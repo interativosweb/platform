@@ -1073,7 +1073,8 @@
             <div class="detail-header">
                 <div class="detail-header-info">
                     <h3 id="detailName">Nome</h3>
-                    <p id="detailEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b0d5ddd1d9dcf0d5c8d1ddc0dcd59ed3dfdd">[email&#160;protected]</a></p>
+                    <p id="detailEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__"
+                            data-cfemail="b0d5ddd1d9dcf0d5c8d1ddc0dcd59ed3dfdd">[email&#160;protected]</a></p>
                 </div>
                 <button class="detail-close" id="detailClose">✕</button>
             </div>
@@ -1098,10 +1099,10 @@
     </div>
 
     <!-- FIREBASE -->
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import {
-            getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged
+            getAuth, onAuthStateChanged
         } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import {
             getDatabase, ref, onValue, update, remove
@@ -1123,10 +1124,9 @@
 
         // ===== ADMIN CREDENTIALS =====
         const ADM_EMAIL = 'gilbertofernandessc@gmail.com';
-        const ADM_SENHA = '424142';
 
-        // ===== AUTH GUARD (admin session check) =====
-        const admSession = sessionStorage.getItem('mathub_adm');
+        // ===== AUTH GUARD (admin session check via localStorage) =====
+        const admSession = localStorage.getItem('mathub_adm');
         if (admSession !== 'true') {
             window.location.href = 'Plataforma.html';
         }
@@ -1137,47 +1137,19 @@
         let allTools = [];
         let dataStarted = false;
 
-        // Authenticate as admin and load data
-        (async function initAdmin() {
-            // Check if already authenticated
-            if (auth.currentUser) {
+        // Wait for Firebase to restore the existing auth session
+        // (Firebase persists auth in IndexedDB, shared across tabs on the same origin)
+        onAuthStateChanged(auth, (user) => {
+            if (user && !dataStarted) {
+                console.log('Usuário autenticado:', user.email);
                 startData();
-                return;
+            } else if (!user) {
+                // No authenticated user — redirect to login
+                console.warn('Nenhum usuário autenticado. Redirecionando...');
+                localStorage.removeItem('mathub_adm');
+                window.location.href = 'index.html';
             }
-
-            // Try sign in with admin credentials
-            try {
-                await signInWithEmailAndPassword(auth, ADM_EMAIL, ADM_SENHA);
-                console.log('Admin autenticado via signIn');
-                startData();
-                return;
-            } catch (e) {
-                console.warn('signIn falhou:', e.code);
-                // If user doesn't exist, create the admin account
-                if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
-                    try {
-                        await createUserWithEmailAndPassword(auth, ADM_EMAIL, ADM_SENHA);
-                        console.log('Admin criado e autenticado');
-                        startData();
-                        return;
-                    } catch (e2) {
-                        console.warn('createUser falhou:', e2.code);
-                    }
-                }
-            }
-
-            // Fallback: wait for any existing auth session to restore
-            onAuthStateChanged(auth, (user) => {
-                if (user && !dataStarted) {
-                    startData();
-                }
-            });
-
-            // Last resort: try anyway after 2 seconds
-            setTimeout(() => {
-                if (!dataStarted) startData();
-            }, 2000);
-        })();
+        });
 
         function startData() {
             if (dataStarted) return;
@@ -1523,4 +1495,13 @@
             }
         });
 
-        // =====
+        // ===== HTML ESCAPE HELPER =====
+        function esc(str) {
+            const div = document.createElement('div');
+            div.textContent = str || '';
+            return div.innerHTML;
+        }
+    </script>
+</body>
+
+</html>
