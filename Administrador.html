@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MathHub — Painel Administrativo</title>
+    <meta name="description"
+        content="Painel administrativo do MathHub — Monitore professores, acessos e ferramentas." />
+    <style>
+        :root {
+            --bg-page: #f5f5f7;
+            --card-bg: #ffffff;
+            --text-main: #1d1d1f;
+            --text-light: #86868b;
+            --accent: #0071e3;
+            --accent-hover: #0077ED;
+            --accent-dark: #005bb5;
+            --success: #34c759;
+            --warning: #ff9f0a;
+            --error: #ff3b30;
+            --radius: 16px;
+            --radius-lg: 20px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.10);
+            --border-light: #e5e5ea;
+            --bg-secondary: #f2f2f7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-page);
+            color: var(--text-main);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===== HEADER (AZUL MATHHUB) ===== */
+        .top-header {
+            background: linear-gradient(135deg, #0071e3 0%, #005bb5 100%);
+            border-bottom: none;
+            padding: 16px 32px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 113, 227, 0.25);
+        }
+
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .logo-text h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: white;
+        }
+
+        .logo-text h1 span {
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .logo-text .subtitle {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-back {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 18px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 50px;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.25s ease;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-back svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .realtime-label {
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .realtime-dot {
+            width: 8px;
+            height: 8px;
+            background: #34c759;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s infinite;
+            margin-right: 6px;
+            box-shadow: 0 0 6px rgba(52, 199, 89, 0.5);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(0.8);
+            }
+        }
+
+        /* ===== CONTENT ===== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 28px 32px 60px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+
+        .page-subtitle {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 28px;
+        }
+
+        /* ===== STATS GRID ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 18px 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-light);
+        }
+
+        .stat-label {
+            font-size: 0.72rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--text-main);
+        }
+
+        .stat-value.accent {
+            color: var(--accent);
+        }
+
+        .stat-value.success {
+            color: var(--success);
+        }
+
+        .stat-value.warning {
+            color: var(--warning);
+        }
+
+        /* ===== TABS ===== */
+        .tabs-bar {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 20px;
+            width: fit-content;
+        }
+
+        .tab-btn {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--text-light);
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: inherit;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+        }
+
+        .tab-btn.active {
+            background: var(--card-bg);
+            color: var(--text-main);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* ===== TABLE ===== */
+        .table-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+        }
+
+        .table-header-row {
+            display: grid;
+            padding: 12px 20px;
+            background: rgba(0, 0, 0, 0.02);
+            border-bottom: 1px solid var(--border-light);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .users-header {
+            grid-template-columns: 2fr 2.5fr 1.2fr 1fr 1fr 0.8fr;
+        }
+
+        .logs-header {
+            grid-template-columns: 2fr 2.5fr 1.5fr 1.5fr;
+        }
+
+        .tools-header {
+            grid-template-columns: 2fr 2.5fr 2fr 1.5fr;
+        }
+
+        .table-body {
+            list-style: none;
+        }
+
+        .table-row {
+            display: grid;
+            padding: 14px 20px;
+            align-items: center;
+            border-bottom: 1px solid #f5f5f7;
+            transition: background 0.2s;
+            font-size: 0.92rem;
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .table-row:hover {
+            background: #fafafa;
+        }
+
+        .users-row {
+            grid-template-columns: 2fr 2.5fr 1.2fr 1fr 1fr 0.8fr;
+        }
+
+        .logs-row {
+            grid-template-columns: 2fr 2.5fr 1.5fr 1.5fr;
+            cursor: pointer;
+        }
+
+        .logs-row:hover {
+            background: #f0f4ff;
+        }
+
+        .tools-row {
+            grid-template-columns: 2fr 2.5fr 2fr 1.5fr;
+        }
+
+        .cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .cell-name {
+            font-weight: 700;
+        }
+
+        .cell-email {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            word-break: break-all;
+        }
+
+        .cell-date {
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        .cell-tool {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--accent);
+        }
+
+        /* ===== PASSWORD BADGE ===== */
+        .password-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            background: #f2f2f7;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .password-badge svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        /* ===== STATUS BADGE ===== */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 14px;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            gap: 5px;
+        }
+
+        .status-badge.ativo {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-badge.bloqueado {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        /* ===== BLOCK/UNBLOCK BTN ===== */
+        .btn-toggle-block {
+            padding: 7px 16px;
+            border-radius: 50px;
+            border: 1.5px solid var(--border-light);
+            background: white;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .btn-toggle-block.bloquear {
+            color: var(--error);
+            border-color: rgba(255, 59, 48, 0.3);
+        }
+
+        .btn-toggle-block.bloquear:hover {
+            background: var(--error);
+            color: white;
+            border-color: var(--error);
+            transform: translateY(-1px);
+        }
+
+        .btn-toggle-block.desbloquear {
+            color: var(--success);
+            border-color: rgba(52, 199, 89, 0.3);
+        }
+
+        .btn-toggle-block.desbloquear:hover {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+            transform: translateY(-1px);
+        }
+
+        /* ===== DELETE BTN ===== */
+        .btn-delete {
+            padding: 7px 14px;
+            border-radius: 50px;
+            border: 1.5px solid rgba(255, 59, 48, 0.2);
+            background: white;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: inherit;
+            white-space: nowrap;
+            color: #c62828;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-delete:hover {
+            background: #c62828;
+            color: white;
+            border-color: #c62828;
+            transform: translateY(-1px);
+        }
+
+        .btn-delete svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-row {
+            padding: 50px 20px;
+            text-align: center;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        /* ===== SEARCH IN TABLE ===== */
+        .table-search {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .table-search-input {
+            flex: 1;
+            max-width: 360px;
+            padding: 12px 18px 12px 42px;
+            background: var(--card-bg);
+            border: 1.5px solid var(--border-light);
+            border-radius: 12px;
+            font-size: 0.92rem;
+            font-family: inherit;
+            font-weight: 500;
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .table-search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+        }
+
+        .table-search-wrapper {
+            position: relative;
+        }
+
+        .table-search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            pointer-events: none;
+        }
+
+        .table-search-icon svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* ===== AUTH GUARD ===== */
+        .auth-loading {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-page);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 16px;
+            transition: opacity 0.3s ease;
+        }
+
+        .auth-loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .auth-spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid var(--border-light);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: authSpin 0.7s linear infinite;
+        }
+
+        @keyframes authSpin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ===== DETAIL POPUP ===== */
+        .detail-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 6000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: popupFadeIn 0.25s ease;
+        }
+
+        .detail-overlay.show {
+            display: flex;
+        }
+
+        @keyframes popupFadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .detail-box {
+            background: white;
+            border-radius: 20px;
+            width: 560px;
+            max-width: 92vw;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+            animation: popupSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+
+        @keyframes popupSlideIn {
+            from {
+                transform: translateY(20px) scale(0.96);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .detail-header {
+            padding: 24px 28px 18px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        .detail-header-info h3 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .detail-header-info p {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .detail-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: var(--bg-secondary);
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .detail-close:hover {
+            background: #e5e5ea;
+            color: var(--text-main);
+        }
+
+        .detail-body {
+            padding: 20px 28px 28px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .detail-section-title {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            margin-top: 16px;
+        }
+
+        .detail-section-title:first-child {
+            margin-top: 0;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            transition: background 0.2s;
+        }
+
+        .detail-item:hover {
+            background: #eaeaf0;
+        }
+
+        .detail-item-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .detail-item-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .detail-item-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .detail-item-time {
+            font-size: 0.78rem;
+            color: var(--text-light);
+            font-weight: 500;
+            text-align: right;
+        }
+
+        .detail-empty {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-light);
+            font-size: 0.88rem;
+            font-weight: 500;
+        }
+
+        /* ===== CONFIRM POPUP ===== */
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(6px);
+            z-index: 7000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirm-overlay.show {
+            display: flex;
+        }
+
+        .confirm-box {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            width: 380px;
+            max-width: 90vw;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            animation: popupSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .confirm-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .confirm-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .confirm-msg {
+            font-size: 0.88rem;
+            color: var(--text-light);
+            font-weight: 500;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .confirm-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.25s;
+        }
+
+        .confirm-btn.cancel {
+            background: var(--bg-secondary);
+            color: var(--text-main);
+        }
+
+        .confirm-btn.cancel:hover {
+            background: #e5e5ea;
+        }
+
+        .confirm-btn.danger {
+            background: var(--error);
+            color: white;
+        }
+
+        .confirm-btn.danger:hover {
+            background: #d32f2f;
+            transform: translateY(-1px);
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            opacity: 0;
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .container {
+                padding: 20px 16px 40px;
+            }
+
+            .users-header,
+            .users-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .users-header> :nth-child(n+3),
+            .users-row> :nth-child(n+3) {
+                display: none;
+            }
+
+            .logs-header,
+            .logs-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .logs-header> :nth-child(n+3),
+            .logs-row> :nth-child(n+3) {
+                display: none;
+            }
+
+            .tools-header,
+            .tools-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .tools-header> :nth-child(n+3),
+            .tools-row> :nth-child(n+3) {
+                display: none;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .top-header {
+                padding: 14px 16px;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs-bar {
+                width: 100%;
+            }
+
+            .tab-btn {
+                flex: 1;
+                text-align: center;
+                font-size: 0.8rem;
+                padding: 10px 10px;
+            }
+        }
+
+        /* ===== FOOTER ===== */
+        .main-footer {
+            text-align: center;
+            padding: 24px;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            font-weight: 500;
+            border-top: 1px solid var(--border-light);
+            background: var(--card-bg);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- AUTH LOADING -->
+    <div class="auth-loading" id="authLoading">
+        <div class="auth-spinner"></div>
+    </div>
+
+    <!-- HEADER (AZUL) -->
+    <header class="top-header">
+        <div class="header-inner">
+            <div class="logo-area">
+                <div class="logo-icon">π</div>
+                <div class="logo-text">
+                    <h1>Math<span>Hub</span></h1>
+                    <div class="subtitle">Painel Administrativo</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <span class="realtime-label"><span class="realtime-dot"></span>Tempo real</span>
+                <a href="Plataforma.html" class="btn-back">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                    Voltar ao MathHub
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div class="container">
+        <h2 class="page-title animate-in">Painel de Controle</h2>
+        <p class="page-subtitle animate-in" style="animation-delay:0.1s">Monitore professores cadastrados, acessos e uso
+            de ferramentas em tempo real.</p>
+
+        <!-- STATS -->
+        <div class="stats-grid animate-in" style="animation-delay:0.15s">
+            <div class="stat-card">
+                <div class="stat-label">Professores Cadastrados</div>
+                <div class="stat-value accent" id="statTotal">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Ativos</div>
+                <div class="stat-value success" id="statAtivos">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Bloqueados</div>
+                <div class="stat-value" style="color:var(--error)" id="statBloqueados">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Logins Hoje</div>
+                <div class="stat-value warning" id="statLoginsHoje">0</div>
+            </div>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs-bar animate-in" style="animation-delay:0.2s">
+            <button class="tab-btn active" onclick="switchTab('usuarios')">Usuários</button>
+            <button class="tab-btn" onclick="switchTab('logins')">Histórico de Logins</button>
+            <button class="tab-btn" onclick="switchTab('ferramentas')">Ferramentas Usadas</button>
+        </div>
+
+        <!-- TAB: USERS -->
+        <div class="tab-panel active" id="tab-usuarios">
+            <div class="table-search">
+                <div class="table-search-wrapper">
+                    <span class="table-search-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                    </span>
+                    <input type="text" class="table-search-input" id="searchUsers" placeholder="Buscar professor..."
+                        oninput="renderUsers()" />
+                </div>
+            </div>
+            <div class="table-card">
+                <div class="table-header-row users-header">
+                    <div>Nome</div>
+                    <div>E-mail</div>
+                    <div>Senha</div>
+                    <div>Status</div>
+                    <div>Ação</div>
+                    <div>Excluir</div>
+                </div>
+                <ul class="table-body" id="usersList">
+                    <li class="empty-row">Carregando...</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- TAB: LOGINS -->
+        <div class="tab-panel" id="tab-logins">
+            <div class="table-search">
+                <div class="table-search-wrapper">
+                    <span class="table-search-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                    </span>
+                    <input type="text" class="table-search-input" id="searchLogins"
+                        placeholder="Buscar por nome ou email..." oninput="renderLogins()" />
+                </div>
+            </div>
+            <p style="font-size:0.82rem; color:var(--text-light); margin-bottom:12px; font-weight:500;">💡 Clique em uma
+                pessoa para ver detalhes das ferramentas usadas</p>
+            <div class="table-card">
+                <div class="table-header-row logs-header">
+                    <div>Nome</div>
+                    <div>E-mail</div>
+                    <div>Data</div>
+                    <div>Horário</div>
+                </div>
+                <ul class="table-body" id="loginsList">
+                    <li class="empty-row">Carregando...</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- TAB: TOOLS -->
+        <div class="tab-panel" id="tab-ferramentas">
+            <div class="table-search">
+                <div class="table-search-wrapper">
+                    <span class="table-search-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                    </span>
+                    <input type="text" class="table-search-input" id="searchTools"
+                        placeholder="Buscar por nome ou ferramenta..." oninput="renderTools()" />
+                </div>
+            </div>
+            <div class="table-card">
+                <div class="table-header-row tools-header">
+                    <div>Professor</div>
+                    <div>E-mail</div>
+                    <div>Ferramenta</div>
+                    <div>Data/Hora</div>
+                </div>
+                <ul class="table-body" id="toolsList">
+                    <li class="empty-row">Carregando...</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer class="main-footer">MathHub © 2026 — Plataforma Educacional de Matemática - Desenvolvida por Gilberto
+        Fernandes</footer>
+
+    <!-- DETAIL POPUP (Ferramentas usadas por pessoa) -->
+    <div class="detail-overlay" id="detailOverlay">
+        <div class="detail-box">
+            <div class="detail-header">
+                <div class="detail-header-info">
+                    <h3 id="detailName">Nome</h3>
+                    <p id="detailEmail">email@example.com</p>
+                </div>
+                <button class="detail-close" id="detailClose">✕</button>
+            </div>
+            <div class="detail-body" id="detailBody">
+                <!-- filled dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIRM DELETE POPUP -->
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-box">
+            <div class="confirm-icon">⚠️</div>
+            <div class="confirm-title">Excluir Usuário</div>
+            <div class="confirm-msg" id="confirmMsg">Tem certeza que deseja excluir este usuário? Esta ação não pode ser
+                desfeita.</div>
+            <div class="confirm-actions">
+                <button class="confirm-btn cancel" id="confirmCancel">Cancelar</button>
+                <button class="confirm-btn danger" id="confirmDelete">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import {
+            getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import {
+            getDatabase, ref, onValue, update, remove
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",
+            authDomain: "profbase-5f9b0.firebaseapp.com",
+            databaseURL: "https://profbase-5f9b0-default-rtdb.firebaseio.com",
+            projectId: "profbase-5f9b0",
+            storageBucket: "profbase-5f9b0.firebasestorage.app",
+            messagingSenderId: "826412057766",
+            appId: "1:826412057766:web:729e6e24ce7587417fe067"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // ===== ADMIN CREDENTIALS =====
+        const ADM_EMAIL = 'gilbertofernandessc@gmail.com';
+        const ADM_SENHA = '424142';
+
+        // ===== AUTH GUARD (admin session check) =====
+        const admSession = sessionStorage.getItem('mathub_adm');
+        if (admSession !== 'true') {
+            window.location.href = 'Plataforma.html';
+        }
+
+        // ===== DATA =====
+        let allUsers = [];
+        let allLogins = [];
+        let allTools = [];
+        let dataStarted = false;
+
+        // Authenticate as admin and load data
+        (async function initAdmin() {
+            // Check if already authenticated
+            if (auth.currentUser) {
+                startData();
+                return;
+            }
+
+            // Try sign in with admin credentials
+            try {
+                await signInWithEmailAndPassword(auth, ADM_EMAIL, ADM_SENHA);
+                console.log('Admin autenticado via signIn');
+                startData();
+                return;
+            } catch (e) {
+                console.warn('signIn falhou:', e.code);
+                // If user doesn't exist, create the admin account
+                if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
+                    try {
+                        await createUserWithEmailAndPassword(auth, ADM_EMAIL, ADM_SENHA);
+                        console.log('Admin criado e autenticado');
+                        startData();
+                        return;
+                    } catch (e2) {
+                        console.warn('createUser falhou:', e2.code);
+                    }
+                }
+            }
+
+            // Fallback: wait for any existing auth session to restore
+            onAuthStateChanged(auth, (user) => {
+                if (user && !dataStarted) {
+                    startData();
+                }
+            });
+
+            // Last resort: try anyway after 2 seconds
+            setTimeout(() => {
+                if (!dataStarted) startData();
+            }, 2000);
+        })();
+
+        function startData() {
+            if (dataStarted) return;
+            dataStarted = true;
+            startDataListeners();
+            const loader = document.getElementById('authLoading');
+            if (loader) {
+                loader.classList.add('hidden');
+                setTimeout(() => loader.remove(), 300);
+            }
+        }
+
+        function startDataListeners() {
+
+            // Listen to professors
+            onValue(ref(db, 'professores'), (snap) => {
+                allUsers = [];
+                const data = snap.val();
+                if (data) {
+                    Object.keys(data).forEach(uid => {
+                        const u = data[uid];
+                        allUsers.push({
+                            uid,
+                            nome: u.nome || 'Sem nome',
+                            email: u.email || '',
+                            dataCriacao: u.dataCriacao || '',
+                            bloqueado: u.bloqueado === true
+                        });
+                    });
+                }
+                updateStats();
+                window.renderUsers();
+            }, (error) => {
+                console.error('Erro ao ler professores:', error);
+            });
+
+            // Listen to logins
+            onValue(ref(db, 'logins'), (snap) => {
+                allLogins = [];
+                const data = snap.val();
+                if (data) {
+                    Object.keys(data).forEach(uid => {
+                        const entries = data[uid];
+                        if (entries && typeof entries === 'object') {
+                            Object.values(entries).forEach(entry => {
+                                allLogins.push({
+                                    uid,
+                                    nome: entry.nome || '',
+                                    email: entry.email || '',
+                                    dataHora: entry.dataHora || '',
+                                    timestamp: entry.timestamp || 0
+                                });
+                            });
+                        }
+                    });
+                }
+                allLogins.sort((a, b) => b.timestamp - a.timestamp);
+                updateStats();
+                window.renderLogins();
+            }, (error) => {
+                console.error('Erro ao ler logins:', error);
+            });
+
+            // Listen to tool usage
+            onValue(ref(db, 'atividades'), (snap) => {
+                allTools = [];
+                const data = snap.val();
+                if (data) {
+                    Object.keys(data).forEach(uid => {
+                        const entries = data[uid];
+                        if (entries && typeof entries === 'object') {
+                            Object.values(entries).forEach(entry => {
+                                allTools.push({
+                                    uid,
+                                    nome: entry.nome || '',
+                                    email: entry.email || '',
+                                    ferramenta: entry.ferramenta || '',
+                                    dataHora: entry.dataHora || '',
+                                    timestamp: entry.timestamp || 0
+                                });
+                            });
+                        }
+                    });
+                }
+                allTools.sort((a, b) => b.timestamp - a.timestamp);
+                window.renderTools();
+            }, (error) => {
+                console.error('Erro ao ler atividades:', error);
+            });
+        }
+
+        // ===== STATS =====
+        function updateStats() {
+            document.getElementById('statTotal').textContent = allUsers.length;
+            document.getElementById('statAtivos').textContent = allUsers.filter(u => !u.bloqueado).length;
+            document.getElementById('statBloqueados').textContent = allUsers.filter(u => u.bloqueado).length;
+
+            const hoje = new Date().toISOString().slice(0, 10);
+            const loginsHoje = allLogins.filter(l => (l.dataHora || '').startsWith(hoje)).length;
+            document.getElementById('statLoginsHoje').textContent = loginsHoje;
+        }
+
+        // ===== TABS =====
+        window.switchTab = function (tab) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            event.target.classList.add('active');
+        };
+
+        // ===== NORMALIZE =====
+        function norm(str) {
+            return (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        }
+
+        // ===== RENDER USERS =====
+        window.renderUsers = function () {
+            const q = norm(document.getElementById('searchUsers')?.value || '');
+            const list = document.getElementById('usersList');
+            let filtered = allUsers;
+            if (q) {
+                filtered = filtered.filter(u =>
+                    norm(u.nome).includes(q) || norm(u.email).includes(q)
+                );
+            }
+
+            if (filtered.length === 0) {
+                list.innerHTML = '<li class="empty-row">Nenhum professor encontrado</li>';
+                return;
+            }
+
+            list.innerHTML = filtered.map(u => `
+                <li class="table-row users-row">
+                    <div class="cell cell-name">${esc(u.nome)}</div>
+                    <div class="cell cell-email">${esc(u.email)}</div>
+                    <div class="cell">
+                        <span class="password-badge">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Criptografada E2E
+                        </span>
+                    </div>
+                    <div class="cell">
+                        <span class="status-badge ${u.bloqueado ? 'bloqueado' : 'ativo'}">
+                            ${u.bloqueado ? '🔒 Bloqueado' : '✓ Ativo'}
+                        </span>
+                    </div>
+                    <div class="cell">
+                        <button class="btn-toggle-block ${u.bloqueado ? 'desbloquear' : 'bloquear'}"
+                                onclick="toggleBlock('${u.uid}', ${u.bloqueado})">
+                            ${u.bloqueado ? 'Desbloquear' : 'Bloquear'}
+                        </button>
+                    </div>
+                    <div class="cell">
+                        <button class="btn-delete" onclick="confirmDeleteUser('${u.uid}', '${esc(u.nome)}', '${esc(u.email)}')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            Excluir
+                        </button>
+                    </div>
+                </li>
+            `).join('');
+        };
+
+        // ===== RENDER LOGINS =====
+        window.renderLogins = function () {
+            const q = norm(document.getElementById('searchLogins')?.value || '');
+            const list = document.getElementById('loginsList');
+            let filtered = allLogins;
+            if (q) {
+                filtered = filtered.filter(l =>
+                    norm(l.nome).includes(q) || norm(l.email).includes(q)
+                );
+            }
+
+            if (filtered.length === 0) {
+                list.innerHTML = '<li class="empty-row">Nenhum login registrado</li>';
+                return;
+            }
+
+            list.innerHTML = filtered.slice(0, 100).map(l => {
+                const dt = l.dataHora ? new Date(l.dataHora) : null;
+                const data = dt ? dt.toLocaleDateString('pt-BR') : '-';
+                const hora = dt ? dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-';
+                return `
+                    <li class="table-row logs-row" onclick="showUserDetail('${l.uid}', '${esc(l.nome || 'Sem nome')}', '${esc(l.email)}')">
+                        <div class="cell cell-name">${esc(l.nome || 'Sem nome')}</div>
+                        <div class="cell cell-email">${esc(l.email)}</div>
+                        <div class="cell cell-date">${data}</div>
+                        <div class="cell cell-date">${hora}</div>
+                    </li>
+                `;
+            }).join('');
+        };
+
+        // ===== RENDER TOOLS =====
+        window.renderTools = function () {
+            const q = norm(document.getElementById('searchTools')?.value || '');
+            const list = document.getElementById('toolsList');
+            let filtered = allTools;
+            if (q) {
+                filtered = filtered.filter(t =>
+                    norm(t.nome).includes(q) || norm(t.email).includes(q) || norm(t.ferramenta).includes(q)
+                );
+            }
+
+            if (filtered.length === 0) {
+                list.innerHTML = '<li class="empty-row">Nenhuma atividade registrada</li>';
+                return;
+            }
+
+            list.innerHTML = filtered.slice(0, 100).map(t => {
+                const dt = t.dataHora ? new Date(t.dataHora) : null;
+                const dataHora = dt ? dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '-';
+                return `
+                    <li class="table-row tools-row">
+                        <div class="cell cell-name">${esc(t.nome || 'Sem nome')}</div>
+                        <div class="cell cell-email">${esc(t.email)}</div>
+                        <div class="cell cell-tool">${esc(t.ferramenta)}</div>
+                        <div class="cell cell-date">${dataHora}</div>
+                    </li>
+                `;
+            }).join('');
+        };
+
+        // ===== BLOCK / UNBLOCK =====
+        window.toggleBlock = async function (uid, currentlyBlocked) {
+            try {
+                await update(ref(db, 'professores/' + uid), {
+                    bloqueado: !currentlyBlocked
+                });
+            } catch (e) {
+                console.error('Erro ao atualizar bloqueio:', e);
+            }
+        };
+
+        // ===== DELETE USER =====
+        let deleteTarget = null;
+        const confirmOverlay = document.getElementById('confirmOverlay');
+        const confirmMsg = document.getElementById('confirmMsg');
+
+        window.confirmDeleteUser = function (uid, nome, email) {
+            deleteTarget = uid;
+            confirmMsg.innerHTML = `Tem certeza que deseja excluir <strong>${nome}</strong> (${email})? Esta ação não pode ser desfeita.`;
+            confirmOverlay.classList.add('show');
+        };
+
+        document.getElementById('confirmCancel').addEventListener('click', () => {
+            confirmOverlay.classList.remove('show');
+            deleteTarget = null;
+        });
+
+        confirmOverlay.addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                confirmOverlay.classList.remove('show');
+                deleteTarget = null;
+            }
+        });
+
+        document.getElementById('confirmDelete').addEventListener('click', async () => {
+            if (!deleteTarget) return;
+            try {
+                // Remove from professores
+                await remove(ref(db, 'professores/' + deleteTarget));
+                // Remove logins
+                await remove(ref(db, 'logins/' + deleteTarget));
+                // Remove atividades
+                await remove(ref(db, 'atividades/' + deleteTarget));
+            } catch (e) {
+                console.error('Erro ao excluir usuário:', e);
+            }
+            confirmOverlay.classList.remove('show');
+            deleteTarget = null;
+        });
+
+        // ===== SHOW USER DETAIL POPUP =====
+        const detailOverlay = document.getElementById('detailOverlay');
+
+        window.showUserDetail = function (uid, nome, email) {
+            document.getElementById('detailName').textContent = nome;
+            document.getElementById('detailEmail').textContent = email;
+
+            const body = document.getElementById('detailBody');
+
+            // Get tool usage for this user
+            const userTools = allTools.filter(t => t.uid === uid);
+            // Get logins for this user
+            const userLogins = allLogins.filter(l => l.uid === uid);
+
+            let html = '';
+
+            // Logins section
+            html += '<div class="detail-section-title">Histórico de Logins (' + userLogins.length + ')</div>';
+            if (userLogins.length === 0) {
+                html += '<div class="detail-empty">Nenhum login registrado</div>';
+            } else {
+                userLogins.slice(0, 20).forEach(l => {
+                    const dt = l.dataHora ? new Date(l.dataHora) : null;
+                    const data = dt ? dt.toLocaleDateString('pt-BR') : '-';
+                    const hora = dt ? dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-';
+                    html += `
+                        <div class="detail-item">
+                            <div class="detail-item-left">
+                                <div class="detail-item-icon">🔑</div>
+                                <div class="detail-item-name">Login</div>
+                            </div>
+                            <div class="detail-item-time">${data} às ${hora}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Tools section
+            html += '<div class="detail-section-title">Ferramentas Usadas (' + userTools.length + ')</div>';
+            if (userTools.length === 0) {
+                html += '<div class="detail-empty">Nenhuma ferramenta utilizada</div>';
+            } else {
+                userTools.slice(0, 30).forEach(t => {
+                    const dt = t.dataHora ? new Date(t.dataHora) : null;
+                    const data = dt ? dt.toLocaleDateString('pt-BR') : '-';
+                    const hora = dt ? dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '-';
+                    html += `
+                        <div class="detail-item">
+                            <div class="detail-item-left">
+                                <div class="detail-item-icon">🛠️</div>
+                                <div class="detail-item-name">${esc(t.ferramenta)}</div>
+                            </div>
+                            <div class="detail-item-time">${data} às ${hora}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            body.innerHTML = html;
+            detailOverlay.classList.add('show');
+        };
+
+        document.getElementById('detailClose').addEventListener('click', () => {
+            detailOverlay.classList.remove('show');
+        });
+
+        detailOverlay.addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                detailOverlay.classList.remove('show');
+            }
+        });
+
+        // ===== ESCAPE HTML =====
+        function esc(str) {
+            const div = document.createElement('div');
+            div.textContent = str || '';
+            return div.innerHTML;
+        }
+    </script>
+
+</body>
+
+</html>
