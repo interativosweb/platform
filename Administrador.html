@@ -1073,7 +1073,7 @@
             <div class="detail-header">
                 <div class="detail-header-info">
                     <h3 id="detailName">Nome</h3>
-                    <p id="detailEmail">email@example.com</p>
+                    <p id="detailEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b0d5ddd1d9dcf0d5c8d1ddc0dcd59ed3dfdd">[email&#160;protected]</a></p>
                 </div>
                 <button class="detail-close" id="detailClose">✕</button>
             </div>
@@ -1098,7 +1098,7 @@
     </div>
 
     <!-- FIREBASE -->
-    <script type="module">
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import {
             getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged
@@ -1193,7 +1193,7 @@
         function startDataListeners() {
 
             // Listen to professors
-            onValue(ref(db, 'professores'), (snap) => {
+            onValue(ref(db, 'usuarios'), (snap) => {
                 allUsers = [];
                 const data = snap.val();
                 if (data) {
@@ -1404,7 +1404,7 @@
         // ===== BLOCK / UNBLOCK =====
         window.toggleBlock = async function (uid, currentlyBlocked) {
             try {
-                await update(ref(db, 'professores/' + uid), {
+                await update(ref(db, 'usuarios/' + uid), {
                     bloqueado: !currentlyBlocked
                 });
             } catch (e) {
@@ -1439,7 +1439,7 @@
             if (!deleteTarget) return;
             try {
                 // Remove from professores
-                await remove(ref(db, 'professores/' + deleteTarget));
+                await remove(ref(db, 'usuarios/' + deleteTarget));
                 // Remove logins
                 await remove(ref(db, 'logins/' + deleteTarget));
                 // Remove atividades
@@ -1523,14 +1523,4 @@
             }
         });
 
-        // ===== ESCAPE HTML =====
-        function esc(str) {
-            const div = document.createElement('div');
-            div.textContent = str || '';
-            return div.innerHTML;
-        }
-    </script>
-
-</body>
-
-</html>
+        // =====
