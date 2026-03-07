@@ -1065,7 +1065,7 @@
                     await updateProfile(user, { displayName: nomeFormatado });
 
                     // Save profile in Realtime DB
-                    await set(ref(db, 'professores/' + user.uid), {
+                    await set(ref(db, 'usuarios/' + user.uid), {
                         nome: nomeFormatado,
                         email: email,
                         tipo: tipoSelecionado.value,
@@ -1099,45 +1099,45 @@
 
                 try {
                     const cred = await signInWithEmailAndPassword(auth, email, senha);
+                    const user = cred.user;
 
-                    // Ensure user profile exists in Realtime Database
-                    let nomeLogin = cred.user.displayName || email.split('@')[0] || 'Usuário';
+                    // Monta nome base
+                    let nomeLogin = user.displayName || email.split('@')[0] || 'Usuário';
 
-                    // Verifica/cria perfil no Realtime Database (erro propaga para o catch externo)
-                    const snap = await get(ref(db, 'professores/' + cred.user.uid));
-                    if (snap.exists()) {
-                        const perfil = snap.val();
-                        if (perfil.nome) nomeLogin = perfil.nome;
-                    } else {
-                        // Perfil não existe ainda — cria agora
-                        await set(ref(db, 'professores/' + cred.user.uid), {
-                            nome: nomeLogin,
-                            email: cred.user.email,
-                            tipo: 'professor',
-                            estado: '',
-                            cidade: '',
-                            dataCriacao: new Date().toISOString(),
-                            ultimoLogin: new Date().toISOString()
-                        });
+                    // Verifica/cria perfil no Realtime Database
+                    try {
+                        const snap = await get(ref(db, 'usuarios/' + user.uid));
+                        if (snap.exists()) {
+                            const perfil = snap.val();
+                            if (perfil.nome) nomeLogin = perfil.nome;
+                            // Atualiza último login
+                            await set(ref(db, 'usuarios/' + user.uid + '/ultimoLogin'), new Date().toISOString());
+                        } else {
+                            // Perfil não existe — cria agora
+                            await set(ref(db, 'usuarios/' + user.uid), {
+                                nome: nomeLogin,
+                                email: user.email,
+                                tipo: 'professor',
+                                estado: '',
+                                cidade: '',
+                                dataCriacao: new Date().toISOString(),
+                                ultimoLogin: new Date().toISOString()
+                            });
+                        }
+                    } catch (dbErr) {
+                        console.error('Erro ao acessar Realtime Database:', dbErr.code, dbErr.message);
+                        // Não bloqueia o login, mas avisa no console
                     }
 
-                    // Atualiza timestamp do último login
-                    await set(ref(db, 'professores/' + cred.user.uid + '/ultimoLogin'), new Date().toISOString());
-
                     // Log this login
-                    await registrarLogin(cred.user, nomeLogin);
+                    await registrarLogin(user, nomeLogin);
 
                     // Redirect
                     window.location.href = 'Plataforma.html';
 
                 } catch (err) {
                     console.error('Erro no login:', err);
-                    // Traduz erros de permissão do Firebase especificamente
-                    if (err.code === 'PERMISSION_DENIED' || (err.message && err.message.includes('PERMISSION_DENIED'))) {
-                        showFeedback('Erro de permissão no banco de dados. Verifique as regras do Firebase.');
-                    } else {
-                        showFeedback(traduzirErro(err.code));
-                    }
+                    showFeedback(traduzirErro(err.code));
                     btnSubmit.classList.remove('loading');
                     btnSubmit.disabled = false;
                 }
