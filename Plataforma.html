@@ -1164,7 +1164,7 @@
         document.getElementById('gearBtn').addEventListener('click', () => {
             if (isAdmin) {
                 // Admin user: open panel directly in a new tab, no password needed
-                sessionStorage.setItem('mathub_adm', 'true');
+                localStorage.setItem('mathub_adm', 'true');
                 window.open('Administrador.html', '_blank');
             } else {
                 // Non-admin: show login modal
@@ -1190,7 +1190,7 @@
             const senha = document.getElementById('admSenha').value;
 
             if (email === ADM_EMAIL && senha === ADM_SENHA) {
-                sessionStorage.setItem('mathub_adm', 'true');
+                localStorage.setItem('mathub_adm', 'true');
                 window.open('Administrador.html', '_blank');
                 document.getElementById('admOverlay').classList.remove('show');
             } else {
