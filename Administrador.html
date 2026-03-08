@@ -307,6 +307,10 @@
             grid-template-columns: 2fr 2.5fr 2fr 1.5fr;
         }
 
+        .ativos-header {
+            grid-template-columns: 2fr 2.5fr 1.2fr 1.5fr;
+        }
+
         .table-body {
             list-style: none;
         }
@@ -343,6 +347,88 @@
 
         .tools-row {
             grid-template-columns: 2fr 2.5fr 2fr 1.5fr;
+        }
+
+        .ativos-row {
+            grid-template-columns: 2fr 2.5fr 1.2fr 1.5fr;
+            cursor: pointer;
+        }
+
+        .ativos-row:hover {
+            background: #f0fff4;
+        }
+
+        /* Online dot indicator */
+        .online-dot {
+            width: 8px;
+            height: 8px;
+            background: #34c759;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 6px rgba(52, 199, 89, 0.5);
+            flex-shrink: 0;
+        }
+
+        /* Clickable name */
+        .cell-name-link {
+            font-weight: 700;
+            color: var(--accent);
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .cell-name-link:hover {
+            opacity: 0.7;
+            text-decoration: underline;
+        }
+
+        /* Profile popup fields */
+        .profile-field {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+
+        .profile-field:hover {
+            background: #eaeaf0;
+        }
+
+        .profile-field-label {
+            font-size: 0.82rem;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .profile-field-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .tipo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .tipo-badge.aluno {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .tipo-badge.professor {
+            background: #e8f5e9;
+            color: #2e7d32;
         }
 
         .cell {
@@ -872,6 +958,16 @@
                 display: none;
             }
 
+            .ativos-header,
+            .ativos-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .ativos-header> :nth-child(n+3),
+            .ativos-row> :nth-child(n+3) {
+                display: none;
+            }
+
             .stats-grid {
                 grid-template-columns: 1fr 1fr;
             }
@@ -954,16 +1050,20 @@
         <!-- STATS -->
         <div class="stats-grid animate-in" style="animation-delay:0.15s">
             <div class="stat-card">
-                <div class="stat-label">Professores Cadastrados</div>
+                <div class="stat-label">Usuários Cadastrados</div>
                 <div class="stat-value accent" id="statTotal">0</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Ativos</div>
+                <div class="stat-label">Não Bloqueados</div>
                 <div class="stat-value success" id="statAtivos">0</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Bloqueados</div>
                 <div class="stat-value" style="color:var(--error)" id="statBloqueados">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Online Agora</div>
+                <div class="stat-value" style="color:var(--success)" id="statOnline">0</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Logins Hoje</div>
@@ -975,6 +1075,7 @@
         <div class="tabs-bar animate-in" style="animation-delay:0.2s">
             <button class="tab-btn active" onclick="switchTab('usuarios')">Usuários</button>
             <button class="tab-btn" onclick="switchTab('logins')">Histórico de Logins</button>
+            <button class="tab-btn" onclick="switchTab('ativos')">Usuários Ativos</button>
             <button class="tab-btn" onclick="switchTab('ferramentas')">Ferramentas Usadas</button>
         </div>
 
@@ -1036,6 +1137,35 @@
             </div>
         </div>
 
+        <!-- TAB: ATIVOS -->
+        <div class="tab-panel" id="tab-ativos">
+            <div class="table-search">
+                <div class="table-search-wrapper">
+                    <span class="table-search-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                    </span>
+                    <input type="text" class="table-search-input" id="searchAtivos"
+                        placeholder="Buscar usuário ativo..." oninput="renderAtivos()" />
+                </div>
+            </div>
+            <p style="font-size:0.82rem; color:var(--text-light); margin-bottom:12px; font-weight:500;">🟢 Mostrando
+                usuários com a plataforma aberta em tempo real</p>
+            <div class="table-card">
+                <div class="table-header-row ativos-header">
+                    <div>Nome</div>
+                    <div>E-mail</div>
+                    <div>Tipo</div>
+                    <div>Último Acesso</div>
+                </div>
+                <ul class="table-body" id="ativosList">
+                    <li class="empty-row">Carregando...</li>
+                </ul>
+            </div>
+        </div>
+
         <!-- TAB: TOOLS -->
         <div class="tab-panel" id="tab-ferramentas">
             <div class="table-search">
@@ -1052,7 +1182,7 @@
             </div>
             <div class="table-card">
                 <div class="table-header-row tools-header">
-                    <div>Professor</div>
+                    <div>Usuário</div>
                     <div>E-mail</div>
                     <div>Ferramenta</div>
                     <div>Data/Hora</div>
@@ -1135,16 +1265,15 @@
         let allUsers = [];
         let allLogins = [];
         let allTools = [];
+        let allAtivos = [];
         let dataStarted = false;
 
         // Wait for Firebase to restore the existing auth session
-        // (Firebase persists auth in IndexedDB, shared across tabs on the same origin)
         onAuthStateChanged(auth, (user) => {
             if (user && !dataStarted) {
                 console.log('Usuário autenticado:', user.email);
                 startData();
             } else if (!user) {
-                // No authenticated user — redirect to login
                 console.warn('Nenhum usuário autenticado. Redirecionando...');
                 localStorage.removeItem('mathub_adm');
                 window.location.href = 'index.html';
@@ -1164,7 +1293,7 @@
 
         function startDataListeners() {
 
-            // Listen to professors
+            // Listen to users (with ALL registration fields)
             onValue(ref(db, 'usuarios'), (snap) => {
                 allUsers = [];
                 const data = snap.val();
@@ -1175,7 +1304,11 @@
                             uid,
                             nome: u.nome || 'Sem nome',
                             email: u.email || '',
+                            tipo: u.tipo || '',
+                            estado: u.estado || '',
+                            cidade: u.cidade || '',
                             dataCriacao: u.dataCriacao || '',
+                            ultimoLogin: u.ultimoLogin || '',
                             bloqueado: u.bloqueado === true
                         });
                     });
@@ -1183,7 +1316,7 @@
                 updateStats();
                 window.renderUsers();
             }, (error) => {
-                console.error('Erro ao ler professores:', error);
+                console.error('Erro ao ler usuários:', error);
             });
 
             // Listen to logins
@@ -1239,6 +1372,30 @@
             }, (error) => {
                 console.error('Erro ao ler atividades:', error);
             });
+
+            // Listen to presence (active users)
+            onValue(ref(db, 'presenca'), (snap) => {
+                allAtivos = [];
+                const data = snap.val();
+                if (data) {
+                    Object.keys(data).forEach(uid => {
+                        const p = data[uid];
+                        allAtivos.push({
+                            uid,
+                            nome: p.nome || 'Sem nome',
+                            email: p.email || '',
+                            tipo: p.tipo || '',
+                            estado: p.estado || '',
+                            cidade: p.cidade || '',
+                            ultimoAcesso: p.ultimoAcesso || ''
+                        });
+                    });
+                }
+                document.getElementById('statOnline').textContent = allAtivos.length;
+                window.renderAtivos();
+            }, (error) => {
+                console.error('Erro ao ler presença:', error);
+            });
         }
 
         // ===== STATS =====
@@ -1277,13 +1434,13 @@
             }
 
             if (filtered.length === 0) {
-                list.innerHTML = '<li class="empty-row">Nenhum professor encontrado</li>';
+                list.innerHTML = '<li class="empty-row">Nenhum usuário encontrado</li>';
                 return;
             }
 
             list.innerHTML = filtered.map(u => `
                 <li class="table-row users-row">
-                    <div class="cell cell-name">${esc(u.nome)}</div>
+                    <div class="cell"><span class="cell-name-link" onclick="event.stopPropagation(); showUserProfile('${u.uid}')">${esc(u.nome)}</span></div>
                     <div class="cell cell-email">${esc(u.email)}</div>
                     <div class="cell">
                         <span class="password-badge">
@@ -1333,10 +1490,41 @@
                 const data = dt ? dt.toLocaleDateString('pt-BR') : '-';
                 const hora = dt ? dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-';
                 return `
-                    <li class="table-row logs-row" onclick="showUserDetail('${l.uid}', '${esc(l.nome || 'Sem nome')}', '${esc(l.email)}')">
-                        <div class="cell cell-name">${esc(l.nome || 'Sem nome')}</div>
+                    <li class="table-row logs-row" onclick="showUserProfile('${l.uid}')">
+                        <div class="cell"><span class="cell-name-link">${esc(l.nome || 'Sem nome')}</span></div>
                         <div class="cell cell-email">${esc(l.email)}</div>
                         <div class="cell cell-date">${data}</div>
+                        <div class="cell cell-date">${hora}</div>
+                    </li>
+                `;
+            }).join('');
+        };
+
+        // ===== RENDER ATIVOS (ACTIVE USERS) =====
+        window.renderAtivos = function () {
+            const q = norm(document.getElementById('searchAtivos')?.value || '');
+            const list = document.getElementById('ativosList');
+            let filtered = allAtivos;
+            if (q) {
+                filtered = filtered.filter(a =>
+                    norm(a.nome).includes(q) || norm(a.email).includes(q)
+                );
+            }
+
+            if (filtered.length === 0) {
+                list.innerHTML = '<li class="empty-row">Nenhum usuário online no momento</li>';
+                return;
+            }
+
+            list.innerHTML = filtered.map(a => {
+                const dt = a.ultimoAcesso ? new Date(a.ultimoAcesso) : null;
+                const hora = dt ? dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-';
+                const tipoLabel = a.tipo === 'aluno' ? '🎓 Aluno' : '📚 Professor';
+                return `
+                    <li class="table-row ativos-row" onclick="showUserProfile('${a.uid}')">
+                        <div class="cell"><span class="online-dot"></span><span class="cell-name-link">${esc(a.nome)}</span></div>
+                        <div class="cell cell-email">${esc(a.email)}</div>
+                        <div class="cell"><span class="tipo-badge ${a.tipo === 'aluno' ? 'aluno' : 'professor'}">${tipoLabel}</span></div>
                         <div class="cell cell-date">${hora}</div>
                     </li>
                 `;
@@ -1364,7 +1552,7 @@
                 const dataHora = dt ? dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '-';
                 return `
                     <li class="table-row tools-row">
-                        <div class="cell cell-name">${esc(t.nome || 'Sem nome')}</div>
+                        <div class="cell"><span class="cell-name-link" onclick="showUserProfile('${t.uid}')">${esc(t.nome || 'Sem nome')}</span></div>
                         <div class="cell cell-email">${esc(t.email)}</div>
                         <div class="cell cell-tool">${esc(t.ferramenta)}</div>
                         <div class="cell cell-date">${dataHora}</div>
@@ -1410,11 +1598,8 @@
         document.getElementById('confirmDelete').addEventListener('click', async () => {
             if (!deleteTarget) return;
             try {
-                // Remove from professores
                 await remove(ref(db, 'usuarios/' + deleteTarget));
-                // Remove logins
                 await remove(ref(db, 'logins/' + deleteTarget));
-                // Remove atividades
                 await remove(ref(db, 'atividades/' + deleteTarget));
             } catch (e) {
                 console.error('Erro ao excluir usuário:', e);
@@ -1423,28 +1608,78 @@
             deleteTarget = null;
         });
 
-        // ===== SHOW USER DETAIL POPUP =====
+        // ===== SHOW USER PROFILE POPUP (registration details) =====
         const detailOverlay = document.getElementById('detailOverlay');
 
-        window.showUserDetail = function (uid, nome, email) {
+        window.showUserProfile = function (uid) {
+            // Find user in allUsers
+            const user = allUsers.find(u => u.uid === uid);
+            // Also check allAtivos if not found in allUsers
+            const ativo = allAtivos.find(a => a.uid === uid);
+
+            const nome = user?.nome || ativo?.nome || 'Sem nome';
+            const email = user?.email || ativo?.email || '';
+            const tipo = user?.tipo || ativo?.tipo || '';
+            const estado = user?.estado || ativo?.estado || '';
+            const cidade = user?.cidade || ativo?.cidade || '';
+            const dataCriacao = user?.dataCriacao || '';
+            const ultimoLogin = user?.ultimoLogin || '';
+
             document.getElementById('detailName').textContent = nome;
             document.getElementById('detailEmail').textContent = email;
 
             const body = document.getElementById('detailBody');
-
-            // Get tool usage for this user
-            const userTools = allTools.filter(t => t.uid === uid);
-            // Get logins for this user
-            const userLogins = allLogins.filter(l => l.uid === uid);
-
             let html = '';
 
-            // Logins section
+            // Registration info section
+            html += '<div class="detail-section-title">Informações do Cadastro</div>';
+
+            const tipoDisplay = tipo === 'aluno' ? '🎓 Aluno' : tipo === 'professor' ? '📚 Professor' : tipo || 'Não informado';
+            html += `<div class="profile-field">
+                <span class="profile-field-label">Tipo</span>
+                <span class="profile-field-value"><span class="tipo-badge ${tipo === 'aluno' ? 'aluno' : 'professor'}">${tipoDisplay}</span></span>
+            </div>`;
+
+            html += `<div class="profile-field">
+                <span class="profile-field-label">Estado</span>
+                <span class="profile-field-value">${esc(estado || 'Não informado')}</span>
+            </div>`;
+
+            html += `<div class="profile-field">
+                <span class="profile-field-label">Cidade</span>
+                <span class="profile-field-value">${esc(cidade || 'Não informado')}</span>
+            </div>`;
+
+            if (dataCriacao) {
+                const dtCriacao = new Date(dataCriacao);
+                html += `<div class="profile-field">
+                    <span class="profile-field-label">Conta criada em</span>
+                    <span class="profile-field-value">${dtCriacao.toLocaleDateString('pt-BR')} às ${dtCriacao.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>`;
+            }
+
+            if (ultimoLogin) {
+                const dtLogin = new Date(ultimoLogin);
+                html += `<div class="profile-field">
+                    <span class="profile-field-label">Último login</span>
+                    <span class="profile-field-value">${dtLogin.toLocaleDateString('pt-BR')} às ${dtLogin.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>`;
+            }
+
+            // Check if online
+            const isOnline = allAtivos.some(a => a.uid === uid);
+            html += `<div class="profile-field">
+                <span class="profile-field-label">Status</span>
+                <span class="profile-field-value">${isOnline ? '<span class="online-dot"></span> Online agora' : '⚫ Offline'}</span>
+            </div>`;
+
+            // Login history section
+            const userLogins = allLogins.filter(l => l.uid === uid);
             html += '<div class="detail-section-title">Histórico de Logins (' + userLogins.length + ')</div>';
             if (userLogins.length === 0) {
                 html += '<div class="detail-empty">Nenhum login registrado</div>';
             } else {
-                userLogins.slice(0, 20).forEach(l => {
+                userLogins.slice(0, 15).forEach(l => {
                     const dt = l.dataHora ? new Date(l.dataHora) : null;
                     const data = dt ? dt.toLocaleDateString('pt-BR') : '-';
                     const hora = dt ? dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-';
@@ -1461,11 +1696,12 @@
             }
 
             // Tools section
+            const userTools = allTools.filter(t => t.uid === uid);
             html += '<div class="detail-section-title">Ferramentas Usadas (' + userTools.length + ')</div>';
             if (userTools.length === 0) {
                 html += '<div class="detail-empty">Nenhuma ferramenta utilizada</div>';
             } else {
-                userTools.slice(0, 30).forEach(t => {
+                userTools.slice(0, 20).forEach(t => {
                     const dt = t.dataHora ? new Date(t.dataHora) : null;
                     const data = dt ? dt.toLocaleDateString('pt-BR') : '-';
                     const hora = dt ? dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '-';
@@ -1483,6 +1719,11 @@
 
             body.innerHTML = html;
             detailOverlay.classList.add('show');
+        };
+
+        // Keep backward compatibility
+        window.showUserDetail = function (uid, nome, email) {
+            window.showUserProfile(uid);
         };
 
         document.getElementById('detailClose').addEventListener('click', () => {
