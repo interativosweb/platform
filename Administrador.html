@@ -1405,8 +1405,9 @@
             document.getElementById('statBloqueados').textContent = allUsers.filter(u => u.bloqueado).length;
 
             const hoje = new Date().toISOString().slice(0, 10);
-            const loginsHoje = allLogins.filter(l => (l.dataHora || '').startsWith(hoje)).length;
-            document.getElementById('statLoginsHoje').textContent = loginsHoje;
+            // Count UNIQUE users who logged in today (same person = 1, even with multiple logins)
+            const uidsHoje = new Set(allLogins.filter(l => (l.dataHora || '').startsWith(hoje)).map(l => l.uid));
+            document.getElementById('statLoginsHoje').textContent = uidsHoje.size;
         }
 
         // ===== TABS =====
