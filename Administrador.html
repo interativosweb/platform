@@ -1297,6 +1297,7 @@
             onValue(ref(db, 'usuarios'), (snap) => {
                 allUsers = [];
                 const data = snap.val();
+                console.log('📋 Dados de usuarios recebidos:', data ? Object.keys(data).length + ' usuários' : 'VAZIO/NULO');
                 if (data) {
                     Object.keys(data).forEach(uid => {
                         const u = data[uid];
@@ -1313,10 +1314,12 @@
                         });
                     });
                 }
+                console.log('✅ Total de usuários carregados:', allUsers.length);
                 updateStats();
                 window.renderUsers();
             }, (error) => {
-                console.error('Erro ao ler usuários:', error);
+                console.error('❌ ERRO ao ler usuários:', error.code, error.message);
+                alert('Erro ao carregar usuários: ' + error.message + '\n\nVerifique as regras do Firebase Realtime Database.');
             });
 
             // Listen to logins
