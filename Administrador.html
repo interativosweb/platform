@@ -1022,7 +1022,7 @@
     <header class="top-header">
         <div class="header-inner">
             <div class="logo-area">
-                <div class="logo-icon">A</div>
+                <div class="logo-icon">π</div>
                 <div class="logo-text">
                     <h1>Alqui<span>Lab</span></h1>
                     <div class="subtitle">Painel Administrativo</div>
@@ -1122,7 +1122,7 @@
                         placeholder="Buscar por nome ou email..." oninput="renderLogins()" />
                 </div>
             </div>
-            <p style="font-size:0.82rem; color:var(--text-light); margin-bottom:12px; font-weight:500;">💡 Clique em uma
+            <p style="font-size:0.82rem; color:var(--text-light); margin-bottom:12px; font-weight:500;">Clique em uma
                 pessoa para ver detalhes das ferramentas usadas</p>
             <div class="table-card">
                 <div class="table-header-row logs-header">
@@ -1152,7 +1152,7 @@
                         placeholder="Buscar usuário ativo..." oninput="renderAtivos()" />
                 </div>
             </div>
-            <p style="font-size:0.82rem; color:var(--text-light); margin-bottom:12px; font-weight:500;">🟢 Mostrando
+            <p style="font-size:0.82rem; color:var(--text-light); margin-bottom:12px; font-weight:500;">Mostrando
                 usuários com a plataforma aberta em tempo real</p>
             <div class="table-card">
                 <div class="table-header-row ativos-header">
@@ -1218,7 +1218,7 @@
     <!-- CONFIRM DELETE POPUP -->
     <div class="confirm-overlay" id="confirmOverlay">
         <div class="confirm-box">
-            <div class="confirm-icon">⚠️</div>
+            <div class="confirm-icon" style="font-size:2.5rem;color:var(--error);">!</div>
             <div class="confirm-title">Excluir Usuário</div>
             <div class="confirm-msg" id="confirmMsg">Tem certeza que deseja excluir este usuário? Esta ação não pode ser
                 desfeita.</div>
@@ -1298,7 +1298,7 @@
             onValue(ref(db, 'usuarios'), (snap) => {
                 allUsers = [];
                 const data = snap.val();
-                console.log('📋 Dados de usuarios recebidos:', data ? Object.keys(data).length + ' usuários' : 'VAZIO/NULO');
+                console.log('Dados de usuarios recebidos:', data ? Object.keys(data).length + ' usuarios' : 'VAZIO/NULO');
                 if (data) {
                     Object.keys(data).forEach(uid => {
                         const u = data[uid];
@@ -1316,11 +1316,11 @@
                         });
                     });
                 }
-                console.log('✅ Total de usuários carregados:', allUsers.length);
+                console.log('Total de usuários carregados:', allUsers.length);
                 updateStats();
                 window.renderUsers();
             }, (error) => {
-                console.error('❌ ERRO ao ler usuários:', error.code, error.message);
+                console.error('ERRO ao ler usuarios:', error.code, error.message);
                 alert('Erro ao carregar usuários: ' + error.message + '\n\nVerifique as regras do Firebase Realtime Database.');
             });
 
@@ -1459,7 +1459,7 @@
                     </div>
                     <div class="cell">
                         <span class="status-badge ${u.bloqueado ? 'bloqueado' : 'ativo'}">
-                            ${u.bloqueado ? '🔒 Bloqueado' : '✓ Ativo'}
+                            ${u.bloqueado ? 'Bloqueado' : 'Ativo'}
                         </span>
                     </div>
                     <div class="cell">
@@ -1531,7 +1531,7 @@
             list.innerHTML = filtered.map(a => {
                 const dt = a.ultimoAcesso ? new Date(a.ultimoAcesso) : null;
                 const hora = dt ? dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-';
-                const tipoLabel = a.tipo === 'aluno' ? '🎓 Aluno' : '📚 Professor';
+                const tipoLabel = a.tipo === 'aluno' ? 'Aluno' : 'Professor';
                 return `
                     <li class="table-row ativos-row" onclick="showUserProfile('${a.uid}')">
                         <div class="cell"><span class="online-dot"></span><span class="cell-name-link">${esc(a.nome)}</span></div>
@@ -1647,7 +1647,7 @@
             // Registration info section
             html += '<div class="detail-section-title">Informações do Cadastro</div>';
 
-            const tipoDisplay = tipo === 'aluno' ? '🎓 Aluno' : tipo === 'professor' ? '📚 Professor' : tipo || 'Não informado';
+            const tipoDisplay = tipo === 'aluno' ? 'Aluno' : tipo === 'professor' ? 'Professor' : tipo || 'Não informado';
             html += `<div class="profile-field">
                 <span class="profile-field-label">Tipo</span>
                 <span class="profile-field-value"><span class="tipo-badge ${tipo === 'aluno' ? 'aluno' : 'professor'}">${tipoDisplay}</span></span>
@@ -1688,7 +1688,7 @@
             const isOnline = allAtivos.some(a => a.uid === uid);
             html += `<div class="profile-field">
                 <span class="profile-field-label">Status</span>
-                <span class="profile-field-value">${isOnline ? '<span class="online-dot"></span> Online agora' : '⚫ Offline'}</span>
+                <span class="profile-field-value">${isOnline ? '<span class="online-dot"></span> Online agora' : 'Offline'}</span>
             </div>`;
 
             // Login history section
@@ -1706,7 +1706,7 @@
                     html += `
                         <div class="detail-item">
                             <div class="detail-item-left">
-                                <div class="detail-item-icon">🔑</div>
+                                <div class="detail-item-icon" style="font-size:0.85rem;font-weight:700;color:var(--accent);">IN</div>
                                 <div class="detail-item-name">Entrada: ${horaE}</div>
                             </div>
                             <div class="detail-item-time">${data}<br>Saída: ${horaS}</div>
@@ -1728,7 +1728,7 @@
                     html += `
                         <div class="detail-item">
                             <div class="detail-item-left">
-                                <div class="detail-item-icon">🛠️</div>
+                                <div class="detail-item-icon" style="font-size:0.85rem;font-weight:700;color:var(--success);">F</div>
                                 <div class="detail-item-name">${esc(t.ferramenta)}</div>
                             </div>
                             <div class="detail-item-time">${data} às ${hora}</div>
