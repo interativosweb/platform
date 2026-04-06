@@ -834,7 +834,7 @@
     <header class="top-header">
         <div class="header-inner">
             <div class="logo-area">
-                <div class="logo-icon">A</div>
+                <div class="logo-icon">π</div>
                 <div class="logo-text">
                     <h1>Alqui<span>Lab</span></h1>
                     <div class="subtitle">Laboratório de Matemática</div>
@@ -891,7 +891,7 @@
         </div>
         <div class="cards-grid" id="cardsGrid"></div>
         <div class="empty-state" id="emptyState" style="display:none;">
-            <div class="empty-icon">🔎</div>
+            <div class="empty-icon" style="font-size:2.5rem;color:var(--text-light);">?</div>
             <h3>Nenhum recurso encontrado</h3>
             <p>Tente pesquisar por outro tema ou categoria</p>
         </div>
@@ -924,7 +924,7 @@
 
     <!-- BLOCKED OVERLAY -->
     <div class="blocked-overlay" id="blockedOverlay">
-        <div class="blocked-icon">🔒</div>
+        <div class="blocked-icon" style="font-size:2.5rem;color:var(--error);">X</div>
         <div class="blocked-title">Acesso Bloqueado</div>
         <div class="blocked-msg">Sua conta foi temporariamente suspensa. Entre em contato com o administrador para mais
             informações.</div>
@@ -1090,7 +1090,12 @@
             };
 
             // Set presence
-            await set(presRef, presData);
+            try {
+                await set(presRef, presData);
+                console.log('Presenca registrada com sucesso');
+            } catch (e) {
+                console.error('ERRO ao registrar presenca:', e.code, e.message);
+            }
 
             // Auto-remove on disconnect
             onDisconnect(presRef).remove();
