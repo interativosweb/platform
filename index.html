@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MathHub — Acesso do Professor</title>
-    <meta name="description" content="Login de professores para a plataforma MathHub - Laboratório de Matemática." />
+    <title>AlquiLab — Acesso</title>
+    <meta name="description" content="Login para a plataforma AlquiLab - Laboratório de Matemática." />
     <style>
         :root {
             --bg-page: #f5f5f7;
@@ -291,7 +291,7 @@
         }
 
         .field-signup.visible {
-            max-height: 200px;
+            max-height: 300px;
             opacity: 1;
             margin-bottom: 18px;
         }
@@ -711,8 +711,8 @@
             <div class="shape"></div>
         </div>
         <div class="brand-content">
-            <div class="brand-logo">π</div>
-            <div class="brand-title">Math<span>Hub</span></div>
+            <div class="brand-logo">A</div>
+            <div class="brand-title">Alqui<span>Lab</span></div>
             <div class="brand-subtitle">Laboratório de Matemática</div>
             <p class="brand-desc">Plataforma educacional centralizada para professores. Acesse recursos, ferramentas e
                 materiais de matemática.</p>
@@ -746,11 +746,11 @@
                     <div class="radio-group">
                         <div class="radio-option">
                             <input type="radio" id="tipoAluno" name="tipo" value="aluno" />
-                            <label for="tipoAluno">🎓 Aluno</label>
+                            <label for="tipoAluno">Aluno</label>
                         </div>
                         <div class="radio-option">
                             <input type="radio" id="tipoProfessor" name="tipo" value="professor" />
-                            <label for="tipoProfessor">📚 Professor</label>
+                            <label for="tipoProfessor">Professor</label>
                         </div>
                     </div>
                 </div>
@@ -769,6 +769,13 @@
                     <select class="form-select" id="inputCidade" disabled>
                         <option value="">Selecione o estado primeiro</option>
                     </select>
+                </div>
+
+                <!-- WhatsApp (sign-up only) -->
+                <div class="form-group field-signup" id="fieldWhatsapp">
+                    <label class="form-label" for="inputWhatsapp">WhatsApp (obrigatório)</label>
+                    <input type="tel" class="form-input" id="inputWhatsapp" placeholder="(99) 99999-9999"
+                        maxlength="15" />
                 </div>
 
                 <!-- Email -->
@@ -802,7 +809,7 @@
             </div>
 
             <div class="form-footer">
-                MathHub © 2026 — Plataforma Educacional de Matemática - Desenvolvida por Gilberto Fernandes
+                AlquiLab © 2026 — Plataforma Educacional de Matemática - Desenvolvida por Gilberto Fernandes
             </div>
         </div>
     </div>
@@ -853,54 +860,53 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // ===== BRAZILIAN STATES & CITIES =====
-        const ESTADOS_CIDADES = {
-            "Acre": ["Rio Branco", "Cruzeiro do Sul", "Sena Madureira", "Tarauacá", "Feijó", "Brasileia", "Epitaciolândia"],
-            "Alagoas": ["Maceió", "Arapiraca", "Rio Largo", "Palmeira dos Índios", "União dos Palmares", "Penedo", "São Miguel dos Campos", "Marechal Deodoro"],
-            "Amapá": ["Macapá", "Santana", "Laranjal do Jari", "Oiapoque", "Mazagão", "Porto Grande"],
-            "Amazonas": ["Manaus", "Parintins", "Itacoatiara", "Manacapuru", "Coari", "Tefé", "Tabatinga", "Maués"],
-            "Bahia": ["Salvador", "Feira de Santana", "Vitória da Conquista", "Camaçari", "Juazeiro", "Lauro de Freitas", "Itabuna", "Ilhéus", "Jequié", "Barreiras", "Teixeira de Freitas", "Porto Seguro"],
-            "Ceará": ["Fortaleza", "Caucaia", "Juazeiro do Norte", "Maracanaú", "Sobral", "Crato", "Itapipoca", "Maranguape", "Iguatu", "Quixadá"],
-            "Distrito Federal": ["Brasília", "Ceilândia", "Taguatinga", "Samambaia", "Planaltina", "Gama", "Sobradinho", "Águas Claras"],
-            "Espírito Santo": ["Vitória", "Vila Velha", "Serra", "Cariacica", "Cachoeiro de Itapemirim", "Linhares", "São Mateus", "Colatina", "Guarapari"],
-            "Goiás": ["Goiânia", "Aparecida de Goiânia", "Anápolis", "Rio Verde", "Luziânia", "Águas Lindas de Goiás", "Valparaíso de Goiás", "Trindade", "Catalão", "Itumbiara"],
-            "Maranhão": ["São Luís", "Imperatriz", "São José de Ribamar", "Timon", "Caxias", "Codó", "Paço do Lumiar", "Açailândia", "Bacabal"],
-            "Mato Grosso": ["Cuiabá", "Várzea Grande", "Rondonópolis", "Sinop", "Tangará da Serra", "Cáceres", "Sorriso", "Lucas do Rio Verde", "Primavera do Leste"],
-            "Mato Grosso do Sul": ["Campo Grande", "Dourados", "Três Lagoas", "Corumbá", "Ponta Porã", "Naviraí", "Nova Andradina", "Aquidauana", "Maracaju"],
-            "Minas Gerais": ["Belo Horizonte", "Uberlândia", "Contagem", "Juiz de Fora", "Betim", "Montes Claros", "Ribeirão das Neves", "Uberaba", "Governador Valadares", "Ipatinga", "Sete Lagoas", "Divinópolis", "Poços de Caldas"],
-            "Pará": ["Belém", "Ananindeua", "Santarém", "Marabá", "Castanhal", "Parauapebas", "Abaetetuba", "Cametá", "Bragança", "Marituba"],
-            "Paraíba": ["João Pessoa", "Campina Grande", "Santa Rita", "Patos", "Bayeux", "Sousa", "Cajazeiras", "Cabedelo", "Guarabira"],
-            "Paraná": ["Curitiba", "Londrina", "Maringá", "Ponta Grossa", "Cascavel", "São José dos Pinhais", "Foz do Iguaçu", "Colombo", "Guarapuava", "Paranaguá", "Toledo"],
-            "Pernambuco": ["Recife", "Jaboatão dos Guararapes", "Olinda", "Caruaru", "Petrolina", "Paulista", "Cabo de Santo Agostinho", "Camaragibe", "Garanhuns", "Vitória de Santo Antão"],
-            "Piauí": ["Teresina", "Parnaíba", "Picos", "Piripiri", "Floriano", "Campo Maior", "Barras", "Corrente"],
-            "Rio de Janeiro": ["Rio de Janeiro", "São Gonçalo", "Duque de Caxias", "Nova Iguaçu", "Niterói", "Belford Roxo", "São João de Meriti", "Campos dos Goytacazes", "Petrópolis", "Volta Redonda", "Magé", "Macaé", "Angra dos Reis"],
-            "Rio Grande do Norte": ["Natal", "Mossoró", "Parnamirim", "São Gonçalo do Amarante", "Macaíba", "Ceará-Mirim", "Caicó", "Açu", "Currais Novos"],
-            "Rio Grande do Sul": ["Porto Alegre", "Caxias do Sul", "Pelotas", "Canoas", "Santa Maria", "Gravataí", "Viamão", "Novo Hamburgo", "São Leopoldo", "Rio Grande", "Alvorada", "Passo Fundo"],
-            "Rondônia": ["Porto Velho", "Ji-Paraná", "Ariquemes", "Vilhena", "Cacoal", "Rolim de Moura", "Jaru", "Guajará-Mirim"],
-            "Roraima": ["Boa Vista", "Rorainópolis", "Caracaraí", "Alto Alegre", "Pacaraima", "Cantá"],
-            "Santa Catarina": ["Florianópolis", "Joinville", "Blumenau", "São José", "Chapecó", "Criciúma", "Itajaí", "Jaraguá do Sul", "Lages", "Palhoça", "Balneário Camboriú"],
-            "São Paulo": ["São Paulo", "Guarulhos", "Campinas", "São Bernardo do Campo", "Santo André", "São José dos Campos", "Osasco", "Ribeirão Preto", "Sorocaba", "Santos", "Mauá", "São José do Rio Preto", "Mogi das Cruzes", "Piracicaba", "Bauru"],
-            "Sergipe": ["Aracaju", "Nossa Senhora do Socorro", "Lagarto", "Itabaiana", "São Cristóvão", "Estância", "Tobias Barreto"],
-            "Tocantins": ["Palmas", "Araguaína", "Gurupi", "Porto Nacional", "Paraíso do Tocantins", "Colinas do Tocantins", "Guaraí"]
-        };
+        // ===== BRAZILIAN STATES (IBGE API) =====
+        const ESTADOS = [
+            { nome: "Acre", id: 12 }, { nome: "Alagoas", id: 27 },
+            { nome: "Amapá", id: 16 }, { nome: "Amazonas", id: 13 },
+            { nome: "Bahia", id: 29 }, { nome: "Ceará", id: 23 },
+            { nome: "Distrito Federal", id: 53 }, { nome: "Espírito Santo", id: 32 },
+            { nome: "Goiás", id: 52 }, { nome: "Maranhão", id: 21 },
+            { nome: "Mato Grosso", id: 51 }, { nome: "Mato Grosso do Sul", id: 50 },
+            { nome: "Minas Gerais", id: 31 }, { nome: "Pará", id: 15 },
+            { nome: "Paraíba", id: 25 }, { nome: "Paraná", id: 41 },
+            { nome: "Pernambuco", id: 26 }, { nome: "Piauí", id: 22 },
+            { nome: "Rio de Janeiro", id: 33 }, { nome: "Rio Grande do Norte", id: 24 },
+            { nome: "Rio Grande do Sul", id: 43 }, { nome: "Rondônia", id: 11 },
+            { nome: "Roraima", id: 14 }, { nome: "Santa Catarina", id: 42 },
+            { nome: "São Paulo", id: 35 }, { nome: "Sergipe", id: 28 },
+            { nome: "Tocantins", id: 17 }
+        ];
 
         // Populate states dropdown
         const inputEstado = document.getElementById('inputEstado');
         const inputCidade = document.getElementById('inputCidade');
+        const inputWhatsapp = document.getElementById('inputWhatsapp');
 
-        Object.keys(ESTADOS_CIDADES).sort().forEach(estado => {
+        // WhatsApp mask: (99) 99999-9999
+        inputWhatsapp.addEventListener('input', () => {
+            let v = inputWhatsapp.value.replace(/\D/g, '').substring(0, 11);
+            if (v.length > 7) v = '(' + v.substring(0, 2) + ') ' + v.substring(2, 7) + '-' + v.substring(7);
+            else if (v.length > 2) v = '(' + v.substring(0, 2) + ') ' + v.substring(2);
+            else if (v.length > 0) v = '(' + v;
+            inputWhatsapp.value = v;
+        });
+
+        ESTADOS.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(e => {
             const opt = document.createElement('option');
-            opt.value = estado;
-            opt.textContent = estado;
+            opt.value = e.nome;
+            opt.dataset.ibgeId = e.id;
+            opt.textContent = e.nome;
             inputEstado.appendChild(opt);
         });
 
-        // On state change, populate cities
-        inputEstado.addEventListener('change', () => {
-            const estado = inputEstado.value;
+        // On state change, fetch ALL cities from IBGE API
+        inputEstado.addEventListener('change', async () => {
+            const selectedOpt = inputEstado.options[inputEstado.selectedIndex];
+            const ibgeId = selectedOpt?.dataset?.ibgeId;
             inputCidade.innerHTML = '';
 
-            if (!estado) {
+            if (!inputEstado.value || !ibgeId) {
                 inputCidade.disabled = true;
                 const opt = document.createElement('option');
                 opt.value = '';
@@ -909,18 +915,35 @@
                 return;
             }
 
-            inputCidade.disabled = false;
-            const defaultOpt = document.createElement('option');
-            defaultOpt.value = '';
-            defaultOpt.textContent = 'Selecione a cidade';
-            inputCidade.appendChild(defaultOpt);
+            inputCidade.disabled = true;
+            const loadOpt = document.createElement('option');
+            loadOpt.value = '';
+            loadOpt.textContent = 'Carregando cidades...';
+            inputCidade.appendChild(loadOpt);
 
-            ESTADOS_CIDADES[estado].forEach(cidade => {
-                const opt = document.createElement('option');
-                opt.value = cidade;
-                opt.textContent = cidade;
-                inputCidade.appendChild(opt);
-            });
+            try {
+                const resp = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados/' + ibgeId + '/municipios?orderBy=nome');
+                const cidades = await resp.json();
+                inputCidade.innerHTML = '';
+                const defaultOpt = document.createElement('option');
+                defaultOpt.value = '';
+                defaultOpt.textContent = 'Selecione a cidade';
+                inputCidade.appendChild(defaultOpt);
+                cidades.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.nome;
+                    opt.textContent = c.nome;
+                    inputCidade.appendChild(opt);
+                });
+                inputCidade.disabled = false;
+            } catch (err) {
+                console.error('Erro ao carregar cidades:', err);
+                inputCidade.innerHTML = '';
+                const errOpt = document.createElement('option');
+                errOpt.value = '';
+                errOpt.textContent = 'Erro ao carregar. Tente novamente.';
+                inputCidade.appendChild(errOpt);
+            }
         });
 
         // ===== STATE =====
@@ -1049,6 +1072,13 @@
                     return;
                 }
 
+                const whatsapp = inputWhatsapp.value.trim();
+                const whatsappDigits = whatsapp.replace(/\D/g, '');
+                if (!whatsapp || whatsappDigits.length < 10) {
+                    showFeedback('Preencha seu WhatsApp corretamente.');
+                    return;
+                }
+
                 // Format name
                 const nomeFormatado = formatarNome(nomeRaw);
 
@@ -1071,6 +1101,7 @@
                         tipo: tipoSelecionado.value,
                         estado: estado,
                         cidade: cidade,
+                        whatsapp: whatsapp,
                         dataCriacao: new Date().toISOString(),
                         ultimoLogin: new Date().toISOString()
                     });
@@ -1147,12 +1178,18 @@
         // ===== LOGIN LOGGING =====
         async function registrarLogin(user, nome) {
             const loginRef = push(ref(db, 'logins/' + user.uid));
+            const loginKey = loginRef.key;
             await set(loginRef, {
                 email: user.email,
                 nome: nome || user.displayName || '',
-                dataHora: new Date().toISOString(),
-                timestamp: Date.now()
+                entrada: new Date().toISOString(),
+                saida: '',
+                timestampEntrada: Date.now(),
+                timestampSaida: 0
             });
+            // Save the login key so we can update logout time later
+            sessionStorage.setItem('alquilab_login_key', loginKey);
+            sessionStorage.setItem('alquilab_login_uid', user.uid);
         }
 
         // ===== PASSWORD RESET =====
