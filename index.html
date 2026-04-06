@@ -711,7 +711,7 @@
             <div class="shape"></div>
         </div>
         <div class="brand-content">
-            <div class="brand-logo">A</div>
+            <div class="brand-logo">π</div>
             <div class="brand-title">Alqui<span>Lab</span></div>
             <div class="brand-subtitle">Laboratório de Matemática</div>
             <p class="brand-desc">Plataforma educacional centralizada para professores. Acesse recursos, ferramentas e
@@ -723,12 +723,12 @@
     <div class="split-right">
         <div class="form-container">
             <div class="form-header">
-                <h2 id="formTitle">Bem-vindo de volta</h2>
-                <p id="formSubtitle">Entre com sua conta para acessar a plataforma</p>
+                <h2 id="formTitle">Acesse a plataforma</h2>
+                <p id="formSubtitle">Entre com sua conta para continuar</p>
             </div>
 
             <div class="msg-feedback" id="msgFeedback">
-                <span id="msgIcon">⚠️</span>
+                <span id="msgIcon"></span>
                 <span id="msgText"></span>
             </div>
 
@@ -948,6 +948,7 @@
 
         // ===== STATE =====
         let isSignUp = false;
+        let isProcessingAuth = false; // Flag to prevent redirect during signup/login
 
         // DOM
         const form = document.getElementById('authForm');
@@ -968,9 +969,9 @@
         const msgText = document.getElementById('msgText');
         const forgotPassword = document.getElementById('forgotPassword');
 
-        // If already logged in, redirect
+        // If already logged in, redirect (but NOT during active signup/login)
         onAuthStateChanged(auth, (user) => {
-            if (user) {
+            if (user && !isProcessingAuth) {
                 window.location.href = 'Plataforma.html';
             }
         });
@@ -1001,8 +1002,8 @@
                 inputNome.required = true;
                 forgotPassword.style.display = 'none';
             } else {
-                formTitle.textContent = 'Bem-vindo de volta';
-                formSubtitle.textContent = 'Entre com sua conta para acessar a plataforma';
+                formTitle.textContent = 'Acesse a plataforma';
+                formSubtitle.textContent = 'Entre com sua conta para continuar';
                 btnSubmit.querySelector('.btn-text').textContent = 'Entrar';
                 toggleText.textContent = 'Não tem conta?';
                 toggleLink.textContent = 'Criar conta';
@@ -1014,7 +1015,7 @@
 
         // ===== FEEDBACK =====
         function showFeedback(message, type = 'error') {
-            msgIcon.textContent = type === 'error' ? '⚠️' : '✅';
+            msgIcon.textContent = type === 'error' ? '!' : '';
             msgText.textContent = message;
             msgFeedback.className = 'msg-feedback show ' + type;
         }
@@ -1085,6 +1086,7 @@
                 // Loading state
                 btnSubmit.classList.add('loading');
                 btnSubmit.disabled = true;
+                isProcessingAuth = true;
 
                 try {
                     // === CREATE ACCOUNT ===
@@ -1114,6 +1116,7 @@
 
                 } catch (err) {
                     console.error('Erro no cadastro:', err);
+                    isProcessingAuth = false;
                     if (err.code === 'PERMISSION_DENIED' || (err.message && err.message.includes('PERMISSION_DENIED'))) {
                         showFeedback('Conta criada, mas erro ao salvar perfil. Verifique as regras do Firebase Realtime Database.');
                     } else {
@@ -1127,6 +1130,7 @@
                 // === LOGIN ===
                 btnSubmit.classList.add('loading');
                 btnSubmit.disabled = true;
+                isProcessingAuth = true;
 
                 try {
                     const cred = await signInWithEmailAndPassword(auth, email, senha);
@@ -1168,6 +1172,7 @@
 
                 } catch (err) {
                     console.error('Erro no login:', err);
+                    isProcessingAuth = false;
                     showFeedback(traduzirErro(err.code));
                     btnSubmit.classList.remove('loading');
                     btnSubmit.disabled = false;
@@ -1229,7 +1234,7 @@
 
             try {
                 await sendPasswordResetEmail(auth, email);
-                resetMsg.textContent = '✅ Link de redefinição enviado! Verifique seu e-mail.';
+                resetMsg.textContent = 'Link de redefinição enviado! Verifique seu e-mail.';
                 resetMsg.className = 'reset-msg show success';
                 setTimeout(() => {
                     resetOverlay.classList.remove('show');
