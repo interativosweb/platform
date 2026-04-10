@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>GeoLab - Classificação das Respostas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green: #58CC02;
+            --green-dark: #46A302;
+            --green-shadow: #3D8A00;
+            --blue: #1CB0F6;
+            --blue-dark: #0F8EC4;
+            --blue-shadow: #0A6FA0;
+            --red: #FF4B4B;
+            --red-dark: #EA2B2B;
+            --red-shadow: #C41E1E;
+            --orange: #FF9600;
+            --orange-dark: #D07B00;
+            --purple: #CE82FF;
+            --purple-dark: #9C3FA6;
+            --yellow: #FFC800;
+            --white: #FFFFFF;
+            --off-white: #F7F7F7;
+            --light-gray: #E5E5E5;
+            --medium-gray: #AFAFAF;
+            --dark-gray: #777777;
+            --text: #3C3C3C;
+            --border-radius: 16px;
+            --border-radius-lg: 24px;
+            --font: 'Nunito', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            background-color: var(--off-white);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 28px 20px;
+            padding-bottom: 100px;
+            overflow-x: hidden;
+            font-family: var(--font);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .titulo-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .btn-voltar {
+            text-decoration: none;
+            color: var(--green);
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+            font-size: 0.82rem;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-voltar:hover {
+            opacity: 0.7;
+        }
+
+        .titulo-pagina {
+            font-size: 1.6rem;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+
+        .titulo-pagina span {
+            color: var(--green);
+        }
+
+        .filtro-data-container {
+            background: var(--white);
+            padding: 10px 18px;
+            border-radius: 50px;
+            border: 2px solid var(--light-gray);
+            box-shadow: 0 3px 0 var(--light-gray);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 48px;
+        }
+
+        .input-data {
+            border: none;
+            background: transparent;
+            font-size: 0.9rem;
+            color: var(--green);
+            font-weight: 800;
+            cursor: pointer;
+            outline: none;
+            font-family: inherit;
+        }
+
+        /* ===== FILTROS ===== */
+        .area-filtros-topo {
+            display: flex;
+            justify-content: flex-start;
+            align-items: stretch;
+            gap: 10px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .dropdown-wrapper {
+            position: relative;
+            display: inline-flex;
+        }
+
+        .btn-filtro-trigger {
+            background-color: var(--white);
+            color: var(--text);
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: 2px solid var(--light-gray);
+            font-size: 0.88rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 3px 0 var(--light-gray);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.1s;
+            min-width: 180px;
+            min-height: 48px;
+            justify-content: space-between;
+            font-family: inherit;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .btn-filtro-trigger:hover {
+            border-color: var(--green);
+            color: var(--green-dark);
+            box-shadow: 0 3px 0 var(--green-shadow);
+        }
+
+        .btn-filtro-trigger:active {
+            box-shadow: 0 0 0 var(--light-gray);
+            transform: translateY(3px);
+        }
+
+        .btn-filtro-trigger.ativo {
+            border: 2px solid var(--green);
+            color: var(--green-dark);
+            background: #E8F9D9;
+        }
+
+        .seta-dropdown {
+            width: 14px;
+            height: 14px;
+            fill: var(--medium-gray);
+            transition: transform 0.3s;
+        }
+
+        .dropdown-wrapper.aberto .seta-dropdown {
+            transform: rotate(180deg);
+            fill: var(--green);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 120%;
+            left: 0;
+            width: 100%;
+            min-width: 200px;
+            background-color: var(--white);
+            border-radius: 16px;
+            border: 2px solid var(--light-gray);
+            box-shadow: 0 8px 0 var(--light-gray), 0 16px 40px rgba(0, 0, 0, 0.1);
+            padding: 8px;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .dropdown-wrapper.aberto .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .opcao-item {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 10px 14px;
+            background: none;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            color: var(--text);
+            cursor: pointer;
+            font-weight: 700;
+            transition: background 0.15s;
+            font-family: inherit;
+        }
+
+        .opcao-item:hover {
+            background-color: #E8F9D9;
+            color: var(--green-dark);
+        }
+
+        .opcao-item.selecionado {
+            background-color: var(--green);
+            color: white;
+            box-shadow: 0 2px 0 var(--green-shadow);
+        }
+
+        /* ===== CARDS RESUMO ===== */
+        .grid-resumo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .card-resumo {
+            background: var(--white);
+            padding: 16px 18px;
+            border-radius: var(--border-radius);
+            border: 2px solid var(--light-gray);
+            box-shadow: 0 3px 0 var(--light-gray);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            min-height: 80px;
+            transition: border-color 0.15s;
+        }
+
+        .card-resumo:hover {
+            border-color: var(--green);
+        }
+
+        .card-titulo {
+            font-size: 0.68rem;
+            color: var(--medium-gray);
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .card-valor {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--text);
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+        }
+
+        /* ===== TABELA RANKING ===== */
+        .painel-ranking {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            border: 2px solid var(--light-gray);
+            box-shadow: 0 4px 0 var(--light-gray);
+            overflow: hidden;
+            min-height: 300px;
+        }
+
+        .tabela-header {
+            display: grid;
+            grid-template-columns: 56px 2fr 1.2fr 1fr 1fr;
+            padding: 12px 18px;
+            border-bottom: 2px solid var(--light-gray);
+            font-size: 0.68rem;
+            font-weight: 900;
+            color: var(--medium-gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tabela-header>div,
+        .item-aluno>div {
+            display: flex;
+            align-items: center;
+        }
+
+        .col-pos {
+            justify-content: center;
+        }
+
+        .col-aluno {
+            justify-content: flex-start;
+            min-width: 0;
+        }
+
+        .col-serie {
+            justify-content: center;
+        }
+
+        .col-respostas,
+        .col-horario {
+            justify-content: center;
+        }
+
+        .lista-alunos {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .item-aluno {
+            display: grid;
+            grid-template-columns: 56px 2fr 1.2fr 1fr 1fr;
+            padding: 14px 18px;
+            align-items: center;
+            border-bottom: 2px solid var(--off-white);
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+
+        .item-aluno:last-child {
+            border-bottom: none;
+        }
+
+        .item-aluno:hover {
+            background-color: #E8F9D9;
+            border-color: var(--green);
+        }
+
+        .posicao {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        .medalha {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            margin-right: 8px;
+        }
+
+        .info-nome {
+            font-weight: 800;
+            font-size: 0.95rem;
+            gap: 8px;
+        }
+
+        .info-serie {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 8px;
+            background-color: var(--off-white);
+            border: 2px solid var(--light-gray);
+            color: var(--dark-gray);
+            font-size: 0.75rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .info-respostas {
+            font-weight: 900;
+            color: var(--green);
+        }
+
+        .info-horario {
+            font-size: 0.85rem;
+            color: var(--medium-gray);
+            text-align: center;
+            font-weight: 700;
+        }
+
+        /* ===== RODAPÉ ===== */
+        .rodape-gestao {
+            margin-top: 40px;
+            text-align: center;
+            border-top: 2px solid var(--light-gray);
+            padding-top: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-acao-rodape {
+            background-color: var(--white);
+            color: var(--dark-gray);
+            border: 2px solid var(--light-gray);
+            padding: 13px 28px;
+            border-radius: 12px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.1s;
+            box-shadow: 0 4px 0 var(--light-gray);
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-acao-rodape:hover {
+            background: #FFE5E5;
+            border-color: var(--red);
+            color: var(--red-dark);
+            box-shadow: 0 4px 0 var(--red-shadow);
+        }
+
+        .btn-acao-rodape:active {
+            box-shadow: 0 0 0 var(--light-gray);
+            transform: translateY(4px);
+        }
+
+        .texto-creditos {
+            font-size: 0.72rem;
+            color: var(--medium-gray);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ===== MODAL OVERLAY ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeInOverlay 0.4s ease;
+        }
+
+        .modal-overlay.visivel {
+            display: flex;
+        }
+
+        @keyframes fadeInOverlay {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes popupIn {
+            from { opacity: 0; transform: scale(0.85) translateY(30px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* ===== MODAL ALUNO ===== */
+        .modal-box-aluno {
+            background: var(--white);
+            padding: 36px 32px 28px;
+            border-radius: var(--border-radius-lg);
+            text-align: center;
+            border: 3px solid var(--light-gray);
+            box-shadow: 0 8px 0 var(--light-gray), 0 24px 60px rgba(0, 0, 0, 0.12);
+            position: relative;
+            animation: popupIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            width: 540px;
+            max-width: 95vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--light-gray) transparent;
+        }
+
+        .modal-box-aluno::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .modal-box-aluno::-webkit-scrollbar-thumb {
+            background: var(--light-gray);
+            border-radius: 2px;
+        }
+
+        .modal-titulo {
+            font-size: 1.3rem;
+            font-weight: 900;
+            margin-bottom: 4px;
+            color: var(--text);
+            letter-spacing: -0.5px;
+        }
+
+        .modal-sub {
+            font-size: 0.82rem;
+            color: var(--medium-gray);
+            margin-bottom: 16px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-close-abs {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: var(--off-white);
+            border: 2px solid var(--light-gray);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: var(--medium-gray);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            font-family: inherit;
+            box-shadow: 0 3px 0 var(--light-gray);
+            padding: 0;
+            margin: 0;
+        }
+
+        .modal-close-abs:hover {
+            background: #FFE5E5;
+            border-color: var(--red);
+            color: var(--red);
+            box-shadow: 0 3px 0 var(--red-shadow);
+        }
+
+        .modal-close-abs:active {
+            box-shadow: 0 0 0 var(--light-gray);
+            transform: translateY(3px);
+        }
+
+        .modal-divisor {
+            height: 2px;
+            background-color: var(--light-gray);
+            border-radius: 1px;
+            width: 100%;
+            margin: 16px 0;
+        }
+
+        /* ===== RESPOSTAS NO MODAL ===== */
+        .resposta-item {
+            background: var(--off-white);
+            border: 2px solid var(--light-gray);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            text-align: left;
+            transition: border-color 0.15s;
+        }
+
+        .resposta-item:hover {
+            border-color: var(--green);
+        }
+
+        .resposta-item.sem-resposta {
+            opacity: 0.6;
+        }
+
+        .resposta-item.sem-resposta:hover {
+            border-color: var(--light-gray);
+        }
+
+        .resposta-pergunta {
+            font-size: 0.72rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            color: var(--blue-dark);
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .resposta-questao-texto {
+            font-size: 0.85rem;
+            color: var(--text);
+            font-weight: 700;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .resposta-texto {
+            font-size: 0.88rem;
+            color: var(--green-dark);
+            line-height: 1.5;
+            font-weight: 800;
+            background: #E8F9D9;
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 2px solid var(--green);
+        }
+
+        .resposta-texto.vazia {
+            color: var(--medium-gray);
+            background: var(--off-white);
+            border-color: var(--light-gray);
+            font-weight: 700;
+            font-style: italic;
+        }
+
+        /* ===== MODAL ADMIN (Reset) ===== */
+        .modal-box-admin {
+            background: var(--white);
+            padding: 32px;
+            border-radius: var(--border-radius-lg);
+            text-align: center;
+            border: 3px solid var(--light-gray);
+            box-shadow: 0 8px 0 var(--light-gray), 0 24px 60px rgba(0, 0, 0, 0.12);
+            width: 90%;
+            max-width: 400px;
+            animation: popupIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-desc {
+            font-size: 0.88rem;
+            color: var(--medium-gray);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .input-senha {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--light-gray);
+            border-radius: 14px;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            outline: none;
+            text-align: center;
+            background-color: var(--off-white);
+            font-family: inherit;
+            font-weight: 700;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .input-senha:focus {
+            border-color: var(--green);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(88, 204, 2, 0.15);
+        }
+
+        .btn-reset-opcao {
+            padding: 13px;
+            border-radius: 12px;
+            border: 2px solid var(--light-gray);
+            font-size: 0.88rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.1s;
+            background-color: var(--white);
+            color: var(--text);
+            margin-bottom: 8px;
+            width: 100%;
+            font-family: inherit;
+            box-shadow: 0 3px 0 var(--light-gray);
+        }
+
+        .btn-reset-opcao:hover {
+            background-color: #E8F9D9;
+            border-color: var(--green);
+            color: var(--green-dark);
+            box-shadow: 0 3px 0 var(--green-shadow);
+        }
+
+        .btn-reset-opcao:active {
+            box-shadow: 0 0 0 var(--light-gray);
+            transform: translateY(3px);
+        }
+
+        .botoes-confirmacao {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn-conf-sim {
+            background-color: var(--red);
+            color: white;
+            flex: 1;
+            padding: 13px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 800;
+            font-family: inherit;
+            box-shadow: 0 4px 0 var(--red-shadow);
+            transition: all 0.1s;
+        }
+
+        .btn-conf-sim:hover {
+            background-color: var(--red-dark);
+        }
+
+        .btn-conf-sim:active {
+            box-shadow: 0 0 0 var(--red-shadow);
+            transform: translateY(4px);
+        }
+
+        .btn-conf-nao {
+            background-color: var(--white);
+            color: var(--text);
+            flex: 1;
+            padding: 13px;
+            border: 2px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 800;
+            font-family: inherit;
+            box-shadow: 0 3px 0 var(--light-gray);
+            transition: all 0.1s;
+        }
+
+        .btn-conf-nao:hover {
+            border-color: var(--green);
+            box-shadow: 0 3px 0 var(--green-shadow);
+        }
+
+        .btn-conf-nao:active {
+            box-shadow: 0 0 0 var(--light-gray);
+            transform: translateY(3px);
+        }
+
+        /* ===== TOAST ===== */
+        .notificacao-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background-color: var(--green);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 0 var(--green-shadow);
+            font-size: 0.82rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.4s ease;
+            max-width: 300px;
+        }
+
+        .toast.alerta {
+            background-color: var(--red);
+            box-shadow: 0 4px 0 var(--red-shadow);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* ===== RESPONSIVO ===== */
+        @media (max-width: 700px) {
+            .tabela-header {
+                display: none;
+            }
+
+            .item-aluno {
+                grid-template-columns: 40px 1fr auto;
+                grid-template-areas: "pos nome respostas" "pos serie horario";
+                gap: 5px;
+                padding: 15px;
+            }
+
+            .posicao { grid-area: pos; align-self: center; }
+            .info-nome { grid-area: nome; }
+            .info-respostas { grid-area: respostas; text-align: right; }
+            .info-serie-wrap { grid-area: serie; }
+            .info-horario { grid-area: horario; text-align: right; font-size: 0.8rem; }
+
+            .area-filtros-topo {
+                gap: 8px;
+                justify-content: center;
+            }
+
+            .btn-filtro-trigger {
+                width: 100%;
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="containerNotificacoes" class="notificacao-container"></div>
+
+    <div class="container">
+        <header>
+            <div class="titulo-container">
+                <a href="index.html" class="btn-voltar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                    Voltar para GeoLab
+                </a>
+                <h1 class="titulo-pagina">Classificação — Geo<span>Lab</span></h1>
+            </div>
+
+            <div class="filtro-data-container">
+                <span style="font-size:0.72rem; color:var(--medium-gray); font-weight:800; text-transform:uppercase; letter-spacing:0.5px;">Data:</span>
+                <input type="date" id="filtroData" class="input-data">
+            </div>
+        </header>
+
+        <div class="area-filtros-topo">
+            <div class="dropdown-wrapper" id="dropAno">
+                <button class="btn-filtro-trigger" onclick="toggleDropdown('dropAno')">
+                    <span id="textoAno">Ano: Todos</span>
+                    <svg class="seta-dropdown" viewBox="0 0 24 24">
+                        <path d="M7 10l5 5 5-5z" />
+                    </svg>
+                </button>
+                <div class="dropdown-menu">
+                    <button class="opcao-item selecionado"
+                        onclick="selecionarOpcao('ano', 'todas', 'Todos', this)">Todos</button>
+                    <button class="opcao-item" onclick="selecionarOpcao('ano', '6°', '6º Ano', this)">6º Ano</button>
+                    <button class="opcao-item" onclick="selecionarOpcao('ano', '7°', '7º Ano', this)">7º Ano</button>
+                    <button class="opcao-item" onclick="selecionarOpcao('ano', '8°', '8º Ano', this)">8º Ano</button>
+                    <button class="opcao-item" onclick="selecionarOpcao('ano', '9°', '9º Ano', this)">9º Ano</button>
+                </div>
+            </div>
+
+            <div class="dropdown-wrapper" id="dropTurma">
+                <button class="btn-filtro-trigger" onclick="toggleDropdown('dropTurma')">
+                    <span id="textoTurma">Turma: Todas</span>
+                    <svg class="seta-dropdown" viewBox="0 0 24 24">
+                        <path d="M7 10l5 5 5-5z" />
+                    </svg>
+                </button>
+                <div class="dropdown-menu">
+                    <button class="opcao-item selecionado"
+                        onclick="selecionarOpcao('turma', 'todas', 'Todas', this)">Todas</button>
+                    <button class="opcao-item" onclick="selecionarOpcao('turma', 'A', 'Turma A', this)">Turma A</button>
+                    <button class="opcao-item" onclick="selecionarOpcao('turma', 'B', 'Turma B', this)">Turma B</button>
+                    <button class="opcao-item" onclick="selecionarOpcao('turma', 'C', 'Turma C', this)">Turma C</button>
+                </div>
+            </div>
+
+            <button class="btn-filtro-trigger" onclick="abrirModalGerenciar()" style="min-width:auto;">
+                <span>Gerenciar Perguntas</span>
+            </button>
+
+            <button class="btn-filtro-trigger" onclick="abrirModalLiberar()" style="min-width:auto;">
+                <span>Liberar atividade</span>
+            </button>
+        </div>
+
+        <!-- Modal: Confirmar liberacao da atividade -->
+        <div id="modalLiberar" class="modal-overlay">
+            <div class="modal-box-admin">
+                <div class="modal-titulo" style="margin-bottom:4px;">Liberar atividade</div>
+                <div class="modal-desc">Todos os alunos conectados receberão a atividade agora, independente do número de figuras criadas. Confirmar?</div>
+                <div class="botoes-confirmacao">
+                    <button class="btn-conf-nao" onclick="fecharModalLiberar()">Cancelar</button>
+                    <button class="btn-conf-sim" style="background:var(--green);box-shadow:0 4px 0 var(--green-shadow);" onclick="confirmarLiberarAtividade()">Liberar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-resumo">
+            <div class="card-resumo">
+                <span class="card-titulo">Total de Alunos</span>
+                <span class="card-valor" id="totalAlunos">0</span>
+            </div>
+            <div class="card-resumo">
+                <span class="card-titulo">Respostas Completas</span>
+                <span class="card-valor" id="respostasCompletas" style="color: var(--green)">0</span>
+            </div>
+            <div class="card-resumo">
+                <span class="card-titulo">Respostas Parciais</span>
+                <span class="card-valor" id="respostasParciais" style="color: var(--purple)">0</span>
+            </div>
+        </div>
+
+        <div class="painel-ranking">
+            <div class="tabela-header">
+                <div class="col-pos">#</div>
+                <div class="col-aluno" style="gap:8px;">Aluno <button id="btnToggleNomes" onclick="toggleNomes()" style="background:none;border:none;cursor:pointer;font-size:1rem;padding:2px 4px;margin:0;box-shadow:none;width:auto;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" title="Esconder/Mostrar nomes">👁</button></div>
+                <div class="col-serie">Série</div>
+                <div class="col-respostas">Acertos</div>
+                <div class="col-horario">Horário</div>
+            </div>
+            <ul id="listaAlunos" class="lista-alunos">
+                <li style="padding:40px; text-align:center; color:var(--medium-gray); font-weight:700;">Carregando
+                    dados...</li>
+            </ul>
+        </div>
+
+        <div class="rodape-gestao">
+            <button class="btn-acao-rodape" onclick="abrirModalReset()">Gerenciar Histórico</button>
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <span class="texto-creditos">Área restrita ao professor</span>
+                <span class="texto-creditos" style="font-weight:900; color:var(--text)">Desenvolvido por Gilberto
+                    Fernandes</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Ver respostas do aluno -->
+    <div id="modalAluno" class="modal-overlay">
+        <div class="modal-box-aluno">
+            <button class="modal-close-abs" onclick="fecharModalAluno()">✕</button>
+            <div class="modal-titulo" id="alunoModalNome">Nome</div>
+            <div class="modal-sub" id="alunoModalInfo">Turma • Ano</div>
+            <div class="modal-divisor"></div>
+            <div id="alunoRespostas"></div>
+        </div>
+    </div>
+
+    <!-- Modal: Reset -->
+    <div id="modalReset" class="modal-overlay">
+        <div class="modal-box-admin">
+            <div class="modal-titulo" style="margin-bottom:4px;">Limpar Dados</div>
+            <div class="modal-desc">Selecione o período para apagar.</div>
+            <button class="btn-reset-opcao" onclick="prepararReset('hoje')">Limpar registros de <b>Hoje</b></button>
+            <button class="btn-reset-opcao" onclick="prepararReset('mes')">Limpar registros do <b>Mês</b></button>
+            <button class="btn-reset-opcao" style="color:var(--red);border-color:var(--red);" onclick="prepararReset('tudo')">🗑️ Resetar
+                <b>Tudo</b></button>
+            <button class="btn-reset-opcao btn-conf-nao" style="margin-top:10px;"
+                onclick="fecharModalReset()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Modal: Senha para Gerenciar Perguntas -->
+    <div id="modalGerenciar" class="modal-overlay">
+        <div class="modal-box-admin">
+            <div class="modal-titulo" style="margin-bottom:4px;">Gerenciar Perguntas</div>
+            <div class="modal-desc">Digite a senha para acessar.</div>
+            <input type="password" id="inputSenhaGerenciar" class="input-senha" placeholder="Senha">
+            <div class="botoes-confirmacao">
+                <button class="btn-conf-nao" onclick="fecharModalGerenciar()">Cancelar</button>
+                <button class="btn-conf-sim" style="background:var(--green);box-shadow:0 4px 0 var(--green-shadow);" onclick="verificarSenhaGerenciar()">Acessar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Senha para confirmar reset -->
+    <div id="modalSenhaAction" class="modal-overlay">
+        <div class="modal-box-admin">
+            <div class="modal-titulo" style="margin-bottom:4px;">Confirmar</div>
+            <div class="modal-desc" id="descSenhaAction">Digite a senha para confirmar.</div>
+            <input type="password" id="inputSenhaAction" class="input-senha" placeholder="Senha do Professor">
+            <div class="botoes-confirmacao">
+                <button class="btn-conf-nao" onclick="fecharModalSenhaAction()">Cancelar</button>
+                <button class="btn-conf-sim" onclick="executarResetConfirmado()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, remove, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAKEQC9tEOEtEL6rmueYmHD20P7Gz3zjGs",
+            authDomain: "geolab-2cd42.firebaseapp.com",
+            databaseURL: "https://geolab-2cd42-default-rtdb.firebaseio.com",
+            projectId: "geolab-2cd42",
+            storageBucket: "geolab-2cd42.firebasestorage.app",
+            messagingSenderId: "22712172336",
+            appId: "1:22712172336:web:1c4951be9e677d0de252f5",
+            measurementId: "G-KX6H436G88"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        /* --- Load quiz questions from Firebase (with fallback) --- */
+        let allQuestions = [
+            { question: "O que é uma transformação geométrica?", type: "text" },
+            { question: "O que é uma translação?", type: "text" },
+            { question: "O que é uma simetria?", type: "text" },
+            { question: "A figura ao lado foi obtida por meio de dois movimentos. Quais foram esses movimentos?", type: "choice", options: ["Translação e rotação", "Reflexão e rotação", "Translação e reflexão", "Rotação e ampliação"], animacao: 1 },
+            { question: "Se girarmos um quadrado em torno de um ponto, qual transformação geométrica está ocorrendo?", type: "choice", options: ["Rotação", "Giro", "Translação", "Simetria"] },
+            { question: "Quando uma figura apenas muda de lugar, sem girar ou mudar de tamanho, qual transformação ocorreu?", type: "choice", options: ["Translação", "Rotação", "Simetria", "Ampliação"] },
+            { question: "Quando uma figura é refletida como se estivesse em um espelho, qual transformação geométrica acontece?", type: "choice", options: ["Translação", "Simetria", "Rotação", "Redução"] },
+            { question: "Crie duas figuras diferentes e aplique uma translação em cada uma.", type: "practical" },
+            { question: "Faça duas figuras e faça uma rotação em cada uma.", type: "practical" },
+            { question: "Construa 3 figuras e faça uma simetria em cada uma.", type: "practical" },
+            { question: "Faça uma nova figura e aplique as 3 transformações geométricas.", type: "practical" }
+        ];
+
+        // Practical tasks (always appended, not editable)
+        const practicalQuestions = [
+            { question: "Crie duas figuras diferentes e aplique uma translação em cada uma.", type: "practical" },
+            { question: "Faça duas figuras e faça uma rotação em cada uma.", type: "practical" },
+            { question: "Construa 3 figuras e faça uma simetria em cada uma.", type: "practical" },
+            { question: "Faça uma nova figura e aplique as 3 transformações geométricas.", type: "practical" }
+        ];
+
+        // Load questions from Firebase
+        async function loadQuestionsFromFirebase() {
+            try {
+                const snap = await get(ref(db, 'geolab_perguntas'));
+                if (snap.exists()) {
+                    let fbQuestions = snap.val();
+                    if (!Array.isArray(fbQuestions)) fbQuestions = Object.values(fbQuestions);
+                    // Combine: firebase questions + practical tasks
+                    allQuestions = [...fbQuestions, ...practicalQuestions];
+                }
+            } catch (e) {
+                console.warn('Error loading questions from Firebase:', e);
+            }
+        }
+        loadQuestionsFromFirebase();
+
+        /* --- Initialize default passwords in Firebase if they don't exist --- */
+        async function initPasswords() {
+            try {
+                const snap = await get(ref(db, 'geolab_config/senhas'));
+                if (!snap.exists()) {
+                    await set(ref(db, 'geolab_config/senhas'), {
+                        professor: '4241',
+                        gerenciar: '9141'
+                    });
+                }
+            } catch (e) {
+                console.warn('Error initializing passwords:', e);
+            }
+        }
+        initPasswords();
+
+        /* --- Helpers --- */
+        function toISODate(v) {
+            if (!v) return "";
+            try {
+                let d;
+                if (typeof v === "number") d = new Date(v);
+                else if (typeof v === "string") {
+                    if (/^\d+$/.test(v)) d = new Date(Number(v));
+                    else d = new Date(v);
+                }
+                if (!d || isNaN(d.getTime())) return "";
+                // Use LOCAL date (not UTC) to match the date picker which also uses local time
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            } catch (e) { }
+            return "";
+        }
+
+        function formatHora(ts) {
+            if (!ts) return "--:--";
+            const d = new Date(ts);
+            return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        /* --- State --- */
+        let todosRegistros = [];
+        let filtroAnoAtual = "todas";
+        let filtroTurmaAtual = "todas";
+        let tipoResetPendente = null;
+        let TOTAL_PERGUNTAS = 11; // updated dynamically from allQuestions.length
+        let nomesOcultos = false;
+
+        /* --- Firebase Listener --- */
+        const respostasRef = ref(db, 'geolab_respostas');
+        onValue(respostasRef, (snapshot) => {
+            const dados = snapshot.val();
+            todosRegistros = [];
+            if (dados) {
+                Object.keys(dados).forEach(key => {
+                    const aluno = dados[key];
+                    const respostas = aluno.respostas || {};
+                    const numRespostas = Object.keys(respostas).length;
+                    // Count correct answers — separate MC from dissertative
+                    let acertos = 0;         // total (MC + dissertative)
+                    let acertosMC = 0;       // only multiple choice correct
+                    let erros = 0;
+                    let totalChars = 0;
+                    let dissertativasRespondidas = 0;
+                    let acertosPractical = 0;
+                    Object.values(respostas).forEach(r => {
+                        if (r && r.tipo === 'choice') {
+                            if (r.acertou) { acertos++; acertosMC++; }
+                            else erros++;
+                        } else if (r && r.tipo === 'practical') {
+                            if (r.concluida === true) { acertos++; acertosPractical++; }
+                        } else if (r && r.resposta) {
+                            // Dissertative answers count as correct
+                            acertos++;
+                            dissertativasRespondidas++;
+                            totalChars += (r.resposta || '').replace(/\s/g, '').length;
+                        }
+                    });
+                    // Use entradaEm (login time) for date/time, fallback to enviadoEm
+                    const timestamp = aluno.entradaEm || aluno.enviadoEm || 0;
+
+                    todosRegistros.push({
+                        id: key,
+                        nome: aluno.nome || 'Sem nome',
+                        ano: aluno.ano || '',
+                        turma: aluno.turma || '',
+                        serie: aluno.serie || ((aluno.ano || '') + ' ' + (aluno.turma || '')),
+                        codigo: aluno.codigo || '',
+                        numRespostas: numRespostas,
+                        acertos: acertos,
+                        acertosMC: acertosMC,
+                        erros: erros,
+                        totalChars: totalChars,
+                        dissertativasRespondidas: dissertativasRespondidas,
+                        acertosPractical: acertosPractical,
+                        respostas: respostas,
+                        snapshots: aluno.snapshots || {},
+                        data: toISODate(timestamp),
+                        hora: formatHora(timestamp),
+                        timestamp: timestamp
+                    });
+                });
+            }
+            renderizarLista();
+        });
+
+        /* --- Render --- */
+        const listaEl = document.getElementById('listaAlunos');
+        const filtroData = document.getElementById('filtroData');
+        // Use local date string to avoid UTC offset issues (e.g. Brazil UTC-3 after 9PM would show next day)
+        const hoje = new Date();
+        filtroData.value = hoje.getFullYear() + '-' + String(hoje.getMonth() + 1).padStart(2, '0') + '-' + String(hoje.getDate()).padStart(2, '0');
+        filtroData.addEventListener('change', () => renderizarLista());
+
+        function renderizarLista() {
+            TOTAL_PERGUNTAS = allQuestions.length;
+            const dataSel = filtroData.value;
+            let filtrados = todosRegistros.filter(item => {
+                const bateData = item.data === dataSel;
+                const bateAno = filtroAnoAtual === 'todas' ? true : (item.ano || '').includes(filtroAnoAtual);
+                const bateTurma = filtroTurmaAtual === 'todas' ? true : (item.turma || '') === filtroTurmaAtual;
+                return bateData && bateAno && bateTurma;
+            });
+            filtrados.sort((a, b) => {
+                // 1. Multiple choice correct (most weight)
+                if ((b.acertosMC || 0) !== (a.acertosMC || 0)) return (b.acertosMC || 0) - (a.acertosMC || 0);
+                // 2. Dissertative responses (more answered + better quality)
+                if ((b.dissertativasRespondidas || 0) !== (a.dissertativasRespondidas || 0)) return (b.dissertativasRespondidas || 0) - (a.dissertativasRespondidas || 0);
+                if ((b.totalChars || 0) !== (a.totalChars || 0)) return (b.totalChars || 0) - (a.totalChars || 0);
+                // 3. Practical activities completed
+                if ((b.acertosPractical || 0) !== (a.acertosPractical || 0)) return (b.acertosPractical || 0) - (a.acertosPractical || 0);
+                // 4. Time to complete (earlier = better)
+                return (a.timestamp || 0) - (b.timestamp || 0);
+            });
+
+            document.getElementById('totalAlunos').innerText = filtrados.length;
+            const completas = filtrados.filter(a => a.numRespostas >= TOTAL_PERGUNTAS).length;
+            const parciais = filtrados.filter(a => a.numRespostas > 0 && a.numRespostas < TOTAL_PERGUNTAS).length;
+            document.getElementById('respostasCompletas').innerText = completas;
+            document.getElementById('respostasParciais').innerText = parciais;
+
+            listaEl.innerHTML = "";
+            if (filtrados.length === 0) {
+                listaEl.innerHTML = `<li style="padding:40px; text-align:center; color:var(--medium-gray); font-weight:700;">Nenhum aluno encontrado nesta data.</li>`;
+                return;
+            }
+
+            filtrados.forEach((aluno, index) => {
+                const pos = index + 1;
+                let medalha = "";
+                if (pos === 1) medalha = "🥇";
+                else if (pos === 2) medalha = "🥈";
+                else if (pos === 3) medalha = "🥉";
+
+                const statusColor = aluno.acertos >= TOTAL_PERGUNTAS ? 'var(--green)' :
+                                    aluno.acertos > 0 ? 'var(--green-dark)' : 'var(--medium-gray)';
+                const statusText = `${aluno.acertos}/${TOTAL_PERGUNTAS}`;
+
+                const li = document.createElement('li');
+                li.className = 'item-aluno';
+                li.innerHTML = `
+                    <div class="posicao col-pos">${pos}</div>
+                    <div class="info-nome col-aluno">${medalha ? `<span class="medalha">${medalha}</span>` : `<span class="medalha"></span>`}${nomesOcultos ? 'Aluno ' + (index + 1) : aluno.nome}</div>
+                    <div class="col-serie"><span class="info-serie">${aluno.serie || '-'}</span></div>
+                    <div class="info-respostas col-respostas" style="color:${statusColor}">${statusText}</div>
+                    <div class="info-horario col-horario">${aluno.hora}</div>
+                `;
+                li.onclick = () => abrirModalAluno(aluno);
+                listaEl.appendChild(li);
+            });
+        }
+        window.renderizarLista = renderizarLista;
+
+        /* --- Modal Aluno --- */
+        function toggleModal(id, show) {
+            const el = document.getElementById(id);
+            if (show) el.classList.add('visivel');
+            else el.classList.remove('visivel');
+        }
+
+        window.abrirModalAluno = (aluno) => {
+            document.getElementById('alunoModalNome').textContent = aluno.nome;
+            const codigoText = aluno.codigo ? ` • Código: ${aluno.codigo}` : '';
+            document.getElementById('alunoModalInfo').textContent = (aluno.serie || 'Série n/a') + ' • Entrada: ' + aluno.hora + codigoText;
+
+            const container = document.getElementById('alunoRespostas');
+            container.innerHTML = '';
+
+            const respostas = aluno.respostas || {};
+            const snapshots = aluno.snapshots || {};
+            const keys = Object.keys(respostas).sort();
+
+            // Show summary stats
+            const totalResp = keys.length;
+            let acertosCount = 0;
+            let errosCount = 0;
+            keys.forEach(key => {
+                const r = respostas[key];
+                if (r && r.tipo === 'choice') {
+                    if (r.acertou) acertosCount++;
+                    else errosCount++;
+                } else if (r && r.tipo === 'practical') {
+                    if (r.concluida === true) acertosCount++;
+                } else if (r && r.resposta) {
+                    acertosCount++; // Dissertative = correct
+                }
+            });
+
+            // Summary card at top
+            const summaryDiv = document.createElement('div');
+            summaryDiv.style.cssText = 'display:flex;gap:10px;margin-bottom:16px;justify-content:center;';
+            summaryDiv.innerHTML = `
+                <div style="flex:1;background:#E8F9D9;border:2px solid var(--green);border-radius:12px;padding:10px;text-align:center;">
+                    <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--green-dark);margin-bottom:2px;">Respostas</div>
+                    <div style="font-size:1.3rem;font-weight:900;color:var(--green-dark);">${totalResp}/${TOTAL_PERGUNTAS}</div>
+                </div>
+                <div style="flex:1;background:#E8F9D9;border:2px solid var(--green);border-radius:12px;padding:10px;text-align:center;">
+                    <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--green-dark);margin-bottom:2px;">Acertos</div>
+                    <div style="font-size:1.3rem;font-weight:900;color:var(--green-dark);">✅ ${acertosCount}</div>
+                </div>
+                <div style="flex:1;background:#FDE8E8;border:2px solid var(--red);border-radius:12px;padding:10px;text-align:center;">
+                    <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--red-dark);margin-bottom:2px;">Erros</div>
+                    <div style="font-size:1.3rem;font-weight:900;color:var(--red-dark);">❌ ${errosCount}</div>
+                </div>
+            `;
+            container.appendChild(summaryDiv);
+
+            if (keys.length === 0) {
+                container.innerHTML += '<div style="padding:20px;text-align:center;color:var(--medium-gray);font-weight:700;">Nenhuma resposta enviada ainda. O aluno entrou mas ainda não respondeu.</div>';
+                toggleModal('modalAluno', true);
+                return;
+            }
+
+            // Render each answer using the question text from Firebase
+            keys.forEach((key, i) => {
+                const r = respostas[key];
+                if (!r) return;
+
+                const item = document.createElement('div');
+                item.className = 'resposta-item';
+
+                // Use question text from Firebase (fixes shuffled order issue)
+                const questionText = r.questao || `Pergunta ${i + 1}`;
+                const isChoice = r.tipo === 'choice';
+                const isPractical = r.tipo === 'practical';
+                const tipoLabel = isChoice ? 'Múltipla Escolha' : isPractical ? 'Atividade Prática' : 'Dissertativa';
+
+                let answerHTML = '';
+                if (isPractical) {
+                    const concluida = r.concluida === true;
+                    answerHTML = `<div style="margin-top:8px;padding:10px 14px;border-radius:10px;background:${concluida ? '#E8F9D9' : '#FDE8E8'};border:2px solid ${concluida ? 'var(--green)' : 'var(--red)'};font-size:0.85rem;font-weight:800;color:${concluida ? 'var(--green-dark)' : 'var(--red)'};">${concluida ? '✅ Atividade concluída' : '❌ Não concluída'}</div>`;
+                } else if (isChoice && r.opcoes) {
+                    // Render multiple choice with visual indicators
+                    const letters = ['A', 'B', 'C', 'D'];
+                    const opcoes = r.opcoes;
+                    const escolhida = r.opcaoEscolhida;
+                    const correta = r.opcaoCorreta;
+                    const acertou = r.acertou;
+
+                    answerHTML = '<div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">';
+                    opcoes.forEach((opt, oi) => {
+                        const isEscolhida = oi === escolhida;
+                        const isCorreta = oi === correta;
+                        let bg = 'transparent';
+                        let border = '2px solid var(--light-gray)';
+                        let icon = '';
+                        if (isCorreta) { bg = '#E8F9D9'; border = '2px solid var(--green)'; icon = '✅'; }
+                        if (isEscolhida && !acertou) { bg = '#FDE8E8'; border = '2px solid var(--red)'; icon = '❌'; }
+                        if (isEscolhida && acertou) { icon = '✅'; }
+
+                        answerHTML += `<div style="padding:8px 12px;border-radius:10px;background:${bg};border:${border};font-size:0.82rem;font-weight:700;display:flex;align-items:center;gap:8px;">
+                            <span style="font-weight:900;color:var(--dark-gray);min-width:18px;">${letters[oi]}.</span>
+                            <span style="flex:1;">${opt}</span>
+                            ${icon ? `<span>${icon}</span>` : ''}
+                        </div>`;
+                    });
+                    answerHTML += '</div>';
+                    answerHTML += `<div style="margin-top:6px;font-size:0.78rem;font-weight:800;color:${acertou ? 'var(--green-dark)' : 'var(--red)'};">${acertou ? '✓ Acertou' : '✗ Errou'}</div>`;
+                } else {
+                    // Dissertative — show as correct
+                    const charCount = (r.resposta || '').replace(/\s/g, '').length;
+                    answerHTML = `<div class="resposta-texto">${r.resposta || 'Sem resposta'}</div>`;
+                    answerHTML += `<div style="margin-top:6px;font-size:0.78rem;font-weight:800;color:var(--green-dark);">✅ Respondida (${charCount} caracteres)</div>`;
+                }
+
+                // Check for canvas snapshot for this question
+                const snapshot = snapshots[key];
+                let snapshotHTML = '';
+                if (snapshot && snapshot.canvasImage) {
+                    snapshotHTML = `
+                        <div style="margin-top:10px;border:2px solid var(--light-gray);border-radius:12px;overflow:hidden;">
+                            <div style="padding:6px 10px;background:#f0f4f8;font-size:0.7rem;font-weight:800;color:var(--dark-gray);text-transform:uppercase;letter-spacing:0.5px;">
+                                🎨 Criação do Aluno (${snapshot.totalFiguras || 0} figuras)
+                            </div>
+                            <img src="${snapshot.canvasImage}" style="width:100%;display:block;cursor:pointer;" 
+                                onclick="window.open(this.src,'_blank')" title="Clique para ampliar"/>
+                        </div>
+                    `;
+                } else if (snapshot && snapshot.totalFiguras > 0) {
+                    snapshotHTML = `
+                        <div style="margin-top:10px;padding:8px 12px;background:#f0f4f8;border:2px solid var(--light-gray);border-radius:10px;font-size:0.75rem;font-weight:700;color:var(--dark-gray);">
+                            🎨 ${snapshot.totalFiguras} figuras criadas nesta pergunta
+                        </div>
+                    `;
+                }
+
+                item.innerHTML = `
+                    <div class="resposta-pergunta">${tipoLabel} ${i + 1}</div>
+                    <div class="resposta-questao-texto">${questionText}</div>
+                    ${answerHTML}
+                    ${snapshotHTML}
+                `;
+                container.appendChild(item);
+            });
+
+            toggleModal('modalAluno', true);
+        };
+
+        window.fecharModalAluno = () => toggleModal('modalAluno', false);
+
+        /* --- Gestão (Reset) --- */
+        window.abrirModalReset = () => toggleModal('modalReset', true);
+        window.fecharModalReset = () => toggleModal('modalReset', false);
+
+        window.prepararReset = (tipo) => {
+            tipoResetPendente = tipo;
+            fecharModalReset();
+            document.getElementById('inputSenhaAction').value = '';
+            document.getElementById('descSenhaAction').innerText = `Confirma apagar: ${tipo.toUpperCase()}?`;
+            toggleModal('modalSenhaAction', true);
+        };
+
+        window.fecharModalSenhaAction = () => toggleModal('modalSenhaAction', false);
+
+        window.executarResetConfirmado = async () => {
+            const senha = document.getElementById('inputSenhaAction').value;
+            let senhaCorreta = '4241'; // fallback
+            try {
+                const snap = await get(ref(db, 'geolab_config/senhas/professor'));
+                if (snap.exists()) senhaCorreta = String(snap.val());
+            } catch (e) { }
+            if (senha !== senhaCorreta) {
+                alert('Senha incorreta!');
+                return;
+            }
+            if (tipoResetPendente === 'tudo') {
+                remove(ref(db, 'geolab_respostas'));
+                mostrarNotificacao("Todos os dados foram apagados!", 'alerta');
+            } else if (tipoResetPendente === 'hoje') {
+                const hoje = new Date().toISOString().split('T')[0];
+                todosRegistros.forEach(aluno => {
+                    if (aluno.data === hoje) remove(ref(db, 'geolab_respostas/' + aluno.id));
+                });
+                mostrarNotificacao("Registros de hoje apagados.");
+            } else if (tipoResetPendente === 'mes') {
+                const mesAtual = new Date().toISOString().slice(0, 7);
+                todosRegistros.forEach(aluno => {
+                    if ((aluno.data || '').startsWith(mesAtual)) remove(ref(db, 'geolab_respostas/' + aluno.id));
+                });
+                mostrarNotificacao("Registros do mês apagados.");
+            }
+            fecharModalSenhaAction();
+        };
+
+        /* --- Dropdowns --- */
+        window.toggleDropdown = (id) => {
+            const el = document.getElementById(id);
+            const estaAberto = el.classList.contains('aberto');
+            document.querySelectorAll('.dropdown-wrapper').forEach(d => d.classList.remove('aberto'));
+            if (!estaAberto) el.classList.add('aberto');
+        };
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown-wrapper')) {
+                document.querySelectorAll('.dropdown-wrapper').forEach(d => d.classList.remove('aberto'));
+            }
+        });
+
+        window.selecionarOpcao = (tipo, valor, textoExibicao, elemento) => {
+            const wrapperId = tipo === 'ano' ? 'dropAno' : 'dropTurma';
+            const wrapper = document.getElementById(wrapperId);
+            wrapper.querySelectorAll('.opcao-item').forEach(i => i.classList.remove('selecionado'));
+            elemento.classList.add('selecionado');
+            if (tipo === 'ano') {
+                filtroAnoAtual = valor;
+                document.getElementById('textoAno').innerText = 'Ano: ' + textoExibicao;
+            } else {
+                filtroTurmaAtual = valor;
+                document.getElementById('textoTurma').innerText = 'Turma: ' + textoExibicao;
+            }
+            wrapper.classList.remove('aberto');
+            renderizarLista();
+        };
+
+        /* --- Toast --- */
+        function mostrarNotificacao(texto, tipo = 'sucesso') {
+            const container = document.getElementById('containerNotificacoes');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            if (tipo === 'alerta') toast.classList.add('alerta');
+            toast.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"></circle>${tipo === 'alerta' ? '<line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>' : '<path d="M8 12l2 2 4-4"/>'}</svg> ${texto}`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
+        }
+
+        /* --- Gerenciar Perguntas Modal --- */
+        window.abrirModalGerenciar = () => {
+            document.getElementById('inputSenhaGerenciar').value = '';
+            toggleModal('modalGerenciar', true);
+            setTimeout(() => document.getElementById('inputSenhaGerenciar').focus(), 100);
+        };
+        window.fecharModalGerenciar = () => toggleModal('modalGerenciar', false);
+
+        window.verificarSenhaGerenciar = async () => {
+            const senha = document.getElementById('inputSenhaGerenciar').value;
+            let senhaCorreta = '9141'; // fallback
+            try {
+                const snap = await get(ref(db, 'geolab_config/senhas/gerenciar'));
+                if (snap.exists()) senhaCorreta = String(snap.val());
+            } catch (e) { }
+            if (senha === senhaCorreta) {
+                fecharModalGerenciar();
+                window.open('gerenciar_perguntas.html', '_blank');
+            } else {
+                alert('Senha incorreta!');
+            }
+        };
+
+        // Enter key on gerenciar password
+        document.getElementById('inputSenhaGerenciar')?.addEventListener('keydown', e => {
+            if (e.key === 'Enter') verificarSenhaGerenciar();
+        });
+
+        /* --- Liberar Atividade --- */
+        window.abrirModalLiberar = () => toggleModal('modalLiberar', true);
+        window.fecharModalLiberar = () => toggleModal('modalLiberar', false);
+
+        window.confirmarLiberarAtividade = async () => {
+            try {
+                await set(ref(db, 'geolab_controle/liberarAtividade'), Date.now());
+                fecharModalLiberar();
+            } catch (e) {
+                alert('Erro ao liberar atividade: ' + e.message);
+            }
+        };
+
+        /* --- Toggle nomes dos alunos --- */
+        window.toggleNomes = () => {
+            nomesOcultos = !nomesOcultos;
+            const btn = document.getElementById('btnToggleNomes');
+            if (btn) {
+                btn.textContent = nomesOcultos ? '🙈' : '👁';
+                btn.title = nomesOcultos ? 'Mostrar nomes' : 'Esconder nomes';
+            }
+            renderizarLista();
+        };
+    </script>
+</body>
+
+</html>
