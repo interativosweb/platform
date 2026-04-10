@@ -995,18 +995,28 @@
         import { getDatabase, ref, onValue, remove, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyAKEQC9tEOEtEL6rmueYmHD20P7Gz3zjGs",
-            authDomain: "geolab-2cd42.firebaseapp.com",
-            databaseURL: "https://geolab-2cd42-default-rtdb.firebaseio.com",
-            projectId: "geolab-2cd42",
-            storageBucket: "geolab-2cd42.firebasestorage.app",
-            messagingSenderId: "22712172336",
-            appId: "1:22712172336:web:1c4951be9e677d0de252f5",
-            measurementId: "G-KX6H436G88"
+            apiKey: "AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",
+            authDomain: "profbase-5f9b0.firebaseapp.com",
+            databaseURL: "https://profbase-5f9b0-default-rtdb.firebaseio.com",
+            projectId: "profbase-5f9b0",
+            storageBucket: "profbase-5f9b0.firebasestorage.app",
+            messagingSenderId: "826412057766",
+            appId: "1:826412057766:web:729e6e24ce7587417fe067"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+
+        // Read turmaId from URL to isolate data per class
+        const GEOLAB_TURMA_ID = (function(){
+          try {
+            const p = new URLSearchParams(window.location.search);
+            const t = p.get('turmaId');
+            return (t && /^[a-zA-Z0-9_\-]+$/.test(t)) ? t : null;
+          } catch(e) { return null; }
+        })();
+        const RESPOSTAS_BASE = GEOLAB_TURMA_ID ? ('turmas/' + GEOLAB_TURMA_ID + '/respostas') : 'geolab_respostas';
+        const CONTROLE_BASE = GEOLAB_TURMA_ID ? ('turmas/' + GEOLAB_TURMA_ID + '/controle') : 'geolab_controle';
 
         /* --- Load quiz questions from Firebase (with fallback) --- */
         let allQuestions = [
@@ -1098,7 +1108,7 @@
         let nomesOcultos = false;
 
         /* --- Firebase Listener --- */
-        const respostasRef = ref(db, 'geolab_respostas');
+        const respostasRef = ref(db, RESPOSTAS_BASE);
         onValue(respostasRef, (snapshot) => {
             const dados = snapshot.val();
             todosRegistros = [];
@@ -1395,18 +1405,18 @@
                 return;
             }
             if (tipoResetPendente === 'tudo') {
-                remove(ref(db, 'geolab_respostas'));
+                remove(ref(db, RESPOSTAS_BASE));
                 mostrarNotificacao("Todos os dados foram apagados!", 'alerta');
             } else if (tipoResetPendente === 'hoje') {
                 const hoje = new Date().toISOString().split('T')[0];
                 todosRegistros.forEach(aluno => {
-                    if (aluno.data === hoje) remove(ref(db, 'geolab_respostas/' + aluno.id));
+                    if (aluno.data === hoje) remove(ref(db, RESPOSTAS_BASE + '/' + aluno.id));
                 });
                 mostrarNotificacao("Registros de hoje apagados.");
             } else if (tipoResetPendente === 'mes') {
                 const mesAtual = new Date().toISOString().slice(0, 7);
                 todosRegistros.forEach(aluno => {
-                    if ((aluno.data || '').startsWith(mesAtual)) remove(ref(db, 'geolab_respostas/' + aluno.id));
+                    if ((aluno.data || '').startsWith(mesAtual)) remove(ref(db, RESPOSTAS_BASE + '/' + aluno.id));
                 });
                 mostrarNotificacao("Registros do mês apagados.");
             }
@@ -1488,7 +1498,7 @@
 
         window.confirmarLiberarAtividade = async () => {
             try {
-                await set(ref(db, 'geolab_controle/liberarAtividade'), Date.now());
+                await set(ref(db, CONTROLE_BASE + '/liberarAtividade'), Date.now());
                 fecharModalLiberar();
             } catch (e) {
                 alert('Erro ao liberar atividade: ' + e.message);
