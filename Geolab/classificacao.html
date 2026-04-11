@@ -1219,9 +1219,12 @@
 
                 const li = document.createElement('li');
                 li.className = 'item-aluno';
+                const codigoBadge = aluno.codigo
+                    ? `<span style="display:inline-block;margin-left:8px;padding:2px 8px;border-radius:6px;background:#eaf1ff;color:#2a4bb0;font-size:0.7rem;font-weight:800;letter-spacing:1px;font-family:ui-monospace,Menlo,Consolas,monospace;vertical-align:middle;">${aluno.codigo}</span>`
+                    : '';
                 li.innerHTML = `
                     <div class="posicao col-pos">${pos}</div>
-                    <div class="info-nome col-aluno">${medalha ? `<span class="medalha">${medalha}</span>` : `<span class="medalha"></span>`}${nomesOcultos ? 'Aluno ' + (index + 1) : aluno.nome}</div>
+                    <div class="info-nome col-aluno">${medalha ? `<span class="medalha">${medalha}</span>` : `<span class="medalha"></span>`}${nomesOcultos ? 'Aluno ' + (index + 1) : aluno.nome}${nomesOcultos ? '' : codigoBadge}</div>
                     <div class="col-serie"><span class="info-serie">${aluno.serie || '-'}</span></div>
                     <div class="info-respostas col-respostas" style="color:${statusColor}">${statusText}</div>
                     <div class="info-horario col-horario">${aluno.hora}</div>
@@ -1310,6 +1313,13 @@
                 if (isPractical) {
                     const concluida = r.concluida === true;
                     answerHTML = `<div style="margin-top:8px;padding:10px 14px;border-radius:10px;background:${concluida ? '#E8F9D9' : '#FDE8E8'};border:2px solid ${concluida ? 'var(--green)' : 'var(--red)'};font-size:0.85rem;font-weight:800;color:${concluida ? 'var(--green-dark)' : 'var(--red)'};">${concluida ? '✅ Atividade concluída' : '❌ Não concluída'}</div>`;
+                    if (!concluida && r.justificativa) {
+                        const just = String(r.justificativa).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+                        answerHTML += `<div style="margin-top:8px;padding:12px 14px;border-radius:10px;background:#fff8ed;border:2px solid #f59e0b;">
+                            <div style="font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:#a35a00;margin-bottom:6px;">Justificativa do aluno</div>
+                            <div style="font-size:0.88rem;font-weight:600;color:var(--dark-gray);line-height:1.45;white-space:pre-wrap;">${just}</div>
+                        </div>`;
+                    }
                 } else if (isChoice && r.opcoes) {
                     // Render multiple choice with visual indicators
                     const letters = ['A', 'B', 'C', 'D'];
