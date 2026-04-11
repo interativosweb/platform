@@ -1547,30 +1547,93 @@
         window.renderTools = function () {
             const q = norm(document.getElementById('searchTools')?.value || '');
             const list = document.getElementById('toolsList');
-            let filtered = allTools;
+
+            // Group activity by user (uid). Build map: uid -> { user, tools[] }
+            const byUid = new Map();
+            allTools.forEach(t => {
+                if (!byUid.has(t.uid)) {
+                    const u = allUsers.find(x => x.uid === t.uid);
+                    byUid.set(t.uid, {
+                        uid: t.uid,
+                        nome: u?.nome || t.nome || 'Sem nome',
+                        email: u?.email || t.email || '',
+                        user: u || null,
+                        tools: []
+                    });
+                }
+                byUid.get(t.uid).tools.push(t);
+            });
+            // Also include registered users without any activity (so admin sees them)
+            allUsers.forEach(u => {
+                if (!byUid.has(u.uid)) {
+                    byUid.set(u.uid, { uid: u.uid, nome: u.nome, email: u.email, user: u, tools: [] });
+                }
+            });
+
+            let groups = Array.from(byUid.values());
             if (q) {
-                filtered = filtered.filter(t =>
-                    norm(t.nome).includes(q) || norm(t.email).includes(q) || norm(t.ferramenta).includes(q)
+                groups = groups.filter(g =>
+                    norm(g.nome).includes(q) || norm(g.email).includes(q) ||
+                    g.tools.some(t => norm(t.ferramenta).includes(q))
                 );
             }
+            // Sort: most active first
+            groups.sort((a, b) => b.tools.length - a.tools.length);
 
-            if (filtered.length === 0) {
-                list.innerHTML = '<li class="empty-row">Nenhuma atividade registrada</li>';
+            if (groups.length === 0) {
+                list.innerHTML = '<li class="empty-row">Nenhum usuário encontrado</li>';
                 return;
             }
 
-            list.innerHTML = filtered.slice(0, 100).map(t => {
-                const dt = t.dataHora ? new Date(t.dataHora) : null;
-                const dataHora = dt ? dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '-';
+            list.innerHTML = groups.map(g => {
+                const u = g.user || {};
+                const tipoLabel = u.tipo === 'aluno' ? 'Aluno' : u.tipo === 'professor' ? 'Professor' : (u.tipo || '—');
+                const cidadeUF = [u.cidade, u.estado].filter(Boolean).join(' / ') || '—';
+                const wpp = u.whatsapp ? `<a href="https://wa.me/55${u.whatsapp.replace(/\D/g, '')}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:700;" onclick="event.stopPropagation()">${esc(u.whatsapp)}</a>` : '—';
+                const recent = g.tools.slice(0, 30).map(t => {
+                    const dt = t.dataHora ? new Date(t.dataHora) : null;
+                    const dataHora = dt ? dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '-';
+                    return `<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 10px;border-bottom:1px solid var(--border-light);font-size:0.82rem;">
+                        <span style="font-weight:600;color:var(--text-main);">${esc(t.ferramenta)}</span>
+                        <span style="color:var(--text-light);font-weight:500;white-space:nowrap;">${dataHora}</span>
+                    </div>`;
+                }).join('');
+                const histBlock = g.tools.length === 0
+                    ? '<div style="padding:12px;color:var(--text-light);font-size:0.82rem;font-style:italic;">Este usuário ainda não usou nenhuma ferramenta.</div>'
+                    : recent;
                 return `
-                    <li class="table-row tools-row">
-                        <div class="cell"><span class="cell-name-link" onclick="showUserProfile('${t.uid}')">${esc(t.nome || 'Sem nome')}</span></div>
-                        <div class="cell cell-email">${esc(t.email)}</div>
-                        <div class="cell cell-tool">${esc(t.ferramenta)}</div>
-                        <div class="cell cell-date">${dataHora}</div>
+                    <li class="tools-user-card" style="display:block;background:var(--card-bg);border:1px solid var(--border-light);border-radius:14px;margin-bottom:10px;overflow:hidden;">
+                        <div class="tools-user-head" style="display:flex;align-items:center;gap:14px;padding:14px 18px;cursor:pointer;flex-wrap:wrap;" onclick="this.parentElement.classList.toggle('open');this.querySelector('.chev').style.transform=this.parentElement.classList.contains('open')?'rotate(90deg)':'rotate(0)';">
+                            <span class="chev" style="font-size:0.9rem;color:var(--text-light);transition:transform .2s;">▶</span>
+                            <div style="flex:1;min-width:160px;">
+                                <div style="font-weight:700;color:var(--text-main);font-size:0.95rem;">
+                                    <span style="cursor:pointer;color:var(--accent);" onclick="event.stopPropagation();showUserProfile('${g.uid}')">${esc(g.nome)}</span>
+                                </div>
+                                <div style="font-size:0.78rem;color:var(--text-light);font-weight:500;">${esc(g.email)}</div>
+                            </div>
+                            <div style="font-size:0.78rem;color:var(--text-light);font-weight:600;">
+                                <div><strong style="color:var(--text-main);">Tipo:</strong> ${tipoLabel}</div>
+                                <div><strong style="color:var(--text-main);">Local:</strong> ${esc(cidadeUF)}</div>
+                                <div><strong style="color:var(--text-main);">WhatsApp:</strong> ${wpp}</div>
+                            </div>
+                            <div style="background:var(--bg-secondary);padding:6px 14px;border-radius:50px;font-size:0.78rem;font-weight:700;color:var(--accent);white-space:nowrap;">
+                                ${g.tools.length} ${g.tools.length === 1 ? 'uso' : 'usos'}
+                            </div>
+                        </div>
+                        <div class="tools-user-body" style="display:none;border-top:1px solid var(--border-light);background:var(--bg-secondary);">
+                            ${histBlock}
+                        </div>
                     </li>
                 `;
             }).join('');
+
+            // Toggle behavior — show body when card is .open
+            list.querySelectorAll('.tools-user-card').forEach(card => {
+                const body = card.querySelector('.tools-user-body');
+                const obs = () => { body.style.display = card.classList.contains('open') ? 'block' : 'none'; };
+                obs();
+                new MutationObserver(obs).observe(card, { attributes: true, attributeFilter: ['class'] });
+            });
         };
 
         // ===== BLOCK / UNBLOCK =====
