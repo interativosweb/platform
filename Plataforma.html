@@ -941,7 +941,8 @@
         import {
             getAuth,
             onAuthStateChanged,
-            signOut
+            signOut,
+            signInWithEmailAndPassword
         } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import {
             getDatabase,
@@ -1284,15 +1285,22 @@
             }
         });
 
-        document.getElementById('admEntrar').addEventListener('click', () => {
+        document.getElementById('admEntrar').addEventListener('click', async () => {
             const email = document.getElementById('admEmail').value.trim();
             const senha = document.getElementById('admSenha').value;
 
-            if (email === ADM_EMAIL && senha === ADM_SENHA) {
+            if (email !== ADM_EMAIL || senha !== ADM_SENHA) {
+                document.getElementById('admError').classList.add('show');
+                return;
+            }
+
+            try {
+                await signInWithEmailAndPassword(auth, email, senha);
                 localStorage.setItem('alquilab_adm', 'true');
                 window.open('Administrador.html', '_blank');
                 document.getElementById('admOverlay').classList.remove('show');
-            } else {
+            } catch (e) {
+                console.error('Falha ao autenticar admin no Firebase:', e);
                 document.getElementById('admError').classList.add('show');
             }
         });
