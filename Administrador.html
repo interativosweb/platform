@@ -1273,6 +1273,7 @@
         onAuthStateChanged(auth, (user) => {
             if (user && !dataStarted) {
                 console.log('Usuário autenticado:', user.email);
+                showAuthBanner(user.email);
                 startData();
             } else if (!user) {
                 console.warn('Nenhum usuário autenticado. Redirecionando...');
@@ -1280,6 +1281,22 @@
                 window.location.href = 'index.html';
             }
         });
+
+        // Diagnostic banner — shows which Firebase Auth account is active in this tab
+        function showAuthBanner(email) {
+            const isAdminEmail = (email === ADM_EMAIL);
+            const banner = document.createElement('div');
+            banner.style.cssText =
+                'position:fixed;left:0;right:0;top:0;z-index:9000;padding:12px 20px;' +
+                'font-family:-apple-system,"Segoe UI",sans-serif;font-size:13px;font-weight:700;' +
+                'text-align:center;color:white;box-shadow:0 2px 12px rgba(0,0,0,.2);' +
+                'background:' + (isAdminEmail ? '#34c759' : '#ff3b30');
+            banner.textContent = isAdminEmail
+                ? '✓ Autenticado como ADMIN: ' + email
+                : '✗ Autenticado como: ' + email + ' — NÃO é o admin! Clique no admin pela engrenagem.';
+            document.body.appendChild(banner);
+            if (isAdminEmail) setTimeout(() => banner.remove(), 4000);
+        }
 
         function startData() {
             if (dataStarted) return;
