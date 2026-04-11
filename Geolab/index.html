@@ -3028,7 +3028,10 @@
       const axisCount = shapes.filter(x => x.isSymAxis && !x.isSymPoint).length - 1;
       s.name = axisLetters[axisCount % axisLetters.length] || `r${axisCount}`;
       s.color = '#9C3FA6';
-      s.points = [{ x: -120, y: -80 }, { x: 120, y: 80 }];
+      s.points = [
+        { x: -120, y: -80, label: nextVertexLabel() },
+        { x: 120, y: 80, label: nextVertexLabel() }
+      ];
       s.isClosed = true;
       s.anchor = { x: 0, y: 0 };
       mode = 'IDLE';
@@ -3048,7 +3051,7 @@
       s.isSymPoint = true;
       s.name = `Ponto ${shapes.filter(x => x.isSymPoint).length + 1}`;
       s.color = '#9C3FA6';
-      s.points = [{ x: 0, y: 0, label: '' }];
+      s.points = [{ x: 0, y: 0, label: nextVertexLabel() }];
       s.pointRadius = 7;
       s.isClosed = true;
       s.anchor = { x: 0, y: 0 };
@@ -3789,7 +3792,8 @@
           drawGhostShape(shape);
         }
         drawShape(shape, false, isSelected);
-        if (!shape.isSymAxis) drawVertexLabels(shape, false);
+        // Draw labels for ALL shapes including sym-axis lines and sym-points
+        drawVertexLabels(shape, false);
         // Reflexão em reta
         if (!shape.isSymAxis && shape.symmetryLineId) {
           drawSymmetryImage(shape);
@@ -4050,7 +4054,8 @@
       // Use the FROZEN axis position (captured at link time).
       // Moving the line after linking does NOT move the reflected image —
       // only changing the original object does.
-      const axis = shape.frozenAxis || getAxisPoints(axisShape);
+      // Always use live axis so reflection follows when the line points are moved
+      const axis = getAxisPoints(axisShape);
       if (!axis) return;
 
       const ext = Math.max(canvas.width, canvas.height) * 2 / view.scale;
@@ -4255,9 +4260,10 @@
       const ptShape = shapes.find(s => s.id === shape.symmetryPointId);
       if (!ptShape || !ptShape.isSymPoint) return;
 
-      // Use frozen center (captured when linked); moving the sym-point doesn't move the image
-      const center = shape.frozenSymPoint ||
-        (ptShape.points[0] ? { x: ptShape.points[0].x + (ptShape.tx || 0), y: ptShape.points[0].y + (ptShape.ty || 0) } : null);
+      // Always use the LIVE center of the sym-point so the reflection follows when it moves
+      const center = ptShape.points[0]
+        ? { x: ptShape.points[0].x + (ptShape.tx || 0), y: ptShape.points[0].y + (ptShape.ty || 0) }
+        : null;
       if (!center) return;
 
       // Draw a subtle cross-hair at the center of symmetry
@@ -5128,6 +5134,11 @@
       mode = 'IDLE';
       nextVertexLetterCode = 65;
       updateUI();
+      // Refresh symmetry selects so old line/point options disappear
+      try { updateSymSelectOptions(); } catch (e) {}
+      // Reset both selects' visible value
+      const selA = document.getElementById('symAxisSelect'); if (selA) selA.value = '';
+      const selP = document.getElementById('symPointSelect'); if (selP) selP.value = '';
       draw();
     }
 
@@ -5776,15 +5787,52 @@
     function skipPractical(pIdx) {
       if (pIdx !== currentPractical) return;
       const feedback = document.getElementById(`practicalFeedback${pIdx}`);
-      const card = document.getElementById(`practicalCard${pIdx}`);
+      // Show justification field instead of skipping immediately
+      feedback.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:10px;text-align:left;background:#fff8ed;border:2px solid #f59e0b;border-radius:14px;padding:14px;">
+          <label style="font-size:0.82rem;font-weight:800;color:#a35a00;">Conta pra gente: por que você não conseguiu?</label>
+          <textarea id="justificativa${pIdx}" placeholder="Ex: não entendi o enunciado, não sabia como aplicar a transformação..." style="width:100%;min-height:80px;padding:10px 12px;border:2px solid #f5c97a;border-radius:10px;background:#fff;font-family:var(--font);font-size:0.88rem;font-weight:600;color:var(--dark-gray);outline:none;resize:vertical;"></textarea>
+          <div style="display:flex;gap:8px;">
+            <button type="button" onclick="confirmarJustificativa(${pIdx})" style="flex:1;padding:10px 14px;border:none;border-radius:10px;background:#f59e0b;color:#fff;font-family:var(--font);font-size:0.84rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:0.4px;">Enviar justificativa</button>
+            <button type="button" onclick="cancelarJustificativa(${pIdx})" style="padding:10px 14px;border:2px solid #f5c97a;border-radius:10px;background:#fff;color:#a35a00;font-family:var(--font);font-size:0.82rem;font-weight:700;cursor:pointer;">Voltar</button>
+          </div>
+        </div>
+      `;
+      feedback.className = 'practical-feedback show';
+      setTimeout(() => { const t = document.getElementById('justificativa' + pIdx); if (t) t.focus(); }, 80);
+    }
 
-      // Save snapshot and answer even when skipped
+    function cancelarJustificativa(pIdx) {
+      const feedback = document.getElementById(`practicalFeedback${pIdx}`);
+      feedback.innerHTML = '';
+      feedback.className = 'practical-feedback';
+    }
+
+    function confirmarJustificativa(pIdx) {
+      if (pIdx !== currentPractical) return;
+      const ta = document.getElementById('justificativa' + pIdx);
+      const justificativa = ta ? ta.value.trim() : '';
+      if (!justificativa || justificativa.length < 5) {
+        if (ta) { ta.style.borderColor = '#ef4444'; ta.focus(); setTimeout(() => { ta.style.borderColor = '#f5c97a'; }, 1500); }
+        return;
+      }
+      const card = document.getElementById(`practicalCard${pIdx}`);
+      const feedback = document.getElementById(`practicalFeedback${pIdx}`);
+
+      // Save snapshot + answer with the justificativa text
       saveCanvasSnapshotToFirebase('pergunta_' + (quizQuestions.length + pIdx));
-      saveAnswerToFirebase(quizQuestions.length + pIdx, practicalTasks[pIdx].task, 'Não concluída', { tipo: 'practical', concluida: false });
-      feedback.textContent = 'Tudo bem! Voc\u00ea pode tentar de novo depois.';
+      saveAnswerToFirebase(quizQuestions.length + pIdx, practicalTasks[pIdx].task, 'Não concluída', {
+        tipo: 'practical', concluida: false, justificativa: justificativa
+      });
+
+      feedback.innerHTML = '\u2713 Justificativa enviada. Voc\u00ea pode tentar de novo depois.';
       feedback.className = 'practical-feedback show error';
       completePractical(card, pIdx);
     }
+
+    // Expose globals so onclick handlers in dynamically inserted HTML can find them
+    window.confirmarJustificativa = confirmarJustificativa;
+    window.cancelarJustificativa = cancelarJustificativa;
 
     function completePractical(card, pIdx) {
       card.classList.remove('active');
@@ -5808,6 +5856,7 @@
       clearAllFigures();
 
       currentPractical++;
+      updateQuizProgress();
 
       if (currentPractical < practicalTasks.length) {
         setTimeout(() => {
