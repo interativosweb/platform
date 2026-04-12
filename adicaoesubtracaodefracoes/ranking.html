@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Painel do Professor - Ranking</title>
+    <style>
+        /* =========================================
+           🎨 ESTILO GERAL (CLEAN / APPLE STYLE)
+           ========================================= */
+        :root {
+            --bg-page: #f5f5f7;
+            --card-bg: #ffffff;
+            --text-main: #1d1d1f;
+            --text-light: #86868b;
+            --accent: #0071e3;
+            --success: #34c759;
+            --warning: #ffcc00;
+            --error: #ff3b30;
+            --radius: 16px;
+            --shadow: 0 4px 20px rgba(0,0,0,0.05);
+            --btn-gray-dark: #8e8e93;
+            --border-light: #e5e5ea;
+        }
+
+        /* Fração Vertical */
+        .fracao { display: inline-flex; flex-direction: column; vertical-align: middle; margin: 0 5px; text-align: center; font-size: 0.9em; }
+        .fracao > span { padding: 0 5px; }
+        .fracao > span:first-child { border-bottom: 2px solid currentColor; padding-bottom: 1px; }
+
+        body {
+            -webkit-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none;
+            background-color: var(--bg-page); color: var(--text-main); min-height: 100vh;
+            padding: 40px 20px; padding-bottom: 100px; overflow-x: hidden; overflow: auto;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .container { max-width: 1140px; margin: 0 auto; }
+
+        /* Header e Filtros */
+        header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 22px; flex-wrap: wrap; gap: 20px; }
+        .titulo-pagina { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+        .btn-voltar { text-decoration: none; color: var(--accent); font-weight: 600; display: flex; align-items: center; gap: 5px; transition: opacity 0.2s; font-size: 0.9rem; margin-bottom: 5px; }
+        .btn-voltar:hover { opacity: 0.7; }
+        .filtro-data-container { background: white; padding: 10px 20px; border-radius: 50px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 10px; min-height: 48px; }
+        .input-data { border: none; background: transparent; font-size: 1rem; color: var(--accent); font-weight: 600; cursor: pointer; outline: none; }
+
+        .area-filtros-topo { display: flex; justify-content: flex-start; align-items: stretch; gap: 14px; margin-bottom: 36px; flex-wrap: wrap; }
+        .dropdown-wrapper { position: relative; display: inline-flex; }
+        .btn-filtro-trigger { background-color: white; color: var(--text-main); padding: 12px 22px; border-radius: 50px; border: none; font-size: 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.08); display: inline-flex; align-items: center; gap: 10px; transition: all 0.3s ease; min-width: 190px; min-height: 48px; justify-content: space-between; }
+        .btn-filtro-trigger:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.12); }
+        .btn-filtro-trigger.ativo { border: 2px solid var(--accent); color: var(--accent); }
+        .seta-dropdown { width: 14px; height: 14px; fill: var(--text-light); transition: transform 0.3s; }
+        .dropdown-wrapper.aberto .seta-dropdown { transform: rotate(180deg); fill: var(--accent); }
+        .dropdown-menu { position: absolute; top: 120%; left: 0; width: 100%; min-width: 200px; background-color: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 10px; z-index: 100; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1); }
+        .dropdown-wrapper.aberto .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+        .opcao-item { display: block; width: 100%; text-align: left; padding: 10px 15px; background: none; border: none; border-radius: 8px; font-size: 0.95rem; color: var(--text-main); cursor: pointer; font-weight: 500; transition: background 0.2s; }
+        .opcao-item:hover { background-color: #f2f2f7; color: var(--accent); }
+        .opcao-item.selecionado { background-color: var(--accent); color: white; }
+
+        .btn-finalizar { background-color: white; color: var(--error); border: 1px solid rgba(255, 59, 48, 0.3); }
+        .btn-finalizar:hover { background-color: var(--error); color: white; border-color: var(--error); box-shadow: 0 6px 15px rgba(255, 59, 48, 0.25); }
+        .btn-liberar { background-color: white; color: var(--success); border: 1px solid rgba(52, 199, 89, 0.3); }
+        .btn-liberar:hover { background-color: var(--success); color: white; border-color: var(--success); box-shadow: 0 6px 15px rgba(52, 199, 89, 0.25); }
+
+        /* Cards e Tabela */
+        .grid-resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 18px; }
+        .card-resumo { background: var(--card-bg); padding: 14px 16px; border-radius: var(--radius); box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: flex-start; justify-content: center; min-height: 86px; }
+        .card-titulo { font-size: 0.75rem; color: var(--text-light); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .card-valor { font-size: 1.65rem; font-weight: 750; color: var(--text-main); letter-spacing: -0.5px; line-height: 1.1; }
+        .painel-ranking { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; min-height: 300px; }
+        .tabela-header { display: grid; grid-template-columns: 56px 2fr 1.5fr 0.85fr 0.85fr 1fr; padding: 12px 18px; background-color: rgba(0,0,0,0.02); border-bottom: 1px solid #e5e5ea; font-size: 0.8rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; }
+
+        /* Alinhamento das colunas (evita texto "quebrado" e desalinhado) */
+        .tabela-header > div,
+        .item-aluno > div { display: flex; align-items: center; }
+
+        .col-pos { justify-content: center; }
+        .col-aluno { justify-content: flex-start; min-width: 0; }
+        .col-serie { justify-content: center; }
+        .col-nota, .col-erro, .col-tempo { justify-content: center; }
+
+        .info-nome { gap: 8px; }
+        .info-serie { white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; }
+        .lista-alunos { list-style: none; }
+        .item-aluno { display: grid; grid-template-columns: 56px 2fr 1.5fr 0.85fr 0.85fr 1fr; padding: 14px 18px; align-items: center; border-bottom: 1px solid #f5f5f7; transition: background 0.2s; cursor: pointer; }
+        .item-aluno:last-child { border-bottom: none; }
+        .item-aluno:hover { background-color: #fafafa; }
+        /* Coluna # (posição) */
+        .posicao { display:flex; align-items:center; justify-content:center; font-weight:800; color: var(--text-main); font-size: 1.05rem; }
+
+        /* Emoji de medalha (renderizado com Twemoji quando disponível) */
+        .medalha { display:inline-flex; align-items:center; justify-content:center; width: 22px; margin-right: 8px; }
+        .medalha img.emoji { width: 18px; height: 18px; vertical-align: -2px; }
+        .info-nome { font-weight: 600; font-size: 1.05rem; }
+        .info-serie { display: inline-block; padding: 4px 12px; border-radius: 20px; background-color: #f2f2f7; color: var(--text-light); font-size: 0.8rem; font-weight: 600; }
+        .info-nota { font-weight: 700; color: var(--success); }
+        .info-erro { font-weight: 700; color: var(--error); }
+        .info-tempo { font-size: 0.9rem; color: var(--text-light); text-align: right; }
+        
+        /* Notificações */
+        .notificacao-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast { background-color: var(--success); color: white; padding: 12px 20px; border-radius: 50px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 10px; animation: slideIn 0.4s ease; opacity: 1; transition: opacity 0.5s; max-width: 300px; }
+        .toast.alerta { background-color: var(--error); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        
+        .rodape-gestao { margin-top: 50px; text-align: center; border-top: 1px solid #e5e5ea; padding-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .btn-acao-rodape { background-color: var(--btn-gray-dark); color: white; border: none; padding: 12px 30px; border-radius: 50px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: transform 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .btn-acao-rodape:hover { background-color: var(--error); transform: scale(1.02); }
+        .texto-creditos { font-size: 0.8rem; color: var(--text-light); }
+
+        /* Responsividade */
+        @media (max-width: 700px) {
+            .tabela-header { display: none; }
+            .item-aluno { grid-template-columns: 40px 1fr auto auto; grid-template-areas: "pos nome nota erro" "pos serie tempo tempo"; gap: 5px; padding: 15px; }
+            .posicao { grid-area: pos; align-self: center; }
+            .info-nome { grid-area: nome; }
+            .info-nota { grid-area: nota; text-align: right; }
+            .info-erro { grid-area: erro; text-align: right; margin-left: 10px; }
+            .info-serie { grid-area: serie; align-self: center; }
+            .info-tempo { grid-area: tempo; text-align: right; font-size: 0.8rem; }
+            .area-filtros-topo { gap: 10px; justify-content: center; }
+            .btn-filtro-trigger, .btn-finalizar, .btn-liberar { width: 100%; min-width: auto; }
+        }
+
+        /* =======================================================
+           ✨ DESIGN DOS MODAIS UNIFICADOS
+           ======================================================= */
+        
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background-color: rgba(255, 255, 255, 0.6); 
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            display: none; justify-content: center; align-items: center; z-index: 1000; 
+            animation: fadeIn 0.3s ease; 
+        }
+        .modal-overlay.visivel { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Wrapper para modais lado a lado */
+        .modais-wrapper {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 900px;
+            pointer-events: none; 
+            padding: 20px;
+        }
+        
+        .modal-box-aluno, .modal-box-lista {
+            background: white; 
+            padding: 30px; 
+            border-radius: 24px; 
+            text-align: center; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.1); 
+            pointer-events: auto; 
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.05);
+            animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes popIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .modal-box-aluno { width: 340px; flex-shrink: 0; }
+        .modal-box-lista { width: 420px; display: none; height: 500px; flex-direction: column; }
+        .modal-box-lista.ativo { display: flex; }
+        .titulo-container { display: flex; flex-direction: column; gap: 6px; }
+
+        .modal-titulo { font-size: 1.4rem; font-weight: 800; margin-bottom: 5px; color: #1d1d1f; letter-spacing: -0.5px; }
+        .modal-sub { font-size: 0.95rem; color: #86868b; margin-bottom: 20px; }
+        
+        .modal-close-abs { 
+            position: absolute; top: 15px; right: 15px; 
+            background: #f5f5f7; border: none; 
+            width: 32px; height: 32px; border-radius: 50%; 
+            cursor: pointer; color: #86868b; font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .modal-close-abs:hover { background: #e5e5ea; color: #1d1d1f; }
+
+        /* --- BOTÕES PÍLULA (Estilo Liberar/Finalizar) --- */
+        .btn-pilula-acao {
+            background-color: white; 
+            color: var(--text-main); 
+            padding: 12px 20px; 
+            border-radius: 50px; 
+            border: 1px solid #e5e5ea; 
+            font-size: 0.95rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            gap: 10px; 
+            transition: all 0.2s ease; 
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .btn-pilula-acao:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        
+        /* Cores Específicas Visualização */
+        .btn-pilula-acao.acerto { color: var(--success); border-color: rgba(52, 199, 89, 0.3); }
+        .btn-pilula-acao.acerto:hover { background-color: var(--success); color: white; border-color: var(--success); }
+
+        .btn-pilula-acao.erro { color: var(--error); border-color: rgba(255, 59, 48, 0.3); }
+        .btn-pilula-acao.erro:hover { background-color: var(--error); color: white; border-color: var(--error); }
+        
+        /* Cores Específicas Ação Individual */
+        .btn-pilula-acao.acao-extra { border-style: dashed; }
+        .btn-pilula-acao.acao-extra:hover { border-style: solid; }
+
+        .badge-count { 
+            background: rgba(0,0,0,0.05); 
+            padding: 4px 10px; 
+            border-radius: 20px; 
+            font-size: 0.85rem; 
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+        .btn-pilula-acao:hover .badge-count { 
+            background: rgba(0,0,0,0.05); 
+            padding: 4px 10px; 
+            border-radius: 20px; 
+            font-size: 0.85rem; 
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        /* Divisor */
+        .modal-divisor {
+            height: 1px; background-color: #f0f0f5; width: 100%; margin: 20px 0; position: relative;
+        }
+        .modal-divisor span {
+            position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+            background: white; padding: 0 10px; color: #c7c7cc; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+        }
+
+        /* Lista de Questões */
+        .modal-lista-scroll { flex: 1; overflow-y: auto; text-align: left; padding-right: 5px; margin-top: 15px; }
+        
+        .item-questao {
+            background: white; border: 1px solid #e5e5ea; 
+            border-radius: 14px; padding: 16px; margin-bottom: 12px; 
+            cursor: pointer; transition: all 0.2s ease;
+        }
+        
+        .item-questao:hover { transform: scale(1.02); }
+
+        .q-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #86868b; }
+        .q-texto { font-size: 0.95rem; color: #1d1d1f; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* Modais Admin */
+        .modal-box-admin {
+            background: white; padding: 30px; border-radius: 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 90%; max-width: 400px;
+        }
+        .input-senha { width: 100%; padding: 15px; border: 1px solid #d2d2d7; border-radius: 12px; font-size: 1.1rem; margin-bottom: 20px; outline: none; text-align: center; transition: border 0.2s; background-color: #fafafa; }
+        .input-senha:focus { border-color: var(--accent); background: white; }
+        
+        .btn-reset-opcao { padding: 15px; border-radius: 14px; border: none; font-size: 1rem; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: all 0.2s; background-color: #f5f5f7; color: #1d1d1f; margin-bottom: 8px; width: 100%; }
+        .btn-reset-opcao:hover { background-color: #e5e5ea; }
+        
+        .botoes-confirmacao { display: flex; gap: 10px; justify-content: center; }
+        .btn-conf-sim { background-color: var(--error); color: white; flex: 1; padding: 12px; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; }
+        .btn-conf-liberar { background-color: var(--success); color: white; flex: 1; padding: 12px; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; }
+        .btn-conf-nao { background-color: #f5f5f7; color: #1d1d1f; flex: 1; padding: 12px; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; }
+
+        @media (max-width: 800px) {
+            .modais-wrapper { flex-direction: column; align-items: center; padding-top: 60px; overflow-y: auto; max-height: 100vh; justify-content: flex-start; }
+            .modal-box-lista { width: 340px; }
+        }
+
+    </style>
+</head>
+<body>
+    <div id="containerNotificacoes" class="notificacao-container"></div>
+
+    <div class="container">
+        <header>
+            <div class="titulo-container">
+                <a href="index.html" class="btn-voltar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+                    Voltar para Atividade
+                </a>
+                <h1 class="titulo-pagina">Painel da Turma</h1>
+            </div>
+
+            <div class="filtro-data-container">
+                <span style="font-size:0.8rem; color:var(--text-light); font-weight:600;">Data:</span>
+                <input type="date" id="filtroData" class="input-data">
+            </div>
+        </header>
+
+        <div class="area-filtros-topo">
+            <div class="dropdown-wrapper" id="dropAno">
+                <button class="btn-filtro-trigger" onclick="toggleDropdown('dropAno')">
+                    <span id="textoAno">Ano: Todos</span>
+                    <svg class="seta-dropdown" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <div class="dropdown-menu">
+                    <button class="opcao-item selecionado" onclick="selecionarOpcao('ano', 'todas', 'Todos', this)">Todos</button>
+                    <button class="opcao-item" onclick="selecionarOpcao('ano', '6º Ano', '6º Ano', this)">6º Ano</button>
+                    <button class="opcao-item" onclick="selecionarOpcao('ano', '7º Ano', '7º Ano', this)">7º Ano</button>
+                    <button class="opcao-item" onclick="selecionarOpcao('ano', '8º Ano', '8º Ano', this)">8º Ano</button>
+                    <button class="opcao-item" onclick="selecionarOpcao('ano', '9º Ano', '9º Ano', this)">9º Ano</button>
+                </div>
+            </div>
+
+            <div class="dropdown-wrapper" id="dropTurma">
+                <button class="btn-filtro-trigger" onclick="toggleDropdown('dropTurma')">
+                    <span id="textoTurma">Turma: Todas</span>
+                    <svg class="seta-dropdown" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <div class="dropdown-menu">
+                    <button class="opcao-item selecionado" onclick="selecionarOpcao('turma', 'todas', 'Todas', this)">Todas</button>
+                    <button class="opcao-item" onclick="selecionarOpcao('turma', 'A', 'Turma A', this)">Turma A</button>
+                    <button class="opcao-item" onclick="selecionarOpcao('turma', 'B', 'Turma B', this)">Turma B</button>
+                    <button class="opcao-item" onclick="selecionarOpcao('turma', 'C', 'Turma C', this)">Turma C</button>
+                </div>
+            </div>
+
+            <button class="btn-filtro-trigger btn-liberar" onclick="abrirModalLiberar()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Liberar Atividade
+            </button>
+
+            <button class="btn-filtro-trigger btn-finalizar" onclick="abrirModalFinalizar()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+                Finalizar Atividade
+            </button>
+        </div>
+
+        <div class="grid-resumo">
+            <div class="card-resumo">
+                <span class="card-titulo">Total de Alunos</span>
+                <span class="card-valor" id="totalAcessos">0</span>
+            </div>
+            <div class="card-resumo">
+                <span class="card-titulo">Média da Turma</span>
+                <span class="card-valor" id="mediaAcertos" style="color: var(--accent)">0.0</span>
+            </div>
+            <div class="card-resumo">
+                <span class="card-titulo">Melhor Desempenho</span>
+                <span class="card-valor" id="melhorAluno">-</span>
+            </div>
+        </div>
+
+        <div class="painel-ranking">
+            <div class="tabela-header">
+                <div class="col-pos">#</div>
+                <div class="col-aluno">Aluno</div>
+                <div class="col-serie">Série</div>
+                <div class="col-nota">Acertos</div>
+                <div class="col-erro">Erros</div>
+                <div class="col-tempo">Horário</div>
+            </div>
+            <ul id="listaRanking" class="lista-alunos">
+                <li style="padding:40px; text-align:center; color:var(--text-light)">Carregando dados...</li>
+            </ul>
+        </div>
+
+        <div class="rodape-gestao">
+            <button class="btn-acao-rodape" onclick="abrirModalReset()">
+                Gerenciar Histórico
+            </button>
+            <div style="display:flex; flex-direction:column; gap:5px;">
+                <span class="texto-creditos">Área restrita ao professor</span>
+                <span class="texto-creditos" style="font-weight:600; color:var(--text-main)">Desenvolvido por Gilberto Fernandes - Matemática</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalUnificadoOverlay" class="modal-overlay">
+        <div class="modais-wrapper">
+            
+            <div class="modal-box-aluno">
+                <button class="modal-close-abs" onclick="fecharModalUnificado()">✕</button>
+                <div class="modal-titulo" id="alunoModalNome">Nome</div>
+                <div class="modal-sub" id="alunoModalInfo">Turma • Ano</div>
+
+                <button id="btnAcertosAluno" class="btn-pilula-acao acerto">
+                    <span style="display:flex; align-items:center; gap:8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                        Ver Acertos
+                    </span>
+                    <span id="btnAcertosAlunoNum" class="badge-count">0</span>
+                </button>
+
+                <button id="btnErrosAluno" class="btn-pilula-acao erro">
+                    <span style="display:flex; align-items:center; gap:8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        Ver Erros
+                    </span>
+                    <span id="btnErrosAlunoNum" class="badge-count">0</span>
+                </button>
+
+                <div id="alunoModalCodigo" class="modal-sub" style="margin: 6px 0 14px 0; font-weight:700; color:#8e8e93;">Código: -</div>
+
+            </div>
+
+            <div id="painelLista" class="modal-box-lista">
+                <div class="modal-titulo" id="listaModalTitulo">Questões</div>
+                <div class="modal-sub">Clique na questão para abrir completa</div>
+                <div id="listaQuestoes" class="modal-lista-scroll"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="modalReset" class="modal-overlay">
+        <div class="modal-box-admin">
+            <div class="modal-titulo">Limpar Dados</div>
+            <div class="modal-desc">Selecione o período para apagar.</div>
+            <div class="grid-botoes-reset">
+                <button class="btn-reset-opcao" onclick="prepararReset('hoje')">Limpar registros de <b>Hoje</b></button>
+                <button class="btn-reset-opcao" onclick="prepararReset('mes')">Limpar registros do <b>Mês</b></button>
+                <button class="btn-reset-opcao" style="color:var(--error)" onclick="prepararReset('tudo')">🗑️ Resetar <b>Tudo</b></button>
+            </div>
+            <button class="btn-cancelar" onclick="fecharModalReset()">Cancelar</button>
+        </div>
+    </div>
+
+    <div id="modalSenhaAction" class="modal-overlay">
+        <div class="modal-box-admin">
+            <div class="modal-titulo">Confirmar</div>
+            <div class="modal-desc" id="descSenhaAction">Digite a senha para confirmar.</div>
+            <input type="password" id="inputSenhaAction" class="input-senha" placeholder="Senha do Professor" inputmode="numeric">
+            <div class="botoes-confirmacao">
+                <button class="btn-reset-opcao btn-conf-nao" onclick="fecharModalSenhaAction()">Cancelar</button>
+                <button class="btn-reset-opcao btn-conf-sim" onclick="executarResetConfirmado()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalFinalizar" class="modal-overlay">
+        <div class="modal-box-admin">
+            <div class="modal-titulo" style="color:var(--error)">Finalizar Atividade?</div>
+            <div class="modal-desc">Isso bloqueará a tela dos alunos.</div>
+            <input type="password" id="inputSenhaFinalizar" class="input-senha" placeholder="Senha do Professor" inputmode="numeric">
+            <div class="botoes-confirmacao">
+                <button class="btn-reset-opcao btn-conf-nao" onclick="fecharModalFinalizar()">Cancelar</button>
+                <button class="btn-reset-opcao btn-conf-sim" onclick="confirmarFinalizar()">Finalizar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalLiberar" class="modal-overlay">
+        <div class="modal-box-admin">
+            <div class="modal-titulo" style="color:var(--success)">Liberar Atividade?</div>
+            <div class="modal-desc">Todos poderão acessar novamente.</div>
+            <input type="password" id="inputSenhaLiberar" class="input-senha" placeholder="Senha do Professor" inputmode="numeric">
+            <div class="botoes-confirmacao">
+                <button class="btn-reset-opcao btn-conf-nao" onclick="fecharModalLiberar()">Cancelar</button>
+                <button class="btn-reset-opcao btn-conf-liberar" onclick="confirmarLiberar()">Liberar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Twemoji (deixa 🥇🥈🥉 mais "clean" e consistente entre PCs) -->
+    <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, set, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        
+        const firebaseConfig = {
+          apiKey: "AIzaSyCHfcVVxma4M1LbYO5M-oMX4fnlaNUPi24",
+          authDomain: "fracoesbanco.firebaseapp.com",
+          databaseURL: "https://fracoesbanco-default-rtdb.firebaseio.com",
+          projectId: "fracoesbanco",
+          storageBucket: "fracoesbanco.firebasestorage.app",
+          messagingSenderId: "873014790580",
+          appId: "1:873014790580:web:09b340386d10d7f88a4ae1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        /* --- FUNÇÕES GLOBAIS --- */
+        
+        function toISODate(v){
+            if (!v) return "";
+            try{
+                if (typeof v === "number") return new Date(v).toISOString().slice(0,10);
+                if (typeof v === "string"){
+                    // timestamp em string?
+                    if (/^\d+$/.test(v)) return new Date(Number(v)).toISOString().slice(0,10);
+                    // ISO ou algo parseável
+                    const d = new Date(v);
+                    if (!isNaN(d.getTime())) return d.toISOString().slice(0,10);
+                    return "";
+                }
+                // firebase timestamp {seconds, nanoseconds} ou {toMillis()}
+                if (typeof v === "object"){
+                    if (typeof v.toMillis === "function") return new Date(v.toMillis()).toISOString().slice(0,10);
+                    if ("seconds" in v) return new Date(v.seconds*1000).toISOString().slice(0,10);
+                }
+            }catch(e){}
+            return "";
+        }
+
+function normalizarLista(v){
+            if (Array.isArray(v)) return v;
+            if (!v) return [];
+            if (typeof v === 'string') return [v];
+            if (typeof v === 'object') {
+                try { return Object.values(v).filter(x=>x!==null && x!==undefined); } catch(e) { return []; }
+            }
+            return [];
+        }
+
+        // Banco de Questões (o arquivo NÃO é módulo; ele define window.questoesIntro / window.questoesComp)
+        let questoesIntro = [];
+        let questoesComp  = [];
+
+        function carregarBancoQuestoes(){
+            const candidatos = [
+                "./banco_questoes.js",
+                "./banco_questoes (25).js",
+                "./banco_questoes (24).js",
+                "./banco_questoes (23).js",
+                "./banco_questoes (22).js",
+                "./banco_questoes (21).js",
+                "./banco_questoes(25).js",
+                "./banco_questoes(24).js",
+                "./banco_questoes(23).js",
+                "./banco_questoes(22).js",
+                "./banco_questoes(21).js"
+            ];
+
+            return new Promise((resolve) => {
+                const tentar = (i) => {
+                    if (i >= candidatos.length){
+                        questoesIntro = Array.isArray(window.questoesIntro) ? window.questoesIntro : [];
+                        questoesComp  = Array.isArray(window.questoesComp)  ? window.questoesComp  : [];
+                        resolve(false);
+                        return;
+                    }
+
+                    const src = candidatos[i];
+
+                    // se já existe na página, só reaproveita
+                    const ja = [...document.scripts].some(sc => (sc.getAttribute("src") || "") === src);
+                    if (ja){
+                        questoesIntro = Array.isArray(window.questoesIntro) ? window.questoesIntro : [];
+                        questoesComp  = Array.isArray(window.questoesComp)  ? window.questoesComp  : [];
+                        resolve(true);
+                        return;
+                    }
+
+                    const sc = document.createElement("script");
+                    sc.src = src;
+                    sc.async = true;
+                    sc.onload = () => {
+                        questoesIntro = Array.isArray(window.questoesIntro) ? window.questoesIntro : [];
+                        questoesComp  = Array.isArray(window.questoesComp)  ? window.questoesComp  : [];
+                        resolve(true);
+                    };
+                    sc.onerror = () => tentar(i+1);
+                    document.head.appendChild(sc);
+                };
+
+                tentar(0);
+            });
+        }
+
+        // Carrega o banco assim que o ranking abrir
+        carregarBancoQuestoes().then((ok) => {
+            if (!ok) console.warn("Banco de questões não encontrado. Confira se o arquivo está na mesma pasta do ranking.");
+        });
+
+
+        let todosRegistros = [];
+        let filtroAnoAtual = "todas";
+        let filtroTurmaAtual = "todas";
+        let tipoResetPendente = null;
+
+        /* --- FIREBASE DATA --- */
+        const alunosRef = ref(db, 'alunos');
+        onValue(alunosRef, (snapshot) => {
+            const dados = snapshot.val();
+            todosRegistros = [];
+            if (dados) {
+                Object.keys(dados).forEach(key => {
+                    const aluno = dados[key];
+                    let horaFormatada = "--:--";
+                    if(aluno.entrouEm) {
+                        const d = new Date(aluno.entrouEm);
+                        horaFormatada = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    }
+                    todosRegistros.push({
+                        id: key,
+                        nome: aluno.nome,
+                        serie: aluno.serie,
+                        acertos: aluno.acertosTotal ?? (aluno.acertos || 0),
+                        erros: aluno.errosTotal ?? (aluno.erros || 0),
+                        listaAcertos: normalizarLista(aluno.listaAcertos),
+                        listaErros: normalizarLista(aluno.listaErros),
+                        codigoDispositivo: aluno.codigoDispositivo || '',
+                        data: toISODate(aluno.entrouEm),
+                        hora: horaFormatada,
+                        timestamp: aluno.entrouEm ? new Date(aluno.entrouEm).getTime() : 0,
+                    });
+                });
+                
+                const agora = new Date().getTime();
+                const ultimosNotificados = JSON.parse(sessionStorage.getItem('notificados')) || [];
+                todosRegistros.forEach(a => {
+                    if (agora - a.timestamp < 20000 && !ultimosNotificados.includes(a.id)) {
+                        mostrarNotificacao(a.nome + " entrou na atividade");
+                        ultimosNotificados.push(a.id);
+                    }
+                });
+                sessionStorage.setItem('notificados', JSON.stringify(ultimosNotificados));
+            }
+            renderizarRanking();
+        });
+
+        /* --- SISTEMA DE RANKING --- */
+        const listaEl = document.getElementById('listaRanking');
+        const filtroData = document.getElementById('filtroData');
+        filtroData.valueAsDate = new Date();
+        filtroData.addEventListener('change', () => renderizarRanking());
+
+        window.renderizarRanking = function() {
+            const dataSel = filtroData.value;
+            let filtrados = todosRegistros.filter(item => {
+                const bateData = item.data === dataSel;
+                const bateAno = filtroAnoAtual === 'todas' ? true : (item.serie || '').includes(filtroAnoAtual);
+                const bateTurma = filtroTurmaAtual === 'todas' ? true : (item.serie || '').endsWith(" " + filtroTurmaAtual);
+                return bateData && bateAno && bateTurma;
+            });
+            filtrados.sort((a, b) => (b.acertos || 0) - (a.acertos || 0));
+
+            document.getElementById('totalAcessos').innerText = filtrados.length;
+            let totalAcertos = filtrados.reduce((sum, item) => sum + (item.acertos || 0), 0);
+            let media = filtrados.length ? (totalAcertos / filtrados.length).toFixed(1) : "0.0";
+            document.getElementById('mediaAcertos').innerText = media;
+            document.getElementById('melhorAluno').innerText = filtrados.length > 0 ? filtrados[0].nome : "-";
+
+            listaEl.innerHTML = "";
+            if (filtrados.length === 0) { listaEl.innerHTML = `<li style="padding:40px; text-align:center; color:var(--text-light)">Aguardando dados...</li>`; return; }
+
+            filtrados.forEach((aluno, index) => {
+                const pos = index + 1;
+                let medalha = "";
+                if (pos === 1) medalha = "🥇";
+                else if (pos === 2) medalha = "🥈";
+                else if (pos === 3) medalha = "🥉";
+                
+                const li = document.createElement('li');
+                li.className = `item-aluno`;
+                li.innerHTML = `
+                    <div class="posicao col-pos">${pos}</div>
+                    <div class="info-nome col-aluno">${medalha ? `<span class="medalha">${medalha}</span>` : `<span class="medalha"></span>`}${aluno.nome || '-'}</div>
+                    <div class="col-serie"><span class="info-serie">${aluno.serie || '-'}</span></div>
+                    <div class="info-nota col-nota">${aluno.acertos || 0} pts</div>
+                    <div class="info-erro col-erro">${aluno.erros || 0} err</div>
+                    <div class="info-tempo col-tempo">${aluno.hora || '--:--'}</div>
+                `;
+                li.onclick = () => abrirModalAluno(aluno);
+                listaEl.appendChild(li);
+            });
+
+            // Renderiza emojis com Twemoji (mais "clean") se disponível
+            if (window.twemoji) {
+                twemoji.parse(listaEl, { folder: 'svg', ext: '.svg' });
+            }
+        }
+
+        /* --- SISTEMA DE MODAIS (CLEAN) --- */
+        function toggleModal(id, show) {
+            const el = document.getElementById(id);
+            if(show) el.classList.add('visivel');
+            else el.classList.remove('visivel');
+        }
+
+        // Modal Aluno + Lista Lado a Lado
+        let alunoSelecionado = null;
+        
+        window.abrirModalAluno = (aluno) => {
+            alunoSelecionado = aluno;
+            document.getElementById('alunoModalNome').textContent = aluno.nome;
+            document.getElementById('alunoModalInfo').textContent = (aluno.serie || "Série n/a");
+            document.getElementById('alunoModalCodigo').textContent = `Código: ${aluno.codigoDispositivo || '- sem código -'}`;
+            document.getElementById('btnAcertosAlunoNum').textContent = aluno.acertos;
+            document.getElementById('btnErrosAlunoNum').textContent = aluno.erros;
+            
+            document.getElementById('painelLista').style.display = 'none';
+            toggleModal('modalUnificadoOverlay', true);
+        };
+        
+        window.fecharModalUnificado = () => toggleModal('modalUnificadoOverlay', false);
+
+        document.getElementById('btnAcertosAluno').onclick = () => abrirListaQuestoesModal('acertos');
+        document.getElementById('btnErrosAluno').onclick = () => abrirListaQuestoesModal('erros');
+        function getQuestaoPorId(qId){
+            // Aceita:
+            // - "intro-0" / "complementar-3"
+            // - "comp-2", "c-2", "introducao-1", "introI-5"
+            // - número (0, 1, 2...) ou string numérica ("12")
+            // - objeto {modo:'intro'|'complementar', idx:0} ou {tipo:'comp', index:3}
+            let raw = qId;
+
+            // objeto
+            if (raw && typeof raw === "object" && !Array.isArray(raw)){
+                const modoObj = String(raw.modo ?? raw.tipo ?? raw.modulo ?? raw.fase ?? "").toLowerCase().trim();
+                const idxObj  = raw.idx ?? raw.index ?? raw.indice ?? raw.i ?? raw.n;
+                raw = modoObj ? `${modoObj}-${idxObj}` : String(idxObj ?? "");
+            }
+
+            const sraw = String(raw ?? "").trim().toLowerCase();
+
+            // extrai indice (último número encontrado)
+            const nums = sraw.match(/\d+/g);
+            const idx = nums ? Number(nums[nums.length - 1]) : 0;
+
+            // tenta inferir modo
+            let modo = "intro";
+            if (/(comp|complementar|c\b)/.test(sraw)) modo = "complementar";
+            if (/(intro|introducao|introdução|i\b|introi)/.test(sraw)) modo = "intro";
+
+            // se era só número e ambos existem, escolhe pelo contexto:
+            const introLen = Array.isArray(questoesIntro) ? questoesIntro.length : 0;
+            const compLen  = Array.isArray(questoesComp)  ? questoesComp.length  : 0;
+
+            if (/^\d+$/.test(sraw)){
+                const inIntro = idx >= 0 && idx < introLen;
+                const inComp  = idx >= 0 && idx < compLen;
+
+                if (inIntro && !inComp) modo = "intro";
+                else if (!inIntro && inComp) modo = "complementar";
+                else if (inIntro && inComp) modo = "complementar"; // desempate (geralmente os registros são da parte complementar)
+            }
+
+            let q = null;
+            let titulo = null;
+            let canonicalId = null;
+
+            if (modo === "intro") {
+                q = (Array.isArray(questoesIntro) ? questoesIntro : [])[idx];
+                titulo = "Introdução";
+                canonicalId = `intro-${idx}`;
+            } else {
+                q = (Array.isArray(questoesComp) ? questoesComp : [])[idx];
+                titulo = "Complementar";
+                canonicalId = `complementar-${idx}`;
+            }
+
+            return { modo, idx, q, titulo, canonicalId, originalId: qId };
+        }
+
+        
+        // ==========================
+        // 🧩 Frações verticais no texto
+        // ==========================
+        function formatarFracoesHTML(str){
+            const s = String(str ?? '');
+            // evita mexer em tags já existentes
+            return s.replace(/(\d+)\s*\/\s*(\d+)/g, (m, a, b) => {
+                return `<span class="fracao"><span>${a}</span><span>${b}</span></span>`;
+            });
+        }
+
+        function htmlPerguntaParaTextoComBarras(html){
+            // Converte frações já em HTML (<div class="fracao">4/9</div>) em texto "4/9" para truncar certinho.
+            const div = document.createElement("div");
+            div.innerHTML = String(html ?? "");
+
+            div.querySelectorAll(".fracao").forEach(fr => {
+                const num = (fr.querySelector(".num")?.textContent || "").trim();
+                const den = (fr.querySelector(".den")?.textContent || "").trim();
+                const txt = document.createTextNode(`${num}/${den}`);
+                fr.replaceWith(txt);
+            });
+
+            return (div.textContent || div.innerText || "").replace(/\s+/g, " ").trim();
+        }
+
+        function truncarTexto(txt, max=90){
+            const s = String(txt ?? "").replace(/\s+/g, " ").trim();
+            if (s.length <= max) return s;
+            return s.slice(0, max - 1).trimEnd() + "…";
+        }
+
+        // ===========================================
+        // 📌 Modal lateral: lista de acertos/erros
+        // ===========================================
+        function abrirListaQuestoesModal(tipo){
+            if (!alunoSelecionado) return;
+
+            const lista = (tipo === "acertos") ? (alunoSelecionado.listaAcertos || []) : (alunoSelecionado.listaErros || []);
+            const titulo = (tipo === "acertos") ? "Questões acertadas" : "Questões com erro";
+            const cor = (tipo === "acertos") ? "#34c759" : "#ff3b30";
+
+            const painel = document.getElementById('painelLista');
+            const tituloEl = document.getElementById('listaModalTitulo');
+            const listaEl = document.getElementById('listaQuestoes');
+
+            tituloEl.textContent = titulo;
+            painel.classList.add('ativo');
+            painel.style.display = 'flex';
+            listaEl.innerHTML = "";
+
+            if (!Array.isArray(lista) || lista.length === 0) {
+                listaEl.innerHTML = `<div style="padding:16px; color:#86868b; text-align:center;">Nenhuma questão registrada.</div>`;
+                return;
+            }
+
+            // Ordena por modo/índice pra ficar organizado
+            const ordenada = [...lista].sort((a,b)=>{
+                const [ma,ia]=String(a).split("-"); const [mb,ib]=String(b).split("-");
+                if (ma !== mb) return ma.localeCompare(mb);
+                return (Number(ia)||0) - (Number(ib)||0);
+            });
+
+            ordenada.forEach((id) => {
+                const info = getQuestaoPorId(id);
+                const perguntaHTML = info.q ? (info.q.pergunta ?? info.q.enunciado ?? info.q.texto ?? '') : '';
+                const textoBase = perguntaHTML ? htmlPerguntaParaTextoComBarras(perguntaHTML) : '';
+                const textoTruncado = textoBase ? truncarTexto(textoBase, 90) : 'Questão não encontrada.';
+                const texto = formatarFracoesHTML(textoTruncado);
+                const item = document.createElement('div');
+                item.className = 'item-questao';
+                // hover verde para acerto e vermelho para erro
+                item.style.setProperty('--hoverColor', cor);
+                item.innerHTML = `
+                    <div class="q-header">
+                        <span>${info.titulo || 'Questão'} • Q${(info.idx ?? 0) + 1}</span>
+                        <span style="color:${cor}">${tipo === 'acertos' ? 'ACERTO' : 'ERRO'}</span>
+                    </div>
+                    <div class="q-texto">${texto}</div>
+                `;
+
+               // No arquivo ranking.html, na função abrirListaQuestoesModal
+// Altere a linha do window.open para:
+
+// No ranking.html, na função abrirListaQuestoesModal, substitua o click handler:
+
+item.addEventListener('click', () => {
+    const status = tipo === 'acertos' ? 'acerto' : 'erro';
+    const url = `questao.html?id=${encodeURIComponent(info.canonicalId || id)}&status=${status}`;
+    console.log('Abrindo questão:', url); // para debug
+    window.open(url, "_blank");
+});
+
+                // Ajusta hover conforme tipo (sem mexer no CSS global do site)
+                item.addEventListener('mouseenter', () => {
+                    item.style.backgroundColor = cor;
+                    item.style.borderColor = cor;
+                    item.style.transform = 'scale(1.02)';
+                    item.style.boxShadow = (tipo === 'acertos')
+                        ? '0 5px 15px rgba(52, 199, 89, 0.3)'
+                        : '0 5px 15px rgba(255, 59, 48, 0.25)';
+                    item.querySelectorAll('*').forEach(el => el.style.color = 'white');
+                });
+                item.addEventListener('mouseleave', () => {
+                    item.style.backgroundColor = 'white';
+                    item.style.borderColor = '#e5e5ea';
+                    item.style.transform = '';
+                    item.style.boxShadow = '';
+                    // restaura cores padrão
+                    const header = item.querySelector('.q-header');
+                    const textoEl = item.querySelector('.q-texto');
+                    header.style.color = '#86868b';
+                    textoEl.style.color = '#1d1d1f';
+                    // restaura o badge ACERTO/ERRO
+                    header.querySelectorAll('span')[1].style.color = cor;
+                });
+
+                listaEl.appendChild(item);
+            });
+        }
+
+        /* --- OUTRAS AÇÕES (Senha, Reset) --- */
+        window.abrirModalFinalizar = () => { document.getElementById('inputSenhaFinalizar').value = ''; toggleModal('modalFinalizar', true); }
+        window.fecharModalFinalizar = () => toggleModal('modalFinalizar', false);
+        window.confirmarFinalizar = function() {
+            if (document.getElementById('inputSenhaFinalizar').value !== '4241') { alert('Senha incorreta!'); return; }
+            fecharModalFinalizar();
+            set(ref(db, 'status_atividade'), { comando: 'finalizar', data: new Date().toISOString() });
+            mostrarNotificacao("Atividade encerrada!", 'alerta');
+        };
+
+        window.abrirModalLiberar = () => { document.getElementById('inputSenhaLiberar').value = ''; toggleModal('modalLiberar', true); }
+        window.fecharModalLiberar = () => toggleModal('modalLiberar', false);
+        window.confirmarLiberar = function() {
+            if (document.getElementById('inputSenhaLiberar').value !== '4241') { alert('Senha incorreta!'); return; }
+            fecharModalLiberar();
+            set(ref(db, 'status_atividade'), { comando: 'liberado', data: new Date().toISOString() });
+            mostrarNotificacao("Atividade liberada!", 'sucesso');
+        };
+
+        window.abrirModalReset = () => toggleModal('modalReset', true);
+        window.fecharModalReset = () => toggleModal('modalReset', false);
+        window.prepararReset = function(tipo) {
+            tipoResetPendente = tipo;
+            fecharModalReset();
+            document.getElementById('inputSenhaAction').value = '';
+            document.getElementById('descSenhaAction').innerText = `Confirma apagar: ${tipo.toUpperCase()}?`;
+            toggleModal('modalSenhaAction', true);
+        }
+        window.fecharModalSenhaAction = () => toggleModal('modalSenhaAction', false);
+        window.executarResetConfirmado = function() {
+            if (document.getElementById('inputSenhaAction').value !== '4241') { alert('Senha incorreta!'); return; }
+            if (tipoResetPendente === 'tudo') {
+                remove(ref(db, 'alunos'));
+                set(ref(db, 'status_atividade'), { comando: 'liberado' });
+                alert("Reiniciado!");
+            } else if (tipoResetPendente === 'hoje') {
+                const hoje = new Date().toISOString().split('T')[0];
+                todosRegistros.forEach(aluno => { if (aluno.data === hoje) remove(ref(db, 'alunos/' + aluno.id)); });
+                alert("Registros de hoje apagados.");
+            } else if (tipoResetPendente === 'mes') {
+                const mesAtual = new Date().toISOString().slice(0, 7);
+                todosRegistros.forEach(aluno => { if ((aluno.data || '').startsWith(mesAtual)) remove(ref(db, 'alunos/' + aluno.id)); });
+                alert("Registros do mês apagados.");
+            }
+            fecharModalSenhaAction();
+        }
+
+        window.toggleDropdown = function(id) {
+            const el = document.getElementById(id);
+            const estaAberto = el.classList.contains('aberto');
+            document.querySelectorAll('.dropdown-wrapper').forEach(d => d.classList.remove('aberto'));
+            if(!estaAberto) el.classList.add('aberto');
+        }
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown-wrapper')) document.querySelectorAll('.dropdown-wrapper').forEach(d => d.classList.remove('aberto'));
+        });
+        window.selecionarOpcao = function(tipo, valor, textoExibicao, elemento) {
+            const wrapperId = tipo === 'ano' ? 'dropAno' : 'dropTurma';
+            const wrapper = document.getElementById(wrapperId);
+            wrapper.querySelectorAll('.opcao-item').forEach(i => i.classList.remove('selecionado'));
+            elemento.classList.add('selecionado');
+            if(tipo === 'ano') { filtroAnoAtual = valor; document.getElementById('textoAno').innerText = 'Ano: ' + textoExibicao; } 
+            else { filtroTurmaAtual = valor; document.getElementById('textoTurma').innerText = 'Turma: ' + textoExibicao; }
+            wrapper.classList.remove('aberto');
+            renderizarRanking();
+        }
+
+
+        function mostrarNotificacao(texto, tipo = 'sucesso') {
+            const container = document.getElementById('containerNotificacoes');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            if(tipo === 'alerta') toast.classList.add('alerta');
+            toast.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"></circle>${tipo==='alerta'?'<line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>':'<path d="M8 12l2 2 4-4"/>'}</svg> ${texto}`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.classList.add('saindo'); setTimeout(() => toast.remove(), 500); }, 3000);
+        }
+    </script>
+</body>
+</html>

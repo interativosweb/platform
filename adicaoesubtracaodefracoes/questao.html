@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="pt-BR" oncontextmenu="return false;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Visualizar Questão</title>
+    <style>
+        /* Proteções visuais */
+        * {
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            -webkit-touch-callout: none !important;
+        }
+        
+        /* Permitir seleção apenas em campos de input (se houver) */
+        input, textarea {
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            -ms-user-select: text !important;
+            user-select: text !important;
+        }
+
+        :root {
+            --bg-page: #f5f5f7;
+            --text-main: #1d1d1f;
+            --text-light: #86868b;
+            --border-color: transparent;
+            --accent: #0071e3;
+            --success: #34c759;
+            --error: #ff3b30;
+            --radius: 12px;
+            --btn-gray-dark: #8e8e93;
+            --btn-gray-light: #aeb0b5;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Header */
+        .header-unificado {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 5px;
+        }
+
+        .top-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: white;
+            user-select: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            height: 44px;
+            white-space: nowrap;
+        }
+
+        .bg-verde-ativo { background-color: var(--success); }
+        .bg-cinza-claro { background-color: var(--btn-gray-light); }
+
+        /* Frações */
+        .fracao {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 4px;
+            font-size: 1.1em;
+        }
+        .fracao .num { border-bottom: 2px solid currentColor; padding: 0 5px; display: block; line-height: 1.2; font-weight: 700; }
+        .fracao .den { padding: 2px 5px 0 5px; display: block; line-height: 1.2; font-weight: 700; }
+
+        /* Layout Questão */
+        .secao-pergunta {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 50px;
+        }
+
+        .coluna-imagem {
+            flex: 1.2;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .img-atividade {
+            max-width: 100%;
+            max-height: 550px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: var(--radius);
+            pointer-events: none;
+            display: block;
+            margin: 0 auto 30px auto;
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
+        }
+
+        .coluna-conteudo { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+
+        .topo-info {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .enunciado {
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 30px;
+            line-height: 1.5;
+            color: var(--text-main);
+        }
+        .enunciado b { font-weight: 700; }
+
+        .grid-opcoes {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn-opcao {
+            background-color: transparent;
+            border: 1px solid #d2d2d7;
+            border-radius: var(--radius);
+            aspect-ratio: 1 / 1;
+            font-size: 1.4rem;
+            cursor: default;
+            transition: all 0.2s ease;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-opcao.certo { 
+            border-color: var(--success); 
+            color: var(--success); 
+            background-color: rgba(52, 199, 89, 0.1); 
+        }
+        .btn-opcao.errado { 
+            border-color: var(--error); 
+            color: var(--error); 
+            background-color: rgba(255, 59, 48, 0.1); 
+        }
+
+        .secao-resposta {
+            padding-top: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .titulo-feedback { font-size: 1.2rem; font-weight: 700; margin-bottom: 15px; display: block; }
+        .texto-resolucao { font-size: 1.1rem; line-height: 1.6; color: var(--text-main); margin-bottom: 20px; }
+
+        /* Badge de status - TAMANHO FIXO ABSOLUTO */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 320px; /* Largura fixa */
+            height: 44px; /* Altura fixa */
+            padding: 0 20px;
+            border-radius: 22px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+        
+        .status-badge.acerto {
+            background-color: rgba(52, 199, 89, 0.15);
+            color: var(--success);
+        }
+        
+        .status-badge.erro {
+            background-color: rgba(255, 59, 48, 0.15);
+            color: var(--error);
+        }
+
+        /* Rodapé */
+        .rodape {
+            margin-top: 40px;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+            padding-top: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn-voltar {
+            background-color: var(--btn-gray-dark);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-voltar:hover { background-color: var(--accent); transform: scale(1.02); }
+
+        .texto-creditos { font-size: 0.8rem; color: var(--text-light); }
+
+        /* Loading e Erro */
+        .loading, .erro {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        .erro { color: var(--error); }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e5e5ea;
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Responsividade */
+        @media (max-width: 900px) {
+            .secao-pergunta { flex-direction: column; }
+            .grid-opcoes { grid-template-columns: repeat(4, 1fr); }
+        }
+        
+        @media (max-width: 600px) {
+            .grid-opcoes { grid-template-columns: repeat(2, 1fr); }
+            .header-unificado { gap: 10px; }
+            .top-item { padding: 10px 15px; font-size: 0.8rem; }
+            .enunciado { font-size: 1.2rem; }
+            .status-badge { 
+                width: 280px; 
+                height: 40px; 
+                font-size: 0.75rem;
+                padding: 0 16px;
+            }
+        }
+
+        /* Overlay de proteção */
+        .protection-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            background: transparent;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="protection-overlay"></div>
+
+    <div id="appContainer" class="app-container">
+        <div class="header-unificado">
+            <div class="top-item bg-verde-ativo" id="btnModo">Visualizar Questão</div>
+            <div class="top-item bg-cinza-claro" id="btnInfo">Carregando...</div>
+        </div>
+
+        <div id="conteudo">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Carregando questão...</p>
+            </div>
+        </div>
+
+        <div class="rodape">
+            <button class="btn-voltar" onclick="voltar()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 18l-6-6 6-6"/>
+                </svg>
+                Painel do Professor
+            </button>
+            <span class="texto-creditos">Desenvolvido por Gilberto Fernandes - Matemática</span>
+        </div>
+    </div>
+
+    <!-- CARREGA O BANCO DE QUESTÕES PRIMEIRO (SÍNCRONO) -->
+    <script src="./banco_questoes.js"></script>
+
+    <script>
+        // ==========================================
+        // 🔒 PROTEÇÕES ANTI-CÓPIA
+        // ==========================================
+        
+        // Desabilitar menu de contexto (botão direito)
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // Bloquear teclas específicas
+        document.addEventListener('keydown', function(e) {
+            // F5 (Atualizar)
+            if (e.key === 'F5' || e.keyCode === 116) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            
+            // Ctrl+R (Atualizar)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.keyCode === 82)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            
+            // Ctrl+S (Salvar)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.keyCode === 83)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            
+            // Ctrl+P (Imprimir)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.keyCode === 80)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            
+            // Ctrl+U (Ver código fonte)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'u' || e.keyCode === 85)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            
+            // Ctrl+Shift+I / F12 (DevTools)
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'i' || e.keyCode === 73)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            
+            if (e.key === 'F12' || e.keyCode === 123) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            
+            // Ctrl+Shift+J (Console)
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'j' || e.keyCode === 74)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            
+            // Ctrl+Shift+C (Inspecionar elemento)
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'c' || e.keyCode === 67)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            
+            // Ctrl+A (Selecionar tudo)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.keyCode === 65)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            
+            // Ctrl+C (Copiar)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.keyCode === 67)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            
+            // Ctrl+X (Recortar)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'x' || e.keyCode === 88)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }, true);
+
+        // Bloquear seleção de texto via mouse
+        document.addEventListener('selectstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // Bloquear arrastar e soltar
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // Bloquear cópia via evento
+        document.addEventListener('copy', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // Bloquear corte
+        document.addEventListener('cut', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // Detectar saída da página
+        window.addEventListener('beforeunload', function(e) {
+            e.preventDefault();
+            e.returnValue = '';
+            return '';
+        });
+
+        // Desabilitar console
+        (function() {
+            var devtools = function() {};
+            devtools.toString = function() {
+                return 'DevTools';
+            };
+            
+            // Sobrescrever console.log e outros métodos
+            console.log = function() {};
+            console.warn = function() {};
+            console.error = function() {};
+            console.info = function() {};
+            console.debug = function() {};
+        })();
+
+        // Detectar DevTools aberto
+        let devtoolsOpen = false;
+        const element = new Image();
+        Object.defineProperty(element, 'id', {
+            get: function() {
+                devtoolsOpen = true;
+                throw new Error('DevTools detectado');
+            }
+        });
+
+        setInterval(function() {
+            devtoolsOpen = false;
+            console.dir(element);
+            if (devtoolsOpen) {
+                window.location.reload();
+            }
+        }, 1000);
+
+        // Bloquear visualização de código fonte via Ctrl+U (extra)
+        document.onkeydown = function(e) {
+            if (e.ctrlKey && (e.keyCode === 85)) {
+                return false;
+            }
+        };
+
+        // ==========================================
+        // 📌 VARIÁVEIS GLOBAIS
+        // ==========================================
+        let questaoAtual = null;
+        let modoAtual = 'intro';
+        let indexAtual = 0;
+
+        // ==========================================
+        // 📌 PARÂMETROS DA URL
+        // ==========================================
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                id: params.get('id'),
+                modo: params.get('modo'),
+                index: params.get('index'),
+                status: params.get('status')
+            };
+        }
+
+        // ==========================================
+        // 📌 VERIFICAR SE O BANCO CARREGOU
+        // ==========================================
+        function verificarBanco() {
+            // Tenta pegar as variáveis globais que o banco_questoes.js deve ter definido
+            const intro = window.questoesIntro || [];
+            const comp = window.questoesComp || [];
+            
+            console.log('Verificando banco:', {
+                intro: intro.length,
+                comp: comp.length,
+                windowQuestoesIntro: typeof window.questoesIntro,
+                windowQuestoesComp: typeof window.questoesComp
+            });
+            
+            return {
+                intro: intro,
+                comp: comp,
+                ok: intro.length > 0 || comp.length > 0
+            };
+        }
+
+        // ==========================================
+        // 📌 PROCESSAR QUESTÃO
+        // ==========================================
+        function processarQuestao() {
+            const params = getUrlParams();
+            console.log('Parâmetros URL:', params);
+            
+            // Verificar banco
+            const banco = verificarBanco();
+            if (!banco.ok) {
+                mostrarErro(`
+                    Não foi possível carregar o banco de questões.<br><br>
+                    <strong>Possíveis causas:</strong><br>
+                    • O arquivo banco_questoes.js não está na mesma pasta<br>
+                    • O arquivo está com nome diferente (ex: banco_questoes (26).js)<br>
+                    • O arquivo não define window.questoesIntro e window.questoesComp<br><br>
+                    <strong>Tentando carregar alternativas...</strong>
+                `);
+                
+                // Tenta carregar variações do nome do arquivo
+                tentarCarregarAlternativas();
+                return;
+            }
+
+            // Determinar modo e índice
+            let modo = 'intro';
+            let index = 0;
+
+            if (params.id) {
+                const partes = params.id.split('-');
+                if (partes.length >= 2) {
+                    const modoRaw = partes[0].toLowerCase();
+                    modo = modoRaw.includes('comp') ? 'complementar' : 'intro';
+                    index = parseInt(partes[1]);
+                    if (isNaN(index)) index = 0;
+                }
+            } else if (params.modo && params.index !== null) {
+                modo = params.modo.includes('comp') ? 'complementar' : 'intro';
+                index = parseInt(params.index) || 0;
+            }
+
+            modoAtual = modo;
+            indexAtual = index;
+
+            console.log('Modo:', modo, 'Índice:', index);
+            console.log('Questões disponíveis:', {
+                intro: banco.intro.length,
+                comp: banco.comp.length
+            });
+
+            // Selecionar array correto
+            const questoes = modo === 'intro' ? banco.intro : banco.comp;
+            
+            if (!questoes || questoes.length === 0) {
+                mostrarErro(`Nenhuma questão disponível no modo "${modo}".`);
+                return;
+            }
+
+            if (index < 0 || index >= questoes.length) {
+                mostrarErro(`Questão ${index + 1} não encontrada. O modo ${modo} tem ${questoes.length} questões.`);
+                return;
+            }
+
+            questaoAtual = questoes[index];
+            renderizarQuestao(questaoAtual, modo, index, params.status);
+        }
+
+        // ==========================================
+        // 📌 TENTAR CARREGAR ARQUIVOS ALTERNATIVOS
+        // ==========================================
+        function tentarCarregarAlternativas() {
+            const alternativas = [
+                './banco_questoes.js',
+                './banco_questoes (26).js',
+                './banco_questoes (25).js',
+                './banco_questoes (24).js',
+                './banco_questoes(26).js',
+                './banco_questoes(25).js',
+                './banco_questoes(24).js'
+            ];
+            
+            let tentativa = 0;
+            
+            function tentarProximo() {
+                if (tentativa >= alternativas.length) {
+                    mostrarErro('Nenhum arquivo de banco de questões encontrado. Verifique o nome do arquivo.');
+                    return;
+                }
+                
+                const src = alternativas[tentativa++];
+                console.log('Tentando carregar:', src);
+                
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = () => {
+                    setTimeout(() => {
+                        const banco = verificarBanco();
+                        if (banco.ok) {
+                            console.log('Sucesso com:', src);
+                            processarQuestao();
+                        } else {
+                            tentarProximo();
+                        }
+                    }, 100);
+                };
+                script.onerror = () => {
+                    tentarProximo();
+                };
+                document.head.appendChild(script);
+            }
+            
+            tentarProximo();
+        }
+
+        // ==========================================
+        // 📌 RENDERIZAR QUESTÃO
+        // ==========================================
+        function renderizarQuestao(questao, modo, index, status) {
+            const container = document.getElementById('conteudo');
+            
+            // Atualizar header - Removido o "I" de Introdução
+            const tipoTexto = modo === 'intro' ? 'Introdução' : 'Atividade Complementar';
+            document.getElementById('btnModo').textContent = tipoTexto;
+            document.getElementById('btnInfo').textContent = `Questão ${index + 1}`;
+
+            // Badge de status - MESMO TAMANHO ABSOLUTO
+            let statusHTML = '';
+            if (status === 'acerto') {
+                statusHTML = `
+                    <div class="status-badge acerto">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M20 6L9 17l-5-5"/>
+                        </svg>
+                        Questão Acertada pelo Aluno
+                    </div>
+                `;
+            } else if (status === 'erro') {
+                statusHTML = `
+                    <div class="status-badge erro">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M18 6L6 18M6 6l12 12"/>
+                        </svg>
+                        Questão Errada pelo Aluno
+                    </div>
+                `;
+            }
+
+            // Processar imagem
+            const imgSrc = questao.img || questao.imagem || '';
+            const imgScale = questao.imgScale || 1;
+            
+            // Processar enunciado
+            const enunciado = questao.pergunta || questao.enunciado || questao.texto || 'Sem enunciado';
+
+            // Processar alternativas
+            const opcoes = questao.opcoes || questao.alternativas || [];
+            const correta = questao.correta;
+            const corretasArray = Array.isArray(correta) ? correta : [correta];
+            
+            let opcoesHTML = '';
+            opcoes.forEach((opt, i) => {
+                let classe = '';
+                if (corretasArray.includes(i)) {
+                    classe = 'certo';
+                }
+                
+                opcoesHTML += `
+                    <div class="btn-opcao ${classe}">
+                        ${opt}
+                    </div>
+                `;
+            });
+
+            // Resolução
+            const resolucao = questao.resolucao || questao.explicacao || 'Sem resolução disponível.';
+
+            // Estilo da imagem com scale
+            const imgStyle = imgScale !== 1 ? `style="max-height: ${550 * imgScale}px;"` : '';
+
+            container.innerHTML = `
+                ${statusHTML}
+                
+                <section class="secao-pergunta">
+                    <div class="coluna-imagem">
+                        ${imgSrc ? `<img class="img-atividade" src="${imgSrc}" alt="Questão" ${imgStyle} ondragstart="return false;" oncontextmenu="return false;">` : ''}
+                    </div>
+
+                    <div class="coluna-conteudo">
+                        <div class="topo-info">
+                            <div>
+                                <span style="color:var(--success)">Resposta Correta</span>
+                            </div>
+                        </div>
+
+                        <div class="enunciado">${enunciado}</div>
+                        
+                        <div class="grid-opcoes">
+                            ${opcoesHTML}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="secao-resposta">
+                    <span class="titulo-feedback" style="color: var(--success)">Resolução</span>
+                    <div class="texto-resolucao">${resolucao}</div>
+                </section>
+            `;
+        }
+
+        // ==========================================
+        // 📌 MOSTRAR ERRO
+        // ==========================================
+        function mostrarErro(mensagem) {
+            document.getElementById('conteudo').innerHTML = `
+                <div class="erro">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 15px;">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <p>${mensagem}</p>
+                </div>
+            `;
+            document.getElementById('btnInfo').textContent = 'Erro';
+        }
+
+        // ==========================================
+        // 📌 VOLTAR
+        // ==========================================
+        function voltar() {
+            if (window.opener && !window.opener.closed) {
+                window.close();
+            } else {
+                // Tenta voltar para o ranking/painel
+                window.location.href = 'ranking.html';
+            }
+        }
+
+        // ==========================================
+        // 📌 INICIALIZAÇÃO
+        // ==========================================
+        // Aguarda um pouco para garantir que o script do banco carregou
+        setTimeout(() => {
+            processarQuestao();
+        }, 100);
+    </script>
+</body>
+</html>
