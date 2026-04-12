@@ -475,17 +475,22 @@
         import { getDatabase, ref, onValue, set, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         
         const firebaseConfig = {
-          apiKey: "AIzaSyCHfcVVxma4M1LbYO5M-oMX4fnlaNUPi24",
-          authDomain: "fracoesbanco.firebaseapp.com",
-          databaseURL: "https://fracoesbanco-default-rtdb.firebaseio.com",
-          projectId: "fracoesbanco",
-          storageBucket: "fracoesbanco.firebasestorage.app",
-          messagingSenderId: "873014790580",
-          appId: "1:873014790580:web:09b340386d10d7f88a4ae1"
+          apiKey: "AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",
+          authDomain: "profbase-5f9b0.firebaseapp.com",
+          databaseURL: "https://profbase-5f9b0-default-rtdb.firebaseio.com",
+          projectId: "profbase-5f9b0",
+          storageBucket: "profbase-5f9b0.firebasestorage.app",
+          messagingSenderId: "826412057766",
+          appId: "1:826412057766:web:729e6e24ce7587417fe067"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+
+        // ===== TURMA ID (from URL) =====
+        const urlParams = new URLSearchParams(window.location.search);
+        const turmaId = urlParams.get('turmaId') || '';
+        const basePath = turmaId ? 'turmas_fracoes/' + turmaId + '/' : '';
 
         /* --- FUNÇÕES GLOBAIS --- */
         
@@ -587,7 +592,7 @@ function normalizarLista(v){
         let tipoResetPendente = null;
 
         /* --- FIREBASE DATA --- */
-        const alunosRef = ref(db, 'alunos');
+        const alunosRef = ref(db, basePath + 'alunos');
         onValue(alunosRef, (snapshot) => {
             const dados = snapshot.val();
             todosRegistros = [];
@@ -889,7 +894,7 @@ item.addEventListener('click', () => {
         window.confirmarFinalizar = function() {
             if (document.getElementById('inputSenhaFinalizar').value !== '4241') { alert('Senha incorreta!'); return; }
             fecharModalFinalizar();
-            set(ref(db, 'status_atividade'), { comando: 'finalizar', data: new Date().toISOString() });
+            set(ref(db, basePath + 'status_atividade'), { comando: 'finalizar', data: new Date().toISOString() });
             mostrarNotificacao("Atividade encerrada!", 'alerta');
         };
 
@@ -898,7 +903,7 @@ item.addEventListener('click', () => {
         window.confirmarLiberar = function() {
             if (document.getElementById('inputSenhaLiberar').value !== '4241') { alert('Senha incorreta!'); return; }
             fecharModalLiberar();
-            set(ref(db, 'status_atividade'), { comando: 'liberado', data: new Date().toISOString() });
+            set(ref(db, basePath + 'status_atividade'), { comando: 'liberado', data: new Date().toISOString() });
             mostrarNotificacao("Atividade liberada!", 'sucesso');
         };
 
@@ -915,16 +920,16 @@ item.addEventListener('click', () => {
         window.executarResetConfirmado = function() {
             if (document.getElementById('inputSenhaAction').value !== '4241') { alert('Senha incorreta!'); return; }
             if (tipoResetPendente === 'tudo') {
-                remove(ref(db, 'alunos'));
-                set(ref(db, 'status_atividade'), { comando: 'liberado' });
+                remove(ref(db, basePath + 'alunos'));
+                set(ref(db, basePath + 'status_atividade'), { comando: 'liberado' });
                 alert("Reiniciado!");
             } else if (tipoResetPendente === 'hoje') {
                 const hoje = new Date().toISOString().split('T')[0];
-                todosRegistros.forEach(aluno => { if (aluno.data === hoje) remove(ref(db, 'alunos/' + aluno.id)); });
+                todosRegistros.forEach(aluno => { if (aluno.data === hoje) remove(ref(db, basePath + 'alunos/' + aluno.id)); });
                 alert("Registros de hoje apagados.");
             } else if (tipoResetPendente === 'mes') {
                 const mesAtual = new Date().toISOString().slice(0, 7);
-                todosRegistros.forEach(aluno => { if ((aluno.data || '').startsWith(mesAtual)) remove(ref(db, 'alunos/' + aluno.id)); });
+                todosRegistros.forEach(aluno => { if ((aluno.data || '').startsWith(mesAtual)) remove(ref(db, basePath + 'alunos/' + aluno.id)); });
                 alert("Registros do mês apagados.");
             }
             fecharModalSenhaAction();
