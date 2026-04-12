@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor de Fluxo — AlquiLab</title>
+<style>
+:root{--bg:#f5f5f7;--bg2:#fff;--text:#1d1d1f;--text2:#86868b;--accent:#0071e3;--success:#34c759;--error:#ff3b30;--warn:#ff9500;--purple:#af52de;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;user-select:none}
+
+/* ── HEADER ── */
+.header{height:54px;background:var(--bg2);border-bottom:1px solid #e5e5ea;display:flex;align-items:center;padding:0 16px;gap:12px;z-index:100;flex-shrink:0}
+.header .btn-back{background:none;border:none;font-size:.9rem;color:var(--accent);cursor:pointer;display:flex;align-items:center;gap:4px;font-weight:600}
+.header .btn-back:hover{text-decoration:underline}
+.header .flow-name{flex:1;font-size:1rem;font-weight:700;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.header .flow-name input{border:none;background:transparent;font:inherit;text-align:center;width:100%;outline:none;color:var(--text)}
+.header .flow-name input:focus{background:#f0f0f5;border-radius:6px}
+.header .save-status{font-size:.75rem;color:var(--success);font-weight:600;white-space:nowrap}
+.header .btn-h{background:none;border:1px solid #d2d2d7;border-radius:8px;padding:6px 14px;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--text)}
+.header .btn-h:hover{background:#e5e5ea}
+
+/* ── MAIN AREA ── */
+.main{flex:1;display:flex;overflow:hidden;position:relative}
+
+/* ── SIDEBAR ── */
+.sidebar{width:260px;background:var(--bg2);border-right:1px solid #e5e5ea;display:flex;flex-direction:column;flex-shrink:0;z-index:50;transition:margin-left .25s}
+.sidebar.hidden{margin-left:-260px}
+.sidebar-header{padding:12px 14px;border-bottom:1px solid #e5e5ea;display:flex;align-items:center;justify-content:space-between}
+.sidebar-header h3{font-size:.85rem;text-transform:uppercase;color:var(--text2);letter-spacing:.5px}
+.sidebar-header button{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:.75rem;font-weight:600;cursor:pointer}
+.sidebar-tabs{display:flex;border-bottom:1px solid #e5e5ea}
+.sidebar-tabs button{flex:1;padding:8px;border:none;background:none;font-size:.78rem;font-weight:600;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent}
+.sidebar-tabs button.active{color:var(--accent);border-bottom-color:var(--accent)}
+.sidebar-list{flex:1;overflow-y:auto;padding:8px}
+.sidebar-item{padding:10px 12px;border-radius:8px;cursor:pointer;margin-bottom:4px;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:8px}
+.sidebar-item:hover{background:#f0f0f5}
+.sidebar-item.active{background:#e8f0fe;color:var(--accent)}
+.sidebar-item .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sidebar-empty{padding:20px;text-align:center;color:var(--text2);font-size:.85rem}
+
+/* ── CANVAS ── */
+.canvas-wrap{flex:1;overflow:auto;position:relative;background:#fafafa}
+.canvas{width:6000px;height:4000px;position:relative;background-image:radial-gradient(circle,#ddd 1px,transparent 1px);background-size:24px 24px}
+.canvas svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.canvas svg path{fill:none;stroke-width:2.5;pointer-events:stroke;cursor:pointer}
+.canvas svg path:hover{stroke-width:4}
+.canvas svg .conn-temp{stroke-dasharray:8 4;opacity:.6}
+
+/* ── NODES ── */
+.node{position:absolute;width:220px;background:var(--bg2);border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.08);border:2px solid transparent;z-index:10;cursor:grab;transition:box-shadow .15s}
+.node:hover{box-shadow:0 4px 20px rgba(0,0,0,.12)}
+.node.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,113,227,.2)}
+.node.dragging{cursor:grabbing;z-index:20;box-shadow:0 8px 30px rgba(0,0,0,.15)}
+.node-head{padding:8px 12px;border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:space-between;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#fff}
+.node-head.inicio{background:var(--success)}
+.node-head.multipla_escolha{background:var(--accent)}
+.node-head.dissertativa{background:var(--purple)}
+.node-head.fim{background:var(--error)}
+.node-head .btn-del{background:none;border:none;color:rgba(255,255,255,.7);font-size:1rem;cursor:pointer;line-height:1}
+.node-head .btn-del:hover{color:#fff}
+.node-body{padding:10px 12px;font-size:.82rem;color:var(--text);line-height:1.4;min-height:30px;cursor:pointer}
+.node-body em{color:var(--text2);font-style:italic}
+
+/* ── PORTS ── */
+.port-in{position:absolute;top:-7px;left:50%;transform:translateX(-50%);width:14px;height:14px;border-radius:50%;background:#c7c7cc;border:2px solid var(--bg2);z-index:15;cursor:crosshair}
+.port-in:hover{background:var(--accent);transform:translateX(-50%) scale(1.3)}
+.port-out-row{display:flex;justify-content:center;gap:16px;padding:6px 0 10px;position:relative}
+.port-out{width:14px;height:14px;border-radius:50%;border:2px solid var(--bg2);z-index:15;cursor:crosshair;position:relative}
+.port-out::after{content:attr(data-label);position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:.6rem;font-weight:700;white-space:nowrap;color:var(--text2)}
+.port-out.acerto{background:var(--success)}
+.port-out.acerto:hover{transform:scale(1.3)}
+.port-out.erro{background:var(--error)}
+.port-out.erro:hover{transform:scale(1.3)}
+.port-out.proximo{background:var(--accent)}
+.port-out.proximo:hover{transform:scale(1.3)}
+.port-out.concluido{background:var(--purple)}
+.port-out.concluido:hover{transform:scale(1.3)}
+
+/* ── TOOLBAR ── */
+.toolbar{height:52px;background:var(--bg2);border-top:1px solid #e5e5ea;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 16px;flex-shrink:0;z-index:100}
+.toolbar .btn-add{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:50px;border:none;font-size:.82rem;font-weight:600;cursor:pointer;color:#fff;transition:transform .15s}
+.toolbar .btn-add:hover{transform:scale(1.05)}
+.toolbar .btn-add.t-mc{background:var(--accent)}
+.toolbar .btn-add.t-di{background:var(--purple)}
+.toolbar .btn-add.t-fi{background:var(--error)}
+.toolbar .btn-toggle{background:none;border:1px solid #d2d2d7;border-radius:8px;padding:6px 12px;font-size:.78rem;cursor:pointer;color:var(--text2);font-weight:600}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:1000}
+.modal-overlay.show{display:flex}
+.modal{background:var(--bg2);border-radius:16px;padding:28px;width:90%;max-width:520px;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:popIn .25s ease}
+@keyframes popIn{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+.modal h2{font-size:1.1rem;margin-bottom:16px}
+.modal label{display:block;font-size:.78rem;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px;margin-top:12px}
+.modal input,.modal textarea,.modal select{width:100%;padding:10px 12px;border:1px solid #d2d2d7;border-radius:8px;font-size:.9rem;outline:none;font-family:inherit}
+.modal input:focus,.modal textarea:focus,.modal select:focus{border-color:var(--accent)}
+.modal textarea{resize:vertical;min-height:70px}
+.modal .opts-grid{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.modal .opt-row{display:flex;align-items:center;gap:8px}
+.modal .opt-row input[type=text]{flex:1}
+.modal .opt-row input[type=radio]{accent-color:var(--success)}
+.modal .opt-row .btn-rm{background:none;border:none;color:var(--error);cursor:pointer;font-size:1.1rem}
+.modal .btn-add-opt{background:none;border:1px dashed #d2d2d7;border-radius:8px;padding:6px;font-size:.8rem;color:var(--accent);cursor:pointer;margin-top:6px;width:100%;font-weight:600}
+.modal .btns{display:flex;gap:10px;margin-top:20px}
+.modal .btns button{flex:1;padding:12px;border:none;border-radius:10px;font-size:.95rem;font-weight:600;cursor:pointer}
+.modal .btn-cancel{background:#f2f2f7;color:var(--text)}
+.modal .btn-save{background:var(--accent);color:#fff}
+
+/* ── AUTH WARNING ── */
+.auth-warn{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px}
+.auth-warn h2{font-size:1.4rem;margin-bottom:10px}
+.auth-warn p{color:var(--text2);margin-bottom:20px}
+.auth-warn a{background:var(--accent);color:#fff;text-decoration:none;padding:12px 30px;border-radius:50px;font-weight:600}
+
+/* ── NEW FLOW MODAL ── */
+.modal .flow-name-input{font-size:1.1rem;text-align:center;font-weight:600}
+
+@media(max-width:700px){.sidebar{width:220px}.node{width:170px}}
+</style>
+</head>
+<body>
+
+<!-- AUTH WARNING -->
+<div id="authWarn" class="auth-warn" style="display:none">
+  <h2>Acesso Restrito</h2>
+  <p>Faça login na plataforma para acessar o editor de fluxos.</p>
+  <a href="../Plataforma.html">Fazer Login</a>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <button class="btn-back" onclick="history.back()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    Voltar
+  </button>
+  <div class="flow-name"><input id="inputFlowName" placeholder="Nome do fluxo..." spellcheck="false"></div>
+  <span id="saveStatus" class="save-status">Salvo</span>
+  <button class="btn-h" id="btnSidebar">Fluxos</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- SIDEBAR -->
+  <div id="sidebar" class="sidebar hidden">
+    <div class="sidebar-header">
+      <h3>Fluxos</h3>
+      <button id="btnNewFlow">+ Novo</button>
+    </div>
+    <div class="sidebar-tabs">
+      <button class="active" data-tab="meus">Meus Fluxos</button>
+      <button data-tab="admin">Pré-criados</button>
+    </div>
+    <div id="sidebarList" class="sidebar-list">
+      <div class="sidebar-empty">Carregando...</div>
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div id="canvasWrap" class="canvas-wrap">
+    <div id="canvas" class="canvas">
+      <svg id="svgLayer"></svg>
+      <div id="nodesLayer"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <button class="btn-toggle" id="btnToggleSidebar">☰</button>
+  <button class="btn-add t-mc" onclick="addNode('multipla_escolha')">+ Múltipla Escolha</button>
+  <button class="btn-add t-di" onclick="addNode('dissertativa')">+ Dissertativa</button>
+  <button class="btn-add t-fi" onclick="addNode('fim')">+ Fim</button>
+</div>
+
+<!-- EDIT NODE MODAL -->
+<div id="editModal" class="modal-overlay">
+  <div class="modal">
+    <h2 id="editModalTitle">Editar Questão</h2>
+
+    <label>Pergunta</label>
+    <textarea id="editPergunta" rows="3" placeholder="Digite a pergunta..."></textarea>
+
+    <div id="editMCSection">
+      <label>Opções de Resposta</label>
+      <div id="editOpcoes" class="opts-grid"></div>
+      <button class="btn-add-opt" id="btnAddOpt">+ Adicionar opção</button>
+    </div>
+
+    <div id="editImgSection" style="margin-top:12px">
+      <label>URL da Imagem (opcional)</label>
+      <input id="editImgUrl" type="text" placeholder="https://...">
+    </div>
+
+    <div class="btns">
+      <button class="btn-cancel" onclick="closeEditModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveNodeEdit()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW FLOW MODAL -->
+<div id="newFlowModal" class="modal-overlay">
+  <div class="modal" style="max-width:380px">
+    <h2>Novo Fluxo</h2>
+    <label>Nome da atividade</label>
+    <input id="newFlowName" class="flow-name-input" placeholder="Ex: Semelhança de Triângulos">
+    <div class="btns">
+      <button class="btn-cancel" onclick="closeNewFlowModal()">Cancelar</button>
+      <button class="btn-save" onclick="createNewFlow()">Criar</button>
+    </div>
+  </div>
+</div>
+
+<!-- FIREBASE + LOGIC -->
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import{getDatabase,ref,set,get,update,remove,onValue,push}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig={apiKey:"AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",authDomain:"profbase-5f9b0.firebaseapp.com",databaseURL:"https://profbase-5f9b0-default-rtdb.firebaseio.com",projectId:"profbase-5f9b0",storageBucket:"profbase-5f9b0.firebasestorage.app",messagingSenderId:"826412057766",appId:"1:826412057766:web:729e6e24ce7587417fe067"};
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getDatabase(app);
+
+const ADM_EMAIL='gilbertofernandessc@gmail.com';
+
+/* ── ELEMENTS ── */
+const $=id=>document.getElementById(id);
+const canvasWrap=$('canvasWrap');
+const canvas=$('canvas');
+const svgLayer=$('svgLayer');
+const nodesLayer=$('nodesLayer');
+
+/* ── STATE ── */
+let currentUser=null;
+let currentFlowId=null;
+let flow={nome:'',nodes:{},meta:{}};
+let selectedNode=null;
+let editingNodeId=null;
+let isDragging=false;
+let dragNodeId=null;
+let dragStart={x:0,y:0};
+let dragNodeStart={x:0,y:0};
+let isConnecting=false;
+let connStart=null; // {nodeId, portType}
+let tempLine=null;
+let myFlows=[];
+let adminFlows=[];
+let sidebarTab='meus';
+let saveTimer=null;
+let pendingSave=false;
+
+/* ── HELPERS ── */
+function uid(){return 'n'+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+
+const typeLabel={inicio:'Início',multipla_escolha:'Múltipla Escolha',dissertativa:'Dissertativa',fim:'Fim'};
+const typeColor={inicio:'var(--success)',multipla_escolha:'var(--accent)',dissertativa:'var(--purple)',fim:'var(--error)'};
+
+/* ── AUTH ── */
+onAuthStateChanged(auth,user=>{
+  if(!user){$('authWarn').style.display='flex';return}
+  $('authWarn').style.display='none';
+  currentUser=user;
+  loadFlowLists();
+
+  // If URL has ?id=xxx, load that flow
+  const urlId=new URLSearchParams(location.search).get('id');
+  if(urlId){loadFlow(urlId)}
+  else{showSidebar()}
+});
+
+/* ── FLOW CRUD ── */
+async function loadFlowLists(){
+  // My flows
+  try{
+    const snap=await get(ref(db,'fluxos/'+currentUser.uid));
+    myFlows=[];
+    if(snap.exists()){
+      snap.forEach(c=>{myFlows.push({id:c.key,...c.val()})});
+    }
+  }catch(e){console.error(e);myFlows=[]}
+
+  // Admin flows
+  try{
+    const snap2=await get(ref(db,'fluxos_admin'));
+    adminFlows=[];
+    if(snap2.exists()){
+      snap2.forEach(c=>{adminFlows.push({id:c.key,...c.val()})});
+    }
+  }catch(e){adminFlows=[]}
+
+  renderSidebar();
+}
+
+function renderSidebar(){
+  const list=$('sidebarList');
+  const items=sidebarTab==='meus'?myFlows:adminFlows;
+  if(!items.length){
+    list.innerHTML=`<div class="sidebar-empty">${sidebarTab==='meus'?'Nenhum fluxo criado ainda.':'Nenhum fluxo pré-criado.'}</div>`;
+    return;
+  }
+  list.innerHTML=items.map(f=>`
+    <div class="sidebar-item ${f.id===currentFlowId?'active':''}" data-id="${f.id}">
+      <span class="dot" style="background:${f.id===currentFlowId?'var(--accent)':'#c7c7cc'}"></span>
+      ${esc(f.nome||'Sem nome')}
+    </div>`).join('');
+  list.querySelectorAll('.sidebar-item').forEach(el=>{
+    el.onclick=()=>{
+      const fid=el.dataset.id;
+      if(sidebarTab==='meus') loadFlow(fid);
+      else loadAdminFlow(fid);
+    }
+  });
+}
+
+async function loadFlow(fluxoId){
+  try{
+    const snap=await get(ref(db,'fluxos/'+currentUser.uid+'/'+fluxoId));
+    if(!snap.exists()){alert('Fluxo não encontrado.');return}
+    const data=snap.val();
+    currentFlowId=fluxoId;
+    flow={nome:data.nome||'',nodes:data.nodes||{},meta:data.meta||{}};
+    $('inputFlowName').value=flow.nome;
+    renderAllNodes();
+    renderConnections();
+    renderSidebar();
+    history.replaceState(null,'',`?id=${fluxoId}`);
+  }catch(e){console.error(e);alert('Erro ao carregar fluxo.')}
+}
+
+async function loadAdminFlow(fluxoId){
+  try{
+    const snap=await get(ref(db,'fluxos_admin/'+fluxoId));
+    if(!snap.exists()) return;
+    const data=snap.val();
+    // Copy to user's flows
+    const newId='fl_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    const copy={nome:(data.nome||'Sem nome')+' (cópia)',nodes:data.nodes||{},criadoEm:new Date().toISOString(),atualizadoEm:new Date().toISOString()};
+    await set(ref(db,'fluxos/'+currentUser.uid+'/'+newId),copy);
+    await loadFlowLists();
+    loadFlow(newId);
+  }catch(e){console.error(e);alert('Erro ao copiar fluxo.')}
+}
+
+async function saveFlow(){
+  if(!currentFlowId||!currentUser) return;
+  $('saveStatus').textContent='Salvando...';
+  $('saveStatus').style.color='var(--warn)';
+  try{
+    await update(ref(db,'fluxos/'+currentUser.uid+'/'+currentFlowId),{
+      nome:flow.nome,
+      nodes:flow.nodes||{},
+      atualizadoEm:new Date().toISOString()
+    });
+    $('saveStatus').textContent='Salvo';
+    $('saveStatus').style.color='var(--success)';
+    pendingSave=false;
+  }catch(e){
+    console.error(e);
+    $('saveStatus').textContent='Erro ao salvar';
+    $('saveStatus').style.color='var(--error)';
+  }
+}
+
+function markDirty(){
+  pendingSave=true;
+  $('saveStatus').textContent='Alterações pendentes...';
+  $('saveStatus').style.color='var(--text2)';
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(saveFlow,1500);
+}
+
+/* ── NEW FLOW ── */
+window.createNewFlow=async function(){
+  const nome=$('newFlowName').value.trim();
+  if(!nome){$('newFlowName').focus();return}
+  const id='fl_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const startNode=uid();
+  const data={
+    nome,
+    criadoEm:new Date().toISOString(),
+    atualizadoEm:new Date().toISOString(),
+    nodes:{
+      [startNode]:{id:startNode,tipo:'inicio',titulo:'Início',x:200,y:200,conexoes:{}}
+    }
+  };
+  try{
+    await set(ref(db,'fluxos/'+currentUser.uid+'/'+id),data);
+    closeNewFlowModal();
+    await loadFlowLists();
+    loadFlow(id);
+  }catch(e){console.error(e);alert('Erro ao criar fluxo.')}
+};
+
+/* ── NODE RENDERING ── */
+function renderAllNodes(){
+  nodesLayer.innerHTML='';
+  Object.values(flow.nodes).forEach(n=>renderNode(n));
+}
+
+function renderNode(n){
+  let el=nodesLayer.querySelector(`[data-id="${n.id}"]`);
+  if(el) el.remove();
+
+  el=document.createElement('div');
+  el.className='node'+(selectedNode===n.id?' selected':'');
+  el.dataset.id=n.id;
+  el.style.left=n.x+'px';
+  el.style.top=n.y+'px';
+
+  // Input port (not for inicio)
+  if(n.tipo!=='inicio'){
+    const pin=document.createElement('div');
+    pin.className='port-in';
+    pin.dataset.nodeId=n.id;
+    pin.dataset.port='input';
+    el.appendChild(pin);
+  }
+
+  // Header
+  const head=document.createElement('div');
+  head.className='node-head '+n.tipo;
+  head.innerHTML=`<span>${typeLabel[n.tipo]||n.tipo}</span>`;
+  if(n.tipo!=='inicio'){
+    const del=document.createElement('button');
+    del.className='btn-del';
+    del.textContent='×';
+    del.onclick=e=>{e.stopPropagation();deleteNode(n.id)};
+    head.appendChild(del);
+  }
+  el.appendChild(head);
+
+  // Body
+  const body=document.createElement('div');
+  body.className='node-body';
+  if(n.tipo==='inicio'){
+    body.innerHTML='<em>Ponto de partida</em>';
+  } else if(n.tipo==='fim'){
+    body.innerHTML='<em>Fim da atividade</em>';
+  } else {
+    const txt=n.pergunta||'';
+    body.innerHTML=txt?esc(txt).slice(0,80)+(txt.length>80?'...':''):'<em>Clique para editar</em>';
+  }
+  body.ondblclick=e=>{e.stopPropagation();if(n.tipo!=='inicio'&&n.tipo!=='fim') openEditModal(n.id)};
+  el.appendChild(body);
+
+  // Output ports
+  const prow=document.createElement('div');
+  prow.className='port-out-row';
+  if(n.tipo==='inicio'||n.tipo==='dissertativa'){
+    const p=document.createElement('div');
+    p.className='port-out '+(n.tipo==='inicio'?'proximo':'concluido');
+    p.dataset.nodeId=n.id;
+    p.dataset.port=n.tipo==='inicio'?'proximo':'concluido';
+    p.dataset.label=n.tipo==='inicio'?'Próximo':'Concluído';
+    prow.appendChild(p);
+  } else if(n.tipo==='multipla_escolha'){
+    const pa=document.createElement('div');
+    pa.className='port-out acerto';
+    pa.dataset.nodeId=n.id;pa.dataset.port='acerto';pa.dataset.label='Acerto';
+    const pe=document.createElement('div');
+    pe.className='port-out erro';
+    pe.dataset.nodeId=n.id;pe.dataset.port='erro';pe.dataset.label='Erro';
+    prow.appendChild(pa);prow.appendChild(pe);
+  }
+  // fim has no output
+  if(n.tipo!=='fim') el.appendChild(prow);
+
+  // Events
+  el.onmousedown=e=>startDrag(e,n.id);
+  el.onclick=e=>{
+    if(!isDragging){selectNode(n.id)}
+  };
+
+  nodesLayer.appendChild(el);
+}
+
+function deleteNode(nodeId){
+  // Remove connections to/from this node
+  Object.values(flow.nodes).forEach(n=>{
+    if(n.conexoes){
+      Object.keys(n.conexoes).forEach(port=>{
+        if(n.conexoes[port]===nodeId) delete n.conexoes[port];
+      });
+    }
+  });
+  delete flow.nodes[nodeId];
+  if(selectedNode===nodeId) selectedNode=null;
+  renderAllNodes();
+  renderConnections();
+  markDirty();
+}
+
+function selectNode(nodeId){
+  selectedNode=nodeId;
+  nodesLayer.querySelectorAll('.node').forEach(el=>{
+    el.classList.toggle('selected',el.dataset.id===nodeId);
+  });
+}
+
+/* ── NODE DRAGGING ── */
+function startDrag(e,nodeId){
+  if(e.target.classList.contains('port-out')||e.target.classList.contains('port-in')) return;
+  if(e.target.classList.contains('btn-del')) return;
+  isDragging=false;
+  dragNodeId=nodeId;
+  const n=flow.nodes[nodeId];
+  dragStart={x:e.clientX,y:e.clientY};
+  dragNodeStart={x:n.x,y:n.y};
+  document.addEventListener('mousemove',onDragMove);
+  document.addEventListener('mouseup',onDragEnd);
+  e.preventDefault();
+}
+
+function onDragMove(e){
+  if(!dragNodeId) return;
+  const dx=e.clientX-dragStart.x;
+  const dy=e.clientY-dragStart.y;
+  if(!isDragging && Math.abs(dx)+Math.abs(dy)>4) isDragging=true;
+  if(!isDragging) return;
+  const n=flow.nodes[dragNodeId];
+  n.x=clamp(dragNodeStart.x+dx,0,5800);
+  n.y=clamp(dragNodeStart.y+dy,0,3800);
+  const el=nodesLayer.querySelector(`[data-id="${dragNodeId}"]`);
+  if(el){el.style.left=n.x+'px';el.style.top=n.y+'px';el.classList.add('dragging')}
+  renderConnections();
+}
+
+function onDragEnd(){
+  document.removeEventListener('mousemove',onDragMove);
+  document.removeEventListener('mouseup',onDragEnd);
+  if(isDragging){
+    const el=nodesLayer.querySelector(`[data-id="${dragNodeId}"]`);
+    if(el) el.classList.remove('dragging');
+    markDirty();
+  }
+  setTimeout(()=>{isDragging=false},50);
+  dragNodeId=null;
+}
+
+/* ── CONNECTIONS ── */
+function renderConnections(){
+  // Clear old
+  svgLayer.innerHTML=`
+    <defs>
+      <marker id="aG" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="var(--success)"/></marker>
+      <marker id="aR" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="var(--error)"/></marker>
+      <marker id="aB" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="var(--accent)"/></marker>
+      <marker id="aP" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="var(--purple)"/></marker>
+    </defs>`;
+
+  Object.values(flow.nodes).forEach(n=>{
+    if(!n.conexoes) return;
+    Object.entries(n.conexoes).forEach(([port,targetId])=>{
+      if(!targetId||!flow.nodes[targetId]) return;
+      const from=getPortPos(n.id,port);
+      const to=getPortPos(targetId,'input');
+      if(!from||!to) return;
+
+      let stroke,marker;
+      if(port==='acerto'){stroke='var(--success)';marker='url(#aG)'}
+      else if(port==='erro'){stroke='var(--error)';marker='url(#aR)'}
+      else if(port==='proximo'){stroke='var(--accent)';marker='url(#aB)'}
+      else{stroke='var(--purple)';marker='url(#aP)'}
+
+      const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d',bezier(from.x,from.y,to.x,to.y));
+      path.setAttribute('stroke',stroke);
+      path.setAttribute('marker-end',marker);
+      path.dataset.from=n.id;
+      path.dataset.port=port;
+      path.onclick=()=>{
+        if(confirm('Remover esta conexão?')){
+          delete flow.nodes[n.id].conexoes[port];
+          renderConnections();
+          markDirty();
+        }
+      };
+      svgLayer.appendChild(path);
+    });
+  });
+}
+
+function getPortPos(nodeId,portType){
+  const el=nodesLayer.querySelector(`[data-id="${nodeId}"]`);
+  if(!el) return null;
+  if(portType==='input'){
+    return{x:parseFloat(el.style.left)+el.offsetWidth/2,y:parseFloat(el.style.top)};
+  }
+  const portEl=el.querySelector(`.port-out[data-port="${portType}"]`);
+  if(!portEl) return{x:parseFloat(el.style.left)+el.offsetWidth/2,y:parseFloat(el.style.top)+el.offsetHeight};
+  const nodeRect={left:parseFloat(el.style.left),top:parseFloat(el.style.top)};
+  return{
+    x:nodeRect.left+portEl.offsetLeft+portEl.offsetWidth/2,
+    y:nodeRect.top+portEl.offsetTop+portEl.offsetHeight/2+el.querySelector('.node-head').offsetHeight+(el.querySelector('.node-body')?el.querySelector('.node-body').offsetHeight:0)
+  };
+}
+
+function bezier(x1,y1,x2,y2){
+  const cp=Math.max(60,Math.abs(y2-y1)*0.4);
+  return`M${x1} ${y1} C${x1} ${y1+cp},${x2} ${y2-cp},${x2} ${y2}`;
+}
+
+/* ── CONNECTION CREATION ── */
+canvas.addEventListener('mousedown',e=>{
+  const port=e.target.closest('.port-out');
+  if(port){
+    e.stopPropagation();
+    isConnecting=true;
+    connStart={nodeId:port.dataset.nodeId,portType:port.dataset.port};
+    // Create temp line
+    tempLine=document.createElementNS('http://www.w3.org/2000/svg','path');
+    tempLine.classList.add('conn-temp');
+    tempLine.setAttribute('stroke','#999');
+    svgLayer.appendChild(tempLine);
+  }
+});
+
+canvas.addEventListener('mousemove',e=>{
+  if(!isConnecting||!tempLine) return;
+  const from=getPortPos(connStart.nodeId,connStart.portType);
+  if(!from) return;
+  const rect=canvas.getBoundingClientRect();
+  const mx=e.clientX-rect.left+canvasWrap.scrollLeft;
+  const my=e.clientY-rect.top+canvasWrap.scrollTop;
+  tempLine.setAttribute('d',bezier(from.x,from.y,mx,my));
+});
+
+canvas.addEventListener('mouseup',e=>{
+  if(!isConnecting){return}
+  isConnecting=false;
+  if(tempLine){tempLine.remove();tempLine=null}
+
+  const portIn=e.target.closest('.port-in');
+  if(portIn){
+    const targetId=portIn.dataset.nodeId;
+    if(targetId!==connStart.nodeId){
+      if(!flow.nodes[connStart.nodeId].conexoes) flow.nodes[connStart.nodeId].conexoes={};
+      flow.nodes[connStart.nodeId].conexoes[connStart.portType]=targetId;
+      renderConnections();
+      markDirty();
+    }
+  }
+  connStart=null;
+});
+
+/* ── ADD NODE ── */
+window.addNode=function(tipo){
+  if(!currentFlowId){alert('Crie ou abra um fluxo primeiro.');return}
+  const id=uid();
+  const scrollX=canvasWrap.scrollLeft+canvasWrap.clientWidth/2-110;
+  const scrollY=canvasWrap.scrollTop+canvasWrap.clientHeight/2-40;
+  flow.nodes[id]={id,tipo,x:scrollX,y:scrollY,conexoes:{}};
+  if(tipo==='multipla_escolha'){
+    flow.nodes[id].pergunta='';
+    flow.nodes[id].opcoes=['','','',''];
+    flow.nodes[id].correta=0;
+  }else if(tipo==='dissertativa'){
+    flow.nodes[id].pergunta='';
+  }
+  renderNode(flow.nodes[id]);
+  renderConnections();
+  markDirty();
+  selectNode(id);
+  if(tipo!=='fim') openEditModal(id);
+};
+
+/* ── EDIT MODAL ── */
+function openEditModal(nodeId){
+  const n=flow.nodes[nodeId];
+  if(!n) return;
+  editingNodeId=nodeId;
+  $('editModalTitle').textContent='Editar: '+typeLabel[n.tipo];
+  $('editPergunta').value=n.pergunta||'';
+  $('editImgUrl').value=n.imgUrl||'';
+
+  const mcSection=$('editMCSection');
+  if(n.tipo==='multipla_escolha'){
+    mcSection.style.display='block';
+    renderOpcoesEdit(n.opcoes||['','','',''],n.correta||0);
+  }else{
+    mcSection.style.display='none';
+  }
+  $('editModal').classList.add('show');
+  $('editPergunta').focus();
+}
+
+function renderOpcoesEdit(opcoes,correta){
+  const container=$('editOpcoes');
+  container.innerHTML='';
+  opcoes.forEach((opt,i)=>{
+    const row=document.createElement('div');
+    row.className='opt-row';
+    row.innerHTML=`
+      <input type="radio" name="editCorreta" value="${i}" ${i===correta?'checked':''}>
+      <input type="text" value="${esc(opt)}" placeholder="Opção ${i+1}" data-idx="${i}">
+      <button class="btn-rm" data-idx="${i}">×</button>`;
+    container.appendChild(row);
+  });
+  container.querySelectorAll('.btn-rm').forEach(btn=>{
+    btn.onclick=()=>{
+      const idx=parseInt(btn.dataset.idx);
+      opcoes.splice(idx,1);
+      if(correta>=opcoes.length) correta=0;
+      renderOpcoesEdit(opcoes,correta);
+    };
+  });
+}
+
+window.closeEditModal=function(){$('editModal').classList.remove('show');editingNodeId=null};
+
+window.saveNodeEdit=function(){
+  const n=flow.nodes[editingNodeId];
+  if(!n) return;
+  n.pergunta=$('editPergunta').value.trim();
+  n.imgUrl=$('editImgUrl').value.trim()||null;
+
+  if(n.tipo==='multipla_escolha'){
+    const inputs=$('editOpcoes').querySelectorAll('input[type=text]');
+    n.opcoes=Array.from(inputs).map(inp=>inp.value.trim());
+    const checked=$('editOpcoes').querySelector('input[type=radio]:checked');
+    n.correta=checked?parseInt(checked.value):0;
+  }
+  renderNode(n);
+  renderConnections();
+  markDirty();
+  closeEditModal();
+};
+
+$('btnAddOpt').onclick=()=>{
+  const inputs=$('editOpcoes').querySelectorAll('input[type=text]');
+  const opcoes=Array.from(inputs).map(i=>i.value);
+  const checked=$('editOpcoes').querySelector('input[type=radio]:checked');
+  const correta=checked?parseInt(checked.value):0;
+  opcoes.push('');
+  renderOpcoesEdit(opcoes,correta);
+};
+
+/* ── FLOW NAME ── */
+$('inputFlowName').addEventListener('input',e=>{
+  flow.nome=e.target.value;
+  markDirty();
+});
+
+/* ── SIDEBAR TOGGLE ── */
+function showSidebar(){$('sidebar').classList.remove('hidden')}
+function hideSidebar(){$('sidebar').classList.add('hidden')}
+$('btnSidebar').onclick=()=>showSidebar();
+$('btnToggleSidebar').onclick=()=>$('sidebar').classList.toggle('hidden');
+
+// Sidebar tabs
+document.querySelectorAll('.sidebar-tabs button').forEach(btn=>{
+  btn.onclick=()=>{
+    sidebarTab=btn.dataset.tab;
+    document.querySelectorAll('.sidebar-tabs button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderSidebar();
+  };
+});
+
+// New flow
+$('btnNewFlow').onclick=()=>{$('newFlowName').value='';$('newFlowModal').classList.add('show');$('newFlowName').focus()};
+window.closeNewFlowModal=function(){$('newFlowModal').classList.remove('show')};
+
+// Enter on new flow name
+$('newFlowName').addEventListener('keydown',e=>{if(e.key==='Enter') createNewFlow()});
+
+/* ── KEYBOARD ── */
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+  if(e.key==='Delete'||e.key==='Backspace'){
+    if(selectedNode&&flow.nodes[selectedNode]&&flow.nodes[selectedNode].tipo!=='inicio'){
+      deleteNode(selectedNode);
+    }
+  }
+  if(e.key==='Escape'){
+    if($('editModal').classList.contains('show')) closeEditModal();
+    else if($('newFlowModal').classList.contains('show')) closeNewFlowModal();
+    else if(isConnecting){isConnecting=false;if(tempLine){tempLine.remove();tempLine=null}connStart=null}
+  }
+});
+
+/* ── DOUBLE CLICK CANVAS ── */
+canvas.addEventListener('dblclick',e=>{
+  if(e.target===canvas||e.target===nodesLayer){
+    // Add a multiple choice node at click position
+    if(!currentFlowId) return;
+    const rect=canvas.getBoundingClientRect();
+    const x=e.clientX-rect.left+canvasWrap.scrollLeft-110;
+    const y=e.clientY-rect.top+canvasWrap.scrollTop-30;
+    const id=uid();
+    flow.nodes[id]={id,tipo:'multipla_escolha',x,y,conexoes:{},pergunta:'',opcoes:['','','',''],correta:0};
+    renderNode(flow.nodes[id]);
+    renderConnections();
+    markDirty();
+    openEditModal(id);
+  }
+});
+
+/* ── ESCAPE HTML ── */
+function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
+window.esc=esc;
+
+/* ── SCROLL CANVAS TO START NODE ── */
+function scrollToStart(){
+  const start=Object.values(flow.nodes).find(n=>n.tipo==='inicio');
+  if(start){
+    canvasWrap.scrollLeft=Math.max(0,start.x-100);
+    canvasWrap.scrollTop=Math.max(0,start.y-100);
+  }
+}
+
+// After initial render, scroll to start
+const origLoadFlow=loadFlow;
+
+/* ── WARN ON LEAVE ── */
+window.addEventListener('beforeunload',e=>{
+  if(pendingSave){e.preventDefault();e.returnValue=''}
+});
+
+</script>
+</body>
+</html>

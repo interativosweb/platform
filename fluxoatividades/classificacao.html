@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classificação — AlquiLab</title>
+<style>
+:root{--bg:#f5f5f7;--bg2:#fff;--text:#1d1d1f;--text2:#86868b;--accent:#0071e3;--success:#34c759;--error:#ff3b30;--purple:#af52de;--radius:14px}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh;padding:30px 20px}
+
+.container{max-width:900px;margin:0 auto}
+
+/* Header */
+.page-header{display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap}
+.btn-back{background:none;border:none;font-size:.9rem;color:var(--accent);cursor:pointer;display:flex;align-items:center;gap:4px;font-weight:600;text-decoration:none}
+.btn-back:hover{text-decoration:underline}
+.page-title{font-size:1.3rem;font-weight:700;flex:1}
+
+/* Filters */
+.filters{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.filters label{font-size:.78rem;font-weight:600;color:var(--text2)}
+.filters input[type=date],.filters select{padding:8px 12px;border:1px solid #d2d2d7;border-radius:8px;font-size:.85rem;outline:none;font-family:inherit}
+
+/* Stats bar */
+.stats-bar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.stat-card{background:var(--bg2);border-radius:var(--radius);padding:14px 20px;flex:1;min-width:120px;box-shadow:0 1px 6px rgba(0,0,0,.04);text-align:center}
+.stat-card .val{font-size:1.6rem;font-weight:700}
+.stat-card .lbl{font-size:.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;font-weight:600}
+
+/* Student list */
+.student-list{display:flex;flex-direction:column;gap:6px}
+.student-row{background:var(--bg2);border-radius:var(--radius);padding:14px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,.03)}
+.student-row:hover{background:#f0f5ff;transform:translateX(4px)}
+.student-row .pos{font-size:1.1rem;font-weight:700;color:var(--text2);min-width:28px;text-align:center}
+.student-row .info{flex:1}
+.student-row .info .name{font-weight:600;font-size:.92rem}
+.student-row .info .serie{font-size:.75rem;color:var(--text2)}
+.student-row .score{font-weight:700;font-size:.9rem;color:var(--success)}
+.student-row .err{font-weight:600;font-size:.8rem;color:var(--error);margin-left:8px}
+.student-row .hora{font-size:.72rem;color:var(--text2);margin-left:8px}
+.empty-msg{text-align:center;padding:40px;color:var(--text2);font-size:.9rem;background:var(--bg2);border-radius:var(--radius)}
+
+/* Modal student detail */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:1000}
+.modal-overlay.show{display:flex}
+.modal{background:var(--bg2);border-radius:16px;padding:28px;width:92%;max-width:560px;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:popIn .25s ease}
+@keyframes popIn{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+.modal .close-btn{position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.4rem;color:var(--text2);cursor:pointer}
+.modal h2{font-size:1.1rem;margin-bottom:4px}
+.modal .sub{font-size:.8rem;color:var(--text2);margin-bottom:16px}
+
+/* Flow path */
+.flow-path{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.path-node{background:#fafafa;border-radius:10px;padding:12px 14px;border-left:4px solid #ccc}
+.path-node.tipo-multipla_escolha{border-left-color:var(--accent)}
+.path-node.tipo-dissertativa{border-left-color:var(--purple)}
+.path-node.tipo-inicio{border-left-color:var(--success)}
+.path-node.tipo-fim{border-left-color:var(--error)}
+.path-node .pn-head{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.path-node .pn-type{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px;padding:2px 8px;border-radius:4px;color:#fff}
+.pn-type.tipo-multipla_escolha{background:var(--accent)}
+.pn-type.tipo-dissertativa{background:var(--purple)}
+.pn-type.tipo-inicio{background:var(--success)}
+.pn-type.tipo-fim{background:var(--error)}
+.path-node .pn-q{font-size:.85rem;font-weight:500;margin-bottom:6px}
+.path-node .pn-resp{font-size:.82rem;padding:6px 10px;border-radius:6px;display:inline-block}
+.pn-resp.acertou{background:rgba(52,199,89,.1);color:var(--success)}
+.pn-resp.errou{background:rgba(255,59,48,.1);color:var(--error)}
+.pn-resp.dissertativa{background:rgba(0,113,227,.06);color:var(--accent)}
+.path-arrow{text-align:center;color:#ccc;font-size:1.2rem}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="page-header">
+    <a id="linkVoltar" href="index.html" class="btn-back">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      Voltar
+    </a>
+    <div class="page-title">Classificação da Turma</div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <label>Data:</label>
+    <input type="date" id="filtroData">
+    <label>Ano:</label>
+    <select id="filtroAno">
+      <option value="todos">Todos</option>
+      <option value="5º">5º</option><option value="6º">6º</option>
+      <option value="7º">7º</option><option value="8º">8º</option>
+      <option value="9º">9º</option>
+      <option value="1º EM">1º EM</option><option value="2º EM">2º EM</option><option value="3º EM">3º EM</option>
+    </select>
+    <label>Turma:</label>
+    <select id="filtroTurma">
+      <option value="todas">Todas</option>
+      <option value="A">A</option><option value="B">B</option>
+      <option value="C">C</option><option value="D">D</option>
+    </select>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-card"><div class="val" id="statTotal">0</div><div class="lbl">Alunos</div></div>
+    <div class="stat-card"><div class="val" id="statMedia" style="color:var(--success)">0</div><div class="lbl">Média Acertos</div></div>
+    <div class="stat-card"><div class="val" id="statMelhor" style="color:var(--accent)">-</div><div class="lbl">Melhor Aluno</div></div>
+  </div>
+
+  <!-- Student list -->
+  <div id="studentList" class="student-list">
+    <div class="empty-msg">Aguardando dados...</div>
+  </div>
+</div>
+
+<!-- Student Detail Modal -->
+<div id="detailModal" class="modal-overlay">
+  <div class="modal" style="position:relative">
+    <button class="close-btn" onclick="closeDetail()">&times;</button>
+    <h2 id="detailNome">Aluno</h2>
+    <div class="sub" id="detailSub">Série</div>
+
+    <div style="display:flex;gap:20px;margin-bottom:16px">
+      <div><span style="font-size:1.3rem;font-weight:700;color:var(--success)" id="detailAcertos">0</span> <span style="font-size:.8rem;color:var(--text2)">acertos</span></div>
+      <div><span style="font-size:1.3rem;font-weight:700;color:var(--error)" id="detailErros">0</span> <span style="font-size:.8rem;color:var(--text2)">erros</span></div>
+    </div>
+
+    <h3 style="font-size:.82rem;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px">Percurso do Aluno</h3>
+    <div id="detailPath" class="flow-path"></div>
+  </div>
+</div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import{getDatabase,ref,onValue,get}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig={apiKey:"AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",authDomain:"profbase-5f9b0.firebaseapp.com",databaseURL:"https://profbase-5f9b0-default-rtdb.firebaseio.com",projectId:"profbase-5f9b0",storageBucket:"profbase-5f9b0.firebasestorage.app",messagingSenderId:"826412057766",appId:"1:826412057766:web:729e6e24ce7587417fe067"};
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+
+const $=id=>document.getElementById(id);
+function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
+function toISO(v){if(!v)return'';try{return new Date(v).toISOString().slice(0,10)}catch(e){return''}}
+
+const urlParams=new URLSearchParams(location.search);
+const turmaId=urlParams.get('turmaId')||'';
+const basePath=turmaId?'turmas_fluxo/'+turmaId+'/':'';
+
+// Update back link
+if(turmaId){
+  $('linkVoltar').href='index.html?turmaId='+encodeURIComponent(turmaId);
+}
+
+let todosAlunos=[];
+let fluxoData=null;
+
+/* ── LOAD FLOW DATA ── */
+async function loadFluxo(){
+  if(!turmaId) return;
+  try{
+    const snap=await get(ref(db,'turmas_fluxo/'+turmaId));
+    if(!snap.exists()) return;
+    const turma=snap.val();
+    if(turma.atividadeId&&turma.criadoPor){
+      const fsnap=await get(ref(db,'fluxos/'+turma.criadoPor+'/'+turma.atividadeId));
+      if(fsnap.exists()) fluxoData=fsnap.val();
+    }
+  }catch(e){console.error(e)}
+}
+
+/* ── DATE FILTER ── */
+const filtroData=$('filtroData');
+filtroData.valueAsDate=new Date();
+filtroData.addEventListener('change',renderList);
+$('filtroAno').addEventListener('change',renderList);
+$('filtroTurma').addEventListener('change',renderList);
+
+/* ── LISTEN FOR STUDENTS ── */
+if(turmaId){
+  loadFluxo();
+  const alunosRef=ref(db,basePath+'alunos');
+  onValue(alunosRef,snap=>{
+    todosAlunos=[];
+    const data=snap.val();
+    if(data){
+      Object.keys(data).forEach(key=>{
+        const a=data[key];
+        let hora='--:--';
+        if(a.entrouEm){try{hora=new Date(a.entrouEm).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}catch(e){}}
+        todosAlunos.push({
+          id:key,
+          nome:a.nome||'-',
+          serie:a.serie||'-',
+          acertos:a.acertos||0,
+          erros:a.erros||0,
+          hora,
+          data:toISO(a.entrouEm),
+          fluxoPercorrido:a.fluxoPercorrido||[],
+          respostas:a.respostas||{},
+          nodeAtual:a.nodeAtual||null,
+          timestamp:a.entrouEm?new Date(a.entrouEm).getTime():0
+        });
+      });
+    }
+    renderList();
+  });
+}else{
+  $('studentList').innerHTML='<div class="empty-msg">Link inválido — sem turmaId.</div>';
+}
+
+/* ── RENDER LIST ── */
+function renderList(){
+  const dataSel=filtroData.value;
+  const anoSel=$('filtroAno').value;
+  const turmaSel=$('filtroTurma').value;
+
+  let filtrados=todosAlunos.filter(a=>{
+    const bateData=a.data===dataSel;
+    const bateAno=anoSel==='todos'||(a.serie||'').includes(anoSel);
+    const bateTurma=turmaSel==='todas'||(a.serie||'').endsWith(' '+turmaSel);
+    return bateData&&bateAno&&bateTurma;
+  });
+
+  filtrados.sort((a,b)=>(b.acertos||0)-(a.acertos||0));
+
+  // Stats
+  $('statTotal').textContent=filtrados.length;
+  const totalAc=filtrados.reduce((s,a)=>s+(a.acertos||0),0);
+  $('statMedia').textContent=filtrados.length?(totalAc/filtrados.length).toFixed(1):'0';
+  $('statMelhor').textContent=filtrados.length>0?filtrados[0].nome:'-';
+
+  // List
+  const list=$('studentList');
+  if(!filtrados.length){
+    list.innerHTML='<div class="empty-msg">Aguardando dados...</div>';
+    return;
+  }
+
+  list.innerHTML=filtrados.map((a,i)=>{
+    const medals=['&#129351;','&#129352;','&#129353;'];
+    const medal=i<3?medals[i]:'';
+    return`
+    <div class="student-row" onclick='openDetail(${JSON.stringify(a).replace(/'/g,"&#39;")})'>
+      <div class="pos">${medal||i+1}</div>
+      <div class="info">
+        <div class="name">${esc(a.nome)}</div>
+        <div class="serie">${esc(a.serie)}</div>
+      </div>
+      <div class="score">${a.acertos} pts</div>
+      <div class="err">${a.erros} err</div>
+      <div class="hora">${a.hora}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── DETAIL MODAL ── */
+window.openDetail=function(aluno){
+  $('detailNome').textContent=aluno.nome;
+  $('detailSub').textContent=aluno.serie+' · Entrou às '+aluno.hora;
+  $('detailAcertos').textContent=aluno.acertos;
+  $('detailErros').textContent=aluno.erros;
+
+  const pathEl=$('detailPath');
+
+  if(!fluxoData||!aluno.fluxoPercorrido||!aluno.fluxoPercorrido.length){
+    pathEl.innerHTML='<div style="color:var(--text2);font-size:.85rem">Sem dados de percurso.</div>';
+    $('detailModal').classList.add('show');
+    return;
+  }
+
+  const typeLabel={inicio:'Início',multipla_escolha:'Múltipla Escolha',dissertativa:'Dissertativa',fim:'Fim'};
+
+  let html='';
+  aluno.fluxoPercorrido.forEach((nodeId,idx)=>{
+    const node=fluxoData.nodes?fluxoData.nodes[nodeId]:null;
+    if(!node) return;
+
+    const resp=aluno.respostas?aluno.respostas[nodeId]:null;
+
+    html+=`<div class="path-node tipo-${node.tipo}">`;
+    html+=`<div class="pn-head"><span class="pn-type tipo-${node.tipo}">${typeLabel[node.tipo]||node.tipo}</span></div>`;
+
+    if(node.tipo==='multipla_escolha'||node.tipo==='dissertativa'){
+      html+=`<div class="pn-q">${esc(node.pergunta||'')}</div>`;
+    }
+
+    if(resp){
+      if(resp.tipo==='multipla_escolha'){
+        const opcText=(node.opcoes&&node.opcoes[resp.escolha])?node.opcoes[resp.escolha]:'Opção '+(resp.escolha+1);
+        html+=`<div class="pn-resp ${resp.acertou?'acertou':'errou'}">${resp.acertou?'&#10003;':'&#10007;'} ${esc(opcText)}</div>`;
+      }else if(resp.tipo==='dissertativa'){
+        html+=`<div class="pn-resp dissertativa">"${esc(resp.texto||'')}"</div>`;
+      }
+    }
+
+    html+=`</div>`;
+
+    if(idx<aluno.fluxoPercorrido.length-1){
+      html+=`<div class="path-arrow">&#8595;</div>`;
+    }
+  });
+
+  pathEl.innerHTML=html;
+  $('detailModal').classList.add('show');
+};
+
+window.closeDetail=()=>$('detailModal').classList.remove('show');
+
+// Close modal on background click
+$('detailModal').addEventListener('click',e=>{
+  if(e.target===$('detailModal')) closeDetail();
+});
+
+</script>
+</body>
+</html>

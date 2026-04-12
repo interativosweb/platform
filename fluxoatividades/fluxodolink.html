@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fluxo de Atividades — AlquiLab</title>
+<style>
+:root{--bg:#f5f5f7;--bg2:#fff;--text:#1d1d1f;--text2:#86868b;--accent:#0071e3;--success:#34c759;--error:#ff3b30;--warn:#ff9500;--purple:#af52de;--radius:14px}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh;padding:30px 20px}
+
+.container{max-width:900px;margin:0 auto}
+
+/* Header */
+.page-header{display:flex;align-items:center;gap:12px;margin-bottom:30px;flex-wrap:wrap}
+.btn-back{background:none;border:none;font-size:.9rem;color:var(--accent);cursor:pointer;display:flex;align-items:center;gap:4px;font-weight:600}
+.btn-back:hover{text-decoration:underline}
+.page-title{font-size:1.5rem;font-weight:700;flex:1}
+
+/* Entry cards */
+.entry-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:36px}
+.entry-card{background:var(--bg2);border-radius:var(--radius);padding:28px;text-align:center;cursor:pointer;border:2px solid transparent;transition:all .2s;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.entry-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.1)}
+.entry-card .icon{font-size:2.4rem;margin-bottom:10px}
+.entry-card h3{font-size:1rem;margin-bottom:4px}
+.entry-card p{font-size:.82rem;color:var(--text2)}
+
+/* Sections */
+.section{margin-bottom:36px}
+.section-title{font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title .count{background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;font-size:.7rem;display:flex;align-items:center;justify-content:center}
+
+/* Link cards */
+.link-card{background:var(--bg2);border-radius:var(--radius);padding:18px 20px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,.05);border:1px solid #e5e5ea}
+.link-card-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.link-card-head .turma-badge{background:#e8f0fe;color:var(--accent);padding:4px 10px;border-radius:6px;font-size:.72rem;font-weight:700}
+.link-card-head .escola{font-weight:600;font-size:.9rem;flex:1}
+.link-card-head .date{font-size:.72rem;color:var(--text2)}
+
+.link-card-body{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.link-card-body .atividade-tag{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;font-size:.8rem;font-weight:600}
+.atividade-tag.connected{background:rgba(52,199,89,.1);color:var(--success)}
+.atividade-tag.empty{background:rgba(255,149,0,.1);color:var(--warn);cursor:pointer}
+.atividade-tag.empty:hover{background:rgba(255,149,0,.2)}
+
+.link-card-actions{display:flex;gap:8px;margin-top:10px}
+.link-card-actions button,.link-card-actions a{padding:6px 14px;border-radius:8px;border:none;font-size:.78rem;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.btn-copy{background:var(--accent);color:#fff}
+.btn-copy:hover{opacity:.9}
+.btn-copy.disabled{background:#c7c7cc;cursor:not-allowed}
+.btn-panel{background:#f2f2f7;color:var(--text)}
+.btn-panel:hover{background:#e5e5ea}
+.btn-open{background:rgba(52,199,89,.1);color:var(--success)}
+.btn-open:hover{background:rgba(52,199,89,.2)}
+.btn-del{background:none;border:1px solid #e5e5ea;color:var(--error);font-size:.75rem}
+.btn-del:hover{background:rgba(255,59,48,.05)}
+
+.link-url{font-size:.72rem;color:var(--text2);word-break:break-all;margin-top:6px;padding:6px 10px;background:#fafafa;border-radius:6px}
+
+/* Activity cards */
+.act-card{background:var(--bg2);border-radius:var(--radius);padding:16px 18px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.04);border:1px solid #e5e5ea;display:flex;align-items:center;gap:12px}
+.act-card .act-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.act-card .act-name{flex:1;font-weight:600;font-size:.9rem}
+.act-card .act-date{font-size:.72rem;color:var(--text2)}
+.act-card .act-actions{display:flex;gap:6px}
+.act-card .act-actions button{padding:4px 10px;border-radius:6px;border:1px solid #e5e5ea;background:none;font-size:.72rem;cursor:pointer;font-weight:600}
+.act-card .act-actions button:hover{background:#f0f0f5}
+.act-card .act-actions .btn-edit{color:var(--accent)}
+.act-card .act-actions .btn-rm{color:var(--error)}
+
+/* Generate link */
+.btn-gerar{display:flex;align-items:center;gap:8px;padding:14px 24px;border-radius:50px;border:2px dashed #d2d2d7;background:none;font-size:.9rem;font-weight:600;cursor:pointer;color:var(--accent);margin:0 auto 20px;transition:all .2s}
+.btn-gerar:hover{border-color:var(--accent);background:rgba(0,113,227,.04)}
+
+/* Empty */
+.empty-msg{text-align:center;padding:30px;color:var(--text2);font-size:.9rem}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:1000}
+.modal-overlay.show{display:flex}
+.modal{background:var(--bg2);border-radius:16px;padding:28px;width:90%;max-width:460px;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:popIn .25s ease}
+@keyframes popIn{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+.modal h2{font-size:1.1rem;margin-bottom:16px}
+.modal label{display:block;font-size:.78rem;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px;margin-top:12px}
+.modal input,.modal select{width:100%;padding:10px 12px;border:1px solid #d2d2d7;border-radius:8px;font-size:.9rem;outline:none;font-family:inherit}
+.modal input:focus,.modal select:focus{border-color:var(--accent)}
+.modal .grupo-sel{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.modal .grupo-sel label{display:inline;margin:0;text-transform:none;letter-spacing:0;font-size:.85rem}
+.modal .grupo-sel input[type=radio]{display:none}
+.modal .grupo-sel label span{display:inline-block;padding:8px 14px;border:1px solid #d2d2d7;border-radius:8px;cursor:pointer;font-weight:500;transition:all .2s}
+.modal .grupo-sel input[type=radio]:checked+span{background:var(--accent);color:#fff;border-color:var(--accent)}
+.modal .btns{display:flex;gap:10px;margin-top:20px}
+.modal .btns button{flex:1;padding:12px;border:none;border-radius:10px;font-size:.95rem;font-weight:600;cursor:pointer}
+.modal .btn-cancel{background:#f2f2f7;color:var(--text)}
+.modal .btn-save{background:var(--accent);color:#fff}
+.modal .btn-save:disabled{background:#c7c7cc;cursor:not-allowed}
+.modal .aviso{color:var(--error);font-size:.78rem;margin-top:6px;font-weight:600;min-height:1em}
+
+/* Connect modal */
+.connect-list{max-height:250px;overflow-y:auto;margin-top:10px}
+.connect-item{padding:10px 12px;border:1px solid #e5e5ea;border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:.85rem;font-weight:500;transition:all .15s}
+.connect-item:hover{border-color:var(--accent);background:#f0f5ff}
+.connect-item.sel{border-color:var(--accent);background:#e8f0fe}
+
+/* Auth warning */
+.auth-warn{text-align:center;padding:80px 20px}
+.auth-warn h2{font-size:1.4rem;margin-bottom:10px}
+.auth-warn p{color:var(--text2);margin-bottom:20px}
+.auth-warn a{background:var(--accent);color:#fff;text-decoration:none;padding:12px 30px;border-radius:50px;font-weight:600;display:inline-block}
+
+/* Toast */
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:10px 24px;border-radius:50px;font-size:.85rem;font-weight:600;z-index:2000;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+
+@media(max-width:600px){.entry-cards{grid-template-columns:1fr}.act-card{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="page-header">
+    <button class="btn-back" onclick="location.href='../Plataforma.html'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      Plataforma
+    </button>
+    <div class="page-title">Fluxo de Atividades</div>
+  </div>
+
+  <!-- AUTH WARNING (hidden by default) -->
+  <div id="authWarn" class="auth-warn" style="display:none">
+    <h2>Acesso Restrito</h2>
+    <p>Faça login na plataforma para acessar.</p>
+    <a href="../Plataforma.html">Fazer Login</a>
+  </div>
+
+  <!-- MAIN CONTENT (hidden until auth) -->
+  <div id="mainContent" style="display:none">
+
+    <!-- Entry cards -->
+    <div class="entry-cards">
+      <div class="entry-card" onclick="location.href='fluxo.html'">
+        <div class="icon">+</div>
+        <h3>Criar Nova Atividade</h3>
+        <p>Abra o editor de fluxo para criar questões e organizar o percurso.</p>
+      </div>
+      <div class="entry-card" id="cardAtividades" onclick="scrollToSection('secAtividades')">
+        <div class="icon">&#9776;</div>
+        <h3>Minhas Atividades</h3>
+        <p>Veja as atividades criadas, gere links e gerencie turmas.</p>
+      </div>
+    </div>
+
+    <!-- My Activities -->
+    <div class="section" id="secAtividades">
+      <div class="section-title">Minhas Atividades <span class="count" id="actCount">0</span></div>
+      <div id="actList"></div>
+    </div>
+
+    <!-- Links / Turmas -->
+    <div class="section" id="secLinks">
+      <div class="section-title">Links de Turma <span class="count" id="linkCount">0</span></div>
+      <button class="btn-gerar" id="btnGerarLink">+ Gerar link para turma</button>
+      <div id="linkList"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<!-- MODAL: GERAR LINK -->
+<div id="gerarModal" class="modal-overlay">
+  <div class="modal">
+    <h2>Gerar Link para Turma</h2>
+
+    <label>Nome da Instituição/Escola</label>
+    <input id="glEscola" placeholder="Ex: Escola Municipal...">
+
+    <label>Série / Ano</label>
+    <div class="grupo-sel" id="glSerie">
+      <label><input type="radio" name="glSerie" value="5"><span>5º</span></label>
+      <label><input type="radio" name="glSerie" value="6"><span>6º</span></label>
+      <label><input type="radio" name="glSerie" value="7"><span>7º</span></label>
+      <label><input type="radio" name="glSerie" value="8"><span>8º</span></label>
+      <label><input type="radio" name="glSerie" value="9"><span>9º</span></label>
+      <label><input type="radio" name="glSerie" value="1EM"><span>1º EM</span></label>
+      <label><input type="radio" name="glSerie" value="2EM"><span>2º EM</span></label>
+      <label><input type="radio" name="glSerie" value="3EM"><span>3º EM</span></label>
+      <label><input type="radio" name="glSerie" value="grad"><span>Graduação</span></label>
+      <label><input type="radio" name="glSerie" value="outro"><span>Outro</span></label>
+    </div>
+    <input id="glSerieOutro" placeholder="Digite a série..." style="display:none;margin-top:6px">
+
+    <label>Turma</label>
+    <div class="grupo-sel" id="glTurma">
+      <label><input type="radio" name="glTurma" value="A"><span>A</span></label>
+      <label><input type="radio" name="glTurma" value="B"><span>B</span></label>
+      <label><input type="radio" name="glTurma" value="C"><span>C</span></label>
+      <label><input type="radio" name="glTurma" value="D"><span>D</span></label>
+      <label><input type="radio" name="glTurma" value="outro"><span>Outro</span></label>
+    </div>
+    <input id="glTurmaOutro" placeholder="Digite a turma..." style="display:none;margin-top:6px">
+
+    <div class="aviso" id="glAviso"></div>
+    <div class="btns">
+      <button class="btn-cancel" onclick="closeGerarModal()">Cancelar</button>
+      <button class="btn-save" onclick="gerarLink()">Gerar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CONNECT ACTIVITY -->
+<div id="connectModal" class="modal-overlay">
+  <div class="modal">
+    <h2>Conectar Atividade</h2>
+    <p style="font-size:.85rem;color:var(--text2);margin-bottom:12px">Selecione qual atividade será usada neste link:</p>
+    <div id="connectList" class="connect-list"></div>
+    <div class="btns">
+      <button class="btn-cancel" onclick="closeConnectModal()">Cancelar</button>
+      <button class="btn-save" id="btnConfirmConnect" onclick="confirmConnect()" disabled>Conectar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import{getDatabase,ref,set,get,update,remove,push}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig={apiKey:"AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",authDomain:"profbase-5f9b0.firebaseapp.com",databaseURL:"https://profbase-5f9b0-default-rtdb.firebaseio.com",projectId:"profbase-5f9b0",storageBucket:"profbase-5f9b0.firebasestorage.app",messagingSenderId:"826412057766",appId:"1:826412057766:web:729e6e24ce7587417fe067"};
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getDatabase(app);
+
+const ADM_EMAIL='gilbertofernandessc@gmail.com';
+const $=id=>document.getElementById(id);
+
+let currentUser=null;
+let myFlows=[];
+let myLinks=[];
+let connectingLinkId=null;
+let selectedConnectFlowId=null;
+
+function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
+
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+
+function scrollToSection(id){document.getElementById(id).scrollIntoView({behavior:'smooth'})}
+window.scrollToSection=scrollToSection;
+
+/* ── AUTH ── */
+onAuthStateChanged(auth,async user=>{
+  if(!user){
+    $('authWarn').style.display='block';
+    $('mainContent').style.display='none';
+    return;
+  }
+  $('authWarn').style.display='none';
+  $('mainContent').style.display='block';
+  currentUser=user;
+  await loadData();
+});
+
+/* ── LOAD DATA ── */
+async function loadData(){
+  // Load flows
+  try{
+    const snap=await get(ref(db,'fluxos/'+currentUser.uid));
+    myFlows=[];
+    if(snap.exists()) snap.forEach(c=>myFlows.push({id:c.key,...c.val()}));
+  }catch(e){console.error(e)}
+
+  // Load links
+  try{
+    const snap=await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo'));
+    myLinks=[];
+    if(snap.exists()) snap.forEach(c=>myLinks.push({id:c.key,...c.val()}));
+  }catch(e){console.error(e)}
+
+  renderActivities();
+  renderLinks();
+}
+
+/* ── RENDER ACTIVITIES ── */
+function renderActivities(){
+  $('actCount').textContent=myFlows.length;
+  if(!myFlows.length){
+    $('actList').innerHTML='<div class="empty-msg">Nenhuma atividade criada. Clique em "Criar Nova Atividade" para começar.</div>';
+    return;
+  }
+  $('actList').innerHTML=myFlows.map(f=>`
+    <div class="act-card">
+      <div class="act-dot"></div>
+      <div class="act-name">${esc(f.nome||'Sem nome')}</div>
+      <div class="act-date">${f.atualizadoEm?new Date(f.atualizadoEm).toLocaleDateString('pt-BR'):''}</div>
+      <div class="act-actions">
+        <button class="btn-edit" onclick="location.href='fluxo.html?id=${f.id}'">Editar</button>
+        <button class="btn-rm" onclick="deleteActivity('${f.id}')">Excluir</button>
+      </div>
+    </div>`).join('');
+}
+
+window.deleteActivity=async function(fluxoId){
+  if(!confirm('Excluir esta atividade? Esta ação não pode ser desfeita.')) return;
+  try{
+    await remove(ref(db,'fluxos/'+currentUser.uid+'/'+fluxoId));
+    toast('Atividade excluída');
+    await loadData();
+  }catch(e){console.error(e);alert('Erro ao excluir.')}
+};
+
+/* ── RENDER LINKS ── */
+function renderLinks(){
+  $('linkCount').textContent=myLinks.length;
+  if(!myLinks.length){
+    $('linkList').innerHTML='<div class="empty-msg">Nenhum link criado ainda. Clique em "Gerar link para turma".</div>';
+    return;
+  }
+  $('linkList').innerHTML=myLinks.map(lk=>{
+    const url=buildStudentUrl(lk.id);
+    const panelUrl=buildPanelUrl(lk.id);
+    const flowName=lk.atividadeId?getFlowName(lk.atividadeId):null;
+    const hasActivity=!!lk.atividadeId;
+
+    return`
+    <div class="link-card">
+      <div class="link-card-head">
+        <span class="turma-badge">${esc(lk.serie||'')}º · Turma ${esc(lk.turma||'')}</span>
+        <span class="escola">${esc(lk.escola||'')}</span>
+        <span class="date">${lk.criadoEm?new Date(lk.criadoEm).toLocaleDateString('pt-BR'):''}</span>
+      </div>
+      <div class="link-card-body">
+        ${hasActivity
+          ?`<span class="atividade-tag connected">&#10003; ${esc(flowName||'Atividade conectada')}</span>`
+          :`<span class="atividade-tag empty" onclick="openConnectModal('${lk.id}')">&#9888; Conectar atividade</span>`
+        }
+      </div>
+      <div class="link-url">${esc(url)}</div>
+      <div class="link-card-actions">
+        <button class="btn-copy ${hasActivity?'':'disabled'}" onclick="copyLink('${lk.id}',${hasActivity})">Copiar Link</button>
+        ${hasActivity?`<a class="btn-open" href="${esc(url)}" target="_blank">Abrir</a>`:''}
+        ${hasActivity?`<a class="btn-panel" href="${esc(panelUrl)}" target="_blank">Classificação</a>`:''}
+        ${!hasActivity?`<button class="btn-panel" onclick="openConnectModal('${lk.id}')">Conectar</button>`:''}
+        <button class="btn-del" onclick="deleteLink('${lk.id}')">Excluir</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function getFlowName(flowId){
+  const f=myFlows.find(x=>x.id===flowId);
+  return f?f.nome:'Atividade';
+}
+
+function buildStudentUrl(turmaId){
+  const base=location.href.replace(/\/fluxodolink\.html.*$/,'');
+  return base+'/index.html?turmaId='+turmaId;
+}
+
+function buildPanelUrl(turmaId){
+  const base=location.href.replace(/\/fluxodolink\.html.*$/,'');
+  return base+'/classificacao.html?turmaId='+turmaId;
+}
+
+/* ── COPY LINK ── */
+window.copyLink=function(linkId,hasActivity){
+  if(!hasActivity){
+    toast('Conecte uma atividade antes de copiar o link!');
+    return;
+  }
+  const url=buildStudentUrl(linkId);
+  navigator.clipboard.writeText(url).then(()=>toast('Link copiado!')).catch(()=>{
+    // Fallback
+    const ta=document.createElement('textarea');
+    ta.value=url;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();
+    toast('Link copiado!');
+  });
+};
+
+// Block Ctrl+C when no activity connected
+document.addEventListener('copy',e=>{
+  const sel=window.getSelection().toString();
+  // Check if copied text looks like a student URL without activity
+  myLinks.forEach(lk=>{
+    if(!lk.atividadeId&&sel.includes(lk.id)){
+      e.preventDefault();
+      toast('Conecte uma atividade antes de copiar o link!');
+    }
+  });
+});
+
+/* ── DELETE LINK ── */
+window.deleteLink=async function(linkId){
+  if(!confirm('Excluir este link de turma?')) return;
+  try{
+    await remove(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+linkId));
+    await remove(ref(db,'turmas_fluxo/'+linkId));
+    toast('Link excluído');
+    await loadData();
+  }catch(e){console.error(e);alert('Erro ao excluir.')}
+};
+
+/* ── GERAR LINK MODAL ── */
+$('btnGerarLink').onclick=()=>{
+  $('glEscola').value='';
+  $('glAviso').textContent='';
+  $('glSerieOutro').style.display='none';
+  $('glTurmaOutro').style.display='none';
+  document.querySelectorAll('input[name=glSerie]').forEach(r=>r.checked=false);
+  document.querySelectorAll('input[name=glTurma]').forEach(r=>r.checked=false);
+  $('gerarModal').classList.add('show');
+};
+window.closeGerarModal=()=>$('gerarModal').classList.remove('show');
+
+// Show "outro" inputs
+document.querySelectorAll('input[name=glSerie]').forEach(r=>{
+  r.onchange=()=>$('glSerieOutro').style.display=r.value==='outro'?'block':'none';
+});
+document.querySelectorAll('input[name=glTurma]').forEach(r=>{
+  r.onchange=()=>$('glTurmaOutro').style.display=r.value==='outro'?'block':'none';
+});
+
+window.gerarLink=async function(){
+  const escola=$('glEscola').value.trim();
+  const serieRadio=document.querySelector('input[name=glSerie]:checked');
+  const turmaRadio=document.querySelector('input[name=glTurma]:checked');
+
+  if(!escola||!serieRadio||!turmaRadio){
+    $('glAviso').textContent='Preencha todos os campos.';
+    return;
+  }
+
+  let serie=serieRadio.value;
+  let turma=turmaRadio.value;
+  if(serie==='outro'){
+    serie=$('glSerieOutro').value.trim();
+    if(!serie){$('glAviso').textContent='Digite a série.';return}
+  }
+  if(turma==='outro'){
+    turma=$('glTurmaOutro').value.trim();
+    if(!turma){$('glAviso').textContent='Digite a turma.';return}
+  }
+
+  const turmaId='tfl_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const dados={
+    escola,serie,turma,
+    atividadeId:null,
+    criadoPor:currentUser.uid,
+    criadoEm:new Date().toISOString()
+  };
+
+  try{
+    const updates={};
+    updates['usuarios/'+currentUser.uid+'/turmas_fluxo/'+turmaId]=dados;
+    updates['turmas_fluxo/'+turmaId]=dados;
+    await update(ref(db),updates);
+    closeGerarModal();
+    toast('Link gerado! Agora conecte uma atividade.');
+    await loadData();
+  }catch(e){console.error(e);$('glAviso').textContent='Erro ao gerar link.'}
+};
+
+/* ── CONNECT MODAL ── */
+window.openConnectModal=function(linkId){
+  connectingLinkId=linkId;
+  selectedConnectFlowId=null;
+  $('btnConfirmConnect').disabled=true;
+
+  const list=$('connectList');
+  if(!myFlows.length){
+    list.innerHTML='<div class="empty-msg">Nenhuma atividade criada. Crie uma atividade primeiro.</div>';
+  }else{
+    list.innerHTML=myFlows.map(f=>`
+      <div class="connect-item" data-id="${f.id}" onclick="selectConnectFlow(this,'${f.id}')">
+        ${esc(f.nome||'Sem nome')}
+      </div>`).join('');
+  }
+  $('connectModal').classList.add('show');
+};
+window.closeConnectModal=()=>{$('connectModal').classList.remove('show');connectingLinkId=null};
+
+window.selectConnectFlow=function(el,flowId){
+  selectedConnectFlowId=flowId;
+  $('connectList').querySelectorAll('.connect-item').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel');
+  $('btnConfirmConnect').disabled=false;
+};
+
+window.confirmConnect=async function(){
+  if(!connectingLinkId||!selectedConnectFlowId) return;
+  try{
+    const updates={};
+    updates['usuarios/'+currentUser.uid+'/turmas_fluxo/'+connectingLinkId+'/atividadeId']=selectedConnectFlowId;
+    updates['turmas_fluxo/'+connectingLinkId+'/atividadeId']=selectedConnectFlowId;
+    await update(ref(db),updates);
+    closeConnectModal();
+    toast('Atividade conectada com sucesso!');
+    await loadData();
+  }catch(e){console.error(e);alert('Erro ao conectar.')}
+};
+
+</script>
+</body>
+</html>
