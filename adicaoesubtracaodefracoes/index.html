@@ -750,7 +750,8 @@
         // Popup do Painel do Aluno (funciona mesmo se o módulo falhar)
         (function(){
             const SENHA_PROFESSOR = "4241";
-            const URL_PAINEL_ALUNO = "./ranking.html"; // ajuste se necessário
+            const _tid = new URLSearchParams(window.location.search).get('turmaId') || '';
+            const URL_PAINEL_ALUNO = "./ranking.html?turmaId=" + encodeURIComponent(_tid);
 
             window.abrirModalPainelAluno = function() {
                 const modal = document.getElementById('modalPainelAluno');
@@ -909,7 +910,7 @@
         // ACESSO DO PROFESSOR COM POPUP + SENHA
         // =========================================================================
         const SENHA_PROFESSOR = "4241";
-        const URL_PAINEL_PROF = "./ranking.html?v=20260215"; // cache-busting para garantir versão atual do painel
+        const URL_PAINEL_PROF = "./ranking.html?turmaId=" + encodeURIComponent(turmaId) + "&v=20260215";
 
         window.abrirModalAcessoProfessor = function() {
             const modal = document.getElementById('modalAcessoProfessor');
@@ -942,7 +943,7 @@
         // =========================================================================
         // ✅ CADEADO NA TELA PAUSADA -> ABRE PAINEL DO ALUNO (SENHA DO PROFESSOR)
         // =========================================================================
-        const URL_PAINEL_ALUNO = "./ranking.html?v=20260215"; // cache-busting para garantir versão atual do painel
+        const URL_PAINEL_ALUNO = "./ranking.html?turmaId=" + encodeURIComponent(turmaId) + "&v=20260215";
 
         window.abrirModalPainelAluno = function() {
             const modal = document.getElementById('modalPainelAluno');
