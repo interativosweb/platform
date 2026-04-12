@@ -1,8 +1,8 @@
 const f = (n, d) => `<div class='fracao'><span class='num'>${n}</span><span class='den'>${d}</span></div>`;
 
-const pathIntro = "https://interativosweb.github.io/part2/introducao/";
-const pathComp  = "https://interativosweb.github.io/part2/complementar/";
-const pathResp  = "https://interativosweb.github.io/part2/respostas/";
+const pathIntro = "introducao/";
+const pathComp  = "complementar/";
+const pathResp  = "respostas/";
 
 const pad2 = (n) => String(n).padStart(2, "0");
 
