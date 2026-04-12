@@ -364,7 +364,9 @@ function renderQuestion(){
   let html=`<div class="q-card">`;
   html+=`<div class="q-step">Questão ${stepNum} de ${totalNodes}</div>`;
 
-  if(node.imgUrl){
+  if(node.imgData){
+    html+=`<img class="q-img" src="${node.imgData}" alt="Imagem">`;
+  }else if(node.imgUrl){
     html+=`<img class="q-img" src="${esc(node.imgUrl)}" alt="Imagem">`;
   }
 
@@ -410,7 +412,9 @@ function showSavedAnswer(node,resp){
     }
     const fb=$('feedback');
     fb.className='feedback show '+(resp.acertou?'acerto':'erro');
-    fb.innerHTML=`<div class="fb-title">${resp.acertou?'Resposta Correta!':'Resposta Incorreta'}</div>`;
+    let fbHtml=`<div class="fb-title">${resp.acertou?'Resposta Correta!':'Resposta Incorreta'}</div>`;
+    if(node.showResolucao&&node.resolucao) fbHtml+=`<div style="margin-top:6px">${esc(node.resolucao)}</div>`;
+    fb.innerHTML=fbHtml;
   }else if(node.tipo==='dissertativa'){
     const ta=$('respDissertativa');
     if(ta){ta.value=resp.texto||'';ta.disabled=true}
@@ -418,7 +422,9 @@ function showSavedAnswer(node,resp){
     if(btn) btn.disabled=true;
     const fb=$('feedback');
     fb.className='feedback show dissertativa';
-    fb.innerHTML='<div class="fb-title">Resposta enviada</div>';
+    let fbHtml='<div class="fb-title">Resposta enviada</div>';
+    if(node.showResolucao&&node.resolucao) fbHtml+=`<div style="margin-top:6px">${esc(node.resolucao)}</div>`;
+    fb.innerHTML=fbHtml;
   }
   $('btnNext').style.display='block';
 }
@@ -448,7 +454,9 @@ window.responderMC=function(idx){
 
   const fb=$('feedback');
   fb.className='feedback show '+(acertou?'acerto':'erro');
-  fb.innerHTML=`<div class="fb-title">${acertou?'Resposta Correta!':'Resposta Incorreta'}</div>`;
+  let fbH=`<div class="fb-title">${acertou?'Resposta Correta!':'Resposta Incorreta'}</div>`;
+  if(node.showResolucao&&node.resolucao) fbH+=`<div style="margin-top:6px">${esc(node.resolucao)}</div>`;
+  fb.innerHTML=fbH;
   $('btnNext').style.display='block';
   updateBadges();
 };
@@ -466,9 +474,12 @@ window.responderDissertativa=function(){
   $('respDissertativa').disabled=true;
   $('btnEnviar').disabled=true;
 
+  const node=fluxoData.nodes[nodeAtual];
   const fb=$('feedback');
   fb.className='feedback show dissertativa';
-  fb.innerHTML='<div class="fb-title">Resposta enviada!</div>';
+  let fbH='<div class="fb-title">Resposta enviada!</div>';
+  if(node&&node.showResolucao&&node.resolucao) fbH+=`<div style="margin-top:6px">${esc(node.resolucao)}</div>`;
+  fb.innerHTML=fbH;
   $('btnNext').style.display='block';
 };
 
