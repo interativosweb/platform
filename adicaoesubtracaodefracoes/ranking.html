@@ -289,7 +289,7 @@
     <div class="container">
         <header>
             <div class="titulo-container">
-                <a href="index.html" class="btn-voltar">
+                <a id="linkVoltar" href="index.html" class="btn-voltar">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
                     Voltar para Atividade
                 </a>
@@ -491,6 +491,12 @@
         const urlParams = new URLSearchParams(window.location.search);
         const turmaId = urlParams.get('turmaId') || '';
         const basePath = turmaId ? 'turmas_fracoes/' + turmaId + '/' : '';
+
+        // Atualiza link "Voltar" com turmaId
+        if (turmaId) {
+            const linkVoltar = document.getElementById('linkVoltar');
+            if (linkVoltar) linkVoltar.href = 'index.html?turmaId=' + encodeURIComponent(turmaId);
+        }
 
         /* --- FUNÇÕES GLOBAIS --- */
         
