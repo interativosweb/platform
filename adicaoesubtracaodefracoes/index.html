@@ -1089,7 +1089,9 @@
                         db.ref(basePath + 'alunos/' + alunoId).update({
                             nome: nomeSalvo,
                             serie: serieSalva,
+                            entrouEm: new Date().toISOString(),
                             status: 'online',
+                            status_individual: 'liberado',
                             codigoDispositivo: codigoDispositivo,
                             ultimoAcesso: new Date().toISOString()
                         });
