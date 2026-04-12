@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AlquiLab - Frações | Gerador de Links de Turma</title>
+    <meta name="description" content="Gere links exclusivos de turma para Adição e Subtração de Frações — cada turma tem seus dados isolados." />
+    <style>
+        :root {
+            --bg-page: #f5f5f7;
+            --card-bg: #ffffff;
+            --text-main: #1d1d1f;
+            --text-light: #86868b;
+            --accent: #0071e3;
+            --accent-hover: #0077ED;
+            --success: #34c759;
+            --warning: #ff9f0a;
+            --error: #ff3b30;
+            --radius: 16px;
+            --radius-lg: 20px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.10);
+            --border-light: #e5e5ea;
+            --bg-secondary: #f2f2f7;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-page);
+            color: var(--text-main);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .top-header {
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-light);
+            padding: 16px 32px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-inner {
+            max-width: 1140px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .logo-area { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        .logo-icon { width: 40px; height: 40px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; font-weight: 700; }
+        .logo-text h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.5px; color: var(--text-main); }
+        .logo-text h1 span { color: var(--accent); }
+        .logo-text .subtitle { font-size: 0.7rem; color: var(--text-light); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .prof-area { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+        .prof-info { text-align: right; }
+        .prof-name { font-size: 0.9rem; font-weight: 700; color: var(--text-main); }
+        .prof-role { font-size: 0.72rem; color: var(--text-light); font-weight: 600; }
+
+        .btn-back { padding: 9px 16px; border-radius: 50px; border: 1px solid var(--border-light); background: var(--card-bg); color: var(--text-light); font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.25s ease; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-back:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+
+        .btn-logout { width: 36px; height: 36px; border-radius: 50%; background: var(--bg-secondary); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-light); transition: all 0.25s ease; }
+        .btn-logout:hover { background: #ff3b30; color: white; transform: scale(1.08); }
+        .btn-logout svg { width: 18px; height: 18px; }
+
+        main { max-width: 1140px; margin: 28px auto; padding: 0 32px 60px; }
+        .section-title { font-size: 0.75rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border-light); }
+        .section-title .count { color: var(--accent); font-weight: 700; }
+
+        .panel { background: var(--card-bg); border: 1px solid var(--border-light); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 28px 30px; margin-bottom: 22px; }
+        .panel h2 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.3px; color: var(--text-main); margin-bottom: 4px; }
+        .panel .panel-desc { font-size: 0.85rem; color: var(--text-light); font-weight: 400; margin-bottom: 20px; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; }
+        .form-group { display: flex; flex-direction: column; gap: 7px; }
+        .form-group.full { grid-column: 1 / -1; }
+        .form-group label { font-size: 0.72rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.4px; font-weight: 600; }
+        .form-group input, .form-group select { width: 100%; padding: 12px 16px; border: 1px solid var(--border-light); border-radius: var(--radius); background: var(--bg-secondary); font-family: inherit; font-size: 0.92rem; font-weight: 500; color: var(--text-main); outline: none; transition: all 0.2s ease; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--accent); background: var(--card-bg); box-shadow: 0 0 0 3px rgba(0,113,227,0.12); }
+        .form-group .hint { font-size: 0.73rem; color: var(--text-light); font-weight: 500; }
+
+        .radio-row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .radio-pill { cursor: pointer; padding: 11px 20px; border: 1px solid var(--border-light); border-radius: 50px; background: var(--card-bg); font-weight: 600; font-size: 0.88rem; color: var(--text-light); transition: all 0.25s ease; }
+        .radio-pill input[type=radio] { display: none; }
+        .radio-pill:hover { border-color: var(--accent); color: var(--accent); }
+        .radio-pill:has(input:checked) { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+        .btn-primary { width: 100%; padding: 14px 22px; border: none; border-radius: var(--radius); background: var(--accent); color: #fff; font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.25s ease; margin-top: 22px; letter-spacing: -0.2px; }
+        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,113,227,0.25); }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .alert { padding: 12px 16px; border-radius: var(--radius); font-size: 0.86rem; font-weight: 500; margin-top: 14px; }
+        .alert-error { background: #fff2f2; color: var(--error); border: 1px solid #ffd4d4; }
+
+        .generated-link { margin-top: 18px; background: #eef6ff; border: 1px solid #cfe3ff; border-radius: var(--radius-lg); padding: 18px 20px; }
+        .generated-link .gl-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+        .generated-link .gl-url { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace; background: #fff; border: 1px solid var(--border-light); border-radius: var(--radius); padding: 11px 14px; font-size: 0.83rem; color: var(--text-main); word-break: break-all; margin-bottom: 12px; }
+        .link-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .link-actions button, .link-actions a { flex: 1; min-width: 130px; padding: 10px 16px; border: 1px solid var(--border-light); border-radius: 50px; background: var(--card-bg); color: var(--text-main); font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; transition: all 0.25s ease; }
+        .link-actions button:hover, .link-actions a:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+        .link-actions .btn-open { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .link-actions .btn-open:hover { background: var(--accent-hover); color: #fff; }
+
+        .history-empty { text-align: center; padding: 36px 20px; color: var(--text-light); font-weight: 500; font-size: 0.9rem; }
+        .loading { text-align: center; padding: 36px 20px; color: var(--text-light); font-weight: 500; }
+        .history-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+        .history-item { background: var(--card-bg); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 18px 20px; box-shadow: var(--shadow); transition: all 0.3s cubic-bezier(0.25,0.46,0.45,0.94); display: flex; flex-direction: column; gap: 10px; }
+        .history-item:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: transparent; }
+        .history-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+        .history-title { font-size: 0.98rem; font-weight: 700; color: var(--text-main); letter-spacing: -0.2px; }
+        .history-meta { font-size: 0.76rem; color: var(--text-light); font-weight: 500; margin-top: 3px; }
+        .history-badge { font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; padding: 4px 10px; border-radius: 6px; background: var(--bg-secondary); color: var(--text-light); white-space: nowrap; }
+        .history-badge.publica { background: #e8f8ed; color: #1d7a3a; }
+        .history-badge.privada { background: #fff3e0; color: #a35a00; }
+        .history-url { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace; font-size: 0.74rem; background: var(--bg-secondary); border-radius: 10px; padding: 9px 12px; color: var(--text-light); word-break: break-all; }
+        .history-date { font-size: 0.72rem; color: var(--text-light); font-weight: 500; }
+        .history-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+        .history-actions button, .history-actions a { padding: 7px 13px; border: 1px solid var(--border-light); border-radius: 50px; background: var(--card-bg); color: var(--text-light); font-family: inherit; font-size: 0.74rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.22s ease; }
+        .history-actions button:hover, .history-actions a:hover { border-color: var(--accent); color: var(--accent); }
+        .history-actions .act-del { color: var(--error); }
+        .history-actions .act-del:hover { background: var(--error); border-color: var(--error); color: #fff; }
+
+        .autocomplete-wrap { position: relative; }
+        .autocomplete-list { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--border-light); border-radius: var(--radius); max-height: 220px; overflow-y: auto; z-index: 50; display: none; box-shadow: var(--shadow-hover); }
+        .autocomplete-list.show { display: block; }
+        .autocomplete-item { padding: 11px 16px; cursor: pointer; font-size: 0.88rem; font-weight: 500; color: var(--text-main); border-bottom: 1px solid var(--border-light); transition: background 0.15s ease; }
+        .autocomplete-item:last-child { border-bottom: none; }
+        .autocomplete-item:hover { background: var(--bg-secondary); color: var(--accent); }
+
+        #turmaOutroWrap { display: none; }
+        #turmaOutroWrap.show { display: block; }
+
+        .auth-loading { position: fixed; inset: 0; background: var(--bg-page); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; transition: opacity 0.3s ease; }
+        .auth-loading.hidden { opacity: 0; pointer-events: none; }
+        .auth-spinner { width: 36px; height: 36px; border: 3px solid var(--border-light); border-top-color: var(--accent); border-radius: 50%; animation: authSpin 0.7s linear infinite; }
+        @keyframes authSpin { to { transform: rotate(360deg); } }
+
+        footer { text-align: center; padding: 24px 20px 40px; color: var(--text-light); font-size: 0.76rem; font-weight: 500; }
+
+        @media (max-width: 720px) {
+            .top-header { padding: 14px 18px; }
+            main { padding: 0 18px 50px; }
+            .panel { padding: 22px 20px; }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="auth-loading" id="authLoading">
+        <div class="auth-spinner"></div>
+        <div style="font-size:0.85rem;color:var(--text-light);font-weight:600">Verificando acesso...</div>
+    </div>
+
+    <header class="top-header">
+        <div class="header-inner">
+            <div class="logo-area">
+                <div class="logo-icon">π</div>
+                <div class="logo-text">
+                    <h1>Alqui<span>Lab</span></h1>
+                    <div class="subtitle">Frações · Gerador de Turmas</div>
+                </div>
+            </div>
+            <div class="prof-area" id="profArea" style="display:none">
+                <a href="../Plataforma.html" class="btn-back">← Plataforma</a>
+                <div class="prof-info">
+                    <div class="prof-name" id="profName">—</div>
+                    <div class="prof-role" id="profRole">—</div>
+                </div>
+                <button class="btn-logout" id="btnLogout" title="Sair">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div id="authWarning" class="panel" style="display:none;border-color:#ffd4d4;background:#fff8f8">
+            <h2 style="color:var(--error)">Acesso restrito</h2>
+            <p class="panel-desc" id="authWarningMsg">Você precisa estar logado como professor para gerar links de turma.</p>
+            <a href="../index.html" class="btn-primary" style="display:block;text-decoration:none;text-align:center">Fazer login</a>
+        </div>
+
+        <div id="mainContent" style="display:none">
+            <div class="section-title">Criar nova turma</div>
+
+            <div class="panel">
+                <h2>Dados da turma — Adição e Subtração de Frações</h2>
+                <p class="panel-desc">Cada turma gerada terá um link exclusivo. Os dados (respostas, acertos, erros) ficam isolados por turma.</p>
+
+                <form id="formTurma" autocomplete="off">
+                    <div class="form-group full">
+                        <label>Tipo de escola</label>
+                        <div class="radio-row">
+                            <label class="radio-pill"><input type="radio" name="tipoEscola" value="publica" required>Pública</label>
+                            <label class="radio-pill"><input type="radio" name="tipoEscola" value="privada">Privada</label>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Ano / Série</label>
+                            <select name="ano" id="selectAno" required>
+                                <option value="">Selecione...</option>
+                                <option value="5">5º ano</option>
+                                <option value="6">6º ano</option>
+                                <option value="7">7º ano</option>
+                                <option value="8">8º ano</option>
+                                <option value="9">9º ano</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Turma</label>
+                            <select name="turma" id="selectTurma" required>
+                                <option value="">Selecione...</option>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                                <option value="outro">Outro (digitar)</option>
+                            </select>
+                        </div>
+                        <div class="form-group full" id="turmaOutroWrap">
+                            <label>Digite a turma</label>
+                            <input type="text" id="inputTurmaOutro" placeholder="Ex: Manhã, Noturno, Sala 12..." maxlength="30">
+                        </div>
+                        <div class="form-group full">
+                            <label>Nome da escola</label>
+                            <div class="autocomplete-wrap">
+                                <input type="text" name="nomeEscola" id="inputEscola" placeholder="Digite o nome da escola" required maxlength="120" autocomplete="off">
+                                <div class="autocomplete-list" id="autocompleteEscolas"></div>
+                            </div>
+                            <div class="hint">Suas escolas anteriores aparecerão como sugestões.</div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="btnGerar">Gerar link da turma</button>
+                    <div id="formAlert"></div>
+                </form>
+
+                <div id="linkGerado" style="display:none"></div>
+            </div>
+
+            <div class="section-title">Histórico de turmas <span class="count" id="historyCount"></span></div>
+
+            <div id="historyContent">
+                <div class="loading">Carregando histórico...</div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        AlquiLab © 2026 — Frações · Gerador de Links de Turma
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, set, get, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",
+            authDomain: "profbase-5f9b0.firebaseapp.com",
+            databaseURL: "https://profbase-5f9b0-default-rtdb.firebaseio.com",
+            projectId: "profbase-5f9b0",
+            storageBucket: "profbase-5f9b0.firebasestorage.app",
+            messagingSenderId: "826412057766",
+            appId: "1:826412057766:web:729e6e24ce7587417fe067"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        let currentUser = null;
+        let currentUserData = null;
+        let minhasTurmas = [];
+        let escolasAnteriores = [];
+
+        const $ = id => document.getElementById(id);
+        const esc = s => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+        function formatDate(iso) {
+            try {
+                const d = new Date(iso);
+                return d.toLocaleDateString('pt-BR') + ' · ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            } catch (e) { return iso; }
+        }
+
+        function generateTurmaId() {
+            const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            let id = '';
+            for (let i = 0; i < 10; i++) id += chars[Math.floor(Math.random() * chars.length)];
+            return 'tf_' + id;
+        }
+
+        function buildTurmaUrl(turmaId) {
+            const base = window.location.href.replace(/\/gerador_link\.html.*$/, '');
+            return base + '/index.html?turmaId=' + turmaId;
+        }
+
+        function buildRankingUrl(turmaId) {
+            const base = window.location.href.replace(/\/gerador_link\.html.*$/, '');
+            return base + '/ranking.html?turmaId=' + turmaId;
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                $('authLoading').classList.add('hidden');
+                $('authWarning').style.display = 'block';
+                $('mainContent').style.display = 'none';
+                return;
+            }
+            currentUser = user;
+            try {
+                const snap = await get(ref(db, 'usuarios/' + user.uid));
+                currentUserData = snap.exists() ? snap.val() : { nome: user.displayName || user.email, email: user.email, tipo: 'aluno' };
+            } catch (e) {
+                currentUserData = { nome: user.displayName || user.email, email: user.email, tipo: 'aluno' };
+            }
+
+            const ADM_EMAIL = 'gilbertofernandessc@gmail.com';
+            if (user.email === ADM_EMAIL) {
+                currentUserData.tipo = 'professor';
+                if (!currentUserData.nome) currentUserData.nome = 'Gilberto Fernandes';
+            }
+
+            if (currentUserData.tipo !== 'professor') {
+                $('authLoading').classList.add('hidden');
+                $('authWarning').style.display = 'block';
+                $('authWarningMsg').textContent = 'Somente professores podem criar turmas de Frações.';
+                $('authWarning').querySelector('a').textContent = 'Voltar à plataforma';
+                $('authWarning').querySelector('a').setAttribute('href', '../Plataforma.html');
+                $('mainContent').style.display = 'none';
+                return;
+            }
+
+            $('profArea').style.display = 'flex';
+            $('mainContent').style.display = 'block';
+            $('profName').textContent = currentUserData.nome || user.email;
+            $('profRole').textContent = 'Professor(a)';
+            $('authLoading').classList.add('hidden');
+
+            await carregarTurmas();
+        });
+
+        $('btnLogout').addEventListener('click', async () => {
+            try { await signOut(auth); } catch (e) { }
+            window.location.href = '../index.html';
+        });
+
+        $('selectTurma').addEventListener('change', () => {
+            const outro = $('turmaOutroWrap');
+            if ($('selectTurma').value === 'outro') {
+                outro.classList.add('show');
+                $('inputTurmaOutro').setAttribute('required', '');
+            } else {
+                outro.classList.remove('show');
+                $('inputTurmaOutro').removeAttribute('required');
+            }
+        });
+
+        const inputEscola = $('inputEscola');
+        const autoList = $('autocompleteEscolas');
+
+        function renderAutocomplete() {
+            const term = inputEscola.value.trim().toLowerCase();
+            if (!term || escolasAnteriores.length === 0) { autoList.classList.remove('show'); return; }
+            const matches = escolasAnteriores.filter(e => e.toLowerCase().includes(term)).slice(0, 6);
+            if (matches.length === 0) { autoList.classList.remove('show'); return; }
+            autoList.innerHTML = matches.map(e => '<div class="autocomplete-item">' + esc(e) + '</div>').join('');
+            autoList.classList.add('show');
+            autoList.querySelectorAll('.autocomplete-item').forEach(item => {
+                item.addEventListener('mousedown', (ev) => {
+                    ev.preventDefault();
+                    inputEscola.value = item.textContent;
+                    autoList.classList.remove('show');
+                });
+            });
+        }
+
+        inputEscola.addEventListener('input', renderAutocomplete);
+        inputEscola.addEventListener('focus', renderAutocomplete);
+        inputEscola.addEventListener('blur', () => setTimeout(() => autoList.classList.remove('show'), 200));
+
+        $('formTurma').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = $('btnGerar');
+            const alertBox = $('formAlert');
+            alertBox.innerHTML = '';
+            btn.disabled = true;
+            btn.textContent = 'Gerando...';
+
+            try {
+                const form = new FormData(e.target);
+                const tipoEscola = form.get('tipoEscola');
+                const ano = form.get('ano');
+                let turma = form.get('turma');
+                if (turma === 'outro') {
+                    turma = $('inputTurmaOutro').value.trim();
+                    if (!turma) throw new Error('Digite o nome da turma.');
+                }
+                const nomeEscola = inputEscola.value.trim();
+                if (!tipoEscola || !ano || !turma || !nomeEscola) throw new Error('Preencha todos os campos.');
+
+                const turmaId = generateTurmaId();
+                const dados = {
+                    id: turmaId,
+                    ferramenta: 'fracoes',
+                    professorUid: currentUser.uid,
+                    professorNome: currentUserData.nome || currentUser.email,
+                    professorEmail: currentUser.email,
+                    tipoEscola, ano, turma, nomeEscola,
+                    dataCriacao: new Date().toISOString(),
+                    timestamp: Date.now()
+                };
+
+                const updates = {};
+                updates['usuarios/' + currentUser.uid + '/turmas_fracoes/' + turmaId] = dados;
+                updates['turmas_fracoes/' + turmaId] = dados;
+                await update(ref(db), updates);
+
+                const url = buildTurmaUrl(turmaId);
+                const linkBox = $('linkGerado');
+                linkBox.style.display = 'block';
+                linkBox.innerHTML = `
+                    <div class="generated-link">
+                        <div class="gl-label">Link gerado com sucesso</div>
+                        <div class="gl-url" id="urlGerada">${esc(url)}</div>
+                        <div class="link-actions">
+                            <button type="button" id="btnCopiarNovo">Copiar link</button>
+                            <a href="${esc(url)}" target="_blank" class="btn-open">Abrir turma</a>
+                        </div>
+                    </div>
+                `;
+                $('btnCopiarNovo').addEventListener('click', () => copiarParaClipboard(url, $('btnCopiarNovo')));
+
+                e.target.reset();
+                $('turmaOutroWrap').classList.remove('show');
+                await carregarTurmas();
+                linkBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } catch (err) {
+                alertBox.innerHTML = '<div class="alert alert-error">' + esc(err.message || 'Erro ao gerar link.') + '</div>';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Gerar link da turma';
+            }
+        });
+
+        async function carregarTurmas() {
+            const cont = $('historyContent');
+            cont.innerHTML = '<div class="loading">Carregando histórico...</div>';
+            try {
+                const snap = await get(ref(db, 'usuarios/' + currentUser.uid + '/turmas_fracoes'));
+                minhasTurmas = [];
+                if (snap.exists()) {
+                    snap.forEach(child => { minhasTurmas.push(child.val()); });
+                }
+                minhasTurmas.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                escolasAnteriores = [...new Set(minhasTurmas.map(t => t.nomeEscola).filter(Boolean))];
+                renderHistory();
+            } catch (e) {
+                cont.innerHTML = '<div class="alert alert-error">Erro ao carregar histórico: ' + esc(e.message) + '</div>';
+            }
+        }
+
+        function renderHistory() {
+            const cont = $('historyContent');
+            $('historyCount').textContent = minhasTurmas.length ? '(' + minhasTurmas.length + ')' : '';
+            if (minhasTurmas.length === 0) {
+                cont.innerHTML = '<div class="panel"><div class="history-empty">Você ainda não criou nenhuma turma. Use o formulário acima para criar a primeira.</div></div>';
+                return;
+            }
+            const tipoLabel = { publica: 'Pública', privada: 'Privada' };
+            cont.innerHTML = '<div class="history-list">' + minhasTurmas.map(t => {
+                const url = buildTurmaUrl(t.id);
+                const rankUrl = buildRankingUrl(t.id);
+                const badge = t.tipoEscola === 'publica' ? 'publica' : 'privada';
+                return `
+                    <div class="history-item" data-id="${esc(t.id)}">
+                        <div class="history-head">
+                            <div>
+                                <div class="history-title">${esc(t.nomeEscola)}</div>
+                                <div class="history-meta">${esc(t.ano)}º ano · Turma ${esc(t.turma)}</div>
+                            </div>
+                            <div class="history-badge ${badge}">${esc(tipoLabel[t.tipoEscola] || t.tipoEscola)}</div>
+                        </div>
+                        <div class="history-date">Criada em ${esc(formatDate(t.dataCriacao))}</div>
+                        <div class="history-url">${esc(url)}</div>
+                        <div class="history-actions">
+                            <button type="button" class="act-copy" data-url="${esc(url)}">Copiar</button>
+                            <a href="${esc(url)}" target="_blank">Abrir</a>
+                            <a href="${esc(rankUrl)}" target="_blank">Painel do Professor</a>
+                            <button type="button" class="act-del" data-id="${esc(t.id)}">Excluir</button>
+                        </div>
+                    </div>
+                `;
+            }).join('') + '</div>';
+
+            cont.querySelectorAll('.act-copy').forEach(b => {
+                b.addEventListener('click', () => copiarParaClipboard(b.dataset.url, b));
+            });
+            cont.querySelectorAll('.act-del').forEach(b => {
+                b.addEventListener('click', async () => {
+                    if (!confirm('Excluir esta turma? O link deixará de funcionar.')) return;
+                    try {
+                        const id = b.dataset.id;
+                        const updates = {};
+                        updates['usuarios/' + currentUser.uid + '/turmas_fracoes/' + id] = null;
+                        updates['turmas_fracoes/' + id] = null;
+                        await update(ref(db), updates);
+                        await carregarTurmas();
+                    } catch (e) {
+                        alert('Erro ao excluir: ' + e.message);
+                    }
+                });
+            });
+        }
+
+        async function copiarParaClipboard(text, btn) {
+            try {
+                await navigator.clipboard.writeText(text);
+                const original = btn.textContent;
+                btn.textContent = 'Copiado!';
+                setTimeout(() => { btn.textContent = original; }, 1800);
+            } catch (e) {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); btn.textContent = 'Copiado!'; setTimeout(() => btn.textContent = 'Copiar', 1800); } catch (_) { }
+                document.body.removeChild(ta);
+            }
+        }
+    </script>
+</body>
+
+</html>
