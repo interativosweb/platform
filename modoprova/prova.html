@@ -5,61 +5,170 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Modo Prova</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#fff}
+:root{
+  --neon:#ff2d6f;
+  --neon2:#b14bff;
+  --neon3:#00e7ff;
+  --text:#f4f4f8;
+  --text2:#8a8aa0;
+  --border:rgba(255,255,255,.1);
+  --border2:rgba(255,255,255,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
+html,body{width:100%;height:100%;overflow:hidden;background:#07070c;color:var(--text)}
 #frame{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);backdrop-filter:blur(10px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px}
+
+.overlay{
+  position:fixed;inset:0;z-index:9999;
+  display:flex;align-items:center;justify-content:center;padding:24px;
+  background:rgba(7,7,12,.8);
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+}
+.overlay::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(circle at 20% 20%,rgba(255,45,111,.22),transparent 45%),
+    radial-gradient(circle at 80% 80%,rgba(0,231,255,.15),transparent 45%),
+    radial-gradient(circle at 50% 50%,rgba(177,75,255,.10),transparent 60%);
+}
 .overlay.hide{display:none}
-.box{background:#1c1c1e;border:1px solid #2c2c2e;border-radius:20px;padding:32px;max-width:520px;width:100%;text-align:center}
-.box h1{font-size:1.5rem;margin-bottom:8px;font-weight:800}
-.box .sub{color:#8e8e93;font-size:.9rem;margin-bottom:20px}
-.box .rules{background:#2c2c2e;border-radius:12px;padding:16px;text-align:left;font-size:.88rem;line-height:1.7;margin-bottom:20px}
-.box .rules b{color:#ff6b60}
-.box .rules ul{list-style:none;padding:0}
-.box .rules li{padding:4px 0;display:flex;gap:8px}
-.box .rules li::before{content:"✕";color:#ff3b30;font-weight:800}
-.box input{width:100%;padding:13px 15px;background:#2c2c2e;border:1.5px solid #3a3a3c;border-radius:12px;color:#fff;font-size:1rem;outline:none;margin-bottom:12px;font-family:inherit}
-.box input:focus{border-color:#ff3b30}
-.box button{width:100%;padding:14px;background:linear-gradient(135deg,#ff3b30,#ff6b60);color:#fff;border:none;border-radius:12px;font-weight:800;font-size:1rem;cursor:pointer;font-family:inherit}
-.box button:hover{transform:translateY(-1px)}
-.box .err{color:#ff3b30;font-size:.85rem;margin-bottom:8px;min-height:1.1em}
-.lock-icon{width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,#ff3b30,#ff6b60);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.6rem}
-.violation{color:#ff6b60;font-weight:700;font-size:.88rem;margin-bottom:12px}
-.loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000;color:#fff;z-index:9998}
+
+.popup{
+  position:relative;
+  background:rgba(18,18,28,.85);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:34px 32px;
+  max-width:480px;width:100%;
+  text-align:center;
+  backdrop-filter:blur(24px);
+  box-shadow:0 30px 80px rgba(0,0,0,.6);
+}
+.popup::before{
+  content:"";position:absolute;inset:-1px;border-radius:23px;pointer-events:none;
+  background:linear-gradient(135deg,rgba(255,45,111,.6),rgba(177,75,255,.3),rgba(0,231,255,.5));
+  -webkit-mask:linear-gradient(#000,#000) content-box,linear-gradient(#000,#000);
+  mask:linear-gradient(#000,#000) content-box,linear-gradient(#000,#000);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  padding:1px;opacity:.7;
+}
+
+.badge{
+  display:inline-block;
+  padding:5px 14px;border-radius:50px;
+  background:rgba(255,45,111,.12);
+  border:1px solid rgba(255,45,111,.35);
+  color:var(--neon);
+  font-size:.66rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  margin-bottom:16px;
+  box-shadow:0 0 20px rgba(255,45,111,.25);
+}
+.badge.warn{background:rgba(255,45,111,.18);border-color:rgba(255,45,111,.5);box-shadow:0 0 24px rgba(255,45,111,.4)}
+
+.popup h1{
+  font-size:1.6rem;font-weight:700;letter-spacing:.3px;margin-bottom:6px;
+  background:linear-gradient(135deg,#fff,#ffb3c9);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.popup .sub{color:var(--text2);font-size:.88rem;margin-bottom:22px;line-height:1.5}
+
+.rules{
+  background:rgba(0,0,0,.3);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:16px 18px;
+  text-align:left;margin-bottom:22px;
+}
+.rules .rtitle{
+  font-size:.68rem;font-weight:700;color:var(--neon3);
+  letter-spacing:1.8px;text-transform:uppercase;margin-bottom:10px;
+}
+.rules ul{list-style:none;padding:0}
+.rules li{
+  padding:6px 0;font-size:.85rem;color:#d0d0dc;
+  display:flex;align-items:center;gap:10px;
+}
+.rules li::before{
+  content:"";width:5px;height:5px;border-radius:50%;
+  background:var(--neon);box-shadow:0 0 8px var(--neon);flex-shrink:0;
+}
+.rules .note{
+  margin-top:12px;padding-top:12px;border-top:1px solid var(--border);
+  font-size:.76rem;color:var(--text2);line-height:1.55;
+}
+
+.popup input{
+  width:100%;padding:13px 15px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--border2);
+  border-radius:12px;
+  color:var(--text);font-size:1rem;outline:none;
+  margin-bottom:12px;font-family:inherit;
+  transition:all .15s;
+}
+.popup input:focus{
+  border-color:var(--neon);
+  background:rgba(255,45,111,.06);
+  box-shadow:0 0 0 3px rgba(255,45,111,.15),0 0 22px rgba(255,45,111,.2);
+}
+
+.popup button{
+  width:100%;padding:14px;
+  background:linear-gradient(135deg,var(--neon),var(--neon2));
+  color:#fff;border:none;border-radius:12px;
+  font-weight:700;font-size:.95rem;letter-spacing:.5px;
+  cursor:pointer;font-family:inherit;
+  box-shadow:0 0 0 1px rgba(255,255,255,.08) inset,0 10px 34px rgba(255,45,111,.4);
+  transition:transform .15s,box-shadow .15s;
+}
+.popup button:hover{transform:translateY(-1px);box-shadow:0 0 0 1px rgba(255,255,255,.1) inset,0 12px 42px rgba(255,45,111,.6)}
+
+.err{color:var(--neon);font-size:.82rem;margin-bottom:8px;min-height:1.1em;font-weight:500}
+.violation{
+  color:var(--neon);font-weight:600;font-size:.85rem;margin-bottom:14px;
+  padding:8px 12px;border-radius:8px;
+  background:rgba(255,45,111,.08);border:1px solid rgba(255,45,111,.25);
+}
+
+.loading{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:#07070c;color:var(--text2);z-index:9998;
+  font-size:.82rem;letter-spacing:2px;text-transform:uppercase;
+}
 </style>
 </head>
 <body>
 
-<div class="loading" id="loading">Carregando prova…</div>
+<div class="loading" id="loading">Carregando prova</div>
 
 <iframe id="frame" style="display:none" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
 
 <div class="overlay" id="rulesOverlay" style="display:none">
-  <div class="box">
-    <div class="lock-icon">🔒</div>
-    <h1 id="provaNome">Modo Prova</h1>
-    <div class="sub">Leia as regras antes de iniciar</div>
+  <div class="popup">
+    <div class="badge">Modo Prova</div>
+    <h1 id="provaNome">Prova</h1>
+    <div class="sub">Leia as regras antes de iniciar. A tela cheia será ativada automaticamente.</div>
     <div class="rules">
-      <b>Durante a prova estará bloqueado:</b>
+      <div class="rtitle">Durante a prova será bloqueado</div>
       <ul>
-        <li>Sair de tela cheia (F11 / ESC)</li>
+        <li>Sair de tela cheia (F11 ou ESC)</li>
         <li>Trocar de aba ou janela</li>
-        <li>Copiar, colar ou recortar (Ctrl+C/V/X)</li>
-        <li>Imprimir / salvar (Ctrl+P / Ctrl+S)</li>
-        <li>Recarregar a página (F5 / Ctrl+R)</li>
-        <li>Abrir ferramentas do desenvolvedor (F12)</li>
-        <li>Clique direito / menu de contexto</li>
+        <li>Copiar, colar ou recortar</li>
+        <li>Imprimir ou salvar a página</li>
+        <li>Recarregar (F5 ou Ctrl+R)</li>
+        <li>Abrir ferramentas do desenvolvedor</li>
+        <li>Menu de contexto (clique direito)</li>
       </ul>
-      <div style="margin-top:10px;color:#8e8e93;font-size:.82rem">Qualquer tentativa bloqueia a tela e exige a senha do professor para continuar.</div>
+      <div class="note">Qualquer tentativa bloqueia a tela e exige a senha do professor para continuar.</div>
     </div>
-    <button id="btnIniciar">Iniciar prova em tela cheia</button>
+    <button id="btnIniciar">Iniciar prova</button>
   </div>
 </div>
 
 <div class="overlay hide" id="lockOverlay">
-  <div class="box">
-    <div class="lock-icon">⚠️</div>
-    <h1>Tela Bloqueada</h1>
+  <div class="popup">
+    <div class="badge warn">Tela Bloqueada</div>
+    <h1>Acesso Suspenso</h1>
     <div class="violation" id="violationMsg">Violação detectada</div>
     <div class="sub">Peça ao professor para inserir a senha de desbloqueio.</div>
     <input id="senhaInput" type="password" placeholder="Senha do professor" autocomplete="off">
@@ -69,9 +178,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#fff}
 </div>
 
 <div class="overlay hide" id="errorOverlay">
-  <div class="box">
-    <div class="lock-icon">❌</div>
-    <h1>Link inválido</h1>
+  <div class="popup">
+    <div class="badge warn">Erro</div>
+    <h1>Link Inválido</h1>
     <div class="sub" id="errorText">Esta prova não foi encontrada.</div>
   </div>
 </div>
@@ -87,9 +196,7 @@ const $=id=>document.getElementById(id);
 const qs=new URLSearchParams(location.search);
 const uid=qs.get('uid'),pid=qs.get('id');
 
-let prova=null;
-let locked=false;
-let started=false;
+let prova=null,locked=false,started=false;
 
 function showError(msg){
   $('loading').style.display='none';
@@ -103,7 +210,7 @@ async function init(){
     const s=await get(ref(db,'provas/'+uid+'/'+pid));
     if(!s.exists()){showError('Esta prova não existe ou foi removida.');return}
     prova=s.val();
-    $('provaNome').textContent=prova.nome||'Modo Prova';
+    $('provaNome').textContent=prova.nome||'Prova';
     document.title=prova.nome||'Modo Prova';
     $('loading').style.display='none';
     $('rulesOverlay').style.display='flex';
@@ -150,7 +257,7 @@ document.addEventListener('keydown',e=>{
   if(!started)return;
   const k=e.key;
   if(blockedKeys.has(k)){e.preventDefault();e.stopPropagation();lock('Tecla bloqueada: '+k);return}
-  if(k==='Escape'){e.preventDefault();e.stopPropagation();lock('Tentou sair da tela cheia (ESC)');return}
+  if(k==='Escape'){e.preventDefault();e.stopPropagation();lock('Tentou sair da tela cheia');return}
   if(e.ctrlKey||e.metaKey){
     const low=(k||'').toLowerCase();
     if(['c','v','x','p','s','r','u','a','t','n','w'].includes(low)||(e.shiftKey&&['i','j','c'].includes(low))){
@@ -160,22 +267,10 @@ document.addEventListener('keydown',e=>{
 },true);
 
 document.addEventListener('contextmenu',e=>{if(started){e.preventDefault();lock('Menu de contexto bloqueado')}});
-
-document.addEventListener('fullscreenchange',()=>{
-  if(started&&!document.fullscreenElement)lock('Saiu da tela cheia');
-});
-
-document.addEventListener('visibilitychange',()=>{
-  if(started&&document.hidden)lock('Trocou de aba');
-});
-
-window.addEventListener('blur',()=>{
-  if(started)setTimeout(()=>{if(!document.hasFocus())lock('Perdeu o foco da janela')},100);
-});
-
-window.addEventListener('beforeunload',e=>{
-  if(started){e.preventDefault();e.returnValue=''}
-});
+document.addEventListener('fullscreenchange',()=>{if(started&&!document.fullscreenElement)lock('Saiu da tela cheia')});
+document.addEventListener('visibilitychange',()=>{if(started&&document.hidden)lock('Trocou de aba')});
+window.addEventListener('blur',()=>{if(started)setTimeout(()=>{if(!document.hasFocus())lock('Perdeu o foco da janela')},100)});
+window.addEventListener('beforeunload',e=>{if(started){e.preventDefault();e.returnValue=''}});
 </script>
 </body>
 </html>
