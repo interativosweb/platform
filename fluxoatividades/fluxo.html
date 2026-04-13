@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="light">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Editor de Fluxo — AlquiLab</title>
 <style>
-/* ── THEME VARS ── */
-[data-theme="light"]{--bg:#f5f5f7;--bg2:#fff;--bg3:#fafafa;--text:#1d1d1f;--text2:#86868b;--border:#e5e5ea;--grid-dot:#ccc;--node-shadow:rgba(0,0,0,.08);--canvas-bg:#f0f0f3}
-[data-theme="dark"]{--bg:#1c1c1e;--bg2:#2c2c2e;--bg3:#3a3a3c;--text:#f5f5f7;--text2:#98989d;--border:#48484a;--grid-dot:#555;--node-shadow:rgba(0,0,0,.4);--canvas-bg:#1c1c1e}
-:root{--accent:#0071e3;--success:#34c759;--error:#ff3b30;--warn:#ff9500;--purple:#af52de;--teal:#5ac8fa;--pink:#ff2d55;--radius:12px}
+/* ── THEME (dark only) ── */
+:root{
+  --bg:#1c1c1e;--bg2:#2c2c2e;--bg3:#3a3a3c;--text:#f5f5f7;--text2:#98989d;--border:#48484a;
+  --grid-dot:#555;--node-shadow:rgba(0,0,0,.4);--canvas-bg:#1c1c1e;
+  --accent:#0071e3;--success:#34c759;--error:#ff3b30;--warn:#ff9500;--purple:#af52de;--teal:#5ac8fa;--pink:#ff2d55;--radius:12px;
+}
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;user-select:none}
 
@@ -43,9 +45,9 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 .sb-empty{padding:16px;text-align:center;color:var(--text2);font-size:.82rem}
 
 /* ── CANVAS ── */
-.canvas-wrap{flex:1;overflow:hidden;position:relative;background:var(--canvas-bg);cursor:grab}
+.canvas-wrap{flex:1;overflow:hidden;position:relative;background:var(--canvas-bg);cursor:grab;background-image:radial-gradient(circle,var(--grid-dot) 1px,transparent 1px);background-size:24px 24px;background-position:0 0}
 .canvas-wrap.grabbing{cursor:grabbing}
-.canvas-inner{position:absolute;top:0;left:0;transform-origin:0 0;width:8000px;height:6000px;background-image:radial-gradient(circle,var(--grid-dot) 1px,transparent 1px);background-size:24px 24px}
+.canvas-inner{position:absolute;top:0;left:0;transform-origin:0 0;width:8000px;height:6000px}
 .canvas-inner svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1}
 .canvas-inner svg path.conn{fill:none;stroke-width:2.5;pointer-events:stroke;cursor:pointer}
 .canvas-inner svg path.conn:hover{stroke-width:4}
@@ -64,6 +66,9 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 .node-body{padding:8px 10px;font-size:.8rem;color:var(--text);line-height:1.35;min-height:24px;cursor:pointer}
 .node-body em{color:var(--text2);font-style:italic}
 .node-body img{max-width:100%;max-height:80px;border-radius:6px;margin-top:4px;object-fit:contain}
+.mc-ports-info{display:flex;justify-content:space-between;margin-top:8px;padding-top:6px;border-top:1px dashed var(--border);font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.mc-p-acerto{color:#34c759}
+.mc-p-erro{color:#ff3b30}
 
 /* ── PORTS (lateral) ── */
 .port{position:absolute;width:12px;height:12px;border-radius:50%;border:2px solid var(--bg2);z-index:15;cursor:crosshair;transition:transform .1s}
@@ -153,7 +158,6 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
   <input id="flowNameInput" class="flow-name-input" placeholder="Nome do fluxo..." spellcheck="false">
   <span id="saveBadge" class="save-badge ok">Salvo</span>
   <button class="btn-h" id="btnSidebarToggle">Fluxos</button>
-  <button class="btn-h" id="btnTheme" title="Modo claro/escuro">&#9790;</button>
 </div>
 
 <!-- MAIN -->
@@ -214,12 +218,19 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
       <input type="file" id="fileInput" accept="image/*" style="display:none">
     </div>
 
-    <label>Resolução para o aluno <small style="color:var(--text2)">(opcional)</small></label>
-    <textarea id="editResolucao" rows="2" placeholder="Explicação exibida após responder..."></textarea>
-
-    <div class="check-row">
+    <div class="check-row" style="margin-top:14px">
       <input type="checkbox" id="editShowResolucao">
       <span>Exibir resolução ao aluno após responder</span>
+    </div>
+
+    <div id="resolucaoBox" style="display:none;margin-top:8px;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--bg3)">
+      <label style="margin-top:0">Texto da resolução</label>
+      <textarea id="editResolucao" rows="2" placeholder="Explicação exibida após responder..."></textarea>
+      <label>Imagem da resolução <small style="color:var(--text2)">(máx 800KB)</small></label>
+      <div class="drop-zone" id="dropZoneResol">
+        Arraste uma imagem aqui ou clique para selecionar
+        <input type="file" id="fileInputResol" accept="image/*" style="display:none">
+      </div>
     </div>
 
     <div class="btns">
@@ -294,14 +305,13 @@ function esc(s){const d=document.createElement('div');d.textContent=s||'';return
 const typeLabel={inicio:'Início',multipla_escolha:'Múlt. Escolha',dissertativa:'Dissertativa',fim:'Fim'};
 const defaultColor={inicio:'#34c759',multipla_escolha:'#0071e3',dissertativa:'#af52de',fim:'#ff3b30'};
 
-/* ── THEME ── */
-function setTheme(t){document.documentElement.dataset.theme=t;localStorage.setItem('fluxo_theme',t);$('btnTheme').textContent=t==='dark'?'☀':'☾'}
-$('btnTheme').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
-setTheme(localStorage.getItem('fluxo_theme')||'light');
 
 /* ══════════════ ZOOM & PAN ══════════════ */
 function applyTransform(){
   inner.style.transform=`translate(${panX}px,${panY}px) scale(${zoom})`;
+  const s=24*zoom;
+  wrap.style.backgroundSize=`${s}px ${s}px`;
+  wrap.style.backgroundPosition=`${panX}px ${panY}px`;
   $('zoomDisplay').textContent=Math.round(zoom*100)+'%';
 }
 window.zoomBy=function(d){zoom=clamp(zoom+d,0.2,3);applyTransform()};
@@ -450,8 +460,8 @@ window.addNode=function(tipo){
   const id=uid();
   const center=clientToCanvas(wrap.clientWidth/2,wrap.clientHeight/2);
   const n={id,tipo,x:center.x-100,y:center.y-30,cor:defaultColor[tipo],conexoes:{}};
-  if(tipo==='multipla_escolha'){n.pergunta='';n.opcoes=['','','',''];n.correta=0;n.resolucao='';n.showResolucao=false}
-  if(tipo==='dissertativa'){n.pergunta='';n.resolucao='';n.showResolucao=false}
+  if(tipo==='multipla_escolha'){n.pergunta='';n.opcoes=['','','',''];n.correta=0;n.resolucao='';n.showResolucao=false;n.resolucaoImg=null}
+  if(tipo==='dissertativa'){n.pergunta='';n.resolucao='';n.showResolucao=false;n.resolucaoImg=null}
   flow.nodes[id]=n;renderNode(n);renderConns();markDirty();selectN(id);
   if(tipo!=='fim'&&tipo!=='inicio') openEditModal(id);
 };
@@ -487,9 +497,11 @@ function renderNode(n){
     const txt=n.pergunta||'';
     let inner=txt?esc(txt).slice(0,70)+(txt.length>70?'...':''):'<em>Clique duplo para editar</em>';
     if(n.imgData) inner+=`<img src="${n.imgData}">`;
+    if(n.tipo==='multipla_escolha'){
+      inner+=`<div class="mc-ports-info"><span class="mc-p-acerto">● Acerto</span><span class="mc-p-erro">● Erro</span></div>`;
+    }
     body.innerHTML=inner;
   }
-  body.ondblclick=e=>{e.stopPropagation();if(n.tipo!=='inicio'&&n.tipo!=='fim')openEditModal(n.id)};
   el.appendChild(body);
 
   // Comment indicator
@@ -504,12 +516,9 @@ function renderNode(n){
   if(n.tipo==='inicio'){
     const p=mk_port(n.id,'proximo','right','50%',color);el.appendChild(p);
   }else if(n.tipo==='multipla_escolha'){
-    const pa=mk_port(n.id,'acerto','right','30%','#34c759');
-    const pe=mk_port(n.id,'erro','right','70%','#ff3b30');
+    const pa=mk_port(n.id,'acerto','right','35%','#34c759');
+    const pe=mk_port(n.id,'erro','right','75%','#ff3b30');
     el.appendChild(pa);el.appendChild(pe);
-    // Labels
-    const la=document.createElement('span');la.className='port-label';la.style.top='calc(30% - 5px)';la.style.right='18px';la.textContent='Acerto';el.appendChild(la);
-    const le=document.createElement('span');le.className='port-label';le.style.top='calc(70% - 5px)';le.style.right='18px';le.textContent='Erro';el.appendChild(le);
   }else if(n.tipo==='dissertativa'){
     const p=mk_port(n.id,'concluido','right','50%',n.cor||'#af52de');el.appendChild(p);
   }
@@ -521,6 +530,7 @@ function renderNode(n){
     dragId=n.id;dragMoved=false;dragStart={x:e.clientX,y:e.clientY};dragNStart={x:n.x,y:n.y};e.preventDefault();
   };
   el.onclick=e=>{if(!dragMoved)selectN(n.id)};
+  el.ondblclick=e=>{if(e.target.closest('.port'))return;e.stopPropagation();if(n.tipo!=='inicio'&&n.tipo!=='fim')openEditModal(n.id)};
   el.oncontextmenu=e=>{e.preventDefault();showCtx(n.id,e.clientX,e.clientY)};
 
   nodesL.appendChild(el);
@@ -590,8 +600,8 @@ function getPortPos(nid,portKey){
   if(pEl) return{x:nx+w,y:ny+parseFloat(pEl.style.top)/100*h};
   // Fallback by position percentage
   if(portKey==='proximo'||portKey==='concluido') return{x:nx+w,y:ny+h*0.5};
-  if(portKey==='acerto') return{x:nx+w,y:ny+h*0.3};
-  if(portKey==='erro') return{x:nx+w,y:ny+h*0.7};
+  if(portKey==='acerto') return{x:nx+w,y:ny+h*0.35};
+  if(portKey==='erro') return{x:nx+w,y:ny+h*0.75};
   return{x:nx+w,y:ny+h/2};
 }
 
@@ -633,12 +643,19 @@ function openEditModal(nid){
   $('editPergunta').value=n.pergunta||'';
   $('editResolucao').value=n.resolucao||'';
   $('editShowResolucao').checked=!!n.showResolucao;
+  $('resolucaoBox').style.display=n.showResolucao?'block':'none';
 
-  // Image
+  // Image (pergunta)
   const dz=$('dropZone');
   if(n.imgData){dz.innerHTML=`<img src="${n.imgData}"><br><small>Clique ou arraste para trocar</small><input type="file" id="fileInput" accept="image/*" style="display:none">`}
   else{dz.innerHTML='Arraste uma imagem aqui ou clique para selecionar<input type="file" id="fileInput" accept="image/*" style="display:none">'}
   setupDropZone();
+
+  // Image (resolução)
+  const dzR=$('dropZoneResol');
+  if(n.resolucaoImg){dzR.innerHTML=`<img src="${n.resolucaoImg}"><br><small>Clique ou arraste para trocar</small><input type="file" id="fileInputResol" accept="image/*" style="display:none">`}
+  else{dzR.innerHTML='Arraste uma imagem aqui ou clique para selecionar<input type="file" id="fileInputResol" accept="image/*" style="display:none">'}
+  setupDropZoneResol();
 
   // MC options
   $('secMC').style.display=n.tipo==='multipla_escolha'?'block':'none';
@@ -674,6 +691,8 @@ window.saveNodeEdit=function(){
   // Get image from drop zone
   const img=$('dropZone').querySelector('img');
   n.imgData=img?img.src:null;
+  const imgR=$('dropZoneResol').querySelector('img');
+  n.resolucaoImg=imgR?imgR.src:null;
 
   if(n.tipo==='multipla_escolha'){
     const inputs=$('editOpts').querySelectorAll('input[type=text]');
@@ -704,6 +723,31 @@ function handleFile(file){
   };
   reader.readAsDataURL(file);
 }
+
+function setupDropZoneResol(){
+  const dz=$('dropZoneResol');
+  dz.onclick=()=>$('fileInputResol').click();
+  $('fileInputResol').onchange=e=>handleFileResol(e.target.files[0]);
+  dz.ondragover=e=>{e.preventDefault();dz.classList.add('drag-over')};
+  dz.ondragleave=()=>dz.classList.remove('drag-over');
+  dz.ondrop=e=>{e.preventDefault();dz.classList.remove('drag-over');if(e.dataTransfer.files.length)handleFileResol(e.dataTransfer.files[0])};
+}
+function handleFileResol(file){
+  if(!file||!file.type.startsWith('image/'))return;
+  if(file.size>800*1024){alert('Imagem muito grande! Máximo 800KB.');return}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    $('dropZoneResol').innerHTML=`<img src="${e.target.result}"><br><small>Clique ou arraste para trocar</small><input type="file" id="fileInputResol" accept="image/*" style="display:none">`;
+    setupDropZoneResol();
+  };
+  reader.readAsDataURL(file);
+}
+
+document.addEventListener('change',e=>{
+  if(e.target&&e.target.id==='editShowResolucao'){
+    $('resolucaoBox').style.display=e.target.checked?'block':'none';
+  }
+});
 
 /* ══════════════ COMMENT MODAL ══════════════ */
 function openCommentModal(nid){
@@ -756,7 +800,7 @@ wrap.addEventListener('dblclick',e=>{
   if(!flowId)return;
   const pt=clientToCanvas(e.clientX,e.clientY);
   const id=uid();
-  flow.nodes[id]={id,tipo:'multipla_escolha',x:pt.x-100,y:pt.y-30,cor:'#0071e3',conexoes:{},pergunta:'',opcoes:['','','',''],correta:0,resolucao:'',showResolucao:false};
+  flow.nodes[id]={id,tipo:'multipla_escolha',x:pt.x-100,y:pt.y-30,cor:'#0071e3',conexoes:{},pergunta:'',opcoes:['','','',''],correta:0,resolucao:'',showResolucao:false,resolucaoImg:null};
   renderNode(flow.nodes[id]);renderConns();markDirty();openEditModal(id);
 });
 
