@@ -5,83 +5,193 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Modo Prova — Gerador</title>
 <style>
-:root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--text2:#86868b;--accent:#ff3b30;--accent2:#ff6b60;--border:#e5e5ea;--bg2:#f2f2f7;--success:#34c759}
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-body{background:var(--bg);color:var(--text);min-height:100vh;padding:24px}
-.header{max-width:900px;margin:0 auto 24px;display:flex;align-items:center;justify-content:space-between}
-.header a{color:var(--text2);text-decoration:none;font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:6px}
-.header a:hover{color:var(--accent)}
-.header .brand{display:flex;align-items:center;gap:10px}
-.brand-icon{width:40px;height:40px;background:linear-gradient(135deg,#ff3b30,#ff6b60);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;font-weight:800}
-.brand h1{font-size:1.15rem;font-weight:800}
-.brand p{font-size:.7rem;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+:root{
+  --bg:#07070c;
+  --bg2:#0d0d16;
+  --panel:rgba(18,18,28,.72);
+  --border:rgba(255,255,255,.08);
+  --border2:rgba(255,255,255,.14);
+  --text:#f4f4f8;
+  --text2:#8a8aa0;
+  --neon:#ff2d6f;
+  --neon2:#b14bff;
+  --neon3:#00e7ff;
+  --ok:#2dffb0;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
+html,body{background:var(--bg);color:var(--text);min-height:100vh}
+body{
+  padding:28px 20px 60px;
+  background:
+    radial-gradient(circle at 15% 10%,rgba(255,45,111,.18),transparent 45%),
+    radial-gradient(circle at 85% 90%,rgba(0,231,255,.14),transparent 45%),
+    radial-gradient(circle at 50% 50%,rgba(177,75,255,.10),transparent 55%),
+    var(--bg);
+}
+.header{max-width:960px;margin:0 auto 28px;display:flex;align-items:center;justify-content:space-between}
+.header a{color:var(--text2);text-decoration:none;font-size:.8rem;font-weight:600;letter-spacing:.3px}
+.header a:hover{color:var(--neon3)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .dot{width:10px;height:10px;border-radius:50%;background:var(--neon);box-shadow:0 0 14px var(--neon),0 0 30px var(--neon)}
+.brand h1{font-size:.95rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase}
+.brand p{font-size:.68rem;color:var(--text2);font-weight:500;letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
 
-.container{max-width:900px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:18px}
-@media(max-width:720px){.container{grid-template-columns:1fr}}
-.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;box-shadow:0 4px 20px rgba(0,0,0,.04)}
-.card h2{font-size:1.05rem;font-weight:800;margin-bottom:6px}
-.card p.desc{font-size:.85rem;color:var(--text2);margin-bottom:16px}
+.container{max-width:960px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:760px){.container{grid-template-columns:1fr}}
 
-label{display:block;font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;margin-top:14px}
-input,select{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:.92rem;outline:none;font-family:inherit;background:var(--bg2);color:var(--text);font-weight:500}
-input:focus,select:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(255,59,48,.12)}
-small{color:var(--text2);font-size:.72rem;font-weight:500}
-.btn{width:100%;padding:13px;background:linear-gradient(135deg,#ff3b30,#ff6b60);color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:18px;transition:transform .15s,box-shadow .15s;font-family:inherit}
-.btn:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(255,59,48,.3)}
-.btn.secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border)}
-.btn.secondary:hover{background:var(--border)}
+.card{
+  position:relative;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:28px;
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+}
+.card::before{
+  content:"";position:absolute;inset:-1px;border-radius:23px;pointer-events:none;
+  background:linear-gradient(135deg,rgba(255,45,111,.5),rgba(177,75,255,.25),rgba(0,231,255,.4));
+  -webkit-mask:linear-gradient(#000,#000) content-box,linear-gradient(#000,#000);
+  mask:linear-gradient(#000,#000) content-box,linear-gradient(#000,#000);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  padding:1px;opacity:.55;
+}
+.card h2{font-size:1.1rem;font-weight:700;letter-spacing:.3px;margin-bottom:4px}
+.card .desc{font-size:.82rem;color:var(--text2);margin-bottom:22px;line-height:1.5}
 
-.generated{margin-top:18px;padding:14px;background:linear-gradient(135deg,rgba(52,199,89,.1),rgba(52,199,89,.05));border:1.5px solid rgba(52,199,89,.3);border-radius:12px;display:none}
+label{display:block;font-size:.68rem;font-weight:600;color:var(--text2);letter-spacing:1.2px;text-transform:uppercase;margin:16px 0 8px}
+input{
+  width:100%;padding:13px 15px;
+  background:rgba(255,255,255,.03);
+  border:1px solid var(--border2);
+  border-radius:12px;
+  color:var(--text);font-size:.92rem;font-family:inherit;font-weight:500;
+  outline:none;transition:border-color .15s,box-shadow .15s,background .15s;
+}
+input::placeholder{color:#4a4a5e}
+input:focus{
+  border-color:var(--neon);
+  background:rgba(255,45,111,.06);
+  box-shadow:0 0 0 3px rgba(255,45,111,.15),0 0 20px rgba(255,45,111,.15);
+}
+small{color:var(--text2);font-size:.7rem;font-weight:400;text-transform:none;letter-spacing:0}
+
+.btn{
+  width:100%;padding:14px;margin-top:22px;
+  background:linear-gradient(135deg,var(--neon),var(--neon2));
+  color:#fff;border:none;border-radius:12px;
+  font-size:.9rem;font-weight:700;letter-spacing:.5px;
+  cursor:pointer;font-family:inherit;
+  box-shadow:0 0 0 1px rgba(255,255,255,.08) inset,0 8px 28px rgba(255,45,111,.35);
+  transition:transform .15s,box-shadow .15s;
+}
+.btn:hover{transform:translateY(-1px);box-shadow:0 0 0 1px rgba(255,255,255,.1) inset,0 10px 36px rgba(255,45,111,.55)}
+.btn:active{transform:translateY(0)}
+
+.generated{
+  margin-top:20px;padding:16px;
+  border:1px solid rgba(45,255,176,.3);
+  border-radius:14px;
+  background:linear-gradient(135deg,rgba(45,255,176,.08),rgba(0,231,255,.05));
+  display:none;
+}
 .generated.show{display:block}
-.generated .lbl{font-size:.7rem;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
-.generated .url-box{background:#fff;padding:10px 12px;border-radius:8px;font-size:.78rem;word-break:break-all;border:1px solid var(--border);margin-top:4px;font-family:monospace;color:var(--text)}
-.copy-btn{margin-top:10px;padding:8px 12px;background:var(--success);color:#fff;border:none;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;width:100%;font-family:inherit}
-.copy-btn.copied{background:#2a9e4a}
+.generated .lbl{font-size:.66rem;font-weight:700;color:var(--ok);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.generated .url-box{
+  background:rgba(0,0,0,.35);padding:11px 13px;border-radius:10px;
+  font-size:.76rem;word-break:break-all;
+  border:1px solid var(--border);font-family:"SF Mono",Consolas,monospace;
+  color:var(--neon3);
+}
+.copy-btn{
+  margin-top:10px;padding:10px;width:100%;
+  background:rgba(45,255,176,.15);color:var(--ok);
+  border:1px solid rgba(45,255,176,.35);border-radius:10px;
+  font-size:.78rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  cursor:pointer;font-family:inherit;transition:background .15s;
+}
+.copy-btn:hover{background:rgba(45,255,176,.25)}
+.copy-btn.copied{background:var(--ok);color:#04120b}
 
-.list-item{padding:12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;font-size:.85rem;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.rules-preview{
+  background:rgba(255,45,111,.06);
+  border:1px solid rgba(255,45,111,.25);
+  border-radius:12px;padding:12px 14px;
+  font-size:.78rem;color:#ffb3c9;line-height:1.65;margin-top:10px;
+}
+.rules-preview strong{color:var(--neon);font-weight:700}
+
+.list-item{
+  padding:13px 14px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.02);
+  border-radius:12px;margin-bottom:10px;
+  font-size:.85rem;display:flex;justify-content:space-between;align-items:center;gap:10px;
+  transition:border-color .15s,background .15s;
+}
+.list-item:hover{border-color:var(--border2);background:rgba(255,255,255,.04)}
 .list-item .ti{flex:1;min-width:0}
-.list-item .ti strong{display:block;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.list-item .ti small{color:var(--text2);font-size:.72rem;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list-item .ti strong{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px}
+.list-item .ti small{color:var(--text2);font-size:.7rem;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-transform:none;letter-spacing:0;font-weight:400}
+.list-item .ti small b{color:var(--neon3);font-weight:600}
 .list-item .actions{display:flex;gap:6px;flex-shrink:0}
-.list-item button{padding:5px 10px;border-radius:7px;border:none;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit}
-.list-item .btn-copy{background:var(--accent);color:#fff}
-.list-item .btn-del{background:var(--bg2);color:var(--text2)}
-.list-item .btn-del:hover{background:#ffe5e3;color:var(--accent)}
-.empty{text-align:center;padding:24px;color:var(--text2);font-size:.85rem}
+.list-item button{
+  padding:6px 11px;border-radius:8px;border:1px solid var(--border2);
+  font-size:.7rem;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+  cursor:pointer;font-family:inherit;background:transparent;color:var(--text2);
+  transition:all .15s;
+}
+.list-item .btn-copy{color:var(--neon3);border-color:rgba(0,231,255,.3)}
+.list-item .btn-copy:hover{background:rgba(0,231,255,.12);color:var(--neon3)}
+.list-item .btn-del:hover{background:rgba(255,45,111,.12);color:var(--neon);border-color:rgba(255,45,111,.35)}
+.empty{text-align:center;padding:28px 12px;color:var(--text2);font-size:.82rem}
 
-.auth-warn{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px}
-.auth-warn h2{font-size:1.3rem;margin-bottom:8px}
-.auth-warn p{color:var(--text2);margin-bottom:18px}
-.auth-warn a{background:var(--accent);color:#fff;text-decoration:none;padding:11px 28px;border-radius:50px;font-weight:700}
-
-.rules-preview{background:#fff4f3;border:1px solid #ffcec9;border-radius:10px;padding:10px 12px;font-size:.78rem;color:#991b1b;line-height:1.55;margin-top:8px}
-.rules-preview strong{color:#7f1d1d}
+.auth-warn{
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(7,7,12,.85);backdrop-filter:blur(16px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:40px;
+}
+.auth-warn .box{
+  background:var(--panel);border:1px solid var(--border2);
+  border-radius:20px;padding:36px 32px;max-width:380px;
+}
+.auth-warn h2{font-size:1.2rem;margin-bottom:8px;font-weight:700}
+.auth-warn p{color:var(--text2);margin-bottom:22px;font-size:.88rem}
+.auth-warn a{
+  display:inline-block;background:linear-gradient(135deg,var(--neon),var(--neon2));
+  color:#fff;text-decoration:none;padding:11px 28px;border-radius:10px;
+  font-weight:700;font-size:.85rem;letter-spacing:.4px;
+  box-shadow:0 6px 22px rgba(255,45,111,.35);
+}
 </style>
 </head>
 <body>
 
 <div id="authWarn" class="auth-warn" style="display:none">
-  <h2>Acesso Restrito</h2>
-  <p>Faça login na plataforma para acessar o gerador.</p>
-  <a href="../index.html">Fazer Login</a>
+  <div class="box">
+    <h2>Acesso Restrito</h2>
+    <p>Faça login na plataforma para acessar o gerador.</p>
+    <a href="../index.html">Fazer Login</a>
+  </div>
 </div>
 
 <div class="header">
   <div class="brand">
-    <div class="brand-icon">🔒</div>
+    <div class="dot"></div>
     <div>
       <h1>Modo Prova</h1>
-      <p>Gerador de Link Bloqueado</p>
+      <p>Gerador de link bloqueado</p>
     </div>
   </div>
-  <a href="../Plataforma.html">&larr; Voltar</a>
+  <a href="../Plataforma.html">← Voltar</a>
 </div>
 
 <div class="container">
 
   <div class="card">
     <h2>Criar nova prova</h2>
-    <p class="desc">Cole o link de qualquer atividade e defina uma senha de desbloqueio. O aluno ficará preso ao link em tela cheia.</p>
+    <p class="desc">Cole o link de qualquer atividade e defina uma senha. O aluno ficará preso à página em tela cheia.</p>
 
     <label>Nome da prova</label>
     <input id="nome" type="text" placeholder="Ex: Prova de Frações 9A">
@@ -89,17 +199,17 @@ small{color:var(--text2);font-size:.72rem;font-weight:500}
     <label>URL original da atividade</label>
     <input id="url" type="url" placeholder="https://...">
 
-    <label>Senha de desbloqueio <small>(você usará para desbloquear o aluno)</small></label>
+    <label>Senha de desbloqueio <small>(só você deve saber)</small></label>
     <input id="senha" type="text" placeholder="Ex: prof2026" maxlength="20">
 
     <div class="rules-preview">
-      <strong>O aluno será bloqueado de:</strong> sair de tela cheia (F11), copiar/colar (Ctrl+C/V), imprimir (Ctrl+P), salvar (Ctrl+S), recarregar (F5), abrir devtools (F12), trocar de aba/janela. Qualquer tentativa exige a senha.
+      <strong>O aluno será bloqueado de</strong> sair de tela cheia, copiar, colar, imprimir, salvar, recarregar, abrir devtools e trocar de aba. Qualquer tentativa exige a senha.
     </div>
 
     <button class="btn" id="btnGerar">Gerar link da prova</button>
 
     <div class="generated" id="genBox">
-      <div class="lbl">✓ Link gerado</div>
+      <div class="lbl">Link gerado</div>
       <div class="url-box" id="genUrl"></div>
       <button class="copy-btn" id="copyBtn">Copiar link</button>
     </div>
@@ -108,7 +218,7 @@ small{color:var(--text2);font-size:.72rem;font-weight:500}
   <div class="card">
     <h2>Minhas provas</h2>
     <p class="desc">Provas já criadas por você.</p>
-    <div id="listaProvas"><div class="empty">Carregando...</div></div>
+    <div id="listaProvas"><div class="empty">Carregando…</div></div>
   </div>
 
 </div>
@@ -153,7 +263,7 @@ $('btnGerar').onclick=async()=>{
     $('copyBtn').textContent='Copiar link';
     $('copyBtn').classList.remove('copied');
     $('copyBtn').onclick=()=>{
-      navigator.clipboard.writeText(link).then(()=>{$('copyBtn').textContent='Copiado!';$('copyBtn').classList.add('copied')});
+      navigator.clipboard.writeText(link).then(()=>{$('copyBtn').textContent='Copiado';$('copyBtn').classList.add('copied')});
     };
     loadLista();
   }catch(e){console.error(e);alert('Erro ao salvar. Verifique as regras do Firebase.')}
@@ -175,7 +285,7 @@ async function loadLista(){
         </div>
         <div class="actions">
           <button class="btn-copy" data-act="copy">Copiar</button>
-          <button class="btn-del" data-act="del">×</button>
+          <button class="btn-del" data-act="del">Excluir</button>
         </div>
       </div>`).join('');
     cont.querySelectorAll('.list-item').forEach(el=>{
@@ -184,7 +294,7 @@ async function loadLista(){
         const link=buildLink(user.uid,id);
         navigator.clipboard.writeText(link).then(()=>{
           const b=el.querySelector('[data-act=copy]');
-          b.textContent='Copiado!';setTimeout(()=>b.textContent='Copiar',1500);
+          b.textContent='Copiado';setTimeout(()=>b.textContent='Copiar',1500);
         });
       };
       el.querySelector('[data-act=del]').onclick=async()=>{
