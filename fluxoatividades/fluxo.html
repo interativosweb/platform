@@ -7,9 +7,9 @@
 <style>
 /* ── THEME (dark only) ── */
 :root{
-  --bg:#1c1c1e;--bg2:#2c2c2e;--bg3:#3a3a3c;--text:#f5f5f7;--text2:#98989d;--border:#48484a;
-  --grid-dot:#555;--node-shadow:rgba(0,0,0,.4);--canvas-bg:#1c1c1e;
-  --accent:#0071e3;--success:#34c759;--error:#ff3b30;--warn:#ff9500;--purple:#af52de;--teal:#5ac8fa;--pink:#ff2d55;--radius:12px;
+  --bg:#000000;--bg2:#0e0e10;--bg3:#1a1a1d;--text:#f5f5f7;--text2:#98989d;--border:#2a2a2e;
+  --grid-dot:#2a1a0a;--node-shadow:rgba(0,0,0,.6);--canvas-bg:#000000;
+  --accent:#ff8a00;--accent2:#ff5a00;--success:#34c759;--error:#ff3b30;--warn:#ffa500;--purple:#af52de;--teal:#5ac8fa;--pink:#ff2d55;--orange:#ff8a00;--orange-dark:#d44700;--radius:12px;
 }
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;user-select:none}
@@ -45,7 +45,7 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 .sb-empty{padding:16px;text-align:center;color:var(--text2);font-size:.82rem}
 
 /* ── CANVAS ── */
-.canvas-wrap{flex:1;overflow:hidden;position:relative;background:var(--canvas-bg);cursor:grab;background-image:radial-gradient(circle,var(--grid-dot) 1px,transparent 1px);background-size:24px 24px;background-position:0 0}
+.canvas-wrap{flex:1;overflow:hidden;position:relative;background:#000;cursor:grab;background-image:radial-gradient(circle,rgba(255,138,0,.18) 1px,transparent 1px);background-size:24px 24px;background-position:0 0}
 .canvas-wrap.grabbing{cursor:grabbing}
 .canvas-inner{position:absolute;top:0;left:0;transform-origin:0 0;width:40000px;height:40000px}
 .canvas-inner svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible}
@@ -54,14 +54,14 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 .canvas-inner svg path.conn-temp{fill:none;stroke:#999;stroke-width:2;stroke-dasharray:6 4;opacity:.5}
 
 /* ── NODES ── */
-.node{position:absolute;min-width:200px;max-width:260px;background:var(--bg2);border-radius:var(--radius);box-shadow:0 2px 10px var(--node-shadow);border:2px solid transparent;z-index:10;cursor:grab;transition:box-shadow .12s,border-color .12s}
-.node:hover{box-shadow:0 4px 18px var(--node-shadow)}
-.node.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,113,227,.18)}
+.node{position:absolute;min-width:200px;max-width:260px;background:#141416;border-radius:var(--radius);box-shadow:0 0 0 1px rgba(255,138,0,.15),0 2px 14px rgba(255,138,0,.08),0 4px 18px rgba(0,0,0,.6);border:2px solid transparent;z-index:10;cursor:grab;transition:box-shadow .12s,border-color .12s}
+.node:hover{box-shadow:0 0 0 1px rgba(255,138,0,.35),0 6px 24px rgba(255,138,0,.25),0 8px 30px rgba(0,0,0,.6)}
+.node.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,138,0,.25),0 0 28px rgba(255,138,0,.35)}
 .node.dragging{cursor:grabbing;z-index:20;box-shadow:0 8px 28px var(--node-shadow)}
 
 .node-head{padding:7px 10px;border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:space-between;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#fff}
-.node-head .btn-del{background:none;border:none;color:rgba(255,255,255,.7);font-size:.95rem;cursor:pointer;line-height:1;padding:0 2px}
-.node-head .btn-del:hover{color:#fff}
+.node-head .btn-del{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;line-height:1;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.node-head .btn-del:hover{background:rgba(255,59,48,.9);border-color:#fff;transform:scale(1.12)}
 
 .node-body{padding:8px 10px;font-size:.8rem;color:var(--text);line-height:1.35;min-height:24px;cursor:pointer}
 .node-body em{color:var(--text2);font-style:italic}
@@ -105,9 +105,9 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 .btn-tool.t-mc{background:var(--accent)}
 .btn-tool.t-di{background:var(--purple)}
 .btn-tool.t-fi{background:var(--error)}
-.btn-tool.t-tempo{background:#ffcc00;color:#2c2c2e}
-.btn-tool.t-shuffle{background:#4a148c}
-.btn-tool.t-prova{background:linear-gradient(135deg,#ff2d6f,#b14bff)}
+.btn-tool.t-tempo{background:linear-gradient(135deg,#ffb700,#ff7a00);color:#1c1c1e}
+.btn-tool.t-shuffle{background:linear-gradient(135deg,#b14bff,#6a00ff)}
+.btn-tool.t-prova{background:linear-gradient(135deg,#ff8a00,#d44700)}
 .btn-tool:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .btn-hist{display:flex;align-items:center;justify-content:center;width:34px;height:32px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text);cursor:pointer;transition:all .12s}
 .btn-hist svg{width:16px;height:16px;display:block}
@@ -175,17 +175,17 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 .mod{position:absolute;min-width:200px;max-width:260px;border-radius:10px;box-shadow:0 2px 8px var(--node-shadow);z-index:11;cursor:grab;padding:6px 10px;display:flex;align-items:center;gap:8px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;border:2px solid transparent}
 .mod.dragging{cursor:grabbing;z-index:25}
 .mod.snapped{border-color:rgba(255,255,255,.25)}
-.mod-tempo{background:#ffcc00;color:#2c2c2e}
-.mod-shuffle{background:#4a148c;color:#fff}
-.mod-prova{background:linear-gradient(135deg,#ff2d6f,#b14bff);color:#fff;flex-direction:column;align-items:stretch;padding:10px 12px;gap:4px}
-.mod-prova-badge{margin:6px 8px 8px;padding:8px 10px;border-radius:10px;background:linear-gradient(135deg,#ff2d6f,#b14bff);color:#fff;box-shadow:0 6px 18px rgba(255,45,111,.35);cursor:pointer;user-select:none}
+.mod-tempo{background:linear-gradient(135deg,#ffb700,#ff7a00);color:#1c1c1e;box-shadow:0 0 18px rgba(255,149,0,.4)}
+.mod-shuffle{background:linear-gradient(135deg,#b14bff,#6a00ff);color:#fff;box-shadow:0 0 18px rgba(138,43,226,.4)}
+.mod-prova{background:linear-gradient(135deg,#ff8a00,#d44700);color:#fff;flex-direction:column;align-items:stretch;padding:10px 12px;gap:4px;box-shadow:0 0 22px rgba(255,138,0,.45)}
+.mod-prova-badge{margin:6px 8px 8px;padding:8px 10px;border-radius:10px;background:linear-gradient(135deg,#ff8a00,#d44700);color:#fff;box-shadow:0 0 22px rgba(255,138,0,.45),0 6px 18px rgba(212,71,0,.3);cursor:pointer;user-select:none;border:1px solid rgba(255,255,255,.15)}
 .mod-prova-badge .mpb-head{font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;text-align:center}
 .mod-prova-badge .mpb-pass{margin-top:4px;font-family:"SF Mono",Consolas,monospace;font-size:.78rem;background:rgba(0,0,0,.28);padding:4px 8px;border-radius:6px;text-align:center;letter-spacing:1px}
 .mod-prova .mp-head{display:flex;align-items:center;gap:8px}
 .mod-prova .mp-pass{font-size:.72rem;font-family:"SF Mono",Consolas,monospace;background:rgba(0,0,0,.25);padding:4px 8px;border-radius:6px;text-transform:none;letter-spacing:1px;text-align:center}
 .mod .val{margin-left:auto;font-weight:800}
-.mod .btn-x{background:none;border:none;color:inherit;opacity:.5;cursor:pointer;font-size:.9rem;padding:0 2px}
-.mod .btn-x:hover{opacity:1}
+.mod .btn-x{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.3);color:inherit;opacity:.9;cursor:pointer;font-size:.95rem;font-weight:700;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;line-height:1;transition:all .15s}
+.mod .btn-x:hover{opacity:1;background:rgba(255,59,48,.9);color:#fff;border-color:#fff;transform:scale(1.12)}
 
 @media(max-width:700px){.sidebar{width:210px}.node{min-width:160px;max-width:200px}.toolbar{gap:4px}.btn-tool{padding:5px 10px;font-size:.72rem}}
 </style>
@@ -307,7 +307,7 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 <!-- TEMPO MODAL -->
 <div id="tempoModal" class="modal-overlay">
   <div class="modal tempo-modal">
-    <div class="tmod-badge" style="background:linear-gradient(135deg,#ffcc00,#ff9500)">⏱ Tempo Limite</div>
+    <div class="tmod-badge" style="background:linear-gradient(135deg,#ffb700,#ff7a00);color:#1c1c1e">Tempo Limite</div>
     <p class="tmod-desc">Defina um tempo limite para a pergunta. Se o aluno não responder a tempo, o sistema escolhe uma alternativa aleatória automaticamente.</p>
     <div class="tmod-preview-wrap" style="background:radial-gradient(circle at center,rgba(255,204,0,.18),transparent 70%)">
       <div id="tempoPreview" class="tmod-preview" style="color:#ffcc00">00:30</div>
@@ -336,7 +336,7 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 <!-- PROVA MODE MODAL -->
 <div id="provaModal" class="modal-overlay">
   <div class="modal tempo-modal">
-    <div class="tmod-badge" style="background:linear-gradient(135deg,#ff2d6f,#b14bff);color:#fff">🔒 Modo Prova</div>
+    <div class="tmod-badge" style="background:linear-gradient(135deg,#ff8a00,#d44700);color:#fff">Modo Prova</div>
     <p class="tmod-desc">Ao ativar o Modo Prova, o aluno entra em tela cheia e fica bloqueado de sair, copiar, colar, trocar de aba ou abrir devtools. Qualquer tentativa exige a senha abaixo.</p>
     <label class="tmod-label">Senha de desbloqueio</label>
     <input id="provaPass" type="text" placeholder="Ex: prof2026" maxlength="20" style="width:100%;padding:13px 15px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:1rem;outline:none;font-family:inherit;letter-spacing:1px">
@@ -353,7 +353,7 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 <!-- EMBARALHAR MODAL -->
 <div id="shuffleModal" class="modal-overlay">
   <div class="modal tempo-modal">
-    <div class="tmod-badge" style="background:linear-gradient(135deg,#7b1fa2,#4a148c)">🔀 Embaralhar Alternativas</div>
+    <div class="tmod-badge" style="background:linear-gradient(135deg,#b14bff,#6a00ff);color:#fff">Embaralhar Alternativas</div>
     <p class="tmod-desc">Ao ativar este modificador, as alternativas da pergunta serão exibidas ao aluno em ordem aleatória a cada tentativa.</p>
     <div class="tmod-preview-wrap" style="background:radial-gradient(circle at center,rgba(123,31,162,.22),transparent 70%)">
       <div id="shufflePreview" class="tmod-shuffle-preview">
@@ -734,7 +734,7 @@ function renderNode(n){
   if(n.tipo==='inicio'&&flow.provaMode){
     const mp=document.createElement('div');
     mp.className='mod-prova-badge';
-    mp.innerHTML=`<div class="mpb-head">🔒 Modo Prova</div><div class="mpb-pass">${esc(flow.provaMode.senha)}</div>`;
+    mp.innerHTML=`<div class="mpb-head">Modo Prova</div><div class="mpb-pass">${esc(flow.provaMode.senha)}</div>`;
     mp.onclick=e=>{e.stopPropagation();if(confirm('Desativar Modo Prova?')){flow.provaMode=null;renderAll();pushHistory()}};
     el.appendChild(mp);
   }
@@ -742,7 +742,7 @@ function renderNode(n){
   if(n.comentario){
     const ci=document.createElement('div');
     ci.style.cssText='padding:3px 8px;font-size:.65rem;color:var(--text2);border-top:1px solid var(--border);font-style:italic';
-    ci.textContent='💬 '+n.comentario.slice(0,40);
+    ci.textContent=n.comentario.slice(0,60);
     el.appendChild(ci);
   }
 
@@ -775,7 +775,7 @@ function renderModifier(m){
   el.className='mod mod-'+(kind==='tempo'?'tempo':'shuffle')+(m.attachedTo?' snapped':'');
   el.dataset.id=m.id;
   el.style.left=m.x+'px';el.style.top=m.y+'px';
-  const label=kind==='tempo'?('⏱ Tempo'+(m.segundos?' '+m.segundos+'s':'')):'🔀 Embaralhar';
+  const label=kind==='tempo'?('Tempo'+(m.segundos?' '+m.segundos+'s':'')):'Embaralhar';
   el.innerHTML=`<span>${label}</span><button class="btn-x" title="Remover">×</button>`;
   el.querySelector('.btn-x').onclick=e=>{e.stopPropagation();delete flow.nodes[m.id];renderAll();pushHistory()};
   el.onmousedown=e=>{
