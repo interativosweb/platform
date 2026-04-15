@@ -115,26 +115,9 @@ body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;justif
 <div id="loginModal" class="modal-overlay">
   <div class="modal">
     <h2>Identificação</h2>
-    <p>Insira seus dados para começar.</p>
+    <p>Digite seu nome para entrar na atividade.</p>
+    <div id="turmaInfo" style="background:#f3f4f6;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:.88rem;color:#374151;line-height:1.5"></div>
     <input type="text" id="inputNome" placeholder="Qual o seu nome?" maxlength="15">
-    <div class="subtitle">Qual seu ano?</div>
-    <div class="grupo-sel" id="selAno">
-      <label><input type="radio" name="ano" value="5º Ano"><span>5º</span></label>
-      <label><input type="radio" name="ano" value="6º Ano"><span>6º</span></label>
-      <label><input type="radio" name="ano" value="7º Ano"><span>7º</span></label>
-      <label><input type="radio" name="ano" value="8º Ano"><span>8º</span></label>
-      <label><input type="radio" name="ano" value="9º Ano"><span>9º</span></label>
-      <label><input type="radio" name="ano" value="1º EM"><span>1ºEM</span></label>
-      <label><input type="radio" name="ano" value="2º EM"><span>2ºEM</span></label>
-      <label><input type="radio" name="ano" value="3º EM"><span>3ºEM</span></label>
-    </div>
-    <div class="subtitle">Qual sua turma?</div>
-    <div class="grupo-sel">
-      <label><input type="radio" name="turma" value="A"><span>A</span></label>
-      <label><input type="radio" name="turma" value="B"><span>B</span></label>
-      <label><input type="radio" name="turma" value="C"><span>C</span></label>
-      <label><input type="radio" name="turma" value="D"><span>D</span></label>
-    </div>
     <div class="aviso" id="loginAviso"></div>
     <button class="btn-entrar" onclick="realizarLogin()">Entrar</button>
   </div>
@@ -161,6 +144,7 @@ const basePath=turmaId?'turmas_fluxo/'+turmaId+'/':'';
 let alunoId=localStorage.getItem('fluxo_firebaseId');
 let alunoNome='';
 let alunoSerie='';
+let turmaInfo=null;
 let fluxoData=null; // {nodes:{...}}
 let atividadeId=null;
 let flowOwnerId=null;
@@ -184,9 +168,16 @@ async function init(){
     const snap=await db.ref('turmas_fluxo/'+turmaId).once('value');
     if(!snap.exists()){$('loadingMsg').textContent='Turma não encontrada.';return}
     const turma=snap.val();
+    turmaInfo=turma;
     atividadeId=turma.atividadeId;
     flowOwnerId=turma.criadoPor;
     if(!atividadeId){$('loadingMsg').textContent='Nenhuma atividade conectada a esta turma.';return}
+    // Pre-fill serie from turma
+    alunoSerie=((turma.serie||'')+' '+(turma.turma||'')).trim();
+    const ti=$('turmaInfo');
+    if(ti){
+      ti.innerHTML='<b>'+esc(turma.escola||'Escola')+'</b><br>'+esc(turma.serie||'')+(turma.turma?' · Turma '+esc(turma.turma):'');
+    }
   }catch(e){console.error(e);$('loadingMsg').textContent='Erro ao carregar turma.';return}
 
   // Load flow
@@ -203,32 +194,29 @@ async function init(){
 
   $('loadingMsg').style.display='none';
 
-  // Check if student already identified
+  // Check if student already identified (reutiliza apenas o nome; série vem da turma atual)
   const savedNome=localStorage.getItem('fluxo_nome');
-  const savedSerie=localStorage.getItem('fluxo_serie');
-  if(savedNome&&savedSerie){
+  if(savedNome){
     alunoNome=savedNome;
-    alunoSerie=savedSerie;
+    // alunoSerie já foi definida a partir da turma
     await syncStudent();
     startFlow();
   }else{
     $('loginModal').classList.add('show');
+    setTimeout(()=>$('inputNome').focus(),100);
   }
 }
 
 /* ── LOGIN ── */
 window.realizarLogin=async function(){
   const nome=$('inputNome').value.trim();
-  const anoEl=document.querySelector('input[name=ano]:checked');
-  const turmaEl=document.querySelector('input[name=turma]:checked');
-
   if(!nome){$('loginAviso').textContent='Digite seu nome.';return}
   if(nome.includes(' ')){$('loginAviso').textContent='Apenas o primeiro nome.';return}
   if(nome.length>15){$('loginAviso').textContent='Máximo 15 letras.';return}
-  if(!anoEl||!turmaEl){$('loginAviso').textContent='Selecione ano e turma.';return}
 
   alunoNome=nome.charAt(0).toUpperCase()+nome.slice(1).toLowerCase();
-  alunoSerie=anoEl.value+' '+turmaEl.value;
+  // alunoSerie já foi pré-preenchida a partir da turma
+  if(!alunoSerie) alunoSerie='—';
   localStorage.setItem('fluxo_nome',alunoNome);
   localStorage.setItem('fluxo_serie',alunoSerie);
 
