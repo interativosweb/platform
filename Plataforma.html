@@ -910,6 +910,23 @@
         </button>
     </footer>
 
+    <!-- CHAT COM ADMIN -->
+    <button id="chatFab" title="Falar com o administrador" style="position:fixed;right:22px;bottom:22px;z-index:7000;width:56px;height:56px;border-radius:50%;border:none;background:linear-gradient(135deg,#0071e3,#5b37d6);color:#fff;box-shadow:0 8px 26px rgba(0,113,227,.45);cursor:pointer;display:none;align-items:center;justify-content:center">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span id="chatBadge" style="position:absolute;top:-4px;right:-4px;background:#ff3b30;color:#fff;font-size:.7rem;font-weight:700;min-width:20px;height:20px;border-radius:10px;display:none;align-items:center;justify-content:center;padding:0 6px">0</span>
+    </button>
+    <div id="chatPanel" style="position:fixed;right:22px;bottom:90px;z-index:7001;width:340px;max-width:calc(100vw - 44px);height:460px;max-height:calc(100vh - 120px);background:#fff;border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.18);display:none;flex-direction:column;overflow:hidden;border:1px solid #e5e5ea">
+      <div style="padding:14px 16px;background:linear-gradient(135deg,#0071e3,#5b37d6);color:#fff;display:flex;align-items:center;justify-content:space-between">
+        <div><div style="font-weight:700;font-size:.95rem">Suporte</div><div style="font-size:.72rem;opacity:.85">Fale com o administrador</div></div>
+        <button id="chatClose" style="background:transparent;border:none;color:#fff;font-size:1.2rem;cursor:pointer">✕</button>
+      </div>
+      <div id="chatMsgs" style="flex:1;overflow-y:auto;padding:14px;background:#f7f7f8;display:flex;flex-direction:column;gap:8px"></div>
+      <div style="padding:10px;border-top:1px solid #e5e5ea;display:flex;gap:8px;background:#fff">
+        <input id="chatInput" type="text" placeholder="Escreva uma mensagem..." style="flex:1;padding:10px 12px;border:1px solid #d2d2d7;border-radius:20px;font-size:.9rem;outline:none;font-family:inherit">
+        <button id="chatSend" style="background:#0071e3;color:#fff;border:none;border-radius:20px;padding:0 16px;font-weight:600;cursor:pointer">Enviar</button>
+      </div>
+    </div>
+
     <!-- ADMIN POPUP -->
     <div class="adm-overlay" id="admOverlay">
         <div class="adm-box">
@@ -1014,6 +1031,8 @@
             profName.textContent = nome;
             profRole.textContent = tipo === 'aluno' ? 'Aluno' : 'Professor de Matemática';
             profArea.style.display = 'flex';
+
+            if (!isAdmin) initChat(user.uid, nome);
 
             // Check if blocked
             onValue(ref(db, 'usuarios/' + user.uid + '/bloqueado'), (snap) => {
@@ -1319,10 +1338,89 @@
             }
         });
 
-        // Allow Enter key to submit
         document.getElementById('admSenha').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') document.getElementById('admEntrar').click();
         });
+
+        // ===== CHAT COM ADMIN =====
+        function initChat(uid, nome) {
+            const fab = document.getElementById('chatFab');
+            const panel = document.getElementById('chatPanel');
+            const msgsEl = document.getElementById('chatMsgs');
+            const input = document.getElementById('chatInput');
+            const send = document.getElementById('chatSend');
+            const closeBtn = document.getElementById('chatClose');
+            const badge = document.getElementById('chatBadge');
+            fab.style.display = 'flex';
+
+            const threadRef = ref(db, 'chats/' + uid);
+            update(threadRef, { nome: nome, email: currentUser.email || '', atualizadoEm: Date.now() });
+
+            let unread = 0;
+            let opened = false;
+
+            function render(data) {
+                const msgs = data || {};
+                const arr = Object.entries(msgs).map(([k, v]) => ({ k, ...v })).sort((a, b) => (a.ts || 0) - (b.ts || 0));
+                msgsEl.innerHTML = '';
+                arr.forEach(m => {
+                    const mine = m.from === 'user';
+                    const bub = document.createElement('div');
+                    bub.style.cssText = 'max-width:78%;padding:8px 12px;border-radius:14px;font-size:.88rem;line-height:1.4;word-wrap:break-word;' + (mine ? 'align-self:flex-end;background:#0071e3;color:#fff;border-bottom-right-radius:4px' : 'align-self:flex-start;background:#fff;color:#1d1d1f;border:1px solid #e5e5ea;border-bottom-left-radius:4px');
+                    bub.textContent = m.text || '';
+                    msgsEl.appendChild(bub);
+                });
+                msgsEl.scrollTop = msgsEl.scrollHeight;
+            }
+
+            onValue(ref(db, 'chats/' + uid + '/messages'), snap => {
+                const data = snap.val() || {};
+                render(data);
+                if (!opened) {
+                    const arr = Object.values(data);
+                    const newAdm = arr.filter(m => m.from === 'admin' && !m.lidoUser).length;
+                    unread = newAdm;
+                    if (unread > 0) { badge.style.display = 'flex'; badge.textContent = unread; }
+                    else badge.style.display = 'none';
+                } else {
+                    markAllRead(data);
+                }
+            });
+
+            function markAllRead(data) {
+                Object.entries(data || {}).forEach(([k, v]) => {
+                    if (v.from === 'admin' && !v.lidoUser) {
+                        update(ref(db, 'chats/' + uid + '/messages/' + k), { lidoUser: true });
+                    }
+                });
+                badge.style.display = 'none';
+                unread = 0;
+            }
+
+            fab.onclick = () => {
+                panel.style.display = 'flex';
+                fab.style.display = 'none';
+                opened = true;
+                setTimeout(() => input.focus(), 80);
+                get(ref(db, 'chats/' + uid + '/messages')).then(s => markAllRead(s.val()));
+            };
+            closeBtn.onclick = () => {
+                panel.style.display = 'none';
+                fab.style.display = 'flex';
+                opened = false;
+            };
+
+            function doSend() {
+                const t = input.value.trim();
+                if (!t) return;
+                const m = push(ref(db, 'chats/' + uid + '/messages'));
+                set(m, { from: 'user', text: t, ts: Date.now(), nome: nome });
+                update(threadRef, { atualizadoEm: Date.now(), ultimaMsg: t.slice(0, 60) });
+                input.value = '';
+            }
+            send.onclick = doSend;
+            input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); doSend(); } });
+        }
     </script>
 </body>
 
