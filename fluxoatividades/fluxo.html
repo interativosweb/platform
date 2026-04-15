@@ -107,6 +107,7 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 .btn-tool.t-fi{background:var(--error)}
 .btn-tool.t-tempo{background:#ffcc00;color:#2c2c2e}
 .btn-tool.t-shuffle{background:#4a148c}
+.btn-tool.t-prova{background:linear-gradient(135deg,#ff2d6f,#b14bff)}
 .btn-tool:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .btn-hist{display:flex;align-items:center;justify-content:center;width:34px;height:32px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text);cursor:pointer;transition:all .12s}
 .btn-hist svg{width:16px;height:16px;display:block}
@@ -176,6 +177,12 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 .mod.snapped{border-color:rgba(255,255,255,.25)}
 .mod-tempo{background:#ffcc00;color:#2c2c2e}
 .mod-shuffle{background:#4a148c;color:#fff}
+.mod-prova{background:linear-gradient(135deg,#ff2d6f,#b14bff);color:#fff;flex-direction:column;align-items:stretch;padding:10px 12px;gap:4px}
+.mod-prova-badge{margin:6px 8px 8px;padding:8px 10px;border-radius:10px;background:linear-gradient(135deg,#ff2d6f,#b14bff);color:#fff;box-shadow:0 6px 18px rgba(255,45,111,.35);cursor:pointer;user-select:none}
+.mod-prova-badge .mpb-head{font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;text-align:center}
+.mod-prova-badge .mpb-pass{margin-top:4px;font-family:"SF Mono",Consolas,monospace;font-size:.78rem;background:rgba(0,0,0,.28);padding:4px 8px;border-radius:6px;text-align:center;letter-spacing:1px}
+.mod-prova .mp-head{display:flex;align-items:center;gap:8px}
+.mod-prova .mp-pass{font-size:.72rem;font-family:"SF Mono",Consolas,monospace;background:rgba(0,0,0,.25);padding:4px 8px;border-radius:6px;text-transform:none;letter-spacing:1px;text-align:center}
 .mod .val{margin-left:auto;font-weight:800}
 .mod .btn-x{background:none;border:none;color:inherit;opacity:.5;cursor:pointer;font-size:.9rem;padding:0 2px}
 .mod .btn-x:hover{opacity:1}
@@ -227,6 +234,7 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
   <span style="flex:1"></span>
   <button class="btn-tool t-tempo" onclick="addModifier('tempo')">+ Tempo</button>
   <button class="btn-tool t-shuffle" onclick="addModifier('embaralhar')">+ Embaralhar</button>
+  <button class="btn-tool t-prova" onclick="toggleProvaMode()">+ Modo Prova</button>
   <button class="btn-ghost" onclick="zoomBy(-0.1)">−</button>
   <span class="zoom-display" id="zoomDisplay">100%</span>
   <button class="btn-ghost" onclick="zoomBy(0.1)">+</button>
@@ -321,6 +329,23 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
     <div class="btns">
       <button class="btn-cancel" onclick="closeTempoModal()">Cancelar</button>
       <button class="btn-save" onclick="saveTempo()" style="background:linear-gradient(135deg,#ffcc00,#ff9500);color:#1c1c1e">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROVA MODE MODAL -->
+<div id="provaModal" class="modal-overlay">
+  <div class="modal tempo-modal">
+    <div class="tmod-badge" style="background:linear-gradient(135deg,#ff2d6f,#b14bff);color:#fff">🔒 Modo Prova</div>
+    <p class="tmod-desc">Ao ativar o Modo Prova, o aluno entra em tela cheia e fica bloqueado de sair, copiar, colar, trocar de aba ou abrir devtools. Qualquer tentativa exige a senha abaixo.</p>
+    <label class="tmod-label">Senha de desbloqueio</label>
+    <input id="provaPass" type="text" placeholder="Ex: prof2026" maxlength="20" style="width:100%;padding:13px 15px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:1rem;outline:none;font-family:inherit;letter-spacing:1px">
+    <div style="background:rgba(255,45,111,.1);border:1px solid rgba(255,45,111,.3);border-radius:10px;padding:10px 12px;font-size:.78rem;color:#ffb3c9;line-height:1.5;margin-top:12px">
+      <b style="color:#ff6b89">Atenção:</b> anote a senha. Você precisará dela para desbloquear o aluno caso ele tente sair da atividade.
+    </div>
+    <div class="btns">
+      <button class="btn-cancel" onclick="closeProvaModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveProvaMode()" style="background:linear-gradient(135deg,#ff2d6f,#b14bff);color:#fff">Ativar</button>
     </div>
   </div>
 </div>
@@ -626,6 +651,24 @@ window.addNode=function(tipo){
   if(tipo!=='fim'&&tipo!=='inicio') openEditModal(id);
 };
 
+window.toggleProvaMode=function(){
+  if(!flowId){alert('Abra um fluxo primeiro.');return}
+  if(flow.provaMode){
+    if(confirm('Desativar Modo Prova?')){flow.provaMode=null;renderAll();pushHistory()}
+    return;
+  }
+  $('provaPass').value='';
+  $('provaModal').classList.add('show');
+  setTimeout(()=>$('provaPass').focus(),80);
+};
+window.closeProvaModal=function(){$('provaModal').classList.remove('show')};
+window.saveProvaMode=function(){
+  const s=$('provaPass').value.trim();
+  if(s.length<3){alert('Senha muito curta (mínimo 3 caracteres).');return}
+  flow.provaMode={senha:s,ativadoEm:new Date().toISOString()};
+  closeProvaModal();renderAll();pushHistory();
+};
+
 window.addModifier=function(kind){
   if(!flowId){alert('Crie ou abra um fluxo primeiro.');return}
   const id=uid();
@@ -687,6 +730,14 @@ function renderNode(n){
     body.innerHTML=inner;
   }
   el.appendChild(body);
+
+  if(n.tipo==='inicio'&&flow.provaMode){
+    const mp=document.createElement('div');
+    mp.className='mod-prova-badge';
+    mp.innerHTML=`<div class="mpb-head">🔒 Modo Prova</div><div class="mpb-pass">${esc(flow.provaMode.senha)}</div>`;
+    mp.onclick=e=>{e.stopPropagation();if(confirm('Desativar Modo Prova?')){flow.provaMode=null;renderAll();pushHistory()}};
+    el.appendChild(mp);
+  }
 
   if(n.comentario){
     const ci=document.createElement('div');
@@ -849,8 +900,8 @@ function getPortPos(nid,portKey){
   if(portKey==='input') return{x:nx,y:ny+h/2};
   const pEl=el.querySelector(`.port-out[data-port-key="${portKey}"]`);
   if(pEl){
-    // Use actual element offset for exact center
-    const py=pEl.offsetTop+pEl.offsetHeight/2;
+    // Port has transform:translateY(-50%), so offsetTop already equals visual center Y
+    const py=pEl.offsetTop;
     return{x:nx+w,y:ny+py};
   }
   if(portKey==='proximo'||portKey==='concluido') return{x:nx+w,y:ny+h*0.5};
@@ -1046,6 +1097,7 @@ document.addEventListener('keydown',e=>{
     else if($('commentModal').classList.contains('show')) closeCommentModal();
     else if($('tempoModal').classList.contains('show')) closeTempoModal();
     else if($('shuffleModal').classList.contains('show')) closeShuffleModal();
+    else if($('provaModal')?.classList.contains('show')) closeProvaModal();
     else if($('newFlowModal').classList.contains('show')) closeNewFlowModal();
     else if(isConn){isConn=false;if(tempPath){tempPath.remove();tempPath=null}connFrom=null}
     hideCtx();
