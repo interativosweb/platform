@@ -61,11 +61,8 @@ body{
 .resolucao{margin-top:18px;padding:16px;border-radius:12px;background:rgba(0,113,227,.06);border-left:4px solid var(--accent);font-size:.95rem;line-height:1.55}
 .resolucao .rt{font-weight:700;margin-bottom:4px;color:var(--accent);font-size:.78rem;text-transform:uppercase;letter-spacing:1px}
 
-.feedback{display:none;margin-top:14px;padding:14px;border-radius:12px;font-size:.95rem;line-height:1.5}
-.feedback.show{display:block}
-.feedback.acerto{background:rgba(52,199,89,.1);border-left:4px solid var(--success);color:#1b5e20}
-.feedback.erro{background:rgba(255,59,48,.1);border-left:4px solid var(--error);color:#7a1e18}
-.feedback.diss{background:rgba(0,113,227,.08);border-left:4px solid var(--accent)}
+.q-textarea.sent{background:#f5f5f7;color:#86868b;cursor:default}
+.btn-enviar.sent{background:#34c759;cursor:default;opacity:.95}
 
 .btn-next{padding:13px;border:none;border-radius:12px;background:var(--success);color:#fff;font-size:1rem;font-weight:600;cursor:pointer;margin-top:14px;display:none;transition:background .15s;width:100%}
 .btn-next:hover{background:#2da84e}
@@ -418,7 +415,6 @@ function renderQuestion(){
   html+=`</div>`; // q-right
   html+=`</div>`; // q-split
 
-  html+=`<div class="feedback" id="feedback"></div>`;
   html+=`<div id="resolucaoBox"></div>`;
   html+=`<button class="btn-next" id="btnNext" onclick="proximaQuestao()">Próxima Questão</button>`;
   html+=`</div>`;
@@ -449,15 +445,10 @@ function showSavedAnswer(node,resp){
       if(resp.escolhaDisplay===display){b.classList.add(resp.acertou?'certo':'errado')}
       if(!resp.acertou&&corretas.includes(orig)) b.classList.add('certo');
     });
-    const fb=$('feedback');
-    fb.className='feedback show '+(resp.acertou?'acerto':'erro');
-    fb.innerHTML=`<div style="font-weight:700">${resp.acertou?'Resposta Correta!':'Resposta Incorreta'}</div>`;
   }else if(node.tipo==='dissertativa'){
     const ta=$('respDissertativa');
-    if(ta){ta.value=resp.texto||'';ta.disabled=true}
-    const btn=$('btnEnviar');if(btn)btn.disabled=true;
-    const fb=$('feedback');fb.className='feedback show diss';
-    fb.innerHTML='<div style="font-weight:700">Resposta enviada</div>';
+    if(ta){ta.value=resp.texto||'';ta.disabled=true;ta.classList.add('sent')}
+    const btn=$('btnEnviar');if(btn){btn.disabled=true;btn.textContent='✓ Enviada';btn.classList.add('sent')}
   }
   showResolucao(node);
   $('btnNext').style.display='block';
@@ -480,9 +471,6 @@ window.responderMC=function(displayIdx){
   if(!acertou){
     btns.forEach(b=>{if(corretas.includes(parseInt(b.dataset.orig))) b.classList.add('certo')});
   }
-  const fb=$('feedback');
-  fb.className='feedback show '+(acertou?'acerto':'erro');
-  fb.innerHTML=`<div style="font-weight:700">${acertou?'Resposta Correta!':'Resposta Incorreta'}</div>`;
   showResolucao(node);
   $('btnNext').style.display='block';
   updateBadges();
@@ -495,10 +483,9 @@ window.responderDissertativa=function(){
   answered=true;stopTimer();
   respostas[nodeAtual]={tipo:'dissertativa',texto,timestamp:new Date().toISOString()};
   saveProgress();
-  $('respDissertativa').disabled=true;$('btnEnviar').disabled=true;
+  const ta=$('respDissertativa');ta.disabled=true;ta.classList.add('sent');
+  const be=$('btnEnviar');be.disabled=true;be.textContent='✓ Enviada';be.classList.add('sent');
   const node=fluxoData.nodes[nodeAtual];
-  const fb=$('feedback');fb.className='feedback show diss';
-  fb.innerHTML='<div style="font-weight:700">Resposta enviada!</div>';
   showResolucao(node);
   $('btnNext').style.display='block';
 };
@@ -546,18 +533,14 @@ function timeExpired(){
     document.querySelectorAll('.btn-opt').forEach(b=>b.disabled=true);
     const corretas=Array.isArray(node.correta)?node.correta:[node.correta];
     document.querySelectorAll('.btn-opt').forEach(b=>{if(corretas.includes(parseInt(b.dataset.orig)))b.classList.add('certo')});
-    const fb=$('feedback');fb.className='feedback show erro';
-    fb.innerHTML='<div style="font-weight:700">Tempo esgotado</div>';
     showResolucao(node);$('btnNext').style.display='block';updateBadges();
   }else if(node.tipo==='dissertativa'){
     answered=true;
     const texto=($('respDissertativa')||{}).value||'';
     respostas[nodeAtual]={tipo:'dissertativa',texto:texto.trim(),expirou:true,timestamp:new Date().toISOString()};
     saveProgress();
-    if($('respDissertativa'))$('respDissertativa').disabled=true;
-    if($('btnEnviar'))$('btnEnviar').disabled=true;
-    const fb=$('feedback');fb.className='feedback show erro';
-    fb.innerHTML='<div style="font-weight:700">Tempo esgotado</div>';
+    const ta2=$('respDissertativa');if(ta2){ta2.disabled=true;ta2.classList.add('sent')}
+    const be2=$('btnEnviar');if(be2){be2.disabled=true;be2.textContent='⏱ Tempo esgotado';be2.classList.add('sent')}
     showResolucao(node);$('btnNext').style.display='block';
   }
 }
