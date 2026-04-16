@@ -46,7 +46,12 @@ body{
 .q-text b{font-weight:700}
 
 .opts{display:flex;flex-direction:column;gap:10px}
-.btn-opt{padding:13px 16px;border:1px solid #d2d2d7;border-radius:12px;font-size:1rem;background:#fff;cursor:pointer;text-align:left;transition:all .15s;font-weight:500}
+.btn-opt{padding:13px 16px;border:1px solid #d2d2d7;border-radius:12px;font-size:1rem;background:#fff;cursor:pointer;text-align:left;transition:all .15s;font-weight:500;display:flex;align-items:center;gap:12px}
+.opt-letra{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#f2f2f7;color:#1d1d1f;font-weight:700;font-size:.9rem;flex-shrink:0;transition:all .15s}
+.btn-opt:hover:not(:disabled) .opt-letra{background:#fff;color:var(--success)}
+.btn-opt.certo .opt-letra{background:var(--success);color:#fff}
+.btn-opt.errado .opt-letra{background:var(--error);color:#fff}
+.opt-texto{flex:1}
 .btn-opt:hover:not(:disabled){background:var(--success);color:#fff;border-color:var(--success);transform:translateY(-1px)}
 .btn-opt:disabled{cursor:default}
 .btn-opt.certo{border-color:var(--success);color:var(--success);background:rgba(52,199,89,.08)}
@@ -405,7 +410,8 @@ function renderQuestion(){
     }
     currentShuffleMap=opcoes.map(o=>o.orig);
     html+=`<div class="opts" id="optsContainer">`;
-    opcoes.forEach((o,i)=>{html+=`<button class="btn-opt" data-display="${i}" data-orig="${o.orig}" onclick="responderMC(${i})">${esc(o.t)}</button>`});
+    const letras=['A','B','C','D','E','F','G','H'];
+    opcoes.forEach((o,i)=>{html+=`<button class="btn-opt" data-display="${i}" data-orig="${o.orig}" onclick="responderMC(${i})"><span class="opt-letra">${letras[i]||''}</span><span class="opt-texto">${esc(o.t)}</span></button>`});
     html+=`</div>`;
   }else if(node.tipo==='dissertativa'){
     html+=`<textarea class="q-textarea" id="respDissertativa" placeholder="Digite sua resposta..."></textarea>`;
