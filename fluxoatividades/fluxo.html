@@ -5,11 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Editor de Fluxo — AlquiLab</title>
 <style>
-/* ── THEME (dark only) ── */
 :root{
-  --bg:#000000;--bg2:#0e0e10;--bg3:#1a1a1d;--text:#f5f5f7;--text2:#98989d;--border:#2a2a2e;
-  --grid-dot:#2a1a0a;--node-shadow:rgba(0,0,0,.6);--canvas-bg:#000000;
-  --accent:#ff8a00;--accent2:#ff5a00;--success:#34c759;--error:#ff3b30;--warn:#ffa500;--purple:#af52de;--teal:#5ac8fa;--pink:#ff2d55;--orange:#ff8a00;--orange-dark:#d44700;--radius:12px;
+  --bg:#f5f5f7;--bg2:#ffffff;--bg3:#f2f2f7;--text:#1d1d1f;--text2:#86868b;--border:#e5e5ea;
+  --grid-dot:#d8d8dd;--node-shadow:rgba(0,0,0,.12);--canvas-bg:#fafafa;
+  --accent:#0071e3;--accent2:#0a84ff;--success:#34c759;--error:#ff3b30;--warn:#ffa500;--purple:#af52de;--teal:#5ac8fa;--pink:#ff2d55;--orange:#ff8a00;--orange-dark:#d44700;--radius:12px;
 }
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;user-select:none}
@@ -45,7 +44,7 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 .sb-empty{padding:16px;text-align:center;color:var(--text2);font-size:.82rem}
 
 /* ── CANVAS ── */
-.canvas-wrap{flex:1;overflow:hidden;position:relative;background:#000;cursor:grab;background-image:radial-gradient(circle,rgba(255,138,0,.18) 1px,transparent 1px);background-size:24px 24px;background-position:0 0}
+.canvas-wrap{flex:1;overflow:hidden;position:relative;background:var(--canvas-bg);cursor:grab;background-image:radial-gradient(circle,var(--grid-dot) 1px,transparent 1px);background-size:24px 24px;background-position:0 0}
 .canvas-wrap.grabbing{cursor:grabbing}
 .canvas-inner{position:absolute;top:0;left:0;transform-origin:0 0;width:40000px;height:40000px}
 .canvas-inner svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible}
@@ -54,14 +53,14 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 .canvas-inner svg path.conn-temp{fill:none;stroke:#999;stroke-width:2;stroke-dasharray:6 4;opacity:.5}
 
 /* ── NODES ── */
-.node{position:absolute;min-width:200px;max-width:260px;background:#141416;border-radius:var(--radius);box-shadow:0 0 0 1px rgba(255,138,0,.15),0 2px 14px rgba(255,138,0,.08),0 4px 18px rgba(0,0,0,.6);border:2px solid transparent;z-index:10;cursor:grab;transition:box-shadow .12s,border-color .12s}
-.node:hover{box-shadow:0 0 0 1px rgba(255,138,0,.35),0 6px 24px rgba(255,138,0,.25),0 8px 30px rgba(0,0,0,.6)}
-.node.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,138,0,.25),0 0 28px rgba(255,138,0,.35)}
+.node{position:absolute;min-width:200px;max-width:260px;background:var(--bg2);border-radius:var(--radius);box-shadow:0 2px 8px rgba(0,0,0,.06),0 4px 14px rgba(0,0,0,.05);border:2px solid transparent;z-index:10;cursor:grab;transition:box-shadow .12s,border-color .12s}
+.node:hover{box-shadow:0 4px 14px rgba(0,0,0,.1),0 6px 20px rgba(0,0,0,.08)}
+.node.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,113,227,.2),0 6px 20px rgba(0,0,0,.12)}
 .node.dragging{cursor:grabbing;z-index:20;box-shadow:0 8px 28px var(--node-shadow)}
 
 .node-head{padding:7px 10px;border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:space-between;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#fff}
-.node-head .btn-del{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;line-height:1;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .15s}
-.node-head .btn-del:hover{background:rgba(255,59,48,.9);border-color:#fff;transform:scale(1.12)}
+.node-head .btn-del{background:none;border:none;color:#fff;font-size:1.25rem;font-weight:700;cursor:pointer;line-height:1;padding:0 2px;opacity:.85;transition:opacity .15s,color .15s}
+.node-head .btn-del:hover{opacity:1;color:#ff3b30}
 
 .node-body{padding:8px 10px;font-size:.8rem;color:var(--text);line-height:1.35;min-height:24px;cursor:pointer}
 .node-body em{color:var(--text2);font-style:italic}
@@ -184,8 +183,8 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 .mod-prova .mp-head{display:flex;align-items:center;gap:8px}
 .mod-prova .mp-pass{font-size:.72rem;font-family:"SF Mono",Consolas,monospace;background:rgba(0,0,0,.25);padding:4px 8px;border-radius:6px;text-transform:none;letter-spacing:1px;text-align:center}
 .mod .val{margin-left:auto;font-weight:800}
-.mod .btn-x{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.3);color:inherit;opacity:.9;cursor:pointer;font-size:.95rem;font-weight:700;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;line-height:1;transition:all .15s}
-.mod .btn-x:hover{opacity:1;background:rgba(255,59,48,.9);color:#fff;border-color:#fff;transform:scale(1.12)}
+.mod .btn-x{background:none;border:none;color:inherit;opacity:.85;cursor:pointer;font-size:1.1rem;font-weight:700;padding:0 2px;line-height:1;transition:opacity .15s,color .15s}
+.mod .btn-x:hover{opacity:1;color:#ff3b30}
 
 @media(max-width:700px){.sidebar{width:210px}.node{min-width:160px;max-width:200px}.toolbar{gap:4px}.btn-tool{padding:5px 10px;font-size:.72rem}}
 </style>
