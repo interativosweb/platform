@@ -5,17 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Atividade — AlquiLab</title>
 <style>
-:root{--bg:#f5f5f7;--text:#1d1d1f;--text2:#86868b;--accent:#0071e3;--success:#34c759;--error:#ff3b30;--radius:14px}
+:root{--bg:#0a0a0c;--bg2:#141418;--bg3:#1c1c1f;--text:#f5f5f7;--text2:#8e8e93;--border:#2a2a2e;--accent:#0a84ff;--success:#30d158;--error:#ff453a;--radius:14px}
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 html,body{min-height:100vh}
 body{
-  background:#fafafa;
+  background-color:var(--bg);
   background-image:
-    linear-gradient(rgba(0,0,0,.045) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(0,0,0,.045) 1px,transparent 1px),
-    radial-gradient(circle,rgba(0,0,0,.08) 1.3px,transparent 1.3px);
-  background-size:60px 60px,60px 60px,60px 60px;
-  background-position:0 0,0 0,30px 30px;
+    linear-gradient(rgba(10,132,255,.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(10,132,255,.07) 1px,transparent 1px);
+  background-size:44px 44px;
+  background-attachment:fixed;
   color:var(--text);
   display:flex;flex-direction:column;align-items:center;
   padding:24px 18px 80px;
@@ -27,14 +26,14 @@ body{
 
 .header-bar{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
 .badge{padding:7px 18px;border-radius:50px;font-size:.82rem;font-weight:600;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.badge-name,.badge-serie{background:#aeb0b5}
+.badge-name,.badge-serie{background:#3a3a3e}
 .badge-score{background:var(--success)}
 .badge-error{background:var(--error)}
 
-.progress-wrap{width:100%;max-width:60%;margin:0 auto 22px;height:8px;background:#e5e5ea;border-radius:6px;overflow:hidden}
+.progress-wrap{width:100%;max-width:60%;margin:0 auto 22px;height:8px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;overflow:hidden}
 .progress-fill{height:100%;width:0%;background:var(--success);transition:width .4s ease}
 
-.q-card{background:#fff;border-radius:var(--radius);box-shadow:0 2px 14px rgba(0,0,0,.07);padding:26px;margin-bottom:20px}
+.q-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 6px 24px rgba(0,0,0,.4);padding:26px;margin-bottom:20px;color:var(--text)}
 .q-step{font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-bottom:14px}
 
 .q-split{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start}
@@ -46,33 +45,33 @@ body{
 .q-text b{font-weight:700}
 
 .opts{display:flex;flex-direction:column;gap:10px}
-.btn-opt{padding:13px 16px;border:1px solid #d2d2d7;border-radius:12px;font-size:1rem;background:#fff;cursor:pointer;text-align:left;transition:all .15s;font-weight:500;display:flex;align-items:center;gap:12px}
-.opt-letra{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#f2f2f7;color:#1d1d1f;font-weight:700;font-size:.9rem;flex-shrink:0;transition:all .15s}
+.btn-opt{padding:13px 16px;border:1px solid var(--border);border-radius:12px;font-size:1rem;background:var(--bg3);color:var(--text);cursor:pointer;text-align:left;transition:all .15s;font-weight:500;display:flex;align-items:center;gap:12px}
+.opt-letra{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#2a2a2e;color:var(--text);font-weight:700;font-size:.9rem;flex-shrink:0;transition:all .15s}
 .btn-opt:hover:not(:disabled) .opt-letra{background:#fff;color:var(--success)}
 .btn-opt.certo .opt-letra{background:var(--success);color:#fff}
 .btn-opt.errado .opt-letra{background:var(--error);color:#fff}
 .opt-texto{flex:1}
 .btn-opt:hover:not(:disabled){background:var(--success);color:#fff;border-color:var(--success);transform:translateY(-1px)}
 .btn-opt:disabled{cursor:default}
-.btn-opt.certo{border-color:var(--success);color:var(--success);background:rgba(52,199,89,.08)}
-.btn-opt.errado{border-color:var(--error);color:var(--error);background:rgba(255,59,48,.08)}
+.btn-opt.certo{border-color:var(--success);color:var(--success);background:rgba(48,209,88,.12)}
+.btn-opt.errado{border-color:var(--error);color:var(--error);background:rgba(255,69,58,.12)}
 
-.q-textarea{width:100%;padding:13px;border:1px solid #d2d2d7;border-radius:12px;font-size:1rem;font-family:inherit;resize:vertical;min-height:110px;outline:none}
+.q-textarea{width:100%;padding:13px;border:1px solid var(--border);border-radius:12px;font-size:1rem;font-family:inherit;resize:vertical;min-height:110px;outline:none;background:var(--bg3);color:var(--text)}
 .q-textarea:focus{border-color:var(--accent)}
 .btn-enviar{padding:13px;border:none;border-radius:12px;background:var(--accent);color:#fff;font-size:1rem;font-weight:600;cursor:pointer;transition:background .15s}
-.btn-enviar:hover{background:#005bb5}
-.btn-enviar:disabled{background:#c7c7cc;cursor:not-allowed}
+.btn-enviar:hover{background:#3a9bff}
+.btn-enviar:disabled{background:#3a3a3e;color:#8e8e93;cursor:not-allowed}
 
-.resolucao{margin-top:18px;padding:16px;border-radius:12px;background:rgba(0,113,227,.06);border-left:4px solid var(--accent);font-size:.95rem;line-height:1.55}
+.resolucao{margin-top:18px;padding:16px;border-radius:12px;background:rgba(10,132,255,.1);border:1px solid rgba(10,132,255,.25);border-left:4px solid var(--accent);font-size:.95rem;line-height:1.55;color:var(--text)}
 .resolucao .rt{font-weight:700;margin-bottom:4px;color:var(--accent);font-size:.78rem;text-transform:uppercase;letter-spacing:1px}
 
-.q-textarea.sent{background:#f5f5f7;color:#86868b;cursor:default}
-.btn-enviar.sent{background:#34c759;cursor:default;opacity:.95}
+.q-textarea.sent{background:#1c1c1f;color:#8e8e93;cursor:default}
+.btn-enviar.sent{background:#30d158;cursor:default;opacity:.95}
 
 .btn-next{padding:13px;border:none;border-radius:12px;background:var(--success);color:#fff;font-size:1rem;font-weight:600;cursor:pointer;margin-top:14px;display:none;transition:background .15s;width:100%}
-.btn-next:hover{background:#2da84e}
+.btn-next:hover{background:#28a745}
 
-.end-screen{text-align:center;padding:40px 20px;background:#fff;border-radius:var(--radius);box-shadow:0 2px 14px rgba(0,0,0,.07)}
+.end-screen{text-align:center;padding:40px 20px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 6px 24px rgba(0,0,0,.5);color:var(--text)}
 .end-screen h1{font-size:1.8rem;margin-bottom:10px;color:var(--success)}
 .end-screen .big-name{font-size:2.2rem;font-weight:800;color:var(--accent);margin:10px 0}
 .end-screen .stats{display:flex;justify-content:center;gap:40px;margin-top:20px}
@@ -82,27 +81,27 @@ body{
 /* Timer footer */
 .timer-footer{
   position:fixed;left:0;right:0;bottom:0;z-index:500;
-  background:rgba(255,255,255,.96);backdrop-filter:blur(12px);
-  border-top:1px solid #e5e5ea;
+  background:rgba(20,20,24,.92);backdrop-filter:blur(12px);
+  border-top:1px solid var(--border);
   padding:12px 20px;display:none;align-items:center;justify-content:center;gap:14px;
-  box-shadow:0 -4px 20px rgba(0,0,0,.06);
+  box-shadow:0 -4px 20px rgba(0,0,0,.5);
 }
 .timer-footer.show{display:flex}
 .timer-label{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2)}
 .timer-val{font-size:1.6rem;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text)}
 .timer-val.warn{color:#ff9500}
 .timer-val.danger{color:var(--error)}
-.timer-bar{width:220px;height:6px;background:#e5e5ea;border-radius:4px;overflow:hidden}
+.timer-bar{width:220px;height:6px;background:#2a2a2e;border-radius:4px;overflow:hidden}
 .timer-bar>div{height:100%;width:100%;background:var(--success);transition:width .5s linear,background .3s}
 
 /* Modals */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;z-index:9000;padding:20px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;z-index:9000;padding:20px}
 .modal-overlay.show{display:flex}
-.modal{background:#fff;padding:26px;border-radius:16px;width:100%;max-width:420px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,.2)}
-.modal h2{font-size:1.2rem;margin-bottom:6px}
+.modal{background:var(--bg2);padding:26px;border-radius:16px;width:100%;max-width:420px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6);border:1px solid var(--border);color:var(--text)}
+.modal h2{font-size:1.2rem;margin-bottom:6px;color:var(--text)}
 .modal p{font-size:.85rem;color:var(--text2);margin-bottom:16px}
-.modal input{width:100%;padding:12px;border:1px solid #d2d2d7;border-radius:10px;font-size:1rem;text-align:center;outline:none;margin-bottom:8px;font-family:inherit}
-.modal input:focus{border-color:var(--accent)}
+.modal input{width:100%;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:1rem;text-align:center;outline:none;margin-bottom:8px;font-family:inherit;color:var(--text)}
+.modal input:focus{border-color:var(--accent);background:rgba(10,132,255,.06)}
 .aviso{color:var(--error);font-size:.78rem;font-weight:600;min-height:1em;margin:4px 0}
 .btn-entrar{width:100%;padding:13px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-size:1rem;font-weight:600;cursor:pointer;margin-top:6px}
 
@@ -158,7 +157,7 @@ body{
   <div class="modal">
     <h2>Identificação</h2>
     <p>Digite seu nome para entrar na atividade.</p>
-    <div id="turmaInfo" style="background:#f3f4f6;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:.88rem;color:#374151;line-height:1.5"></div>
+    <div id="turmaInfo" style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:.88rem;color:var(--text2);line-height:1.5"></div>
     <input type="text" id="inputNome" placeholder="Qual o seu nome?" maxlength="15">
     <div class="aviso" id="loginAviso"></div>
     <button class="btn-entrar" onclick="realizarLogin()">Entrar</button>
