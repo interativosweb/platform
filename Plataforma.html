@@ -966,10 +966,9 @@
     <div class="adm-overlay" id="wipOverlay">
         <div class="adm-box" style="width:420px">
             <button class="adm-close" id="wipClose">✕</button>
-            <div style="font-size:2.5rem;margin-bottom:10px">🚧</div>
-            <div class="adm-title" id="wipTitle">Em construção</div>
-            <div class="adm-sub" id="wipSub" style="margin-bottom:18px">Esta área está sendo preparada com muito carinho. Em breve estará disponível!</div>
-            <button class="adm-btn" id="wipOk">Entendi</button>
+            <div id="wipTitle" style="font-size:1.1rem;font-weight:600;color:var(--text-main);margin-bottom:8px;letter-spacing:-0.2px">Em construção</div>
+            <div id="wipSub" style="font-size:0.9rem;color:var(--text-light);font-weight:400;line-height:1.5;margin-bottom:22px">Esta área está sendo preparada. Em breve estará disponível.</div>
+            <button class="adm-btn" id="wipOk" style="font-weight:500">Entendi</button>
         </div>
     </div>
 
@@ -1203,7 +1202,7 @@
                 },
                 {
                     title: "Teorema de Pitágoras", desc: "Atividades para praticar a aplicação do Teorema de Pitágoras em triângulos retângulos.",
-                    url: "https://pitagoras-one.vercel.app/", icon: "",
+                    url: "#", icon: "", underConstruction: true,
                     category: "Geometria", theme: "green",
                     tags: ["Geometria", "Pitágoras", "Hipotenusa", "Cateto",]
                 },
@@ -1329,7 +1328,8 @@
         // ===== CONSTRUCTION POPUP =====
         function showWip(title) {
             const ov = document.getElementById('wipOverlay');
-            document.getElementById('wipTitle').textContent = title + ' em construção';
+            document.getElementById('wipTitle').textContent = 'Em construção';
+            document.getElementById('wipSub').textContent = title + ' está sendo preparada. Em breve estará disponível.';
             ov.classList.add('show');
         }
         document.getElementById('wipClose').addEventListener('click', () => document.getElementById('wipOverlay').classList.remove('show'));
