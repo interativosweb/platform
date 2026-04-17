@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Repositório — Montador de Provas</title>
+<style>
+:root{
+  --bg:#0a0a0c; --bg2:#141418; --bg3:#1c1c1f;
+  --border:#2a2a2e; --border2:#3a3a3e;
+  --text:#f5f5f7; --text2:#8e8e93;
+  --accent:#0a84ff; --success:#30d158; --warning:#ff9f0a; --error:#ff453a;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--text); overflow:hidden;
+  background-image:linear-gradient(rgba(10,132,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(10,132,255,.06) 1px,transparent 1px);
+  background-size:44px 44px; background-attachment:fixed;
+}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 20px;background:var(--bg2);border-bottom:1px solid var(--border);
+  height:58px;position:relative;z-index:50;
+}
+.topbar .brand{font-size:1rem;font-weight:800;letter-spacing:-.2px}
+.topbar .brand small{font-weight:500;color:var(--text2);margin-left:8px;font-size:.82rem}
+.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.top-actions button,.top-actions a{
+  padding:8px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;
+  text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all .15s
+}
+.top-actions button:hover,.top-actions a:hover{border-color:var(--accent);color:var(--accent)}
+.top-actions .primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.top-actions .primary:hover{background:#3a9bff;border-color:#3a9bff;color:#fff}
+.top-actions .admin{color:var(--warning);border-color:rgba(255,159,10,.3)}
+.top-actions .admin:hover{color:var(--warning);border-color:var(--warning)}
+
+.workspace{display:grid;grid-template-columns:340px 1fr;height:calc(100vh - 58px)}
+
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.search-box{padding:14px;border-bottom:1px solid var(--border)}
+.search-box .wrap{position:relative}
+.search-box input{
+  width:100%;padding:11px 14px 11px 36px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-size:.9rem;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s
+}
+.search-box input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(10,132,255,.15)}
+.search-box svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text2)}
+.sidebar-head{padding:10px 14px 6px;font-size:.7rem;font-weight:700;color:var(--text2);letter-spacing:1px;text-transform:uppercase;display:flex;justify-content:space-between}
+.qlist{flex:1;overflow-y:auto;padding:6px 10px 16px}
+.qitem{
+  background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:8px;margin-bottom:8px;cursor:pointer;
+  transition:border-color .15s,transform .15s
+}
+.qitem:hover{border-color:var(--accent);transform:translateY(-1px)}
+.qitem img{width:100%;max-height:130px;object-fit:contain;border-radius:6px;background:#fff;display:block}
+.qitem .meta{font-size:.72rem;color:var(--text2);display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.qitem .tema{color:var(--accent);font-weight:700}
+.qitem .stars{color:var(--warning);font-size:.7rem;letter-spacing:1px}
+.sid-empty{padding:28px 12px;text-align:center;color:var(--text2);font-size:.82rem;line-height:1.5}
+
+.docarea{overflow-y:auto;padding:24px 24px 80px;display:flex;flex-direction:column;align-items:center;gap:18px}
+.page{
+  background:#fff;color:#111;width:794px;min-height:1123px;position:relative;
+  box-shadow:0 4px 30px rgba(0,0,0,.45);border-radius:4px;padding:56px 64px;
+  display:flex;flex-direction:column;
+}
+.page-num{position:absolute;bottom:18px;right:28px;font-size:.72rem;color:#999;font-weight:500;font-family:Georgia,serif}
+.doc-header{border-bottom:2px solid #111;padding-bottom:14px;margin-bottom:22px}
+.doc-header .school{
+  width:100%;border:none;border-bottom:1px solid #ccc;font-size:1.05rem;font-weight:700;padding:2px 0;
+  margin-bottom:8px;font-family:Georgia,"Times New Roman",serif;color:#111;outline:none;background:transparent
+}
+.doc-header .school:focus,.doc-header input:focus{border-color:#0a84ff}
+.doc-header .teacher{
+  width:100%;border:none;border-bottom:1px dotted #ccc;font-size:.86rem;padding:2px 0;
+  margin-bottom:14px;font-family:Georgia,serif;color:#333;outline:none;background:transparent
+}
+.doc-header .row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px}
+.doc-header .field{display:flex;flex-direction:column}
+.doc-header .field label{font-size:.66rem;text-transform:uppercase;color:#666;font-weight:700;letter-spacing:.5px;margin-bottom:2px;font-family:-apple-system,sans-serif}
+.doc-header .field input{border:none;border-bottom:1px solid #888;padding:2px 0;font-size:.86rem;font-family:Georgia,serif;color:#111;outline:none;background:transparent}
+
+.blocks-area{flex:1;display:flex;flex-direction:column;gap:10px;min-height:0}
+.block{
+  position:relative;background:#fff;border:1.5px dashed transparent;border-radius:4px;padding:6px 8px;
+  min-height:110px;resize:vertical;overflow:hidden;transition:border-color .12s;
+}
+.block:hover{border-color:#bcd6f5}
+.block.dragging{opacity:.35}
+.block.drag-over{border-color:#0a84ff;background:#eef6ff}
+.block img{max-width:100%;max-height:100%;display:block;margin:0 auto;pointer-events:none}
+.block .manual-text{
+  width:100%;height:100%;min-height:100px;border:none;font-family:Georgia,"Times New Roman",serif;
+  font-size:.96rem;color:#111;line-height:1.55;outline:none;resize:none;background:transparent;padding:4px
+}
+.block .ctrls{position:absolute;top:4px;right:6px;display:none;gap:4px;z-index:2}
+.block:hover .ctrls{display:flex}
+.block .ctrls button{
+  background:rgba(255,255,255,.95);border:1px solid #ccc;border-radius:6px;
+  width:26px;height:26px;cursor:pointer;font-size:.82rem;color:#111;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;transition:all .12s
+}
+.block .ctrls .del{color:#ff453a;border-color:#ffb3ae}
+.block .ctrls .del:hover{background:#ff453a;color:#fff;border-color:#ff453a}
+.block .handle{
+  position:absolute;top:4px;left:6px;cursor:grab;padding:3px 8px;
+  background:rgba(255,255,255,.95);border:1px solid #ccc;border-radius:6px;
+  font-size:.8rem;color:#555;display:none;font-weight:700;letter-spacing:1px;user-select:none
+}
+.block:hover .handle{display:block}
+.block .handle:active{cursor:grabbing}
+.page-placeholder{color:#999;text-align:center;padding:40px 10px;font-size:.92rem;font-family:Georgia,serif;font-style:italic}
+
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:500;display:none;align-items:center;justify-content:center;padding:24px}
+.ov.show{display:flex}
+.ov-box{background:var(--bg2);border:1px solid var(--border);border-radius:16px;max-width:720px;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.7)}
+.ov-box header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.ov-box header h3{font-size:.98rem;font-weight:700}
+.ov-box header button{background:transparent;border:none;color:var(--text2);font-size:1.2rem;cursor:pointer;line-height:1}
+.ov-box .body{padding:18px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:12px}
+.ov-box .body .tag{display:inline-block;font-size:.7rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;background:rgba(10,132,255,.1);padding:4px 10px;border-radius:6px;align-self:flex-start}
+.ov-box .body img{max-width:100%;border:1px solid var(--border);border-radius:8px;background:#fff}
+.ov-box .body h4{font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.7px;margin-top:4px}
+.ov-box .body .com{font-size:.88rem;color:var(--text);line-height:1.5;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px}
+.ov-box footer{padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+.ov-box footer button{padding:10px 18px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
+.ov-box footer button:hover{border-color:var(--accent);color:var(--accent)}
+.ov-box footer button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.ov-box footer button.primary:hover{background:#3a9bff;border-color:#3a9bff;color:#fff}
+
+.print-box{width:420px;padding:24px}
+.print-box h3{font-size:1.05rem;font-weight:800;margin-bottom:4px}
+.print-box .sub{font-size:.82rem;color:var(--text2);margin-bottom:16px}
+.print-box .row{margin-bottom:14px}
+.print-box label{display:block;font-size:.72rem;color:var(--text2);font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:6px}
+.print-box select,.print-box input[type=number]{
+  width:100%;padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.9rem;outline:none
+}
+.print-box select:focus,.print-box input:focus{border-color:var(--accent)}
+.print-box .tip{font-size:.76rem;color:var(--text2);background:var(--bg3);border:1px solid var(--border);padding:10px 12px;border-radius:8px;margin-bottom:14px;line-height:1.45}
+.print-box .foot{display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
+.print-box .foot button{padding:10px 18px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit}
+.print-box .foot button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.print-box .foot button.primary:hover{background:#3a9bff}
+.print-box .foot button:hover{border-color:var(--accent)}
+
+#manualText{
+  width:100%;min-height:220px;padding:14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-family:Georgia,"Times New Roman",serif;font-size:.96rem;line-height:1.5;outline:none;resize:vertical
+}
+#manualText:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(10,132,255,.15)}
+
+.auth-loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999}
+.auth-loader .sp{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+@media print{
+  html,body{background:#fff !important;background-image:none !important;overflow:visible !important;height:auto !important}
+  .topbar,.sidebar,.ov,.block .ctrls,.block .handle,.page-num{display:none !important}
+  .workspace{display:block !important;height:auto !important}
+  .docarea{padding:0 !important;gap:0 !important;display:block !important;overflow:visible !important}
+  .page{
+    box-shadow:none !important;margin:0 !important;page-break-after:always;
+    width:auto !important;min-height:auto !important;padding:14mm 16mm !important;border-radius:0 !important
+  }
+  .page:last-child{page-break-after:auto}
+  .block{border:none !important;break-inside:avoid;resize:none !important;padding:4px 0 !important}
+  @page{size:A4;margin:0}
+  body.print-bw{filter:grayscale(100%)}
+}
+</style>
+</head>
+<body>
+
+<div class="auth-loader" id="authLoader"><div class="sp"></div></div>
+
+<div class="topbar">
+  <div class="brand">Montador de Provas<small id="pageCount">· 1 página</small></div>
+  <div class="top-actions">
+    <button id="btnLimpar" title="Remover todas as questões">Limpar</button>
+    <button id="btnManual">+ Questão manual</button>
+    <a href="admin.html" class="admin" id="linkAdmin" style="display:none" title="Área administrativa">⚙ Cadastrar</a>
+    <a href="../Plataforma.html" title="Voltar à plataforma">← Plataforma</a>
+    <button class="primary" id="btnPrint">Imprimir</button>
+  </div>
+</div>
+
+<div class="workspace">
+  <aside class="sidebar">
+    <div class="search-box">
+      <div class="wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchInp" placeholder="Buscar por tema... ex: matrizes">
+      </div>
+    </div>
+    <div class="sidebar-head"><span>Banco de questões</span><span id="countQ">0</span></div>
+    <div class="qlist" id="qlist"><div class="sid-empty">Carregando banco...</div></div>
+  </aside>
+
+  <main class="docarea" id="docArea"></main>
+</div>
+
+<div class="ov" id="previewOv">
+  <div class="ov-box">
+    <header><h3>Pré-visualização da questão</h3><button id="previewClose">✕</button></header>
+    <div class="body" id="previewBody"></div>
+    <footer>
+      <button id="previewCancel">Cancelar</button>
+      <button class="primary" id="previewAdd">Adicionar à prova</button>
+    </footer>
+  </div>
+</div>
+
+<div class="ov" id="manualOv">
+  <div class="ov-box">
+    <header><h3>Nova questão manual</h3><button id="manualClose">✕</button></header>
+    <div class="body">
+      <textarea id="manualText" placeholder="Digite aqui o enunciado da questão..."></textarea>
+    </div>
+    <footer>
+      <button id="manualCancel">Cancelar</button>
+      <button class="primary" id="manualAdd">Adicionar</button>
+    </footer>
+  </div>
+</div>
+
+<div class="ov" id="printOv">
+  <div class="ov-box print-box">
+    <h3>Imprimir prova</h3>
+    <div class="sub">Configure antes de abrir a caixa de impressão do navegador.</div>
+    <div class="tip">No diálogo do navegador você também pode confirmar cópias, cor/preto-branco e a opção frente/verso (duplex) da sua impressora.</div>
+    <div class="row">
+      <label>Número de cópias</label>
+      <input type="number" id="cfgCopies" min="1" max="60" value="1">
+    </div>
+    <div class="row">
+      <label>Tipo de impressão</label>
+      <select id="cfgColor">
+        <option value="cor">Colorida</option>
+        <option value="pb">Preto e branco</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>Layout</label>
+      <select id="cfgLayout">
+        <option value="1face">Somente frente</option>
+        <option value="2face">Frente e verso (configure também na impressora)</option>
+      </select>
+    </div>
+    <div class="foot">
+      <button id="printCancel">Cancelar</button>
+      <button class="primary" id="printGo">Continuar para impressão</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {getAuth,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {getDatabase,ref,onValue} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig={apiKey:"AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",authDomain:"profbase-5f9b0.firebaseapp.com",databaseURL:"https://profbase-5f9b0-default-rtdb.firebaseio.com",projectId:"profbase-5f9b0",storageBucket:"profbase-5f9b0.firebasestorage.app",messagingSenderId:"826412057766",appId:"1:826412057766:web:729e6e24ce7587417fe067"};
+const ADMIN_EMAIL='gilbertofernandessc@gmail.com';
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getDatabase(app);
+const $=id=>document.getElementById(id);
+
+let questoes=[];
+let blocks=[];
+let currentQid=null;
+let dragBid=null;
+let headerData={escola:'',professor:'',aluno:'',serie:'',data:''};
+let relayoutTimer=null;
+
+onAuthStateChanged(auth,user=>{
+  if(!user){ window.location.href='../index.html'; return }
+  if(user.email===ADMIN_EMAIL) $('linkAdmin').style.display='inline-flex';
+  $('authLoader').style.display='none';
+});
+
+onValue(ref(db,'questoes'), snap=>{
+  const data=snap.val()||{};
+  questoes=Object.entries(data).map(([id,q])=>({id,...q})).sort((a,b)=>(b.criadoEm||0)-(a.criadoEm||0));
+  renderSidebar();
+});
+
+function norm(s){return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
+function esc(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML}
+
+$('searchInp').addEventListener('input', renderSidebar);
+function renderSidebar(){
+  const q=norm($('searchInp').value.trim());
+  let list=questoes;
+  if(q) list=list.filter(it=>
+    norm(it.tema).includes(q) ||
+    (it.bncc||[]).some(b=>norm(b).includes(q)) ||
+    norm(it.comentario||'').includes(q)
+  );
+  $('countQ').textContent=list.length;
+  const el=$('qlist');
+  if(!list.length){
+    el.innerHTML='<div class="sid-empty">'+(questoes.length?'Nenhuma questão encontrada.':'Banco vazio. O administrador precisa cadastrar questões.')+'</div>';
+    return;
+  }
+  el.innerHTML=list.map(q=>`
+    <div class="qitem" data-id="${q.id}">
+      <img src="${q.imgQuestao}" alt="">
+      <div class="meta">
+        <span class="tema">${esc(q.tema)}</span>
+        ${q.estrelas?`<span class="stars">${'★'.repeat(q.estrelas)}</span>`:''}
+      </div>
+    </div>
+  `).join('');
+  el.querySelectorAll('.qitem').forEach(it=>it.onclick=()=>openPreview(it.dataset.id));
+}
+
+function openPreview(qid){
+  const q=questoes.find(x=>x.id===qid); if(!q) return;
+  currentQid=qid;
+  $('previewBody').innerHTML=`
+    <span class="tag">${esc(q.tema)}</span>
+    <h4>Questão</h4>
+    <img src="${q.imgQuestao}">
+    ${q.imgResposta?`<h4>Resposta (não aparece na prova)</h4><img src="${q.imgResposta}">`:''}
+    ${q.bncc&&q.bncc.length?`<h4>BNCC</h4><div class="com">${q.bncc.map(esc).join(' · ')}</div>`:''}
+    ${q.comentario?`<h4>Comentário</h4><div class="com">${esc(q.comentario)}</div>`:''}
+    <h4>Avaliação</h4>
+    <div class="com" style="color:var(--warning);letter-spacing:3px;font-size:1.1rem">${'★'.repeat(q.estrelas||0)}${'☆'.repeat(5-(q.estrelas||0))}</div>
+  `;
+  $('previewOv').classList.add('show');
+}
+$('previewClose').onclick=()=>$('previewOv').classList.remove('show');
+$('previewCancel').onclick=()=>$('previewOv').classList.remove('show');
+$('previewAdd').onclick=()=>{
+  if(!currentQid) return;
+  blocks.push({bid:newId(),type:'banco',qid:currentQid,altura:null});
+  $('previewOv').classList.remove('show');
+  renderDoc();
+};
+
+$('btnManual').onclick=()=>{ $('manualText').value=''; $('manualOv').classList.add('show'); setTimeout(()=>$('manualText').focus(),40) };
+$('manualClose').onclick=()=>$('manualOv').classList.remove('show');
+$('manualCancel').onclick=()=>$('manualOv').classList.remove('show');
+$('manualAdd').onclick=()=>{
+  const t=$('manualText').value.trim();
+  if(!t){ $('manualOv').classList.remove('show'); return }
+  blocks.push({bid:newId(),type:'manual',texto:t,altura:null});
+  $('manualOv').classList.remove('show');
+  renderDoc();
+};
+
+$('btnLimpar').onclick=()=>{
+  if(!blocks.length) return;
+  if(confirm('Remover todas as questões da prova?')){ blocks=[]; renderDoc() }
+};
+
+const MAX_PAGES=10;
+const PAGE_HEIGHT_PX=1123;
+const PAGE_PAD_TB=56*2;
+const HEADER_H=150;
+const BLOCK_GAP=10;
+
+function paginate(){
+  const contentArea=PAGE_HEIGHT_PX-PAGE_PAD_TB;
+  const pages=[[]];
+  let used=HEADER_H;
+  for(const b of blocks){
+    const h=(b.altura||220)+BLOCK_GAP;
+    if(used+h>contentArea && pages[pages.length-1].length>0){
+      if(pages.length>=MAX_PAGES) break;
+      pages.push([b]);
+      used=h;
+    }else{
+      pages[pages.length-1].push(b);
+      used+=h;
+    }
+  }
+  return pages;
+}
+
+function renderDoc(){
+  const cont=$('docArea');
+  const pages=paginate();
+  $('pageCount').textContent='· '+pages.length+' página'+(pages.length>1?'s':'');
+  const savedFocusBid=(document.activeElement&&document.activeElement.closest('.block'))?document.activeElement.closest('.block').dataset.bid:null;
+  const savedSel=document.activeElement&&document.activeElement.tagName==='TEXTAREA'?{start:document.activeElement.selectionStart,end:document.activeElement.selectionEnd}:null;
+  const savedHeaderKey=(document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.k)?document.activeElement.dataset.k:null;
+
+  cont.innerHTML='';
+  pages.forEach((pageBlocks,pi)=>{
+    const page=document.createElement('div');
+    page.className='page';
+    if(pi===0) page.appendChild(renderHeader());
+    const area=document.createElement('div');
+    area.className='blocks-area';
+    area.dataset.page=pi;
+    pageBlocks.forEach(b=>area.appendChild(renderBlock(b)));
+    if(pi===0 && blocks.length===0){
+      const ph=document.createElement('div');
+      ph.className='page-placeholder';
+      ph.textContent='Clique em uma questão à esquerda para adicioná-la, ou use "+ Questão manual" no topo.';
+      area.appendChild(ph);
+    }
+    page.appendChild(area);
+    const num=document.createElement('div');
+    num.className='page-num';
+    num.textContent='Página '+(pi+1)+' de '+pages.length;
+    page.appendChild(num);
+    cont.appendChild(page);
+  });
+
+  if(savedHeaderKey){
+    const inp=cont.querySelector('[data-k="'+savedHeaderKey+'"]');
+    if(inp){ inp.focus(); if(inp.setSelectionRange) try{ inp.setSelectionRange(inp.value.length,inp.value.length) }catch(_){} }
+  }else if(savedFocusBid){
+    const el=cont.querySelector('.block[data-bid="'+savedFocusBid+'"] .manual-text');
+    if(el){ el.focus(); if(savedSel) try{ el.setSelectionRange(savedSel.start,savedSel.end) }catch(_){} }
+  }
+}
+
+function renderHeader(){
+  const h=document.createElement('div');
+  h.className='doc-header';
+  h.innerHTML=`
+    <input class="school" placeholder="Nome da Escola" value="${esc(headerData.escola)}" data-k="escola">
+    <input class="teacher" placeholder="Professor(a): nome do professor" value="${esc(headerData.professor)}" data-k="professor">
+    <div class="row">
+      <div class="field"><label>Aluno(a)</label><input placeholder="Nome do aluno" value="${esc(headerData.aluno)}" data-k="aluno"></div>
+      <div class="field"><label>Série/Turma</label><input placeholder="Ex: 9º ano A" value="${esc(headerData.serie)}" data-k="serie"></div>
+      <div class="field"><label>Data</label><input placeholder="__/__/____" value="${esc(headerData.data)}" data-k="data"></div>
+    </div>
+  `;
+  h.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input',()=>{ headerData[inp.dataset.k]=inp.value });
+  });
+  return h;
+}
+
+function renderBlock(b){
+  const el=document.createElement('div');
+  el.className='block';
+  el.dataset.bid=b.bid;
+  if(b.altura) el.style.height=b.altura+'px';
+
+  if(b.type==='banco'){
+    const q=questoes.find(x=>x.id===b.qid);
+    if(q){
+      const img=document.createElement('img');
+      img.src=q.imgQuestao;
+      img.onload=()=>{
+        if(!b.altura){
+          b.altura=Math.min(img.naturalHeight*((794-128)/img.naturalWidth),900)+20;
+          el.style.height=b.altura+'px';
+          scheduleRelayout();
+        }
+      };
+      el.appendChild(img);
+    }else{
+      const w=document.createElement('div');
+      w.style.cssText='color:#999;text-align:center;padding:20px;font-family:Georgia,serif;font-style:italic';
+      w.textContent='Questão removida do banco';
+      el.appendChild(w);
+    }
+  }else{
+    const ta=document.createElement('textarea');
+    ta.className='manual-text';
+    ta.value=b.texto||'';
+    ta.addEventListener('input',()=>{ b.texto=ta.value });
+    el.appendChild(ta);
+  }
+
+  const ctrls=document.createElement('div');
+  ctrls.className='ctrls';
+  ctrls.innerHTML='<button class="del" title="Remover questão">✕</button>';
+  ctrls.querySelector('.del').onclick=(e)=>{
+    e.stopPropagation();
+    blocks=blocks.filter(x=>x.bid!==b.bid);
+    renderDoc();
+  };
+  el.appendChild(ctrls);
+
+  const handle=document.createElement('div');
+  handle.className='handle';
+  handle.textContent='⋮⋮';
+  handle.title='Arraste para reordenar';
+  el.appendChild(handle);
+
+  el.draggable=true;
+  el.addEventListener('dragstart',e=>{
+    dragBid=b.bid;
+    el.classList.add('dragging');
+    e.dataTransfer.effectAllowed='move';
+    try{ e.dataTransfer.setData('text/plain',b.bid) }catch(_){}
+  });
+  el.addEventListener('dragend',()=>{
+    el.classList.remove('dragging');
+    document.querySelectorAll('.block.drag-over').forEach(x=>x.classList.remove('drag-over'));
+  });
+  el.addEventListener('dragover',e=>{
+    if(!dragBid||dragBid===b.bid) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect='move';
+    el.classList.add('drag-over');
+  });
+  el.addEventListener('dragleave',()=>el.classList.remove('drag-over'));
+  el.addEventListener('drop',e=>{
+    e.preventDefault();
+    el.classList.remove('drag-over');
+    if(!dragBid||dragBid===b.bid) return;
+    const fromIdx=blocks.findIndex(x=>x.bid===dragBid);
+    const toIdx=blocks.findIndex(x=>x.bid===b.bid);
+    if(fromIdx<0||toIdx<0) return;
+    const [mv]=blocks.splice(fromIdx,1);
+    blocks.splice(toIdx,0,mv);
+    dragBid=null;
+    renderDoc();
+  });
+
+  return el;
+}
+
+function scheduleRelayout(){
+  clearTimeout(relayoutTimer);
+  relayoutTimer=setTimeout(()=>renderDoc(),120);
+}
+
+document.addEventListener('pointerup',()=>{
+  let changed=false;
+  document.querySelectorAll('.block').forEach(el=>{
+    const b=blocks.find(x=>x.bid===el.dataset.bid);
+    if(!b) return;
+    const h=el.offsetHeight;
+    if(h>0 && Math.abs((b.altura||0)-h)>3){
+      b.altura=h;
+      changed=true;
+    }
+  });
+  if(changed) scheduleRelayout();
+});
+
+function newId(){return 'b'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+
+$('btnPrint').onclick=()=>$('printOv').classList.add('show');
+$('printCancel').onclick=()=>$('printOv').classList.remove('show');
+$('printGo').onclick=()=>{
+  const copies=Math.max(1,Math.min(60,parseInt($('cfgCopies').value)||1));
+  const color=$('cfgColor').value;
+  document.body.classList.toggle('print-bw',color==='pb');
+  $('printOv').classList.remove('show');
+
+  const cont=$('docArea');
+  const originalHTML=cont.innerHTML;
+  if(copies>1){
+    let full='';
+    for(let i=0;i<copies;i++) full+=originalHTML;
+    cont.innerHTML=full;
+  }
+  setTimeout(()=>{
+    window.print();
+    setTimeout(()=>{
+      if(copies>1){ cont.innerHTML=originalHTML; renderDoc() }
+      document.body.classList.remove('print-bw');
+    },400);
+  },100);
+};
+
+document.querySelectorAll('.ov').forEach(ov=>{
+  ov.addEventListener('click',e=>{ if(e.target===ov) ov.classList.remove('show') });
+});
+
+renderDoc();
+</script>
+</body>
+</html>

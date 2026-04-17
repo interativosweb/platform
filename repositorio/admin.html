@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Repositório — Cadastro de Questões</title>
+<style>
+:root{
+  --bg:#0a0a0c; --bg2:#141418; --bg3:#1c1c1f;
+  --border:#2a2a2e; --border2:#3a3a3e;
+  --text:#f5f5f7; --text2:#8e8e93;
+  --accent:#0a84ff; --success:#30d158; --warning:#ff9f0a; --error:#ff453a;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{
+  background:var(--bg); color:var(--text); min-height:100vh; padding:28px 24px 60px;
+  background-image:linear-gradient(rgba(10,132,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(10,132,255,.06) 1px,transparent 1px);
+  background-size:44px 44px; background-attachment:fixed;
+}
+.container{max-width:1100px;margin:0 auto}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap}
+.header h1{font-size:1.5rem;font-weight:800;letter-spacing:-.3px}
+.header .sub{color:var(--text2);font-size:.85rem;font-weight:500;margin-top:2px}
+.back{color:var(--text2);text-decoration:none;font-size:.85rem;font-weight:600;padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);transition:all .15s}
+.back:hover{color:var(--text);border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:420px 1fr;gap:20px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:22px;box-shadow:0 4px 20px rgba(0,0,0,.5)}
+.card h2{font-size:1rem;font-weight:700;margin-bottom:14px}
+label{display:block;font-size:.72rem;font-weight:600;color:var(--text2);letter-spacing:.8px;text-transform:uppercase;margin:14px 0 6px}
+input[type=text],textarea{
+  width:100%;padding:11px 13px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-size:.92rem;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s;
+}
+textarea{min-height:70px;resize:vertical}
+input[type=text]:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(10,132,255,.15)}
+.file-drop{
+  display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg3);border:1.5px dashed var(--border2);border-radius:10px;cursor:pointer;transition:all .15s;
+}
+.file-drop:hover{border-color:var(--accent);background:rgba(10,132,255,.04)}
+.file-drop.ok{border-color:var(--success);background:rgba(48,209,88,.05)}
+.file-drop input{display:none}
+.file-drop img{max-width:72px;max-height:72px;border-radius:6px;object-fit:cover;background:#fff}
+.file-drop .txt{flex:1;font-size:.82rem;color:var(--text2);line-height:1.35}
+.stars{display:flex;gap:6px;margin-top:4px;user-select:none}
+.stars span{font-size:1.6rem;color:#3a3a3e;cursor:pointer;transition:color .12s;line-height:1}
+.stars span.on{color:var(--warning)}
+.btn{
+  width:100%;padding:13px;margin-top:18px;background:var(--accent);color:#fff;border:none;border-radius:10px;
+  font-size:.92rem;font-weight:700;letter-spacing:.3px;cursor:pointer;font-family:inherit;transition:background .15s,transform .15s;
+}
+.btn:hover{background:#3a9bff;transform:translateY(-1px)}
+.btn:disabled{background:#444;cursor:not-allowed;transform:none}
+.msg{margin-top:12px;padding:10px 12px;border-radius:8px;font-size:.82rem;font-weight:500;display:none}
+.msg.show{display:block}
+.msg.ok{background:rgba(48,209,88,.1);border:1px solid rgba(48,209,88,.3);color:var(--success)}
+.msg.err{background:rgba(255,69,58,.1);border:1px solid rgba(255,69,58,.3);color:var(--error)}
+
+.list{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:18px;max-height:calc(100vh - 140px);overflow-y:auto}
+.list h2{font-size:1rem;font-weight:700;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.list h2 small{color:var(--text2);font-size:.72rem;font-weight:600;letter-spacing:.6px;text-transform:uppercase}
+.list .search{margin-bottom:12px}
+.q-row{display:grid;grid-template-columns:90px 1fr auto;gap:12px;align-items:center;padding:10px;border-bottom:1px solid var(--border)}
+.q-row:last-child{border-bottom:none}
+.q-row:hover{background:var(--bg3);border-radius:8px}
+.q-thumb{width:90px;height:68px;background:#fff;border:1px solid var(--border);border-radius:6px;object-fit:contain}
+.q-meta{min-width:0}
+.q-tema{font-size:.9rem;font-weight:700;color:var(--text)}
+.q-bncc{font-size:.72rem;color:var(--accent);font-weight:600;margin-top:2px}
+.q-star{font-size:.78rem;color:var(--warning);margin-top:2px;letter-spacing:1px}
+.q-com{font-size:.76rem;color:var(--text2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.q-del{padding:6px 10px;background:transparent;color:var(--error);border:1px solid rgba(255,69,58,.3);border-radius:8px;font-size:.74rem;font-weight:700;cursor:pointer;transition:all .15s;font-family:inherit}
+.q-del:hover{background:var(--error);color:#fff;border-color:var(--error)}
+.empty{padding:30px 12px;text-align:center;color:var(--text2);font-size:.85rem}
+
+.auth-block{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:14px;text-align:center;padding:30px}
+.auth-block h2{font-size:1.2rem;font-weight:800}
+.auth-block p{color:var(--text2);font-size:.9rem;max-width:320px;line-height:1.5}
+.auth-block a{background:var(--accent);color:#fff;padding:11px 22px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.88rem;margin-top:6px}
+.auth-block a:hover{background:#3a9bff}
+</style>
+</head>
+<body>
+
+<div id="authBlock" class="auth-block" style="display:none">
+  <h2>Acesso Restrito</h2>
+  <p id="authMsg">Apenas o administrador pode cadastrar questões no repositório.</p>
+  <a href="../Plataforma.html">Voltar à plataforma</a>
+</div>
+
+<div class="container">
+  <div class="header">
+    <div>
+      <h1>Cadastro de Questões</h1>
+      <div class="sub">Banco compartilhado do Repositório do Professor</div>
+    </div>
+    <a href="index.html" class="back">← Voltar ao montador</a>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Nova questão</h2>
+
+      <label>Imagem da questão (obrigatório)</label>
+      <label class="file-drop" id="dropQ">
+        <input type="file" id="fileQ" accept="image/png,image/jpeg">
+        <img id="prevQ" style="display:none">
+        <div class="txt" id="txtQ">Clique para enviar um PNG ou JPEG</div>
+      </label>
+
+      <label>Imagem da resposta (visível apenas no banco)</label>
+      <label class="file-drop" id="dropR">
+        <input type="file" id="fileR" accept="image/png,image/jpeg">
+        <img id="prevR" style="display:none">
+        <div class="txt" id="txtR">Clique para enviar um PNG ou JPEG</div>
+      </label>
+
+      <label>Tema</label>
+      <input type="text" id="inpTema" placeholder="Ex: matrizes, trigonometria, frações">
+
+      <label>Habilidades BNCC (separe por vírgula)</label>
+      <input type="text" id="inpBncc" placeholder="Ex: EM13MAT301, EM13MAT302">
+
+      <label>Avaliação</label>
+      <div class="stars" id="stars">
+        <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
+      </div>
+
+      <label>Comentário</label>
+      <textarea id="inpCom" placeholder="Observações, dificuldade, fonte..."></textarea>
+
+      <button class="btn" id="btnSalvar">Salvar questão</button>
+      <div class="msg" id="msg"></div>
+    </div>
+
+    <div class="list">
+      <h2>Questões cadastradas <small id="count">0 questões</small></h2>
+      <div class="search"><input type="text" id="search" placeholder="Filtrar por tema ou BNCC..."></div>
+      <div id="qlist"><div class="empty">Carregando...</div></div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {getAuth,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {getDatabase,ref,onValue,push,set,remove} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig={apiKey:"AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",authDomain:"profbase-5f9b0.firebaseapp.com",databaseURL:"https://profbase-5f9b0-default-rtdb.firebaseio.com",projectId:"profbase-5f9b0",storageBucket:"profbase-5f9b0.firebasestorage.app",messagingSenderId:"826412057766",appId:"1:826412057766:web:729e6e24ce7587417fe067"};
+const ADMIN_EMAIL='gilbertofernandessc@gmail.com';
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getDatabase(app);
+const $=id=>document.getElementById(id);
+
+let allQuestoes=[], imgQ=null, imgR=null, stars=0;
+
+onAuthStateChanged(auth,user=>{
+  if(!user){ window.location.href='../index.html'; return }
+  if(user.email!==ADMIN_EMAIL){
+    $('authMsg').textContent='Apenas o administrador ('+ADMIN_EMAIL+') pode cadastrar questões. Você está logado como '+user.email+'.';
+    $('authBlock').style.display='flex';
+    return;
+  }
+  $('authBlock').style.display='none';
+  initApp();
+});
+
+async function compressImg(file,maxW=1400,quality=0.82){
+  const bmp=await createImageBitmap(file);
+  const scale=Math.min(1,maxW/bmp.width);
+  const w=Math.round(bmp.width*scale), h=Math.round(bmp.height*scale);
+  const canvas=document.createElement('canvas'); canvas.width=w; canvas.height=h;
+  canvas.getContext('2d').drawImage(bmp,0,0,w,h);
+  return canvas.toDataURL('image/jpeg',quality);
+}
+
+function bindFile(inputId,prevId,txtId,dropId,setter){
+  const el=$(inputId);
+  el.addEventListener('change', async ()=>{
+    const f=el.files[0]; if(!f) return;
+    try{
+      let dataUrl=await compressImg(f);
+      let quality=0.82;
+      while(dataUrl.length>700*1024 && quality>0.45){
+        quality-=0.1;
+        dataUrl=await compressImg(f,1200,quality);
+      }
+      if(dataUrl.length>900*1024){
+        showMsg('Imagem muito grande mesmo após compressão ('+(dataUrl.length/1024|0)+' KB). Escolha uma menor.','err');
+        el.value=''; return;
+      }
+      setter(dataUrl);
+      const prev=$(prevId); prev.src=dataUrl; prev.style.display='block';
+      $(txtId).textContent=f.name+' · '+(dataUrl.length/1024|0)+' KB';
+      $(dropId).classList.add('ok');
+    }catch(e){ console.error(e); showMsg('Erro ao processar imagem.','err') }
+  });
+}
+
+function initApp(){
+  bindFile('fileQ','prevQ','txtQ','dropQ',v=>imgQ=v);
+  bindFile('fileR','prevR','txtR','dropR',v=>imgR=v);
+
+  $('stars').addEventListener('click',e=>{
+    const v=parseInt(e.target.dataset.v); if(!v) return;
+    stars=(stars===v)?0:v;
+    Array.from($('stars').children).forEach((s,i)=>s.classList.toggle('on',i<stars));
+  });
+
+  $('btnSalvar').addEventListener('click',salvar);
+  $('search').addEventListener('input',renderList);
+  loadList();
+}
+
+function showMsg(text,kind){
+  const m=$('msg'); m.textContent=text; m.className='msg show '+(kind||'ok');
+  setTimeout(()=>m.classList.remove('show'),4500);
+}
+
+async function salvar(){
+  const tema=$('inpTema').value.trim();
+  if(!imgQ){ showMsg('Envie a imagem da questão.','err'); return }
+  if(!tema){ showMsg('Informe o tema.','err'); return }
+  const bncc=$('inpBncc').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const com=$('inpCom').value.trim();
+  try{
+    $('btnSalvar').disabled=true;
+    const r=push(ref(db,'questoes'));
+    await set(r,{
+      tema, bncc, estrelas:stars, comentario:com,
+      imgQuestao:imgQ, imgResposta:imgR||null,
+      criadoPor:auth.currentUser.uid,
+      criadoEm:Date.now()
+    });
+    showMsg('Questão salva com sucesso.','ok');
+    limpar();
+  }catch(e){ console.error(e); showMsg('Erro ao salvar: '+e.message,'err') }
+  finally{ $('btnSalvar').disabled=false }
+}
+
+function limpar(){
+  imgQ=null; imgR=null; stars=0;
+  $('inpTema').value=''; $('inpBncc').value=''; $('inpCom').value='';
+  ['dropQ','dropR'].forEach(id=>$(id).classList.remove('ok'));
+  ['prevQ','prevR'].forEach(id=>{$(id).style.display='none'; $(id).src=''});
+  $('txtQ').textContent='Clique para enviar um PNG ou JPEG';
+  $('txtR').textContent='Clique para enviar um PNG ou JPEG';
+  Array.from($('stars').children).forEach(s=>s.classList.remove('on'));
+  $('fileQ').value=''; $('fileR').value='';
+}
+
+function norm(s){return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
+
+function loadList(){
+  onValue(ref(db,'questoes'), snap=>{
+    const data=snap.val()||{};
+    allQuestoes=Object.entries(data).map(([id,q])=>({id,...q})).sort((a,b)=>(b.criadoEm||0)-(a.criadoEm||0));
+    renderList();
+  });
+}
+
+function renderList(){
+  const q=norm($('search')?.value||'');
+  let list=allQuestoes;
+  if(q) list=list.filter(it=> norm(it.tema).includes(q) || (it.bncc||[]).some(b=>norm(b).includes(q)) || norm(it.comentario||'').includes(q));
+  $('count').textContent=list.length+' questão'+(list.length===1?'':'ões');
+  const el=$('qlist');
+  if(!list.length){ el.innerHTML='<div class="empty">'+(allQuestoes.length?'Nenhuma questão encontrada.':'Nenhuma questão cadastrada ainda.')+'</div>'; return }
+  el.innerHTML=list.map(q=>`
+    <div class="q-row">
+      <img class="q-thumb" src="${q.imgQuestao}" alt="">
+      <div class="q-meta">
+        <div class="q-tema">${esc(q.tema||'sem tema')}</div>
+        ${q.bncc&&q.bncc.length?`<div class="q-bncc">${q.bncc.map(esc).join(' · ')}</div>`:''}
+        ${q.estrelas?`<div class="q-star">${'★'.repeat(q.estrelas)}${'☆'.repeat(5-q.estrelas)}</div>`:''}
+        ${q.comentario?`<div class="q-com">${esc(q.comentario)}</div>`:''}
+      </div>
+      <button class="q-del" data-id="${q.id}">Excluir</button>
+    </div>
+  `).join('');
+  el.querySelectorAll('.q-del').forEach(b=>b.onclick=()=>{
+    if(confirm('Excluir esta questão do banco?')) remove(ref(db,'questoes/'+b.dataset.id));
+  });
+}
+
+function esc(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML}
+</script>
+</body>
+</html>
