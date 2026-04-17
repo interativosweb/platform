@@ -6,82 +6,75 @@
 <title>Modo Prova</title>
 <style>
 :root{
-  --neon:#ff2d6f;
-  --neon2:#b14bff;
-  --neon3:#00e7ff;
-  --text:#f4f4f8;
-  --text2:#8a8aa0;
-  --border:rgba(255,255,255,.1);
-  --border2:rgba(255,255,255,.18);
+  --bg:#0a0a0c;
+  --bg2:#141418;
+  --bg3:#1c1c1f;
+  --accent:#0a84ff;
+  --neon:#ff453a;
+  --neon2:#bf5af2;
+  --neon3:#30d158;
+  --text:#f5f5f7;
+  --text2:#8e8e93;
+  --border:#2a2a2e;
+  --border2:#3a3a3e;
 }
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
-html,body{width:100%;height:100%;overflow:hidden;background:#07070c;color:var(--text)}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text)}
 #frame{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff}
 
 .overlay{
   position:fixed;inset:0;z-index:9999;
   display:flex;align-items:center;justify-content:center;padding:24px;
-  background-color:#07070c;
+  background-color:var(--bg);
   background-image:
-    linear-gradient(rgba(255,45,111,.08) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(255,45,111,.08) 1px,transparent 1px);
+    linear-gradient(rgba(10,132,255,.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(10,132,255,.07) 1px,transparent 1px);
   background-size:44px 44px;
 }
 .overlay::before{
   content:"";position:absolute;inset:0;pointer-events:none;
   background:
-    radial-gradient(circle at 50% 50%,rgba(7,7,12,0) 0%,rgba(7,7,12,.55) 80%);
+    radial-gradient(circle at 50% 50%,rgba(10,10,12,0) 0%,rgba(10,10,12,.45) 90%);
 }
 .overlay.hide{display:none}
 
 .popup{
   position:relative;
-  background:rgba(18,18,28,.85);
+  background:var(--bg2);
   border:1px solid var(--border);
   border-radius:22px;
   padding:34px 32px;
   max-width:480px;width:100%;
   text-align:center;
-  backdrop-filter:blur(24px);
   box-shadow:0 30px 80px rgba(0,0,0,.6);
-}
-.popup::before{
-  content:"";position:absolute;inset:-1px;border-radius:23px;pointer-events:none;
-  background:linear-gradient(135deg,rgba(255,45,111,.6),rgba(177,75,255,.3),rgba(0,231,255,.5));
-  -webkit-mask:linear-gradient(#000,#000) content-box,linear-gradient(#000,#000);
-  mask:linear-gradient(#000,#000) content-box,linear-gradient(#000,#000);
-  -webkit-mask-composite:xor;mask-composite:exclude;
-  padding:1px;opacity:.7;
 }
 
 .badge{
   display:inline-block;
   padding:5px 14px;border-radius:50px;
-  background:rgba(255,45,111,.12);
-  border:1px solid rgba(255,45,111,.35);
-  color:var(--neon);
+  background:rgba(10,132,255,.12);
+  border:1px solid rgba(10,132,255,.35);
+  color:var(--accent);
   font-size:.66rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
   margin-bottom:16px;
-  box-shadow:0 0 20px rgba(255,45,111,.25);
 }
-.badge.warn{background:rgba(255,45,111,.18);border-color:rgba(255,45,111,.5);box-shadow:0 0 24px rgba(255,45,111,.4)}
+.badge.warn{background:rgba(255,69,58,.15);border-color:rgba(255,69,58,.4);color:var(--neon)}
 
 .popup h1{
   font-size:1.6rem;font-weight:700;letter-spacing:.3px;margin-bottom:6px;
-  background:linear-gradient(135deg,#fff,#ffb3c9);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
+  color:var(--text);
 }
 .popup .sub{color:var(--text2);font-size:.88rem;margin-bottom:22px;line-height:1.5}
 
 .rules{
-  background:rgba(0,0,0,.3);
+  background:var(--bg3);
   border:1px solid var(--border);
   border-radius:14px;
   padding:16px 18px;
   text-align:left;margin-bottom:22px;
 }
 .rules .rtitle{
-  font-size:.68rem;font-weight:700;color:var(--neon3);
+  font-size:.68rem;font-weight:700;color:var(--accent);
   letter-spacing:1.8px;text-transform:uppercase;margin-bottom:10px;
 }
 .rules ul{list-style:none;padding:0}
@@ -91,7 +84,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#07070c;color:var(--
 }
 .rules li::before{
   content:"";width:5px;height:5px;border-radius:50%;
-  background:var(--neon);box-shadow:0 0 8px var(--neon);flex-shrink:0;
+  background:var(--accent);flex-shrink:0;
 }
 .rules .note{
   margin-top:12px;padding-top:12px;border-top:1px solid var(--border);
@@ -100,40 +93,39 @@ html,body{width:100%;height:100%;overflow:hidden;background:#07070c;color:var(--
 
 .popup input{
   width:100%;padding:13px 15px;
-  background:rgba(255,255,255,.04);
-  border:1px solid var(--border2);
+  background:var(--bg3);
+  border:1px solid var(--border);
   border-radius:12px;
   color:var(--text);font-size:1rem;outline:none;
   margin-bottom:12px;font-family:inherit;
   transition:all .15s;
 }
 .popup input:focus{
-  border-color:var(--neon);
-  background:rgba(255,45,111,.06);
-  box-shadow:0 0 0 3px rgba(255,45,111,.15),0 0 22px rgba(255,45,111,.2);
+  border-color:var(--accent);
+  background:rgba(10,132,255,.06);
+  box-shadow:0 0 0 3px rgba(10,132,255,.15);
 }
 
 .popup button{
   width:100%;padding:14px;
-  background:linear-gradient(135deg,var(--neon),var(--neon2));
+  background:var(--accent);
   color:#fff;border:none;border-radius:12px;
   font-weight:700;font-size:.95rem;letter-spacing:.5px;
   cursor:pointer;font-family:inherit;
-  box-shadow:0 0 0 1px rgba(255,255,255,.08) inset,0 10px 34px rgba(255,45,111,.4);
-  transition:transform .15s,box-shadow .15s;
+  transition:background .15s,transform .15s;
 }
-.popup button:hover{transform:translateY(-1px);box-shadow:0 0 0 1px rgba(255,255,255,.1) inset,0 12px 42px rgba(255,45,111,.6)}
+.popup button:hover{background:#3a9bff;transform:translateY(-1px)}
 
 .err{color:var(--neon);font-size:.82rem;margin-bottom:8px;min-height:1.1em;font-weight:500}
 .violation{
   color:var(--neon);font-weight:600;font-size:.85rem;margin-bottom:14px;
   padding:8px 12px;border-radius:8px;
-  background:rgba(255,45,111,.08);border:1px solid rgba(255,45,111,.25);
+  background:rgba(255,69,58,.1);border:1px solid rgba(255,69,58,.3);
 }
 
 .loading{
   position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-  background:#07070c;color:var(--text2);z-index:9998;
+  background:var(--bg);color:var(--text2);z-index:9998;
   font-size:.82rem;letter-spacing:2px;text-transform:uppercase;
 }
 </style>
