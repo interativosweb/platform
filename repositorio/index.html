@@ -93,7 +93,32 @@ body{
 .qitem .meta{font-size:.72rem;color:var(--text2);display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:4px}
 .qitem .tema{color:var(--accent2);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .qitem .stars{color:var(--warning);font-size:.7rem;letter-spacing:1px;flex-shrink:0}
+.qitem.qitem-pendente{border-style:dashed;border-color:var(--warning);background:rgba(255,159,10,.05)}
+.qitem.qitem-pendente:hover{border-color:var(--warning);box-shadow:0 6px 20px rgba(255,159,10,.18)}
+.qitem.qitem-pendente .tema{color:var(--warning)}
+.qitem .badge-pend{
+  font-size:.62rem;font-weight:800;letter-spacing:.4px;text-transform:uppercase;
+  color:#1a1205;background:var(--warning);padding:2px 7px;border-radius:4px;flex-shrink:0;
+}
+.qitem-manual-thumb{
+  width:100%;min-height:90px;max-height:140px;background:#fff;color:#111;
+  border-radius:6px;padding:10px;font-size:.74rem;line-height:1.35;
+  overflow:hidden;display:block;word-break:break-word;
+}
+.qitem-manual-thumb .katex{font-size:.9em}
 .sid-empty{padding:40px 12px;text-align:center;color:var(--text2);font-size:.86rem;line-height:1.55;grid-column:1/-1}
+.preview-pend-banner{
+  display:flex;gap:10px;align-items:flex-start;
+  background:rgba(255,159,10,.1);border:1px solid rgba(255,159,10,.3);color:var(--warning);
+  padding:12px 14px;border-radius:10px;font-size:.84rem;line-height:1.5;
+}
+.preview-pend-banner svg{flex-shrink:0;margin-top:2px}
+.preview-pend-banner b{color:#ffb93a}
+.preview-manual-text{
+  background:#fff;color:#111;padding:20px 24px;border-radius:8px;
+  font-size:.95rem;line-height:1.6;min-height:80px;word-wrap:break-word;
+}
+.preview-manual-text .katex{font-size:1.05em}
 
 /* ===== DOCUMENT AREA ===== */
 .docarea{overflow:auto;padding:24px;display:flex;flex-direction:column;align-items:center;gap:18px}
@@ -205,15 +230,20 @@ body{
   content:attr(data-placeholder);color:#aaa;font-style:italic;pointer-events:none;
 }
 .visual-editor .math-node{
-  display:inline-block;padding:2px 4px;margin:0 2px;border-radius:4px;
+  display:inline-block;padding:6px 10px;margin:3px 4px;border-radius:6px;
   background:rgba(10,132,255,.06);border:1px solid rgba(10,132,255,.18);
-  user-select:none;cursor:default;vertical-align:middle;
-  transition:background .1s,border-color .1s;
+  user-select:none;cursor:pointer;vertical-align:middle;
+  transition:background .1s,border-color .1s,box-shadow .1s;
 }
-.visual-editor .math-node{cursor:pointer}
 .visual-editor .math-node:hover{background:rgba(10,132,255,.18);border-color:var(--accent);box-shadow:0 2px 8px rgba(10,132,255,.2)}
 .visual-editor .math-node.selected{background:rgba(10,132,255,.25);border-color:var(--accent)}
-.visual-editor .math-node .katex{font-size:1em}
+.visual-editor .math-node .katex{font-size:1.2em}
+.visual-editor .math-node .katex .mord,
+.visual-editor .math-node .katex .mrel,
+.visual-editor .math-node .katex .mbin{margin-left:.05em;margin-right:.05em}
+/* Matrizes com mais respiro */
+.visual-editor .math-node .katex .arraycolsep{width:.7em}
+.visual-editor .math-node .katex .mtable .col-align-c .vlist{padding:.2em 0}
 .visual-editor .math-node::after{
   content:'✎'; font-size:.65rem; color:var(--accent); margin-left:4px; opacity:0; transition:opacity .12s;
   font-family:'Inter',sans-serif; vertical-align:super;
@@ -285,6 +315,76 @@ math-field{
   @page{size:A4;margin:0}
   body.print-bw{filter:grayscale(100%)}
 }
+
+/* ===== Finalizar cadastro (tema + BNCC + estrelas) ===== */
+.fin-form label{display:block;font-size:.72rem;font-weight:700;color:var(--text2);letter-spacing:.9px;text-transform:uppercase;margin:18px 0 6px}
+.fin-form input[type=text],.fin-form textarea{
+  width:100%;padding:11px 13px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-size:.92rem;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s;
+}
+.fin-form textarea{min-height:70px;resize:vertical;line-height:1.5}
+.fin-form input[type=text]:focus,.fin-form textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(10,132,255,.18)}
+.ac-wrap{position:relative}
+.ac-dropdown{
+  position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:20;
+  background:var(--bg3);border:1px solid var(--border2);border-radius:10px;
+  max-height:240px;overflow-y:auto;box-shadow:0 10px 30px rgba(0,0,0,.5);display:none;
+}
+.ac-dropdown.show{display:block}
+.ac-item{padding:9px 13px;cursor:pointer;font-size:.88rem;color:var(--text);border-bottom:1px solid var(--border);transition:background .1s}
+.ac-item:last-child{border-bottom:none}
+.ac-item:hover,.ac-item.active{background:var(--bg4);color:var(--accent)}
+.ac-item .fz{font-size:.72rem;color:var(--text3);margin-left:6px;font-style:italic}
+.ac-empty{padding:14px;text-align:center;color:var(--text3);font-size:.82rem;font-style:italic}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;min-height:4px}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 6px 5px 11px;
+  background:rgba(10,132,255,.13);border:1px solid rgba(10,132,255,.3);border-radius:20px;
+  font-size:.8rem;font-weight:500;color:var(--accent2);cursor:default;transition:all .15s;
+}
+.chip.bncc{
+  background:rgba(94,92,230,.13);border-color:rgba(94,92,230,.35);color:#a48cff;
+  font-family:'SF Mono','JetBrains Mono',Consolas,monospace;font-size:.78rem;font-weight:600;letter-spacing:.3px;
+  cursor:help;position:relative;
+}
+.chip .x{
+  width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.08);
+  border:none;color:currentColor;font-size:.85rem;line-height:1;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;transition:all .12s;font-family:inherit;
+}
+.chip .x:hover{background:rgba(255,69,58,.3);color:#ff7b72}
+.chip.bncc .tip{
+  position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+  min-width:320px;max-width:420px;padding:12px 14px;
+  background:#1f1f24;border:1px solid var(--border2);border-radius:10px;
+  font-size:.78rem;line-height:1.5;color:var(--text);font-weight:400;font-family:'Inter',sans-serif;
+  letter-spacing:0;text-transform:none;text-align:left;
+  box-shadow:0 12px 40px rgba(0,0,0,.7);
+  opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:1000;white-space:normal;
+}
+.chip.bncc .tip::after{
+  content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:6px solid transparent;border-top-color:#1f1f24;
+}
+.chip.bncc .tip b{color:var(--accent2);display:block;margin-bottom:4px;font-family:'SF Mono',monospace;font-size:.75rem}
+.chip.bncc:hover .tip{opacity:1;transform:translateX(-50%) translateY(-2px)}
+.bncc-actions{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.mini-btn{
+  padding:7px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  color:var(--text2);font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;
+}
+.mini-btn:hover{color:var(--accent);border-color:var(--accent)}
+.add-bncc-row{display:flex;gap:6px;margin-top:6px}
+.add-bncc-row input{flex:1}
+.add-bncc-row button{
+  padding:0 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;
+}
+.add-bncc-row button:hover{border-color:var(--accent);color:var(--accent)}
+.star-rating{display:flex;gap:6px;margin-top:4px;user-select:none}
+.star-rating span{font-size:1.7rem;color:#3a3a3e;cursor:pointer;transition:color .12s,transform .12s;line-height:1}
+.star-rating span:hover{transform:scale(1.1)}
+.star-rating span.on{color:var(--warning)}
 </style>
 </head>
 <body>
@@ -335,7 +435,11 @@ math-field{
     <header><h3>Pré-visualização da questão</h3><button id="previewClose">✕</button></header>
     <div class="body" id="previewBody"></div>
     <footer>
+      <button id="previewDelete" style="display:none;color:var(--error);border-color:rgba(255,69,58,.3)">Remover</button>
+      <button id="previewEdit" style="display:none">Editar</button>
+      <div style="flex:1"></div>
       <button id="previewCancel">Cancelar</button>
+      <button id="previewFin" style="display:none;background:var(--warning);color:#1a1205;border:0;font-weight:700;padding:9px 16px;border-radius:9px;cursor:pointer;font-family:inherit">Finalizar cadastro</button>
       <button class="primary" id="previewAdd">Adicionar à prova</button>
     </footer>
   </div>
@@ -356,6 +460,45 @@ math-field{
     <footer>
       <button id="manualCancel">Cancelar</button>
       <button class="primary" id="manualAdd">Adicionar</button>
+    </footer>
+  </div>
+</div>
+
+<div class="ov" id="finalizarOv">
+  <div class="ov-box" style="max-width:720px">
+    <header><h3>Finalizar cadastro da questão</h3><button id="finClose">✕</button></header>
+    <div class="body fin-form">
+      <div style="font-size:.82rem;color:var(--text2);line-height:1.5">Classifique a questão com tema, habilidades da BNCC e nível de dificuldade. Isso facilita encontrá-la no banco.</div>
+
+      <label for="finInpTema">Tema</label>
+      <div class="ac-wrap">
+        <input type="text" id="finInpTema" placeholder="Ex: Geometria Plana, Funções, Matrizes..." autocomplete="off">
+        <div class="ac-dropdown" id="finAcTema"></div>
+      </div>
+      <div class="chips" id="finChipsTema"></div>
+
+      <label>Habilidades BNCC</label>
+      <div class="chips" id="finChipsBncc"></div>
+      <div class="bncc-actions">
+        <button type="button" class="mini-btn" id="finBtnSugerir">Sugerir pelos temas</button>
+        <button type="button" class="mini-btn" id="finBtnLimparBncc">Limpar</button>
+      </div>
+      <div class="add-bncc-row">
+        <input type="text" id="finInpBnccAdd" placeholder="Adicionar manualmente (ex: EM13MAT301)">
+        <button type="button" id="finBtnAddBncc">Adicionar</button>
+      </div>
+
+      <label>Nível (estrelas)</label>
+      <div class="star-rating" id="finStars">
+        <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
+      </div>
+
+      <label>Comentário (opcional)</label>
+      <textarea id="finInpCom" placeholder="Observações, gabarito, dicas..."></textarea>
+    </div>
+    <footer>
+      <button id="finCancel">Cancelar</button>
+      <button class="primary" id="finSave">Cadastrar</button>
     </footer>
   </div>
 </div>
@@ -417,7 +560,8 @@ math-field{
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {getAuth,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import {getDatabase,ref,onValue} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import {getDatabase,ref,onValue,push,set,update,remove} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import {TEMAS,BNCC_CODES,fuzzySearchTemas,bnccSugeridos} from "./dados.js";
 
 const firebaseConfig={apiKey:"AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",authDomain:"profbase-5f9b0.firebaseapp.com",databaseURL:"https://profbase-5f9b0-default-rtdb.firebaseio.com",projectId:"profbase-5f9b0",storageBucket:"profbase-5f9b0.firebasestorage.app",messagingSenderId:"826412057766",appId:"1:826412057766:web:729e6e24ce7587417fe067"};
 const ADMIN_EMAIL='gilbertofernandessc@gmail.com';
@@ -432,11 +576,15 @@ let blocks=[];
 let currentQid=null;
 let dragBid=null;
 let editBid=null;
+let editingQid=null;
+let finalizingQid=null;
 let headerData={escola:'',professor:'',aluno:'',serie:'',data:''};
 let relayoutTimer=null;
 
+let currentUser=null;
 onAuthStateChanged(auth,user=>{
   if(!user){ window.location.href='../index.html'; return }
+  currentUser=user;
   if(user.email===ADMIN_EMAIL) $('linkAdmin').style.display='inline-flex';
   $('authLoader').style.display='none';
 });
@@ -467,33 +615,122 @@ function renderSidebar(){
     return;
   }
   el.innerHTML=list.map(q=>{
-    const temaDisplay = (q.temas && q.temas[0]) || q.tema || 'sem tema';
+    const isPendente = q.status==='pendente';
+    const temaDisplay = isPendente ? 'Pendente' : ((q.temas && q.temas[0]) || q.tema || 'sem tema');
+    let thumb;
+    if(q.imgQuestao){
+      thumb = `<img src="${q.imgQuestao}" alt="" loading="lazy">`;
+    } else if(q.tipo==='manual' && q.textoManual){
+      thumb = `<div class="qitem-manual-thumb" data-texto="${escAttr(q.textoManual)}"></div>`;
+    } else {
+      thumb = `<div class="qitem-manual-thumb">—</div>`;
+    }
     return `
-    <div class="qitem" data-id="${q.id}">
-      <img src="${q.imgQuestao}" alt="" loading="lazy">
+    <div class="qitem${isPendente?' qitem-pendente':''}" data-id="${q.id}">
+      ${thumb}
       <div class="meta">
         <span class="tema">${esc(temaDisplay)}</span>
-        ${q.estrelas?`<span class="stars">${'★'.repeat(q.estrelas)}</span>`:''}
+        ${isPendente?'<span class="badge-pend">Pendente</span>':(q.estrelas?`<span class="stars">${'★'.repeat(q.estrelas)}</span>`:'')}
       </div>
     </div>`;
   }).join('');
+  // Renderizar previews de questões manuais
+  el.querySelectorAll('.qitem-manual-thumb[data-texto]').forEach(div=>{
+    renderTextWithMath(div, div.dataset.texto, {compact:true});
+  });
   el.querySelectorAll('.qitem').forEach(it=>it.onclick=()=>openPreview(it.dataset.id));
+}
+
+/* Renderiza texto com blocos $LATEX$ em um container, com KaTeX inline. */
+function renderTextWithMath(container, text, opts={}){
+  container.innerHTML='';
+  const re=/\$([^$]+)\$/g;
+  let last=0, m;
+  const frag=document.createDocumentFragment();
+  const makeText=(s)=>{
+    const parts=s.split('\n');
+    parts.forEach((p,i)=>{
+      if(p) frag.appendChild(document.createTextNode(p));
+      if(i<parts.length-1) frag.appendChild(document.createElement('br'));
+    });
+  };
+  while((m=re.exec(text))!==null){
+    if(m.index>last) makeText(text.slice(last,m.index));
+    const s=document.createElement('span');
+    s.className='math-inline';
+    try{
+      if(window.katex) katex.render(sanitizeLatex(m[1]), s, {throwOnError:false, displayMode:false, output:'html'});
+      else s.textContent=m[1];
+    }catch(_){ s.textContent=m[1] }
+    frag.appendChild(s);
+    last=m.index+m[0].length;
+  }
+  if(last<text.length) makeText(text.slice(last));
+  container.appendChild(frag);
+  if(opts.compact){
+    container.style.maxHeight='100%';
+    container.style.overflow='hidden';
+  }
 }
 
 function openPreview(qid){
   const q=questoes.find(x=>x.id===qid); if(!q) return;
   currentQid=qid;
+  const isPendente = q.status==='pendente';
+  const isManual = q.tipo==='manual';
   const temasArr = q.temas || (q.tema ? [q.tema] : []);
-  $('previewBody').innerHTML=`
-    <div style="display:flex;gap:6px;flex-wrap:wrap">${temasArr.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
-    <h4>Questão</h4>
-    <img src="${q.imgQuestao}">
-    ${q.imgResposta?`<h4>Resposta (não aparece na prova)</h4><img src="${q.imgResposta}">`:''}
-    ${q.bncc&&q.bncc.length?`<h4>BNCC</h4><div class="com" style="font-family:'SF Mono',monospace;color:#a48cff">${q.bncc.map(esc).join(' · ')}</div>`:''}
-    ${q.comentario?`<h4>Comentário</h4><div class="com">${esc(q.comentario)}</div>`:''}
-    <h4>Avaliação</h4>
-    <div class="com" style="color:var(--warning);letter-spacing:3px;font-size:1.1rem">${'★'.repeat(q.estrelas||0)}${'☆'.repeat(5-(q.estrelas||0))}</div>
-  `;
+  const body=$('previewBody');
+
+  if(isPendente){
+    body.innerHTML=`
+      <div class="preview-pend-banner">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".5" fill="currentColor"/></svg>
+        <span><b>Cadastro pendente.</b> Esta questão foi salva como rascunho. Finalize o cadastro para classificar por tema, BNCC e estrelas.</span>
+      </div>
+      <h4>Enunciado</h4>
+      <div class="preview-manual-text" id="previewManualText"></div>
+    `;
+    renderTextWithMath($('previewManualText'), q.textoManual||'', {});
+  } else if(isManual){
+    body.innerHTML=`
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${temasArr.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
+      <h4>Enunciado</h4>
+      <div class="preview-manual-text" id="previewManualText"></div>
+      ${q.bncc&&q.bncc.length?`<h4>BNCC</h4><div class="com" style="font-family:'SF Mono',monospace;color:#a48cff">${q.bncc.map(esc).join(' · ')}</div>`:''}
+      ${q.comentario?`<h4>Comentário</h4><div class="com">${esc(q.comentario)}</div>`:''}
+      <h4>Avaliação</h4>
+      <div class="com" style="color:var(--warning);letter-spacing:3px;font-size:1.1rem">${'★'.repeat(q.estrelas||0)}${'☆'.repeat(5-(q.estrelas||0))}</div>
+    `;
+    renderTextWithMath($('previewManualText'), q.textoManual||'', {});
+  } else {
+    body.innerHTML=`
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${temasArr.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
+      <h4>Questão</h4>
+      <img src="${q.imgQuestao}">
+      ${q.imgResposta?`<h4>Resposta (não aparece na prova)</h4><img src="${q.imgResposta}">`:''}
+      ${q.bncc&&q.bncc.length?`<h4>BNCC</h4><div class="com" style="font-family:'SF Mono',monospace;color:#a48cff">${q.bncc.map(esc).join(' · ')}</div>`:''}
+      ${q.comentario?`<h4>Comentário</h4><div class="com">${esc(q.comentario)}</div>`:''}
+      <h4>Avaliação</h4>
+      <div class="com" style="color:var(--warning);letter-spacing:3px;font-size:1.1rem">${'★'.repeat(q.estrelas||0)}${'☆'.repeat(5-(q.estrelas||0))}</div>
+    `;
+  }
+
+  // Ajusta botões do rodapé conforme estado da questão
+  const btnEdit=$('previewEdit');
+  const btnFin=$('previewFin');
+  const btnDel=$('previewDelete');
+  const btnAdd=$('previewAdd');
+  if(isManual){
+    btnEdit.style.display='inline-flex';
+    btnDel.style.display='inline-flex';
+    btnFin.style.display = isPendente ? 'inline-flex' : 'none';
+    btnAdd.style.display = isPendente ? 'none' : 'inline-flex';
+  } else {
+    btnEdit.style.display='none';
+    btnFin.style.display='none';
+    btnDel.style.display='none';
+    btnAdd.style.display='inline-flex';
+  }
   $('previewOv').classList.add('show');
 }
 $('previewClose').onclick=()=>$('previewOv').classList.remove('show');
@@ -504,18 +741,40 @@ $('previewAdd').onclick=()=>{
   $('previewOv').classList.remove('show');
   renderDoc();
 };
+$('previewEdit').onclick=()=>{
+  if(!currentQid) return;
+  const q=questoes.find(x=>x.id===currentQid); if(!q) return;
+  $('previewOv').classList.remove('show');
+  openManualPopup(null, {qid: currentQid});
+};
+$('previewFin').onclick=()=>{
+  if(!currentQid) return;
+  $('previewOv').classList.remove('show');
+  openFinalizarPopup(currentQid);
+};
+$('previewDelete').onclick=async ()=>{
+  if(!currentQid) return;
+  if(!confirm('Remover esta questão do banco? Esta ação não pode ser desfeita.')) return;
+  await remove(ref(db,'questoes/'+currentQid));
+  $('previewOv').classList.remove('show');
+  currentQid=null;
+};
 
 /* ===== Manual question popup + math keyboard ===== */
 $('btnManual').onclick=()=>openManualPopup(null);
 $('manualClose').onclick=()=>$('manualOv').classList.remove('show');
 $('manualCancel').onclick=()=>$('manualOv').classList.remove('show');
 
-function openManualPopup(bid){
+function openManualPopup(bid, opts={}){
   editBid=bid;
-  $('manualTitle').textContent=bid?'Editar questão manual':'Nova questão manual';
+  editingQid=opts.qid||null;
+  $('manualTitle').textContent=(bid||editingQid)?'Editar questão manual':'Nova questão manual';
   const editor=$('manualEditor');
   editor.innerHTML='';
-  if(bid){
+  if(editingQid){
+    const q=questoes.find(x=>x.id===editingQid);
+    if(q && q.textoManual) deserializeToEditor(q.textoManual, editor);
+  } else if(bid){
     const b=blocks.find(x=>x.bid===bid);
     if(b && b.texto) deserializeToEditor(b.texto, editor);
   }
@@ -532,21 +791,196 @@ function openManualPopup(bid){
   },50);
 }
 
-$('manualAdd').onclick=()=>{
+$('manualAdd').onclick=async ()=>{
   const editor=$('manualEditor');
   const t=serializeEditor(editor).trim();
-  if(editBid){
+  // Modo edição de questão manual do banco (recebe editingQid)
+  if(editingQid){
+    const q=questoes.find(x=>x.id===editingQid);
+    if(q){
+      if(!t){
+        await remove(ref(db,'questoes/'+editingQid));
+      } else {
+        await update(ref(db,'questoes/'+editingQid),{textoManual:t, atualizadoEm:Date.now()});
+      }
+    }
+    editingQid=null;
+  } else if(editBid){
+    // Edição de bloco manual legado dentro da prova (mantido por compatibilidade)
     const b=blocks.find(x=>x.bid===editBid);
     if(b){
       if(!t){ blocks=blocks.filter(x=>x.bid!==editBid); }
       else b.texto=t;
     }
+    editBid=null;
   } else if(t){
-    blocks.push({bid:newId(),type:'manual',texto:t,altura:null});
+    // Nova questão manual → vai para o banco como PENDENTE
+    if(!currentUser){ alert('Aguarde autenticação.'); return }
+    const novaRef=push(ref(db,'questoes'));
+    await set(novaRef,{
+      tipo:'manual',
+      textoManual:t,
+      status:'pendente',
+      imgQuestao:null,
+      criadoPor:currentUser.uid,
+      criadoEm:Date.now()
+    });
   }
   $('manualOv').classList.remove('show');
-  editBid=null;
   renderDoc();
+};
+
+/* ===== Finalizar cadastro de questão manual ===== */
+let finTemasSel=[], finBnccSel=[], finStars=0, finAcItems=[], finAcIdx=-1;
+
+function openFinalizarPopup(qid){
+  finalizingQid=qid;
+  const q=questoes.find(x=>x.id===qid);
+  finTemasSel = (q && q.temas) ? q.temas.slice() : [];
+  finBnccSel = (q && q.bncc) ? q.bncc.slice() : [];
+  finStars = (q && q.estrelas) || 0;
+  $('finInpTema').value='';
+  $('finInpBnccAdd').value='';
+  $('finInpCom').value = (q && q.comentario) || '';
+  renderFinTemaChips();
+  renderFinBnccChips();
+  renderFinStars();
+  $('finalizarOv').classList.add('show');
+  setTimeout(()=>{ try{ $('finInpTema').focus() }catch(_){} }, 80);
+}
+function closeFinalizarPopup(){ $('finalizarOv').classList.remove('show'); finalizingQid=null }
+
+$('finClose').onclick=closeFinalizarPopup;
+$('finCancel').onclick=closeFinalizarPopup;
+
+function normTema(s){return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
+
+(function setupFinTemaAutocomplete(){
+  const inp=$('finInpTema'); const dd=$('finAcTema');
+  inp.addEventListener('input',()=>updateFinAc(inp.value));
+  inp.addEventListener('focus',()=>updateFinAc(inp.value));
+  inp.addEventListener('keydown',e=>{
+    if(!dd.classList.contains('show')) return;
+    if(e.key==='ArrowDown'){ e.preventDefault(); finAcIdx=Math.min(finAcIdx+1,finAcItems.length-1); highlightFinAc() }
+    else if(e.key==='ArrowUp'){ e.preventDefault(); finAcIdx=Math.max(finAcIdx-1,0); highlightFinAc() }
+    else if(e.key==='Enter'){
+      e.preventDefault();
+      if(finAcIdx>=0 && finAcItems[finAcIdx]) pickFinTema(finAcItems[finAcIdx]);
+      else if(inp.value.trim()){
+        const res=fuzzySearchTemas(inp.value,1);
+        if(res[0]) pickFinTema(res[0]);
+        else pickFinTema(inp.value.trim());
+      }
+    } else if(e.key==='Escape'){ dd.classList.remove('show') }
+  });
+  document.addEventListener('click',e=>{
+    if(!dd.contains(e.target) && e.target!==inp) dd.classList.remove('show');
+  });
+})();
+
+function updateFinAc(query){
+  const dd=$('finAcTema');
+  const q=query.trim();
+  if(!q) finAcItems=TEMAS.slice(0,8);
+  else{
+    finAcItems=fuzzySearchTemas(q,8);
+    if(!finAcItems.includes(q) && !TEMAS.some(t=>normTema(t)===normTema(q))){
+      finAcItems.push(q+' (adicionar como novo)');
+    }
+  }
+  finAcIdx=finAcItems.length?0:-1;
+  if(!finAcItems.length){ dd.innerHTML='<div class="ac-empty">Nada encontrado</div>'; dd.classList.add('show'); return }
+  dd.innerHTML=finAcItems.map((t,i)=>{
+    const isNew=t.endsWith(' (adicionar como novo)');
+    const display=isNew?t.replace(' (adicionar como novo)',''):t;
+    const hint=isNew?'<span class="fz">+ novo</span>':'';
+    return `<div class="ac-item${i===finAcIdx?' active':''}" data-v="${escAttr(isNew?display:t)}">${esc(display)}${hint}</div>`;
+  }).join('');
+  dd.querySelectorAll('.ac-item').forEach((el,i)=>{
+    el.onmouseenter=()=>{finAcIdx=i;highlightFinAc()};
+    el.onclick=()=>pickFinTema(el.dataset.v);
+  });
+  dd.classList.add('show');
+}
+function highlightFinAc(){
+  const dd=$('finAcTema');
+  dd.querySelectorAll('.ac-item').forEach((el,i)=>el.classList.toggle('active',i===finAcIdx));
+  const act=dd.querySelector('.ac-item.active'); if(act) act.scrollIntoView({block:'nearest'});
+}
+function pickFinTema(tema){
+  tema=(tema||'').trim(); if(!tema) return;
+  if(!finTemasSel.some(t=>normTema(t)===normTema(tema))) finTemasSel.push(tema);
+  $('finInpTema').value=''; $('finAcTema').classList.remove('show');
+  renderFinTemaChips();
+  finSugerirBncc(false);
+}
+function renderFinTemaChips(){
+  const c=$('finChipsTema');
+  c.innerHTML=finTemasSel.map((t,i)=>`<span class="chip">${esc(t)}<button class="x" data-i="${i}" title="Remover">×</button></span>`).join('');
+  c.querySelectorAll('.x').forEach(b=>b.onclick=()=>{
+    finTemasSel.splice(parseInt(b.dataset.i),1);
+    renderFinTemaChips(); finSugerirBncc(false);
+  });
+}
+
+function finSugerirBncc(replace){
+  const sug=bnccSugeridos(finTemasSel);
+  if(replace) finBnccSel=sug.slice();
+  else for(const c of sug) if(!finBnccSel.includes(c)) finBnccSel.push(c);
+  renderFinBnccChips();
+}
+function renderFinBnccChips(){
+  const c=$('finChipsBncc');
+  if(!finBnccSel.length){ c.innerHTML='<span style="color:var(--text3);font-size:.82rem;font-style:italic">Nenhuma habilidade selecionada. Adicione temas para sugestões automáticas.</span>'; return }
+  c.innerHTML=finBnccSel.map((code,i)=>{
+    const desc=BNCC_CODES[code]||'Código personalizado — sem descrição oficial neste sistema.';
+    return `<span class="chip bncc">${esc(code)}<button class="x" data-i="${i}" title="Remover">×</button><span class="tip"><b>${esc(code)}</b>${esc(desc)}</span></span>`;
+  }).join('');
+  c.querySelectorAll('.x').forEach(b=>{
+    b.onclick=e=>{e.stopPropagation(); finBnccSel.splice(parseInt(b.dataset.i),1); renderFinBnccChips()};
+  });
+}
+$('finBtnSugerir').onclick=()=>finSugerirBncc(true);
+$('finBtnLimparBncc').onclick=()=>{ finBnccSel=[]; renderFinBnccChips() };
+
+(function setupFinBnccManual(){
+  const inp=$('finInpBnccAdd');
+  const add=()=>{
+    const v=inp.value.trim().toUpperCase(); if(!v) return;
+    if(!finBnccSel.includes(v)) finBnccSel.push(v);
+    inp.value=''; renderFinBnccChips();
+  };
+  $('finBtnAddBncc').onclick=add;
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); add() }});
+})();
+
+function renderFinStars(){
+  Array.from($('finStars').children).forEach((s,i)=>s.classList.toggle('on',i<finStars));
+}
+$('finStars').addEventListener('click',e=>{
+  const v=parseInt(e.target.dataset.v); if(!v) return;
+  finStars=(finStars===v)?0:v;
+  renderFinStars();
+});
+
+$('finSave').onclick=async ()=>{
+  if(!finalizingQid){ closeFinalizarPopup(); return }
+  if(!finTemasSel.length){ alert('Selecione ao menos um tema.'); return }
+  const com=$('finInpCom').value.trim();
+  try{
+    $('finSave').disabled=true;
+    await update(ref(db,'questoes/'+finalizingQid),{
+      tema: finTemasSel.join(', '),
+      temas: finTemasSel,
+      bncc: finBnccSel,
+      estrelas: finStars,
+      comentario: com,
+      status: null,
+      atualizadoEm: Date.now()
+    });
+    closeFinalizarPopup();
+  }catch(e){ console.error(e); alert('Erro ao cadastrar: '+e.message) }
+  finally{ $('finSave').disabled=false }
 };
 
 /* Serialização: editor visual -> texto com $LATEX$ para armazenar/renderizar */
@@ -611,9 +1045,31 @@ function createMathNode(latex){
   return span;
 }
 
+function stripStylingMacros(s){
+  let prev;
+  do{
+    prev=s;
+    s=s.replace(/\\bbox\s*(?:\[[^\]]*\])?\s*\{([^{}]*)\}/g,'$1');
+    s=s.replace(/\\textcolor\s*\{[^{}]*\}\s*\{([^{}]*)\}/g,'$1');
+    s=s.replace(/\\color\s*\{[^{}]*\}/g,'');
+    s=s.replace(/\\htmlData\s*\{[^{}]*\}\s*\{([^{}]*)\}/g,'$1');
+    s=s.replace(/\\class\s*\{[^{}]*\}\s*\{([^{}]*)\}/g,'$1');
+    s=s.replace(/\\cssId\s*\{[^{}]*\}\s*\{([^{}]*)\}/g,'$1');
+    s=s.replace(/\\style\s*\{[^{}]*\}\s*\{([^{}]*)\}/g,'$1');
+  } while(s!==prev);
+  return s;
+}
+
+function sanitizeLatex(latex){
+  let s=stripStylingMacros(latex);
+  s=s.replace(/\\placeholder\{[^}]*\}/g,'\\square');
+  s=s.replace(/\\placeholder(?![a-zA-Z])/g,'\\square');
+  return s;
+}
+
 function renderMathNodeContent(span, latex){
   span.innerHTML='';
-  const forKatex=latex.replace(/\\placeholder\{[^}]*\}/g,'\\square');
+  const forKatex=sanitizeLatex(latex);
   try{
     if(window.katex) katex.render(forKatex, span, {throwOnError:false, displayMode:false, output:'html'});
     else span.textContent=latex;
@@ -652,7 +1108,7 @@ $('mathEditSave').onclick=()=>{
   const mf=$('mathEditField');
   let newLatex='';
   try{ newLatex=(mf.getValue&&mf.getValue('latex'))||mf.value||'' }catch(_){ newLatex=mf.value||'' }
-  newLatex=newLatex.trim();
+  newLatex=stripStylingMacros(newLatex).trim();
   if(!newLatex){
     editingMathSpan.remove();
   } else {
@@ -800,7 +1256,7 @@ function renderKbdGrid(){
       // Renderizar KaTeX dentro do botão para mostrar visual
       const tmp=document.createElement('span');
       try{
-        if(window.katex) katex.render(k.latex, tmp, {throwOnError:false, displayMode:false, output:'html'});
+        if(window.katex) katex.render(sanitizeLatex(k.latex), tmp, {throwOnError:false, displayMode:false, output:'html'});
         else tmp.textContent=k.l;
       }catch(e){ tmp.textContent=k.l }
       content=tmp.innerHTML;
@@ -990,16 +1446,28 @@ function renderBlock(b){
   if(b.type==='banco'){
     const q=questoes.find(x=>x.id===b.qid);
     if(q){
-      const img=document.createElement('img');
-      img.src=q.imgQuestao;
-      img.onload=()=>{
-        if(!b.altura){
-          b.altura=Math.min(img.naturalHeight*((794-128)/img.naturalWidth),900)+20;
-          el.style.height=b.altura+'px';
-          scheduleRelayout();
-        }
-      };
-      el.appendChild(img);
+      if(q.tipo==='manual' && q.textoManual){
+        const div=document.createElement('div');
+        div.className='rendered';
+        renderTextWithMath(div, q.textoManual, {});
+        el.appendChild(div);
+      } else if(q.imgQuestao){
+        const img=document.createElement('img');
+        img.src=q.imgQuestao;
+        img.onload=()=>{
+          if(!b.altura){
+            b.altura=Math.min(img.naturalHeight*((794-128)/img.naturalWidth),900)+20;
+            el.style.height=b.altura+'px';
+            scheduleRelayout();
+          }
+        };
+        el.appendChild(img);
+      } else {
+        const w=document.createElement('div');
+        w.style.cssText='color:#999;text-align:center;padding:20px;font-family:Georgia,serif;font-style:italic';
+        w.textContent='Questão sem conteúdo';
+        el.appendChild(w);
+      }
     }else{
       const w=document.createElement('div');
       w.style.cssText='color:#999;text-align:center;padding:20px;font-family:Georgia,serif;font-style:italic';
