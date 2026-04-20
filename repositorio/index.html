@@ -115,10 +115,11 @@ body{
 .preview-pend-banner svg{flex-shrink:0;margin-top:2px}
 .preview-pend-banner b{color:#ffb93a}
 .preview-manual-text{
-  background:#fff;color:#111;padding:20px 24px;border-radius:8px;
-  font-size:.95rem;line-height:1.6;min-height:80px;word-wrap:break-word;
+  background:#fff;color:#111;padding:26px 30px;border-radius:8px;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  font-size:1.2rem;line-height:1.75;min-height:90px;word-wrap:break-word;
 }
-.preview-manual-text .katex{font-size:1.05em}
+.preview-manual-text .katex{font-size:1.25em}
 
 /* ===== DOCUMENT AREA ===== */
 .docarea{overflow:auto;padding:24px;display:flex;flex-direction:column;align-items:center;gap:18px}
@@ -128,7 +129,7 @@ body{
   display:flex;flex-direction:column;
   transform-origin:top center;
 }
-.page-num{position:absolute;bottom:18px;right:28px;font-size:.72rem;color:#999;font-weight:500;font-family:Georgia,serif}
+.page-num{position:absolute;bottom:18px;right:28px;font-size:.72rem;color:#999;font-weight:500;font-family:'Inter',sans-serif}
 
 .doc-header{border-bottom:2px solid #111;padding-bottom:16px;margin-bottom:24px}
 .doc-header .school{
@@ -156,10 +157,11 @@ body{
 .block.drag-over{border-color:#0a84ff;background:#eef6ff}
 .block img{max-width:100%;max-height:100%;display:block;margin:0 auto;pointer-events:none}
 .block .rendered{
-  width:100%;height:100%;overflow:auto;font-family:'Lora',Georgia,"Times New Roman",serif;
-  font-size:1rem;color:#111;line-height:1.55;padding:4px 6px;
+  width:100%;height:100%;overflow:auto;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  font-size:1.1rem;color:#111;line-height:1.7;padding:6px 8px;
 }
-.block .rendered .katex{font-size:1.05em}
+.block .rendered .katex{font-size:1.2em}
 .block .rendered.empty{color:#bbb;font-style:italic}
 .block .ctrls{position:absolute;top:4px;right:6px;display:none;gap:4px;z-index:2}
 .block:hover .ctrls{display:flex}
@@ -219,25 +221,24 @@ body{
 .math-editor{display:flex;flex-direction:column;gap:12px;min-height:0}
 
 .visual-editor{
-  width:100%;min-height:140px;max-height:260px;padding:16px 18px;overflow:auto;
+  width:100%;min-height:180px;max-height:340px;padding:20px 22px;overflow:auto;
   background:#fff;color:#111;border:1px solid var(--border);border-radius:10px;
-  font-family:'Lora',Georgia,"Times New Roman",serif;font-size:1.05rem;line-height:1.7;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1.25rem;line-height:1.75;
   outline:none;transition:border-color .15s,box-shadow .15s;
-  -webkit-user-modify:read-write-plaintext-only;
 }
 .visual-editor:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(10,132,255,.18)}
 .visual-editor:empty:before{
   content:attr(data-placeholder);color:#aaa;font-style:italic;pointer-events:none;
 }
 .visual-editor .math-node{
-  display:inline-block;padding:6px 10px;margin:3px 4px;border-radius:6px;
+  display:inline-block;padding:8px 12px;margin:4px 5px;border-radius:6px;
   background:rgba(10,132,255,.06);border:1px solid rgba(10,132,255,.18);
   user-select:none;cursor:pointer;vertical-align:middle;
   transition:background .1s,border-color .1s,box-shadow .1s;
 }
 .visual-editor .math-node:hover{background:rgba(10,132,255,.18);border-color:var(--accent);box-shadow:0 2px 8px rgba(10,132,255,.2)}
 .visual-editor .math-node.selected{background:rgba(10,132,255,.25);border-color:var(--accent)}
-.visual-editor .math-node .katex{font-size:1.2em}
+.visual-editor .math-node .katex{font-size:1.45em}
 .visual-editor .math-node .katex .mord,
 .visual-editor .math-node .katex .mrel,
 .visual-editor .math-node .katex .mbin{margin-left:.05em;margin-right:.05em}
@@ -252,15 +253,27 @@ body{
 
 /* ===== Math edit popup (MathLive) ===== */
 .mfield-wrap{
-  background:#fff;border:2px solid var(--border);border-radius:10px;padding:12px 14px;min-height:90px;
-  transition:border-color .15s,box-shadow .15s;
+  background:#fff;border:2px solid var(--border);border-radius:12px;padding:20px 24px;min-height:180px;
+  transition:border-color .15s,box-shadow .15s;display:flex;align-items:center;
 }
 .mfield-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(10,132,255,.18)}
 math-field{
-  font-size:1.5rem;color:#111;width:100%;display:block;outline:none;background:transparent;
+  font-size:2.4rem;color:#111;width:100%;display:block;outline:none;background:transparent;
   --selection-background-color:#bcd6f5; --caret-color:#0a84ff;
-  --placeholder-color:#a0a0a8; --placeholder-opacity:.6;
+  --placeholder-color:#a0a0a8; --placeholder-opacity:.55;
+  min-height:100px;
 }
+.mfield-quick{
+  display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;
+}
+.mfield-quick .qk{
+  min-width:42px;height:38px;padding:4px 10px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-size:.95rem;font-family:'Lora',Georgia,serif;
+  cursor:pointer;transition:all .12s;display:inline-flex;align-items:center;justify-content:center;
+}
+.mfield-quick .qk:hover{border-color:var(--accent);color:var(--accent);background:rgba(10,132,255,.08)}
+.mfield-quick .qk .katex{font-size:1em;color:var(--text)}
+.mfield-quick .qk:hover .katex{color:var(--accent)}
 .mfield-tip{
   display:flex;gap:10px;align-items:flex-start;
   font-size:.8rem;color:var(--text2);line-height:1.5;
@@ -385,6 +398,36 @@ math-field{
 .star-rating span{font-size:1.7rem;color:#3a3a3e;cursor:pointer;transition:color .12s,transform .12s;line-height:1}
 .star-rating span:hover{transform:scale(1.1)}
 .star-rating span.on{color:var(--warning)}
+
+.rate-widget{display:flex;gap:16px;align-items:center;margin-top:4px}
+.rate-stars{display:flex;gap:6px;user-select:none}
+.rate-stars span{
+  font-size:2rem;color:#3a3a3e;cursor:pointer;transition:color .12s,transform .12s;line-height:1;
+}
+.rate-stars span:hover{transform:scale(1.12);color:var(--warning)}
+.rate-stars span.on{color:var(--warning)}
+.rate-info{font-size:.88rem;color:var(--text2);font-family:'Inter',sans-serif}
+.rate-info b{color:var(--warning);font-size:1.05rem;font-weight:700}
+.rate-hint{font-size:.74rem;color:var(--text3);font-style:italic;margin-top:6px}
+
+.provas-list{display:flex;flex-direction:column;gap:8px}
+.prova-row{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;
+  background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  transition:border-color .12s;
+}
+.prova-row:hover{border-color:var(--accent)}
+.prova-info{flex:1;min-width:0}
+.prova-nome{font-weight:700;font-size:.95rem;color:var(--text);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prova-meta{font-size:.74rem;color:var(--text2)}
+.prova-actions{display:flex;gap:6px;flex-shrink:0}
+.prova-actions button{
+  padding:7px 14px;background:var(--bg4);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .12s;
+}
+.prova-actions .p-open:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.prova-actions .p-del{color:var(--error);border-color:rgba(255,69,58,.25);padding:7px 10px}
+.prova-actions .p-del:hover{background:rgba(255,69,58,.15);border-color:var(--error)}
 </style>
 </head>
 <body>
@@ -409,6 +452,8 @@ math-field{
   <div class="top-actions">
     <button id="btnLimpar" title="Remover todas as questões">Limpar</button>
     <button id="btnManual">+ Questão manual</button>
+    <button id="btnSalvarProva" title="Salvar prova atual">💾 Salvar</button>
+    <button id="btnMinhasProvas" title="Abrir provas salvas">Minhas provas</button>
     <a href="admin.html" class="admin" id="linkAdmin" style="display:none" title="Área administrativa">⚙ Cadastrar</a>
     <a href="../Plataforma.html" title="Voltar à plataforma">← Plataforma</a>
     <button class="primary" id="btnPrint">Imprimir</button>
@@ -503,20 +548,50 @@ math-field{
   </div>
 </div>
 
+<div class="ov" id="salvarProvaOv">
+  <div class="ov-box" style="max-width:480px">
+    <header><h3 id="salvarProvaTitle">Salvar prova</h3><button id="salvarProvaClose">✕</button></header>
+    <div class="body fin-form">
+      <label>Nome da prova</label>
+      <input type="text" id="salvarProvaNome" placeholder="Ex: Prova Bimestral — 2º Ano A" maxlength="120">
+      <div style="font-size:.78rem;color:var(--text3);margin-top:6px;line-height:1.5">A prova fica salva apenas na sua conta. Você pode abri-la a qualquer momento em "Minhas provas".</div>
+    </div>
+    <footer>
+      <button id="salvarProvaCancel">Cancelar</button>
+      <button class="primary" id="salvarProvaOk">Salvar</button>
+    </footer>
+  </div>
+</div>
+
+<div class="ov" id="provasListOv">
+  <div class="ov-box" style="max-width:680px">
+    <header><h3>Minhas provas</h3><button id="provasListClose">✕</button></header>
+    <div class="body">
+      <div id="provasListBody"></div>
+    </div>
+    <footer>
+      <div style="flex:1"></div>
+      <button id="provasListCancel">Fechar</button>
+    </footer>
+  </div>
+</div>
+
 <div class="ov" id="mathEditOv">
-  <div class="ov-box" style="max-width:620px">
+  <div class="ov-box" style="max-width:900px">
     <header><h3>Editar expressão</h3><button id="mathEditClose">✕</button></header>
     <div class="body">
       <div class="mfield-tip">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".5" fill="currentColor"/></svg>
-        <span>Clique em qualquer letra ou número para selecionar. Use as <b>setas do teclado</b> para navegar entre numerador, denominador, células da matriz e potências. Digite para substituir.</span>
+        <span>Clique em uma <b>caixa vazia</b> para digitar. Use as <b>setas do teclado</b> para navegar entre numerador, denominador, células da matriz e potências. As caixas que ficarem vazias serão removidas ao salvar.</span>
       </div>
       <div class="mfield-wrap">
         <math-field id="mathEditField"></math-field>
       </div>
+      <div class="mfield-quick" id="mathEditQuick"></div>
     </div>
     <footer>
       <button id="mathEditDelete" style="color:var(--error);border-color:rgba(255,69,58,.3)">Remover expressão</button>
+      <button id="mathEditClearBoxes" title="Remover todas as caixas vazias (□) da expressão">Limpar caixas</button>
       <div style="flex:1"></div>
       <button id="mathEditCancel">Cancelar</button>
       <button class="primary" id="mathEditSave">Salvar</button>
@@ -625,12 +700,18 @@ function renderSidebar(){
     } else {
       thumb = `<div class="qitem-manual-thumb">—</div>`;
     }
+    const avals = q.avaliacoes || {};
+    const vals = Object.values(avals).filter(v=>typeof v==='number' && v>=1 && v<=5);
+    const avg = vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length) : 0;
+    const starsHtml = vals.length
+      ? `<span class="stars" title="${vals.length} ${vals.length===1?'avaliação':'avaliações'}">★ ${avg.toFixed(1)}</span>`
+      : (q.estrelas?`<span class="stars">${'★'.repeat(q.estrelas)}</span>`:'');
     return `
     <div class="qitem${isPendente?' qitem-pendente':''}" data-id="${q.id}">
       ${thumb}
       <div class="meta">
         <span class="tema">${esc(temaDisplay)}</span>
-        ${isPendente?'<span class="badge-pend">Pendente</span>':(q.estrelas?`<span class="stars">${'★'.repeat(q.estrelas)}</span>`:'')}
+        ${isPendente?'<span class="badge-pend">Pendente</span>':starsHtml}
       </div>
     </div>`;
   }).join('');
@@ -673,6 +754,43 @@ function renderTextWithMath(container, text, opts={}){
   }
 }
 
+/* Renderiza widget interativo de avaliação do usuário + média/contagem global */
+function renderUserRating(qid, q){
+  const block=$('previewRateBlock'); if(!block) return;
+  const avals = (q && q.avaliacoes) || {};
+  const values = Object.values(avals).filter(v=>typeof v==='number' && v>=1 && v<=5);
+  const count = values.length;
+  const media = count ? (values.reduce((a,b)=>a+b,0)/count) : 0;
+  const myUid = currentUser ? currentUser.uid : null;
+  const myRating = myUid ? (avals[myUid]||0) : 0;
+
+  block.innerHTML=`
+    <div class="rate-widget">
+      <div class="rate-stars" id="rateStars">
+        ${[1,2,3,4,5].map(v=>`<span data-v="${v}" class="${v<=myRating?'on':''}">★</span>`).join('')}
+      </div>
+      <div class="rate-info">
+        ${count?`<b>${media.toFixed(1)}</b> · ${count} ${count===1?'avaliação':'avaliações'}`:`<span style="color:var(--text3);font-style:italic">Seja o primeiro a avaliar</span>`}
+      </div>
+    </div>
+    <div class="rate-hint">${myRating?'Clique na mesma nota para remover sua avaliação.':'Clique em uma estrela para avaliar.'}</div>
+  `;
+  $('rateStars').querySelectorAll('span').forEach(s=>{
+    s.onclick=async ()=>{
+      if(!currentUser){ alert('Aguarde autenticação.'); return }
+      const v=parseInt(s.dataset.v);
+      const newVal=(myRating===v)?null:v;
+      try{
+        if(newVal===null){
+          await remove(ref(db,'questoes/'+qid+'/avaliacoes/'+currentUser.uid));
+        } else {
+          await set(ref(db,'questoes/'+qid+'/avaliacoes/'+currentUser.uid), newVal);
+        }
+      }catch(e){ console.error(e); alert('Erro ao avaliar: '+e.message) }
+    };
+  });
+}
+
 function openPreview(qid){
   const q=questoes.find(x=>x.id===qid); if(!q) return;
   currentQid=qid;
@@ -696,23 +814,31 @@ function openPreview(qid){
       <div style="display:flex;gap:6px;flex-wrap:wrap">${temasArr.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
       <h4>Enunciado</h4>
       <div class="preview-manual-text" id="previewManualText"></div>
-      ${q.bncc&&q.bncc.length?`<h4>BNCC</h4><div class="com" style="font-family:'SF Mono',monospace;color:#a48cff">${q.bncc.map(esc).join(' · ')}</div>`:''}
+      ${q.bncc&&q.bncc.length?`<h4>BNCC</h4><div class="chips">${q.bncc.map(code=>{
+        const desc=BNCC_CODES[code]||'Código personalizado — sem descrição oficial neste sistema.';
+        return `<span class="chip bncc">${esc(code)}<span class="tip"><b>${esc(code)}</b>${esc(desc)}</span></span>`;
+      }).join('')}</div>`:''}
       ${q.comentario?`<h4>Comentário</h4><div class="com">${esc(q.comentario)}</div>`:''}
-      <h4>Avaliação</h4>
-      <div class="com" style="color:var(--warning);letter-spacing:3px;font-size:1.1rem">${'★'.repeat(q.estrelas||0)}${'☆'.repeat(5-(q.estrelas||0))}</div>
+      <h4>Sua avaliação</h4>
+      <div id="previewRateBlock"></div>
     `;
     renderTextWithMath($('previewManualText'), q.textoManual||'', {});
+    renderUserRating(qid, q);
   } else {
     body.innerHTML=`
       <div style="display:flex;gap:6px;flex-wrap:wrap">${temasArr.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
       <h4>Questão</h4>
       <img src="${q.imgQuestao}">
       ${q.imgResposta?`<h4>Resposta (não aparece na prova)</h4><img src="${q.imgResposta}">`:''}
-      ${q.bncc&&q.bncc.length?`<h4>BNCC</h4><div class="com" style="font-family:'SF Mono',monospace;color:#a48cff">${q.bncc.map(esc).join(' · ')}</div>`:''}
+      ${q.bncc&&q.bncc.length?`<h4>BNCC</h4><div class="chips">${q.bncc.map(code=>{
+        const desc=BNCC_CODES[code]||'Código personalizado — sem descrição oficial neste sistema.';
+        return `<span class="chip bncc">${esc(code)}<span class="tip"><b>${esc(code)}</b>${esc(desc)}</span></span>`;
+      }).join('')}</div>`:''}
       ${q.comentario?`<h4>Comentário</h4><div class="com">${esc(q.comentario)}</div>`:''}
-      <h4>Avaliação</h4>
-      <div class="com" style="color:var(--warning);letter-spacing:3px;font-size:1.1rem">${'★'.repeat(q.estrelas||0)}${'☆'.repeat(5-(q.estrelas||0))}</div>
+      <h4>Sua avaliação</h4>
+      <div id="previewRateBlock"></div>
     `;
+    renderUserRating(qid, q);
   }
 
   // Ajusta botões do rodapé conforme estado da questão
@@ -724,7 +850,7 @@ function openPreview(qid){
     btnEdit.style.display='inline-flex';
     btnDel.style.display='inline-flex';
     btnFin.style.display = isPendente ? 'inline-flex' : 'none';
-    btnAdd.style.display = isPendente ? 'none' : 'inline-flex';
+    btnAdd.style.display='inline-flex';
   } else {
     btnEdit.style.display='none';
     btnFin.style.display='none';
@@ -768,7 +894,7 @@ $('manualCancel').onclick=()=>$('manualOv').classList.remove('show');
 function openManualPopup(bid, opts={}){
   editBid=bid;
   editingQid=opts.qid||null;
-  $('manualTitle').textContent=(bid||editingQid)?'Editar questão manual':'Nova questão manual';
+  $('manualTitle').textContent=(bid||editingQid)?'Editar questão manualmente':'Nova questão manualmente';
   const editor=$('manualEditor');
   editor.innerHTML='';
   if(editingQid){
@@ -1087,13 +1213,53 @@ function openMathEdit(span){
     try{
       if(typeof mf.setValue==='function') mf.setValue(latex,{silenceNotifications:true});
       else mf.value=latex;
+      // Pula automaticamente para a primeira caixa vazia (\placeholder) para o usuário digitar direto
+      setTimeout(()=>{
+        try{ mf.focus() }catch(_){}
+        try{ mf.executeCommand('moveToMathFieldStart') }catch(_){}
+        try{ mf.executeCommand('moveToNextPlaceholder') }catch(_){}
+      }, 60);
     }catch(_){ mf.value=latex }
   };
-  // MathLive pode não estar registrado ainda (script defer); aguarda e aplica
   if(customElements.get('math-field')) apply();
   else customElements.whenDefined('math-field').then(apply);
   $('mathEditOv').classList.add('show');
-  setTimeout(()=>{ try{ mf.focus() }catch(_){} }, 80);
+  renderMathEditQuick();
+}
+
+/* Teclado rápido de básico dentro do popup de editar expressão.
+   Reutiliza categoria "Básico" + alguns itens de frações/raízes. */
+function renderMathEditQuick(){
+  const grid=$('mathEditQuick');
+  if(!grid) return;
+  const quick=[
+    {l:'+',text:'+'},{l:'−',text:'-'},{l:'×',text:'\\times'},{l:'÷',text:'\\div'},
+    {l:'=',text:'='},{l:'≠',text:'\\neq'},{l:'<',text:'<'},{l:'>',text:'>'},
+    {l:'≤',text:'\\leq'},{l:'≥',text:'\\geq'},{l:'±',text:'\\pm'},
+    {l:'( )',text:'('},{l:'x²',text:'^{2}'},{l:'x^n',text:'^{}'},
+    {l:'√',text:'\\sqrt{}'},{l:'ⁿ√',text:'\\sqrt[]{}'},
+    {l:'a/b',text:'\\frac{}{}'},{l:'π',text:'\\pi'},{l:'∞',text:'\\infty'},{l:'°',text:'^{\\circ}'}
+  ];
+  grid.innerHTML=quick.map((k,i)=>{
+    let visual=esc(k.l);
+    // Itens que se beneficiam de preview KaTeX
+    if(['√','ⁿ√','a/b','π','∞','x²','±','≤','≥','≠','×','÷'].includes(k.l)){
+      const tmp=document.createElement('span');
+      const latexPreview={'√':'\\sqrt{x}','ⁿ√':'\\sqrt[n]{x}','a/b':'\\frac{a}{b}','π':'\\pi','∞':'\\infty','x²':'x^{2}','±':'\\pm','≤':'\\leq','≥':'\\geq','≠':'\\neq','×':'\\times','÷':'\\div'}[k.l];
+      try{
+        if(window.katex && latexPreview){ katex.render(latexPreview,tmp,{throwOnError:false,output:'html'}); visual=tmp.innerHTML }
+      }catch(_){}
+    }
+    return `<button class="qk" data-i="${i}" type="button" title="${escAttr(k.l)}">${visual}</button>`;
+  }).join('');
+  grid.querySelectorAll('.qk').forEach(b=>{
+    b.onclick=()=>{
+      const k=quick[parseInt(b.dataset.i)];
+      const mf=$('mathEditField');
+      try{ mf.focus(); mf.executeCommand(['insert', k.text, {focus:true, feedback:false}]) }
+      catch(_){ try{ mf.insert(k.text) }catch(__){} }
+    };
+  });
 }
 
 function closeMathEdit(){
@@ -1120,6 +1286,25 @@ $('mathEditSave').onclick=()=>{
 $('mathEditDelete').onclick=()=>{
   if(editingMathSpan) editingMathSpan.remove();
   closeMathEdit();
+};
+$('mathEditClearBoxes').onclick=()=>{
+  const mf=$('mathEditField');
+  let cur='';
+  try{ cur=(mf.getValue&&mf.getValue('latex'))||mf.value||'' }catch(_){ cur=mf.value||'' }
+  // Remove \placeholder{...} e \square e caixas vazias {} aninhadas
+  let prev;
+  do{
+    prev=cur;
+    cur=cur.replace(/\\placeholder\s*\{[^{}]*\}/g,'');
+    cur=cur.replace(/\\placeholder(?![a-zA-Z])/g,'');
+    cur=cur.replace(/\\square(?![a-zA-Z])/g,'');
+    cur=cur.replace(/\{\s*\}/g,'{}');
+  } while(cur!==prev);
+  try{
+    if(typeof mf.setValue==='function') mf.setValue(cur,{silenceNotifications:false});
+    else mf.value=cur;
+    mf.focus();
+  }catch(_){}
 };
 
 /* ---- Teclado de matemática VISUAL ----
@@ -1180,14 +1365,14 @@ const KEYBOARD_CATS = [
   },
   {
     name:"Gregas", keys:[
-      {l:'α',text:'α'},{l:'β',text:'β'},{l:'γ',text:'γ'},{l:'δ',text:'δ'},
-      {l:'ε',text:'ε'},{l:'ζ',text:'ζ'},{l:'η',text:'η'},{l:'θ',text:'θ'},
-      {l:'ι',text:'ι'},{l:'κ',text:'κ'},{l:'λ',text:'λ'},{l:'μ',text:'μ'},
-      {l:'ν',text:'ν'},{l:'ξ',text:'ξ'},{l:'π',text:'π'},{l:'ρ',text:'ρ'},
-      {l:'σ',text:'σ'},{l:'τ',text:'τ'},{l:'φ',text:'φ'},{l:'χ',text:'χ'},
-      {l:'ψ',text:'ψ'},{l:'ω',text:'ω'},
-      {l:'Γ',text:'Γ'},{l:'Δ',text:'Δ'},{l:'Θ',text:'Θ'},{l:'Λ',text:'Λ'},
-      {l:'Σ',text:'Σ'},{l:'Π',text:'Π'},{l:'Φ',text:'Φ'},{l:'Ω',text:'Ω'}
+      {l:'α',text:'α',t:'alfa'},{l:'β',text:'β',t:'beta'},{l:'γ',text:'γ',t:'gama'},{l:'δ',text:'δ',t:'delta'},
+      {l:'ε',text:'ε',t:'épsilon'},{l:'ζ',text:'ζ',t:'zeta'},{l:'η',text:'η',t:'eta'},{l:'θ',text:'θ',t:'teta'},
+      {l:'ι',text:'ι',t:'iota'},{l:'κ',text:'κ',t:'kappa'},{l:'λ',text:'λ',t:'lambda'},{l:'μ',text:'μ',t:'mi'},
+      {l:'ν',text:'ν',t:'ni'},{l:'ξ',text:'ξ',t:'csi'},{l:'π',text:'π',t:'pi'},{l:'ρ',text:'ρ',t:'rô'},
+      {l:'σ',text:'σ',t:'sigma'},{l:'τ',text:'τ',t:'tau'},{l:'φ',text:'φ',t:'fi'},{l:'χ',text:'χ',t:'qui'},
+      {l:'ψ',text:'ψ',t:'psi'},{l:'ω',text:'ω',t:'ômega'},
+      {l:'Γ',text:'Γ',t:'Gama maiúsculo'},{l:'Δ',text:'Δ',t:'Delta maiúsculo'},{l:'Θ',text:'Θ',t:'Teta maiúsculo'},{l:'Λ',text:'Λ',t:'Lambda maiúsculo'},
+      {l:'Σ',text:'Σ',t:'Sigma maiúsculo'},{l:'Π',text:'Π',t:'Pi maiúsculo'},{l:'Φ',text:'Φ',t:'Fi maiúsculo'},{l:'Ω',text:'Ω',t:'Ômega maiúsculo'}
     ]
   },
   {
@@ -1203,12 +1388,12 @@ const KEYBOARD_CATS = [
   },
   {
     name:"Conjuntos", keys:[
-      {l:'∈',text:'∈'},{l:'∉',text:'∉'},{l:'⊂',text:'⊂'},{l:'⊆',text:'⊆'},
-      {l:'⊃',text:'⊃'},{l:'⊇',text:'⊇'},{l:'∪',text:'∪'},{l:'∩',text:'∩'},
-      {l:'∅',text:'∅'},{l:'∀',text:'∀'},{l:'∃',text:'∃'},{l:'¬',text:'¬'},
-      {l:'∧',text:'∧'},{l:'∨',text:'∨'},{l:'⇔',text:'⇔'},
-      {l:'ℕ',latex:'\\mathbb{N}'},{l:'ℤ',latex:'\\mathbb{Z}'},{l:'ℚ',latex:'\\mathbb{Q}'},
-      {l:'ℝ',latex:'\\mathbb{R}'},{l:'ℂ',latex:'\\mathbb{C}'}
+      {l:'∈',text:'∈',t:'pertence'},{l:'∉',text:'∉',t:'não pertence'},{l:'⊂',text:'⊂',t:'está contido'},{l:'⊆',text:'⊆',t:'está contido ou é igual'},
+      {l:'⊃',text:'⊃',t:'contém'},{l:'⊇',text:'⊇',t:'contém ou é igual'},{l:'∪',text:'∪',t:'união'},{l:'∩',text:'∩',t:'intersecção'},
+      {l:'∅',text:'∅',t:'conjunto vazio'},{l:'∀',text:'∀',t:'para todo'},{l:'∃',text:'∃',t:'existe'},{l:'¬',text:'¬',t:'negação'},
+      {l:'∧',text:'∧',t:'e (conjunção)'},{l:'∨',text:'∨',t:'ou (disjunção)'},{l:'⇔',text:'⇔',t:'se e somente se'},
+      {l:'ℕ',latex:'\\mathbb{N}',t:'Conjunto dos Naturais'},{l:'ℤ',latex:'\\mathbb{Z}',t:'Conjunto dos Inteiros'},{l:'ℚ',latex:'\\mathbb{Q}',t:'Conjunto dos Racionais'},
+      {l:'ℝ',latex:'\\mathbb{R}',t:'Conjunto dos Reais'},{l:'ℂ',latex:'\\mathbb{C}',t:'Conjunto dos Complexos'}
     ]
   },
   {
@@ -1263,7 +1448,7 @@ function renderKbdGrid(){
     } else {
       content=esc(k.l);
     }
-    return `<button class="kbd-key" data-i="${i}" title="${escAttr(k.l)}">${content}</button>`;
+    return `<button class="kbd-key" data-i="${i}" title="${escAttr(k.t||k.l)}">${content}</button>`;
   }).join('');
   grid.querySelectorAll('.kbd-key').forEach(btn=>{
     btn.onclick=()=>insertKey(cat.keys[parseInt(btn.dataset.i)]);
@@ -1330,8 +1515,13 @@ buildKeyboard();
 
 /* ===== Limpar tudo ===== */
 $('btnLimpar').onclick=()=>{
-  if(!blocks.length) return;
-  if(confirm('Remover todas as questões da prova?')){ blocks=[]; renderDoc() }
+  if(!blocks.length && !currentProvaId) return;
+  if(confirm('Remover todas as questões da prova atual?')){
+    blocks=[];
+    currentProvaId=null;
+    currentProvaNome='';
+    renderDoc();
+  }
 };
 
 /* ===== Pagination ===== */
@@ -1574,6 +1764,103 @@ document.addEventListener('pointerup',()=>{
 
 function newId(){return 'b'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 function escAttr(s){return esc(s).replace(/"/g,'&quot;')}
+
+/* ===== Minhas provas (salvar/abrir) ===== */
+let currentProvaId=null;
+let currentProvaNome='';
+
+$('btnSalvarProva').onclick=()=>openSalvarProva();
+$('salvarProvaClose').onclick=()=>$('salvarProvaOv').classList.remove('show');
+$('salvarProvaCancel').onclick=()=>$('salvarProvaOv').classList.remove('show');
+$('btnMinhasProvas').onclick=()=>openMinhasProvas();
+$('provasListClose').onclick=()=>$('provasListOv').classList.remove('show');
+$('provasListCancel').onclick=()=>$('provasListOv').classList.remove('show');
+
+function openSalvarProva(){
+  if(!currentUser){ alert('Aguarde autenticação.'); return }
+  $('salvarProvaTitle').textContent = currentProvaId ? 'Atualizar prova' : 'Salvar prova';
+  $('salvarProvaNome').value = currentProvaNome || '';
+  $('salvarProvaOv').classList.add('show');
+  setTimeout(()=>{ try{ $('salvarProvaNome').focus(); $('salvarProvaNome').select() }catch(_){} }, 60);
+}
+
+$('salvarProvaOk').onclick=async ()=>{
+  if(!currentUser) return;
+  const nome=$('salvarProvaNome').value.trim();
+  if(!nome){ alert('Informe um nome para a prova.'); return }
+  const dados={
+    nome,
+    headerData,
+    blocks: blocks.map(b=>({bid:b.bid,type:b.type,qid:b.qid||null,texto:b.texto||null,altura:b.altura||null})),
+    atualizadoEm: Date.now()
+  };
+  try{
+    $('salvarProvaOk').disabled=true;
+    if(currentProvaId){
+      await update(ref(db,'provas/'+currentUser.uid+'/'+currentProvaId), dados);
+    } else {
+      dados.criadoEm = Date.now();
+      const r=push(ref(db,'provas/'+currentUser.uid));
+      await set(r, dados);
+      currentProvaId = r.key;
+    }
+    currentProvaNome = nome;
+    $('salvarProvaOv').classList.remove('show');
+  }catch(e){ console.error(e); alert('Erro ao salvar: '+e.message) }
+  finally{ $('salvarProvaOk').disabled=false }
+};
+
+async function openMinhasProvas(){
+  if(!currentUser){ alert('Aguarde autenticação.'); return }
+  const body=$('provasListBody');
+  body.innerHTML='<div style="padding:20px;text-align:center;color:var(--text2);font-style:italic">Carregando...</div>';
+  $('provasListOv').classList.add('show');
+  onValue(ref(db,'provas/'+currentUser.uid), snap=>{
+    const data=snap.val()||{};
+    const items=Object.entries(data).map(([id,p])=>({id,...p}))
+      .sort((a,b)=>(b.atualizadoEm||b.criadoEm||0)-(a.atualizadoEm||a.criadoEm||0));
+    if(!items.length){
+      body.innerHTML='<div style="padding:30px;text-align:center;color:var(--text2);line-height:1.6">Você ainda não salvou nenhuma prova.<br><span style="font-size:.82rem;color:var(--text3)">Monte uma prova e clique em <b>Salvar</b> no topo.</span></div>';
+      return;
+    }
+    body.innerHTML=`<div class="provas-list">${items.map(p=>{
+      const d=new Date(p.atualizadoEm||p.criadoEm||0);
+      const qtde=(p.blocks||[]).length;
+      return `
+      <div class="prova-row" data-id="${p.id}">
+        <div class="prova-info">
+          <div class="prova-nome">${esc(p.nome||'(sem nome)')}</div>
+          <div class="prova-meta">${qtde} ${qtde===1?'questão':'questões'} · ${d.toLocaleDateString('pt-BR')} ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div>
+        </div>
+        <div class="prova-actions">
+          <button class="p-open" data-id="${p.id}">Abrir</button>
+          <button class="p-del" data-id="${p.id}" title="Remover">✕</button>
+        </div>
+      </div>`;
+    }).join('')}</div>`;
+    body.querySelectorAll('.p-open').forEach(b=>b.onclick=()=>loadProva(b.dataset.id, data[b.dataset.id]));
+    body.querySelectorAll('.p-del').forEach(b=>b.onclick=async ()=>{
+      if(!confirm('Remover esta prova salva?')) return;
+      await remove(ref(db,'provas/'+currentUser.uid+'/'+b.dataset.id));
+    });
+  }, {onlyOnce:false});
+}
+
+function loadProva(id, p){
+  if(!p) return;
+  blocks = (p.blocks||[]).map(b=>({
+    bid:b.bid||newId(),
+    type:b.type,
+    qid:b.qid||null,
+    texto:b.texto||null,
+    altura:b.altura||null
+  }));
+  headerData = Object.assign({escola:'',professor:'',aluno:'',serie:'',data:''}, p.headerData||{});
+  currentProvaId = id;
+  currentProvaNome = p.nome || '';
+  $('provasListOv').classList.remove('show');
+  renderDoc();
+}
 
 $('btnPrint').onclick=()=>$('printOv').classList.add('show');
 $('printCancel').onclick=()=>$('printOv').classList.remove('show');
