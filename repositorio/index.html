@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://unpkg.com/mathlive@0.101.0/dist/mathlive.min.js"></script>
 <style>
 :root{
   --bg:#0a0a0c; --bg2:#141418; --bg3:#1c1c1f; --bg4:#242428;
@@ -209,9 +210,34 @@ body{
   user-select:none;cursor:default;vertical-align:middle;
   transition:background .1s,border-color .1s;
 }
-.visual-editor .math-node:hover{background:rgba(10,132,255,.12);border-color:rgba(10,132,255,.4)}
+.visual-editor .math-node{cursor:pointer}
+.visual-editor .math-node:hover{background:rgba(10,132,255,.18);border-color:var(--accent);box-shadow:0 2px 8px rgba(10,132,255,.2)}
 .visual-editor .math-node.selected{background:rgba(10,132,255,.25);border-color:var(--accent)}
 .visual-editor .math-node .katex{font-size:1em}
+.visual-editor .math-node::after{
+  content:'✎'; font-size:.65rem; color:var(--accent); margin-left:4px; opacity:0; transition:opacity .12s;
+  font-family:'Inter',sans-serif; vertical-align:super;
+}
+.visual-editor .math-node:hover::after{opacity:.75}
+
+/* ===== Math edit popup (MathLive) ===== */
+.mfield-wrap{
+  background:#fff;border:2px solid var(--border);border-radius:10px;padding:12px 14px;min-height:90px;
+  transition:border-color .15s,box-shadow .15s;
+}
+.mfield-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(10,132,255,.18)}
+math-field{
+  font-size:1.5rem;color:#111;width:100%;display:block;outline:none;background:transparent;
+  --selection-background-color:#bcd6f5; --caret-color:#0a84ff;
+  --placeholder-color:#a0a0a8; --placeholder-opacity:.6;
+}
+.mfield-tip{
+  display:flex;gap:10px;align-items:flex-start;
+  font-size:.8rem;color:var(--text2);line-height:1.5;
+  background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;
+}
+.mfield-tip svg{color:var(--accent2);flex-shrink:0;margin-top:2px}
+.mfield-tip b{color:var(--text)}
 
 /* Math keyboard - tabs em 2 linhas (sem rolagem horizontal) */
 .kbd-tabs{
@@ -330,6 +356,27 @@ body{
     <footer>
       <button id="manualCancel">Cancelar</button>
       <button class="primary" id="manualAdd">Adicionar</button>
+    </footer>
+  </div>
+</div>
+
+<div class="ov" id="mathEditOv">
+  <div class="ov-box" style="max-width:620px">
+    <header><h3>Editar expressão</h3><button id="mathEditClose">✕</button></header>
+    <div class="body">
+      <div class="mfield-tip">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".5" fill="currentColor"/></svg>
+        <span>Clique em qualquer letra ou número para selecionar. Use as <b>setas do teclado</b> para navegar entre numerador, denominador, células da matriz e potências. Digite para substituir.</span>
+      </div>
+      <div class="mfield-wrap">
+        <math-field id="mathEditField"></math-field>
+      </div>
+    </div>
+    <footer>
+      <button id="mathEditDelete" style="color:var(--error);border-color:rgba(255,69,58,.3)">Remover expressão</button>
+      <div style="flex:1"></div>
+      <button id="mathEditCancel">Cancelar</button>
+      <button class="primary" id="mathEditSave">Salvar</button>
     </footer>
   </div>
 </div>
@@ -554,12 +601,70 @@ function createMathNode(latex){
   span.className='math-node';
   span.contentEditable='false';
   span.dataset.latex=latex;
-  try{
-    if(window.katex) katex.render(latex, span, {throwOnError:false, displayMode:false, output:'html'});
-    else span.textContent=latex;
-  }catch(e){ span.textContent=latex }
+  renderMathNodeContent(span, latex);
+  span.title='Clique para editar';
+  span.addEventListener('click', e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    openMathEdit(span);
+  });
   return span;
 }
+
+function renderMathNodeContent(span, latex){
+  span.innerHTML='';
+  const forKatex=latex.replace(/\\placeholder\{[^}]*\}/g,'\\square');
+  try{
+    if(window.katex) katex.render(forKatex, span, {throwOnError:false, displayMode:false, output:'html'});
+    else span.textContent=latex;
+  }catch(e){ span.textContent=latex }
+}
+
+/* ===== Editor de expressão (MathLive) ===== */
+let editingMathSpan=null;
+
+function openMathEdit(span){
+  editingMathSpan=span;
+  const mf=$('mathEditField');
+  const latex=span.dataset.latex||'';
+  const apply=()=>{
+    try{
+      if(typeof mf.setValue==='function') mf.setValue(latex,{silenceNotifications:true});
+      else mf.value=latex;
+    }catch(_){ mf.value=latex }
+  };
+  // MathLive pode não estar registrado ainda (script defer); aguarda e aplica
+  if(customElements.get('math-field')) apply();
+  else customElements.whenDefined('math-field').then(apply);
+  $('mathEditOv').classList.add('show');
+  setTimeout(()=>{ try{ mf.focus() }catch(_){} }, 80);
+}
+
+function closeMathEdit(){
+  $('mathEditOv').classList.remove('show');
+  editingMathSpan=null;
+}
+
+$('mathEditClose').onclick=closeMathEdit;
+$('mathEditCancel').onclick=closeMathEdit;
+$('mathEditSave').onclick=()=>{
+  if(!editingMathSpan) return closeMathEdit();
+  const mf=$('mathEditField');
+  let newLatex='';
+  try{ newLatex=(mf.getValue&&mf.getValue('latex'))||mf.value||'' }catch(_){ newLatex=mf.value||'' }
+  newLatex=newLatex.trim();
+  if(!newLatex){
+    editingMathSpan.remove();
+  } else {
+    editingMathSpan.dataset.latex=newLatex;
+    renderMathNodeContent(editingMathSpan, newLatex);
+  }
+  closeMathEdit();
+};
+$('mathEditDelete').onclick=()=>{
+  if(editingMathSpan) editingMathSpan.remove();
+  closeMathEdit();
+};
 
 /* ---- Teclado de matemática VISUAL ----
    Cada tecla: {l: label (exibido no botão), text: inserir como texto, latex: inserir como fórmula renderizada}
