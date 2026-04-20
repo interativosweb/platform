@@ -189,58 +189,56 @@ body{
 .print-box .foot button.primary:hover{background:#3a9bff}
 .print-box .foot button:hover{border-color:var(--accent)}
 
-/* ===== MATH EDITOR (manual) ===== */
-.math-editor{display:grid;grid-template-columns:1fr;gap:10px;min-height:0}
-.math-hint{
-  font-size:.76rem;color:var(--text2);line-height:1.5;background:var(--bg3);border:1px solid var(--border);
-  border-radius:8px;padding:9px 12px;display:flex;gap:8px;align-items:flex-start;
-}
-.math-hint b{color:var(--accent2)}
-#manualText{
-  width:100%;min-height:130px;max-height:220px;padding:12px 14px;
-  background:var(--bg3);border:1px solid var(--border);border-radius:10px;
-  color:var(--text);font-family:'JetBrains Mono','SF Mono',Consolas,monospace;font-size:.92rem;line-height:1.55;
-  outline:none;resize:vertical;
-}
-#manualText:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(10,132,255,.15)}
+/* ===== MATH EDITOR (manual) - visual WYSIWYG ===== */
+.math-editor{display:flex;flex-direction:column;gap:12px;min-height:0}
 
-.math-preview{
-  background:#fff;color:#111;border-radius:10px;padding:14px 16px;min-height:70px;max-height:180px;overflow:auto;
-  font-family:'Lora',Georgia,"Times New Roman",serif;font-size:1rem;line-height:1.55;
-  border:1px solid var(--border);
+.visual-editor{
+  width:100%;min-height:140px;max-height:260px;padding:16px 18px;overflow:auto;
+  background:#fff;color:#111;border:1px solid var(--border);border-radius:10px;
+  font-family:'Lora',Georgia,"Times New Roman",serif;font-size:1.05rem;line-height:1.7;
+  outline:none;transition:border-color .15s,box-shadow .15s;
+  -webkit-user-modify:read-write-plaintext-only;
 }
-.math-preview.empty{color:#aaa;font-style:italic}
-.math-preview-label{
-  font-size:.7rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;
-  display:flex;align-items:center;gap:6px;
+.visual-editor:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(10,132,255,.18)}
+.visual-editor:empty:before{
+  content:attr(data-placeholder);color:#aaa;font-style:italic;pointer-events:none;
 }
-.math-preview-label .dot{width:6px;height:6px;border-radius:50%;background:var(--success)}
+.visual-editor .math-node{
+  display:inline-block;padding:2px 4px;margin:0 2px;border-radius:4px;
+  background:rgba(10,132,255,.06);border:1px solid rgba(10,132,255,.18);
+  user-select:none;cursor:default;vertical-align:middle;
+  transition:background .1s,border-color .1s;
+}
+.visual-editor .math-node:hover{background:rgba(10,132,255,.12);border-color:rgba(10,132,255,.4)}
+.visual-editor .math-node.selected{background:rgba(10,132,255,.25);border-color:var(--accent)}
+.visual-editor .math-node .katex{font-size:1em}
 
-/* Math keyboard */
-.kbd-tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);overflow-x:auto;padding-bottom:0;scrollbar-width:thin}
-.kbd-tabs::-webkit-scrollbar{height:4px}
-.kbd-tabs::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+/* Math keyboard - tabs em 2 linhas (sem rolagem horizontal) */
+.kbd-tabs{
+  display:flex;flex-wrap:wrap;gap:5px;
+  border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:4px;
+}
 .kbd-tab{
-  padding:9px 14px;background:transparent;border:none;color:var(--text2);font-size:.82rem;font-weight:600;cursor:pointer;
-  border-bottom:2px solid transparent;transition:all .12s;font-family:inherit;white-space:nowrap;
+  padding:6px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  color:var(--text2);font-size:.8rem;font-weight:600;cursor:pointer;
+  transition:all .12s;font-family:inherit;white-space:nowrap;
 }
-.kbd-tab:hover{color:var(--text)}
-.kbd-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.kbd-tab:hover{color:var(--text);border-color:var(--border2);background:var(--bg4)}
+.kbd-tab.active{color:#fff;background:var(--accent);border-color:var(--accent);box-shadow:0 2px 8px rgba(10,132,255,.3)}
 .kbd-grid{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:5px;padding:10px 2px 2px;
-  max-height:200px;overflow-y:auto;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px;padding:4px 0;
+  max-height:220px;overflow-y:auto;
 }
 .kbd-key{
-  padding:8px 4px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;
-  color:var(--text);font-family:'KaTeX_Main','Lora',Georgia,serif;font-size:.95rem;cursor:pointer;
-  transition:all .1s;display:flex;align-items:center;justify-content:center;min-height:40px;
-  line-height:1.1;text-align:center;
+  padding:10px 6px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-size:1rem;cursor:pointer;
+  transition:all .1s;display:flex;align-items:center;justify-content:center;min-height:46px;
+  line-height:1.1;text-align:center;font-family:'Lora',Georgia,serif;
 }
-.kbd-key:hover{background:var(--bg4);border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
+.kbd-key:hover{background:var(--bg4);border-color:var(--accent);transform:translateY(-1px);box-shadow:0 4px 10px rgba(10,132,255,.15)}
 .kbd-key:active{transform:translateY(0)}
-.kbd-key.wide{grid-column:span 2}
-.kbd-key .katex{font-size:1em}
-.kbd-key-label{font-size:.7rem;color:var(--text2);font-family:'Inter',sans-serif;margin-top:2px;display:block;line-height:1}
+.kbd-key .katex{font-size:.95em;color:var(--text)}
+.kbd-key-label{font-size:.7rem;color:var(--text2);font-family:'Inter',sans-serif;margin-top:2px;line-height:1}
 
 .auth-loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999}
 .auth-loader .sp{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite}
@@ -322,13 +320,7 @@ body{
     <header><h3 id="manualTitle">Nova questão manual</h3><button id="manualClose">✕</button></header>
     <div class="body">
       <div class="math-editor">
-        <div class="math-hint">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent2);flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".5" fill="currentColor"/></svg>
-          <span>Use <b>$...$</b> para fórmulas em linha e <b>$$...$$</b> para fórmulas em destaque. Clique nas teclas abaixo para inserir — a prévia atualiza em tempo real.</span>
-        </div>
-        <textarea id="manualText" placeholder="Digite o enunciado. Ex: Calcule $\frac{1}{2} + \sqrt{3}$ e determine $x$ em $x^2 - 4 = 0$."></textarea>
-        <div class="math-preview-label"><span class="dot"></span> Prévia renderizada</div>
-        <div class="math-preview empty" id="mathPreview">A prévia aparecerá aqui.</div>
+        <div id="manualEditor" class="visual-editor" contenteditable="true" data-placeholder="Digite o enunciado aqui. Use os botões abaixo para inserir frações, raízes, potências e outros símbolos."></div>
         <div>
           <div class="kbd-tabs" id="kbdTabs"></div>
           <div class="kbd-grid" id="kbdGrid"></div>
@@ -474,18 +466,28 @@ $('manualCancel').onclick=()=>$('manualOv').classList.remove('show');
 function openManualPopup(bid){
   editBid=bid;
   $('manualTitle').textContent=bid?'Editar questão manual':'Nova questão manual';
+  const editor=$('manualEditor');
+  editor.innerHTML='';
   if(bid){
     const b=blocks.find(x=>x.bid===bid);
-    $('manualText').value=b?b.texto||'':'';
-  } else {
-    $('manualText').value='';
+    if(b && b.texto) deserializeToEditor(b.texto, editor);
   }
   $('manualOv').classList.add('show');
-  setTimeout(()=>{$('manualText').focus(); updatePreview()},40);
+  setTimeout(()=>{
+    editor.focus();
+    // Posicionar cursor no fim
+    const range=document.createRange();
+    range.selectNodeContents(editor);
+    range.collapse(false);
+    const sel=window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  },50);
 }
 
 $('manualAdd').onclick=()=>{
-  const t=$('manualText').value.trim();
+  const editor=$('manualEditor');
+  const t=serializeEditor(editor).trim();
   if(editBid){
     const b=blocks.find(x=>x.bid===editBid);
     if(b){
@@ -500,105 +502,177 @@ $('manualAdd').onclick=()=>{
   renderDoc();
 };
 
-/* ---- Math keyboard layout ---- */
+/* Serialização: editor visual -> texto com $LATEX$ para armazenar/renderizar */
+function serializeEditor(editor){
+  let out='';
+  function walk(node){
+    if(node.nodeType===Node.TEXT_NODE){
+      out+=node.textContent;
+    } else if(node.nodeType===Node.ELEMENT_NODE){
+      if(node.classList && node.classList.contains('math-node')){
+        const latex=node.dataset.latex||'';
+        out+='$'+latex+'$';
+      } else if(node.tagName==='BR'){
+        out+='\n';
+      } else if(node.tagName==='DIV' || node.tagName==='P'){
+        if(out && !out.endsWith('\n')) out+='\n';
+        for(const c of node.childNodes) walk(c);
+      } else {
+        for(const c of node.childNodes) walk(c);
+      }
+    }
+  }
+  for(const c of editor.childNodes) walk(c);
+  return out;
+}
+
+function deserializeToEditor(text, editor){
+  editor.innerHTML='';
+  const re=/\$([^$]+)\$/g;
+  let last=0, m;
+  while((m=re.exec(text))!==null){
+    if(m.index>last){
+      appendTextWithBreaks(editor, text.slice(last,m.index));
+    }
+    const span=createMathNode(m[1]);
+    editor.appendChild(span);
+    last=m.index+m[0].length;
+  }
+  if(last<text.length) appendTextWithBreaks(editor, text.slice(last));
+}
+
+function appendTextWithBreaks(parent, text){
+  const parts=text.split('\n');
+  parts.forEach((p,i)=>{
+    if(p) parent.appendChild(document.createTextNode(p));
+    if(i<parts.length-1) parent.appendChild(document.createElement('br'));
+  });
+}
+
+function createMathNode(latex){
+  const span=document.createElement('span');
+  span.className='math-node';
+  span.contentEditable='false';
+  span.dataset.latex=latex;
+  try{
+    if(window.katex) katex.render(latex, span, {throwOnError:false, displayMode:false, output:'html'});
+    else span.textContent=latex;
+  }catch(e){ span.textContent=latex }
+  return span;
+}
+
+/* ---- Teclado de matemática VISUAL ----
+   Cada tecla: {l: label (exibido no botão), text: inserir como texto, latex: inserir como fórmula renderizada}
+   - text: insere caractere literal no cursor (o usuário vê exatamente o símbolo)
+   - latex: insere um bloco renderizado (fração vertical, raiz com radical, matriz, etc.) */
 const KEYBOARD_CATS = [
   {
     name:"Básico", keys:[
-      {l:'+',i:'+'},{l:'−',i:'-'},{l:'×',i:'\\times '},{l:'÷',i:'\\div '},
-      {l:'=',i:'='},{l:'≠',i:'\\neq '},{l:'<',i:'<'},{l:'>',i:'>'},
-      {l:'≤',i:'\\leq '},{l:'≥',i:'\\geq '},{l:'≈',i:'\\approx '},{l:'±',i:'\\pm '},
-      {l:'∞',i:'\\infty '},{l:'( )',i:'()',cur:-1},{l:'[ ]',i:'[]',cur:-1},{l:'{ }',i:'\\{\\}',cur:-2},
-      {l:'|x|',i:'|x|'},{l:'·',i:'\\cdot '},{l:'%',i:'\\%'},{l:'°',i:'^{\\circ}'}
-    ]
-  },
-  {
-    name:"Potências e Raízes", keys:[
-      {l:'x²',i:'^{2}'},{l:'x³',i:'^{3}'},{l:'xⁿ',i:'^{n}'},{l:'x^{}',i:'^{ }',cur:-2},
-      {l:'√',i:'\\sqrt{ }',cur:-2},{l:'∛',i:'\\sqrt[3]{ }',cur:-2},{l:'ⁿ√',i:'\\sqrt[n]{ }',cur:-2},
-      {l:'eˣ',i:'e^{x}'},{l:'10ˣ',i:'10^{x}'},{l:'aˣ',i:'a^{x}'},
-      {l:'x₁',i:'_{1}'},{l:'xᵢ',i:'_{i}'},{l:'x_{}',i:'_{ }',cur:-2},
-      {l:'log',i:'\\log '},{l:'log_{a}',i:'\\log_{a}'},{l:'ln',i:'\\ln '},
-      {l:'exp',i:'\\exp '}
+      {l:'+',text:'+'},{l:'−',text:'−'},{l:'×',text:'×'},{l:'÷',text:'÷'},
+      {l:'=',text:'='},{l:'≠',text:'≠'},{l:'<',text:'<'},{l:'>',text:'>'},
+      {l:'≤',text:'≤'},{l:'≥',text:'≥'},{l:'≈',text:'≈'},{l:'±',text:'±'},
+      {l:'∞',text:'∞'},{l:'·',text:'·'},{l:'%',text:'%'},{l:'°',text:'°'},
+      {l:'( )',text:'()'},{l:'[ ]',text:'[]'},{l:'{ }',text:'{}'},{l:'|',text:'|'},
+      {l:'|x|',latex:'|x|'}
     ]
   },
   {
     name:"Frações", keys:[
-      {l:'a/b',i:'\\frac{a}{b}'},{l:'⊘',i:'\\frac{ }{ }',cur:-5},
-      {l:'½',i:'\\frac{1}{2}'},{l:'⅓',i:'\\frac{1}{3}'},{l:'¼',i:'\\frac{1}{4}'},
-      {l:'¾',i:'\\frac{3}{4}'},{l:'dx/dy',i:'\\frac{dx}{dy}'},
-      {l:'∂/∂x',i:'\\frac{\\partial}{\\partial x}'},{l:'d/dx',i:'\\frac{d}{dx}'}
+      {l:'½',latex:'\\frac{1}{2}'},{l:'⅓',latex:'\\frac{1}{3}'},{l:'¼',latex:'\\frac{1}{4}'},
+      {l:'¾',latex:'\\frac{3}{4}'},{l:'⅔',latex:'\\frac{2}{3}'},
+      {l:'a/b',latex:'\\frac{a}{b}'},{l:'x/y',latex:'\\frac{x}{y}'},
+      {l:'□/□',latex:'\\frac{\\square}{\\square}'},
+      {l:'(a+b)/c',latex:'\\frac{a+b}{c}'},{l:'dy/dx',latex:'\\frac{dy}{dx}'},
+      {l:'∂/∂x',latex:'\\frac{\\partial}{\\partial x}'}
+    ]
+  },
+  {
+    name:"Potências", keys:[
+      {l:'x²',latex:'x^{2}'},{l:'x³',latex:'x^{3}'},{l:'xⁿ',latex:'x^{n}'},
+      {l:'x^□',latex:'x^{\\square}'},{l:'a^b',latex:'a^{b}'},
+      {l:'eˣ',latex:'e^{x}'},{l:'10ˣ',latex:'10^{x}'},{l:'2ˣ',latex:'2^{x}'},
+      {l:'x₁',latex:'x_{1}'},{l:'x₂',latex:'x_{2}'},{l:'xᵢ',latex:'x_{i}'},
+      {l:'x_□',latex:'x_{\\square}'},{l:'x_n',latex:'x_{n}'},
+      {l:'x⁻¹',latex:'x^{-1}'},{l:'aᵀ',latex:'a^{T}'}
+    ]
+  },
+  {
+    name:"Raízes", keys:[
+      {l:'√x',latex:'\\sqrt{x}'},{l:'√□',latex:'\\sqrt{\\square}'},
+      {l:'√2',latex:'\\sqrt{2}'},{l:'√3',latex:'\\sqrt{3}'},
+      {l:'√(a+b)',latex:'\\sqrt{a+b}'},
+      {l:'∛x',latex:'\\sqrt[3]{x}'},{l:'∛□',latex:'\\sqrt[3]{\\square}'},
+      {l:'ⁿ√x',latex:'\\sqrt[n]{x}'},{l:'ⁿ√□',latex:'\\sqrt[n]{\\square}'},
+      {l:'log',latex:'\\log{x}'},{l:'log_a',latex:'\\log_{a}{x}'},
+      {l:'log₁₀',latex:'\\log_{10}{x}'},{l:'ln',latex:'\\ln{x}'},{l:'log₂',latex:'\\log_{2}{x}'}
     ]
   },
   {
     name:"Trigonometria", keys:[
-      {l:'sin',i:'\\sin '},{l:'cos',i:'\\cos '},{l:'tan',i:'\\tan '},
-      {l:'sec',i:'\\sec '},{l:'csc',i:'\\csc '},{l:'cot',i:'\\cot '},
-      {l:'arcsin',i:'\\arcsin '},{l:'arccos',i:'\\arccos '},{l:'arctan',i:'\\arctan '},
-      {l:'sin²',i:'\\sin^{2} '},{l:'cos²',i:'\\cos^{2} '},{l:'tan²',i:'\\tan^{2} '},
-      {l:'sinh',i:'\\sinh '},{l:'cosh',i:'\\cosh '},{l:'tanh',i:'\\tanh '},
-      {l:'π',i:'\\pi '},{l:'°',i:'^{\\circ}'},{l:'∡',i:'\\angle '}
+      {l:'sin',latex:'\\sin{x}'},{l:'cos',latex:'\\cos{x}'},{l:'tan',latex:'\\tan{x}'},
+      {l:'sec',latex:'\\sec{x}'},{l:'csc',latex:'\\csc{x}'},{l:'cot',latex:'\\cot{x}'},
+      {l:'sin²',latex:'\\sin^{2}{x}'},{l:'cos²',latex:'\\cos^{2}{x}'},{l:'tan²',latex:'\\tan^{2}{x}'},
+      {l:'arcsin',latex:'\\arcsin{x}'},{l:'arccos',latex:'\\arccos{x}'},{l:'arctan',latex:'\\arctan{x}'},
+      {l:'sinh',latex:'\\sinh{x}'},{l:'cosh',latex:'\\cosh{x}'},{l:'tanh',latex:'\\tanh{x}'},
+      {l:'π',text:'π'},{l:'30°',latex:'30^{\\circ}'},{l:'∡',text:'∡'}
     ]
   },
   {
-    name:"Letras Gregas", keys:[
-      {l:'α',i:'\\alpha '},{l:'β',i:'\\beta '},{l:'γ',i:'\\gamma '},{l:'δ',i:'\\delta '},
-      {l:'ε',i:'\\varepsilon '},{l:'ζ',i:'\\zeta '},{l:'η',i:'\\eta '},{l:'θ',i:'\\theta '},
-      {l:'ι',i:'\\iota '},{l:'κ',i:'\\kappa '},{l:'λ',i:'\\lambda '},{l:'μ',i:'\\mu '},
-      {l:'ν',i:'\\nu '},{l:'ξ',i:'\\xi '},{l:'π',i:'\\pi '},{l:'ρ',i:'\\rho '},
-      {l:'σ',i:'\\sigma '},{l:'τ',i:'\\tau '},{l:'φ',i:'\\varphi '},{l:'χ',i:'\\chi '},
-      {l:'ψ',i:'\\psi '},{l:'ω',i:'\\omega '},
-      {l:'Γ',i:'\\Gamma '},{l:'Δ',i:'\\Delta '},{l:'Θ',i:'\\Theta '},{l:'Λ',i:'\\Lambda '},
-      {l:'Σ',i:'\\Sigma '},{l:'Π',i:'\\Pi '},{l:'Φ',i:'\\Phi '},{l:'Ω',i:'\\Omega '}
+    name:"Gregas", keys:[
+      {l:'α',text:'α'},{l:'β',text:'β'},{l:'γ',text:'γ'},{l:'δ',text:'δ'},
+      {l:'ε',text:'ε'},{l:'ζ',text:'ζ'},{l:'η',text:'η'},{l:'θ',text:'θ'},
+      {l:'ι',text:'ι'},{l:'κ',text:'κ'},{l:'λ',text:'λ'},{l:'μ',text:'μ'},
+      {l:'ν',text:'ν'},{l:'ξ',text:'ξ'},{l:'π',text:'π'},{l:'ρ',text:'ρ'},
+      {l:'σ',text:'σ'},{l:'τ',text:'τ'},{l:'φ',text:'φ'},{l:'χ',text:'χ'},
+      {l:'ψ',text:'ψ'},{l:'ω',text:'ω'},
+      {l:'Γ',text:'Γ'},{l:'Δ',text:'Δ'},{l:'Θ',text:'Θ'},{l:'Λ',text:'Λ'},
+      {l:'Σ',text:'Σ'},{l:'Π',text:'Π'},{l:'Φ',text:'Φ'},{l:'Ω',text:'Ω'}
     ]
   },
   {
     name:"Cálculo", keys:[
-      {l:'∫',i:'\\int '},{l:'∫ₐᵇ',i:'\\int_{a}^{b} '},{l:'∬',i:'\\iint '},{l:'∮',i:'\\oint '},
-      {l:'∑',i:'\\sum_{i=1}^{n} '},{l:'∏',i:'\\prod_{i=1}^{n} '},
-      {l:'lim',i:'\\lim_{x \\to 0} '},{l:"f'",i:"f'"},{l:"f''",i:"f''"},
-      {l:'d/dx',i:'\\frac{d}{dx} '},{l:'∂/∂x',i:'\\frac{\\partial}{\\partial x} '},
-      {l:'∇',i:'\\nabla '},{l:'∆',i:'\\Delta '},{l:'→',i:'\\to '},{l:'⟶',i:'\\longrightarrow '},
-      {l:'↦',i:'\\mapsto '}
+      {l:'∫',latex:'\\int'},{l:'∫ₐᵇ',latex:'\\int_{a}^{b}'},
+      {l:'∫ f dx',latex:'\\int f(x)\\,dx'},
+      {l:'∑',latex:'\\sum_{i=1}^{n}'},{l:'∏',latex:'\\prod_{i=1}^{n}'},
+      {l:'lim',latex:'\\lim_{x \\to 0}'},{l:'lim x→∞',latex:'\\lim_{x \\to \\infty}'},
+      {l:"f'",latex:"f'(x)"},{l:"f''",latex:"f''(x)"},
+      {l:'d/dx',latex:'\\frac{d}{dx}'},{l:'∂/∂x',latex:'\\frac{\\partial}{\\partial x}'},
+      {l:'∇',text:'∇'},{l:'Δ',text:'Δ'},{l:'→',text:'→'},{l:'⇒',text:'⇒'},{l:'↦',text:'↦'}
     ]
   },
   {
-    name:"Conjuntos e Lógica", keys:[
-      {l:'∈',i:'\\in '},{l:'∉',i:'\\notin '},{l:'⊂',i:'\\subset '},{l:'⊆',i:'\\subseteq '},
-      {l:'⊃',i:'\\supset '},{l:'⊇',i:'\\supseteq '},{l:'∪',i:'\\cup '},{l:'∩',i:'\\cap '},
-      {l:'∅',i:'\\emptyset '},{l:'∀',i:'\\forall '},{l:'∃',i:'\\exists '},{l:'¬',i:'\\neg '},
-      {l:'∧',i:'\\wedge '},{l:'∨',i:'\\vee '},{l:'⇒',i:'\\Rightarrow '},{l:'⇔',i:'\\Leftrightarrow '},
-      {l:'ℕ',i:'\\mathbb{N} '},{l:'ℤ',i:'\\mathbb{Z} '},{l:'ℚ',i:'\\mathbb{Q} '},{l:'ℝ',i:'\\mathbb{R} '},
-      {l:'ℂ',i:'\\mathbb{C} '}
+    name:"Conjuntos", keys:[
+      {l:'∈',text:'∈'},{l:'∉',text:'∉'},{l:'⊂',text:'⊂'},{l:'⊆',text:'⊆'},
+      {l:'⊃',text:'⊃'},{l:'⊇',text:'⊇'},{l:'∪',text:'∪'},{l:'∩',text:'∩'},
+      {l:'∅',text:'∅'},{l:'∀',text:'∀'},{l:'∃',text:'∃'},{l:'¬',text:'¬'},
+      {l:'∧',text:'∧'},{l:'∨',text:'∨'},{l:'⇔',text:'⇔'},
+      {l:'ℕ',latex:'\\mathbb{N}'},{l:'ℤ',latex:'\\mathbb{Z}'},{l:'ℚ',latex:'\\mathbb{Q}'},
+      {l:'ℝ',latex:'\\mathbb{R}'},{l:'ℂ',latex:'\\mathbb{C}'}
     ]
   },
   {
-    name:"Matrizes e Sistemas", keys:[
-      {l:'[2x2]',i:'\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}'},
-      {l:'[3x3]',i:'\\begin{pmatrix} a & b & c \\\\ d & e & f \\\\ g & h & i \\end{pmatrix}'},
-      {l:'[2x3]',i:'\\begin{pmatrix} a & b & c \\\\ d & e & f \\end{pmatrix}'},
-      {l:'|det|',i:'\\begin{vmatrix} a & b \\\\ c & d \\end{vmatrix}'},
-      {l:'{sist.',i:'\\begin{cases} x + y = 1 \\\\ x - y = 0 \\end{cases}'},
-      {l:'vetor',i:'\\vec{v}'},{l:'AB',i:'\\overrightarrow{AB}'},
-      {l:'ᵀ',i:'^{T}'},{l:'⁻¹',i:'^{-1}'}
+    name:"Matrizes", keys:[
+      {l:'[2×2]',latex:'\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}'},
+      {l:'[3×3]',latex:'\\begin{pmatrix} a & b & c \\\\ d & e & f \\\\ g & h & i \\end{pmatrix}'},
+      {l:'[2×3]',latex:'\\begin{pmatrix} a & b & c \\\\ d & e & f \\end{pmatrix}'},
+      {l:'[3×2]',latex:'\\begin{pmatrix} a & b \\\\ c & d \\\\ e & f \\end{pmatrix}'},
+      {l:'det 2×2',latex:'\\begin{vmatrix} a & b \\\\ c & d \\end{vmatrix}'},
+      {l:'det 3×3',latex:'\\begin{vmatrix} a & b & c \\\\ d & e & f \\\\ g & h & i \\end{vmatrix}'},
+      {l:'sistema',latex:'\\begin{cases} x + y = 1 \\\\ x - y = 0 \\end{cases}'},
+      {l:'sist. 3',latex:'\\begin{cases} x + y + z = 0 \\\\ 2x - y = 1 \\\\ x + z = 2 \\end{cases}'},
+      {l:'v⃗',latex:'\\vec{v}'},{l:'AB⃗',latex:'\\overrightarrow{AB}'}
     ]
   },
   {
     name:"Física", keys:[
-      {l:'m/s',i:'\\text{ m/s}'},{l:'m/s²',i:'\\text{ m/s}^{2}'},{l:'km/h',i:'\\text{ km/h}'},
-      {l:'N',i:'\\text{ N}'},{l:'J',i:'\\text{ J}'},{l:'W',i:'\\text{ W}'},
-      {l:'Pa',i:'\\text{ Pa}'},{l:'kg',i:'\\text{ kg}'},{l:'g',i:'\\text{ g}'},
-      {l:'°C',i:'^{\\circ}\\text{C}'},{l:'K',i:'\\text{ K}'},{l:'Hz',i:'\\text{ Hz}'},
-      {l:'v₀',i:'v_{0}'},{l:'v_f',i:'v_{f}'},{l:'Δt',i:'\\Delta t'},{l:'Δx',i:'\\Delta x'},
-      {l:'g=9,8',i:'g = 9{,}8 \\text{ m/s}^{2}'},{l:'F=ma',i:'F = m \\cdot a'},
-      {l:'E=mc²',i:'E = m c^{2}'},{l:'Δv',i:'\\Delta v'}
-    ]
-  },
-  {
-    name:"Rápido", keys:[
-      {l:'$...$',i:'$$',cur:-1},{l:'$$...$$',i:'$$\n\n$$',cur:-4},
-      {l:'↵',i:'\n'},{l:'tab',i:'\\quad '},{l:'espaço',i:'\\;'},
-      {l:'resp.',i:'\n\n\\textbf{Resposta:} '},
-      {l:'a)',i:'\n\\textbf{a)} '},{l:'b)',i:'\n\\textbf{b)} '},{l:'c)',i:'\n\\textbf{c)} '},{l:'d)',i:'\n\\textbf{d)} '}
+      {l:'m/s',text:'m/s'},{l:'m/s²',latex:'\\text{m/s}^{2}'},{l:'km/h',text:'km/h'},
+      {l:'N',text:'N'},{l:'J',text:'J'},{l:'W',text:'W'},{l:'Pa',text:'Pa'},
+      {l:'kg',text:'kg'},{l:'g',text:'g'},{l:'°C',text:'°C'},{l:'K',text:'K'},{l:'Hz',text:'Hz'},
+      {l:'v₀',latex:'v_{0}'},{l:'vf',latex:'v_{f}'},{l:'Δt',text:'Δt'},{l:'Δx',text:'Δx'},
+      {l:'g=9,8 m/s²',latex:'g = 9{,}8\\,\\text{m/s}^{2}'},
+      {l:'F = m·a',latex:'F = m \\cdot a'},
+      {l:'E = m·c²',latex:'E = m c^{2}'},
+      {l:'v = v₀+at',latex:'v = v_{0} + a t'}
     ]
   }
 ];
@@ -616,62 +690,78 @@ function renderKbdGrid(){
   const grid=$('kbdGrid');
   const cat=KEYBOARD_CATS[activeCat];
   grid.innerHTML=cat.keys.map((k,i)=>{
-    const lbl=k.l;
-    const isLatex=lbl.includes('\\')||lbl.startsWith('$')||lbl.includes('∫')||lbl.includes('∑');
-    return `<button class="kbd-key${k.wide?' wide':''}" data-i="${i}" title="${escAttr(k.i)}">${esc(lbl)}</button>`;
+    let content;
+    if(k.latex){
+      // Renderizar KaTeX dentro do botão para mostrar visual
+      const tmp=document.createElement('span');
+      try{
+        if(window.katex) katex.render(k.latex, tmp, {throwOnError:false, displayMode:false, output:'html'});
+        else tmp.textContent=k.l;
+      }catch(e){ tmp.textContent=k.l }
+      content=tmp.innerHTML;
+    } else {
+      content=esc(k.l);
+    }
+    return `<button class="kbd-key" data-i="${i}" title="${escAttr(k.l)}">${content}</button>`;
   }).join('');
   grid.querySelectorAll('.kbd-key').forEach(btn=>{
-    btn.onclick=()=>insertAtCursor(cat.keys[parseInt(btn.dataset.i)]);
+    btn.onclick=()=>insertKey(cat.keys[parseInt(btn.dataset.i)]);
   });
 }
 
-function insertAtCursor(key){
-  const ta=$('manualText');
-  const start=ta.selectionStart;
-  const end=ta.selectionEnd;
-  const before=ta.value.slice(0,start);
-  const after=ta.value.slice(end);
-  const sel=ta.value.slice(start,end);
-  let insert=key.i;
-  if(sel && (insert.includes('{ }')||insert.includes('{}'))){
-    insert=insert.replace('{ }','{'+sel+'}').replace('{}','{'+sel+'}');
+/* Inserir no cursor do editor visual (contentEditable) */
+let lastEditorRange=null;
+$('manualEditor').addEventListener('mouseup',saveRange);
+$('manualEditor').addEventListener('keyup',saveRange);
+$('manualEditor').addEventListener('focus',saveRange);
+
+function saveRange(){
+  const sel=window.getSelection();
+  if(sel.rangeCount>0){
+    const r=sel.getRangeAt(0);
+    if($('manualEditor').contains(r.commonAncestorContainer)) lastEditorRange=r.cloneRange();
   }
-  ta.value=before+insert+after;
-  let newPos=start+insert.length;
-  if(key.cur && !sel) newPos=start+insert.length+key.cur;
-  ta.focus();
-  ta.setSelectionRange(newPos,newPos);
-  updatePreview();
 }
 
-const manualTa=$('manualText');
-manualTa.addEventListener('input',updatePreview);
-
-function updatePreview(){
-  const txt=manualTa.value;
-  const prev=$('mathPreview');
-  if(!txt.trim()){
-    prev.className='math-preview empty';
-    prev.textContent='A prévia aparecerá aqui.';
-    return;
+function insertKey(key){
+  const editor=$('manualEditor');
+  editor.focus();
+  const sel=window.getSelection();
+  let range;
+  if(lastEditorRange && editor.contains(lastEditorRange.commonAncestorContainer)){
+    range=lastEditorRange;
+  } else if(sel.rangeCount>0 && editor.contains(sel.getRangeAt(0).commonAncestorContainer)){
+    range=sel.getRangeAt(0);
+  } else {
+    // Cursor no fim
+    range=document.createRange();
+    range.selectNodeContents(editor);
+    range.collapse(false);
   }
-  prev.className='math-preview';
-  prev.innerHTML=renderMathText(txt);
-  try{
-    if(window.renderMathInElement){
-      renderMathInElement(prev,{
-        delimiters:[
-          {left:'$$',right:'$$',display:true},
-          {left:'$',right:'$',display:false}
-        ],
-        throwOnError:false
-      });
-    }
-  }catch(_){}
+  range.deleteContents();
+
+  let insertedNode;
+  if(key.text){
+    insertedNode=document.createTextNode(key.text);
+    range.insertNode(insertedNode);
+  } else if(key.latex){
+    insertedNode=createMathNode(key.latex);
+    range.insertNode(insertedNode);
+    // Adiciona um espaço após para permitir digitar em seguida
+    const spc=document.createTextNode('\u00A0');
+    insertedNode.after(spc);
+    insertedNode=spc;
+  }
+
+  // Mover cursor para depois do inserido
+  range.setStartAfter(insertedNode);
+  range.setEndAfter(insertedNode);
+  sel.removeAllRanges();
+  sel.addRange(range);
+  lastEditorRange=range.cloneRange();
 }
 
 function renderMathText(txt){
-  // Preserva quebras de linha
   return esc(txt).replace(/\n/g,'<br>');
 }
 
