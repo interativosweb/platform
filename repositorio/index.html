@@ -195,11 +195,17 @@ body{
 .ov-box .body img{max-width:100%;border:1px solid var(--border);border-radius:8px;background:#fff}
 .ov-box .body h4{font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.7px;margin-top:4px}
 .ov-box .body .com{font-size:.88rem;color:var(--text);line-height:1.5;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px}
-.ov-box footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
-.ov-box footer button{padding:10px 18px;border-radius:9px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
+.ov-box footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;align-items:center}
+.ov-box footer button{padding:10px 18px;border-radius:9px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
 .ov-box footer button:hover{border-color:var(--accent);color:var(--accent)}
 .ov-box footer button.primary{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(10,132,255,.3)}
 .ov-box footer button.primary:hover{background:#3a9bff;border-color:#3a9bff;color:#fff}
+.preview-footer{justify-content:space-between !important}
+.preview-footer .pf-left,.preview-footer .pf-right{display:flex;gap:10px;align-items:center}
+.preview-footer .pf-danger{color:var(--error);border-color:rgba(255,69,58,.3)}
+.preview-footer .pf-danger:hover{border-color:var(--error);color:var(--error);background:rgba(255,69,58,.08)}
+.preview-footer .pf-warning{background:var(--warning);color:#1a1205;border-color:var(--warning);font-weight:700}
+.preview-footer .pf-warning:hover{background:#ffb54a;border-color:#ffb54a;color:#1a1205}
 
 .print-box{width:440px;padding:24px}
 .print-box h3{font-family:'Lora',Georgia,serif;font-size:1.2rem;font-weight:700;margin-bottom:4px;letter-spacing:-.2px}
@@ -230,6 +236,40 @@ body{
 .visual-editor:empty:before{
   content:attr(data-placeholder);color:#aaa;font-style:italic;pointer-events:none;
 }
+.editor-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.editor-toolbar button{
+  display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;
+  background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:inherit;
+  font-size:.82rem;font-weight:600;cursor:pointer;transition:all .12s;
+}
+.editor-toolbar button:hover{border-color:var(--accent);color:var(--accent)}
+
+.visual-editor .img-node{
+  display:block;margin:8px auto;max-width:100%;border:2px solid transparent;border-radius:6px;
+  cursor:pointer;transition:border-color .1s,box-shadow .1s;user-select:none;
+}
+.visual-editor .img-node:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(10,132,255,.25)}
+.visual-editor .img-node.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(10,132,255,.3)}
+.visual-editor .img-node[data-align="left"]{margin-left:0;margin-right:auto;display:block}
+.visual-editor .img-node[data-align="right"]{margin-left:auto;margin-right:0;display:block}
+.visual-editor .img-node[data-align="center"]{margin-left:auto;margin-right:auto;display:block}
+
+.img-controls{
+  position:fixed;background:var(--bg2);border:1px solid var(--border);border-radius:10px;
+  padding:10px;display:none;gap:8px;align-items:center;z-index:3000;
+  box-shadow:0 10px 28px rgba(0,0,0,.5);
+}
+.img-controls.show{display:flex}
+.img-controls button{
+  padding:6px 10px;border-radius:6px;background:var(--bg3);border:1px solid var(--border);
+  color:var(--text);font-family:inherit;font-size:.78rem;font-weight:600;cursor:pointer;
+}
+.img-controls button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.img-controls button:hover:not(.active){border-color:var(--accent);color:var(--accent)}
+.img-controls .sep{width:1px;height:18px;background:var(--border)}
+.img-controls input[type=range]{width:120px}
+.img-controls label{font-size:.78rem;color:var(--text2);display:flex;align-items:center;gap:6px}
+.img-controls .val{min-width:42px;text-align:right;color:var(--text);font-weight:700}
 .visual-editor .math-node{
   display:inline-block;padding:8px 12px;margin:4px 5px;border-radius:6px;
   background:rgba(10,132,255,.06);border:1px solid rgba(10,132,255,.18);
@@ -394,6 +434,12 @@ math-field{
   color:var(--text);font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;
 }
 .add-bncc-row button:hover{border-color:var(--accent);color:var(--accent)}
+.fin-resp-img{display:flex;gap:8px;align-items:center;margin-top:4px;flex-wrap:wrap}
+.fin-resp-img button{
+  padding:8px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;
+}
+.fin-resp-img button:hover{border-color:var(--accent);color:var(--accent)}
 .star-rating{display:flex;gap:6px;margin-top:4px;user-select:none}
 .star-rating span{font-size:1.7rem;color:#3a3a3e;cursor:pointer;transition:color .12s,transform .12s;line-height:1}
 .star-rating span:hover{transform:scale(1.1)}
@@ -452,7 +498,7 @@ math-field{
   <div class="top-actions">
     <button id="btnLimpar" title="Remover todas as questões">Limpar</button>
     <button id="btnManual">+ Questão manual</button>
-    <button id="btnSalvarProva" title="Salvar prova atual">💾 Salvar</button>
+    <button id="btnSalvarProva" title="Salvar prova atual">Salvar</button>
     <button id="btnMinhasProvas" title="Abrir provas salvas">Minhas provas</button>
     <a href="admin.html" class="admin" id="linkAdmin" style="display:none" title="Área administrativa">⚙ Cadastrar</a>
     <a href="../Plataforma.html" title="Voltar à plataforma">← Plataforma</a>
@@ -479,13 +525,16 @@ math-field{
   <div class="ov-box" style="max-width:640px">
     <header><h3>Pré-visualização da questão</h3><button id="previewClose">✕</button></header>
     <div class="body" id="previewBody"></div>
-    <footer>
-      <button id="previewDelete" style="display:none;color:var(--error);border-color:rgba(255,69,58,.3)">Remover</button>
-      <button id="previewEdit" style="display:none">Editar</button>
-      <div style="flex:1"></div>
-      <button id="previewCancel">Cancelar</button>
-      <button id="previewFin" style="display:none;background:var(--warning);color:#1a1205;border:0;font-weight:700;padding:9px 16px;border-radius:9px;cursor:pointer;font-family:inherit">Finalizar cadastro</button>
-      <button class="primary" id="previewAdd">Adicionar à prova</button>
+    <footer class="preview-footer">
+      <div class="pf-left">
+        <button id="previewDelete" class="pf-danger" style="display:none">Remover</button>
+        <button id="previewEdit" style="display:none">Editar</button>
+      </div>
+      <div class="pf-right">
+        <button id="previewCancel">Cancelar</button>
+        <button id="previewFin" class="pf-warning" style="display:none">Finalizar cadastro</button>
+        <button class="primary" id="previewAdd">Adicionar à prova</button>
+      </div>
     </footer>
   </div>
 </div>
@@ -495,6 +544,13 @@ math-field{
     <header><h3 id="manualTitle">Nova questão manual</h3><button id="manualClose">✕</button></header>
     <div class="body">
       <div class="math-editor">
+        <div class="editor-toolbar" id="manualEditorToolbar">
+          <button type="button" id="btnInsertImg" title="Inserir imagem (até 800kb)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            Inserir imagem
+          </button>
+          <input type="file" id="inpInsertImg" accept="image/*" style="display:none">
+        </div>
         <div id="manualEditor" class="visual-editor" contenteditable="true" data-placeholder="Digite o enunciado aqui. Use os botões abaixo para inserir frações, raízes, potências e outros símbolos."></div>
         <div>
           <div class="kbd-tabs" id="kbdTabs"></div>
@@ -506,6 +562,20 @@ math-field{
       <button id="manualCancel">Cancelar</button>
       <button class="primary" id="manualAdd">Adicionar</button>
     </footer>
+  </div>
+
+  <div class="img-controls" id="imgControls">
+    <label>Alinhar:</label>
+    <button type="button" data-align="left" title="Esquerda">◧</button>
+    <button type="button" data-align="center" title="Centro">▣</button>
+    <button type="button" data-align="right" title="Direita">◨</button>
+    <div class="sep"></div>
+    <label>Largura:
+      <input type="range" id="imgWidthRange" min="10" max="100" step="5" value="60">
+      <span class="val" id="imgWidthVal">60%</span>
+    </label>
+    <div class="sep"></div>
+    <button type="button" id="imgRemove" style="color:var(--error);border-color:rgba(255,69,58,.3)">Remover</button>
   </div>
 </div>
 
@@ -538,8 +608,22 @@ math-field{
         <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
       </div>
 
+      <label>Resposta — texto (opcional)</label>
+      <textarea id="finInpResp" placeholder="Gabarito ou solução em texto..."></textarea>
+
+      <label>Resposta — imagem (opcional, até 800kb)</label>
+      <div class="fin-resp-img">
+        <button type="button" id="finBtnRespImg">Selecionar imagem</button>
+        <input type="file" id="finInpRespImg" accept="image/*" style="display:none">
+        <button type="button" id="finBtnRespImgRem" style="display:none;color:var(--error);border-color:rgba(255,69,58,.3)">Remover</button>
+        <span id="finRespImgInfo" style="font-size:.78rem;color:var(--text2)"></span>
+      </div>
+      <div id="finRespImgPreview" style="display:none;margin-top:6px">
+        <img id="finRespImgEl" style="max-width:100%;max-height:220px;border:1px solid var(--border);border-radius:8px;background:#fff">
+      </div>
+
       <label>Comentário (opcional)</label>
-      <textarea id="finInpCom" placeholder="Observações, gabarito, dicas..."></textarea>
+      <textarea id="finInpCom" placeholder="Observações, dicas..."></textarea>
     </div>
     <footer>
       <button id="finCancel">Cancelar</button>
@@ -587,7 +671,10 @@ math-field{
       <div class="mfield-wrap">
         <math-field id="mathEditField"></math-field>
       </div>
-      <div class="mfield-quick" id="mathEditQuick"></div>
+      <div>
+        <div class="kbd-tabs" id="mathEditTabs"></div>
+        <div class="kbd-grid" id="mathEditGrid"></div>
+      </div>
     </div>
     <footer>
       <button id="mathEditDelete" style="color:var(--error);border-color:rgba(255,69,58,.3)">Remover expressão</button>
@@ -725,7 +812,7 @@ function renderSidebar(){
 /* Renderiza texto com blocos $LATEX$ em um container, com KaTeX inline. */
 function renderTextWithMath(container, text, opts={}){
   container.innerHTML='';
-  const re=/\$([^$]+)\$/g;
+  const re=/\$([^$]+)\$|\[\[IMG:([A-Za-z0-9+/=]+)\]\]/g;
   let last=0, m;
   const frag=document.createDocumentFragment();
   const makeText=(s)=>{
@@ -737,13 +824,30 @@ function renderTextWithMath(container, text, opts={}){
   };
   while((m=re.exec(text))!==null){
     if(m.index>last) makeText(text.slice(last,m.index));
-    const s=document.createElement('span');
-    s.className='math-inline';
-    try{
-      if(window.katex) katex.render(sanitizeLatex(m[1]), s, {throwOnError:false, displayMode:false, output:'html'});
-      else s.textContent=m[1];
-    }catch(_){ s.textContent=m[1] }
-    frag.appendChild(s);
+    if(m[1]!==undefined){
+      const s=document.createElement('span');
+      s.className='math-inline';
+      try{
+        if(window.katex) katex.render(sanitizeLatex(m[1]), s, {throwOnError:false, displayMode:false, output:'html'});
+        else s.textContent=m[1];
+      }catch(_){ s.textContent=m[1] }
+      frag.appendChild(s);
+    } else if(m[2]!==undefined){
+      const data=parseImgMarker(m[2]);
+      if(data && data.src){
+        const im=document.createElement('img');
+        im.src=data.src;
+        im.style.width=(data.width||60)+'%';
+        im.style.display='block';
+        const a=data.align||'center';
+        if(a==='left'){ im.style.marginLeft='0'; im.style.marginRight='auto' }
+        else if(a==='right'){ im.style.marginLeft='auto'; im.style.marginRight='0' }
+        else { im.style.marginLeft='auto'; im.style.marginRight='auto' }
+        im.style.marginTop='8px'; im.style.marginBottom='8px';
+        im.style.maxWidth='100%'; im.style.borderRadius='4px';
+        frag.appendChild(im);
+      }
+    }
     last=m.index+m[0].length;
   }
   if(last<text.length) makeText(text.slice(last));
@@ -780,13 +884,25 @@ function renderUserRating(qid, q){
       if(!currentUser){ alert('Aguarde autenticação.'); return }
       const v=parseInt(s.dataset.v);
       const newVal=(myRating===v)?null:v;
+      // Mutação local otimista para feedback imediato
+      if(!q.avaliacoes) q.avaliacoes={};
+      if(newVal===null) delete q.avaliacoes[currentUser.uid];
+      else q.avaliacoes[currentUser.uid]=newVal;
+      renderUserRating(qid, q);
       try{
         if(newVal===null){
           await remove(ref(db,'questoes/'+qid+'/avaliacoes/'+currentUser.uid));
         } else {
           await set(ref(db,'questoes/'+qid+'/avaliacoes/'+currentUser.uid), newVal);
         }
-      }catch(e){ console.error(e); alert('Erro ao avaliar: '+e.message) }
+      }catch(e){
+        console.error(e);
+        alert('Erro ao avaliar: '+e.message);
+        // Reverte mutação otimista
+        if(myRating===0) delete q.avaliacoes[currentUser.uid];
+        else q.avaliacoes[currentUser.uid]=myRating;
+        renderUserRating(qid, q);
+      }
     };
   });
 }
@@ -814,6 +930,8 @@ function openPreview(qid){
       <div style="display:flex;gap:6px;flex-wrap:wrap">${temasArr.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
       <h4>Enunciado</h4>
       <div class="preview-manual-text" id="previewManualText"></div>
+      ${q.respostaTexto?`<h4>Resposta (não aparece na prova)</h4><div class="com">${esc(q.respostaTexto)}</div>`:''}
+      ${q.respostaImg?`<h4>Resposta — imagem (não aparece na prova)</h4><img src="${q.respostaImg}">`:''}
       ${q.bncc&&q.bncc.length?`<h4>BNCC</h4><div class="chips">${q.bncc.map(code=>{
         const desc=BNCC_CODES[code]||'Código personalizado — sem descrição oficial neste sistema.';
         return `<span class="chip bncc">${esc(code)}<span class="tip"><b>${esc(code)}</b>${esc(desc)}</span></span>`;
@@ -846,15 +964,18 @@ function openPreview(qid){
   const btnFin=$('previewFin');
   const btnDel=$('previewDelete');
   const btnAdd=$('previewAdd');
+  const isAdmin = currentUser && currentUser.email===ADMIN_EMAIL;
+  const isOwner = currentUser && q.criadoPor && q.criadoPor===currentUser.uid;
+  const canEdit = isAdmin || isOwner;
   if(isManual){
-    btnEdit.style.display='inline-flex';
-    btnDel.style.display='inline-flex';
-    btnFin.style.display = isPendente ? 'inline-flex' : 'none';
+    btnEdit.style.display = canEdit ? 'inline-flex' : 'none';
+    btnDel.style.display = canEdit ? 'inline-flex' : 'none';
+    btnFin.style.display = (isPendente && canEdit) ? 'inline-flex' : 'none';
     btnAdd.style.display='inline-flex';
   } else {
     btnEdit.style.display='none';
     btnFin.style.display='none';
-    btnDel.style.display='none';
+    btnDel.style.display = isAdmin ? 'inline-flex' : 'none';
     btnAdd.style.display='inline-flex';
   }
   $('previewOv').classList.add('show');
@@ -894,7 +1015,7 @@ $('manualCancel').onclick=()=>$('manualOv').classList.remove('show');
 function openManualPopup(bid, opts={}){
   editBid=bid;
   editingQid=opts.qid||null;
-  $('manualTitle').textContent=(bid||editingQid)?'Editar questão manualmente':'Nova questão manualmente';
+  $('manualTitle').textContent=(bid||editingQid)?'Editar questão':'Nova questão';
   const editor=$('manualEditor');
   editor.innerHTML='';
   if(editingQid){
@@ -927,7 +1048,12 @@ $('manualAdd').onclick=async ()=>{
       if(!t){
         await remove(ref(db,'questoes/'+editingQid));
       } else {
-        await update(ref(db,'questoes/'+editingQid),{textoManual:t, atualizadoEm:Date.now()});
+        // Ao editar, a questão volta para pendente (preservando demais dados)
+        await update(ref(db,'questoes/'+editingQid),{
+          textoManual:t,
+          status:'pendente',
+          atualizadoEm:Date.now()
+        });
       }
     }
     editingQid=null;
@@ -959,6 +1085,8 @@ $('manualAdd').onclick=async ()=>{
 /* ===== Finalizar cadastro de questão manual ===== */
 let finTemasSel=[], finBnccSel=[], finStars=0, finAcItems=[], finAcIdx=-1;
 
+let finRespImg=null; // dataUrl atual da imagem de resposta em edição
+
 function openFinalizarPopup(qid){
   finalizingQid=qid;
   const q=questoes.find(x=>x.id===qid);
@@ -968,11 +1096,32 @@ function openFinalizarPopup(qid){
   $('finInpTema').value='';
   $('finInpBnccAdd').value='';
   $('finInpCom').value = (q && q.comentario) || '';
+  $('finInpResp').value = (q && q.respostaTexto) || '';
+  finRespImg = (q && q.respostaImg) || null;
+  renderFinRespImg();
   renderFinTemaChips();
   renderFinBnccChips();
   renderFinStars();
   $('finalizarOv').classList.add('show');
   setTimeout(()=>{ try{ $('finInpTema').focus() }catch(_){} }, 80);
+}
+
+function renderFinRespImg(){
+  const prev=$('finRespImgPreview');
+  const el=$('finRespImgEl');
+  const rem=$('finBtnRespImgRem');
+  const info=$('finRespImgInfo');
+  if(finRespImg){
+    el.src=finRespImg;
+    prev.style.display='block';
+    rem.style.display='inline-flex';
+    const kb=Math.round(finRespImg.length*3/4/1024);
+    info.textContent='~'+kb+' kb';
+  } else {
+    prev.style.display='none';
+    rem.style.display='none';
+    info.textContent='';
+  }
 }
 function closeFinalizarPopup(){ $('finalizarOv').classList.remove('show'); finalizingQid=null }
 
@@ -1069,6 +1218,19 @@ function renderFinBnccChips(){
 $('finBtnSugerir').onclick=()=>finSugerirBncc(true);
 $('finBtnLimparBncc').onclick=()=>{ finBnccSel=[]; renderFinBnccChips() };
 
+$('finBtnRespImg').onclick=()=>$('finInpRespImg').click();
+$('finInpRespImg').onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  compressImageFile(f, 800*1024, (dataUrl,bytes)=>{
+    if(!dataUrl){ alert('Falha ao processar imagem.'); return }
+    if(bytes>800*1024){ alert('Imagem ainda acima de 800kb após compressão.'); return }
+    finRespImg=dataUrl;
+    renderFinRespImg();
+    e.target.value='';
+  });
+};
+$('finBtnRespImgRem').onclick=()=>{ finRespImg=null; renderFinRespImg() };
+
 (function setupFinBnccManual(){
   const inp=$('finInpBnccAdd');
   const add=()=>{
@@ -1093,6 +1255,7 @@ $('finSave').onclick=async ()=>{
   if(!finalizingQid){ closeFinalizarPopup(); return }
   if(!finTemasSel.length){ alert('Selecione ao menos um tema.'); return }
   const com=$('finInpCom').value.trim();
+  const respT=$('finInpResp').value.trim();
   try{
     $('finSave').disabled=true;
     await update(ref(db,'questoes/'+finalizingQid),{
@@ -1101,6 +1264,8 @@ $('finSave').onclick=async ()=>{
       bncc: finBnccSel,
       estrelas: finStars,
       comentario: com,
+      respostaTexto: respT || null,
+      respostaImg: finRespImg || null,
       status: null,
       atualizadoEm: Date.now()
     });
@@ -1109,7 +1274,7 @@ $('finSave').onclick=async ()=>{
   finally{ $('finSave').disabled=false }
 };
 
-/* Serialização: editor visual -> texto com $LATEX$ para armazenar/renderizar */
+/* Serialização: editor visual -> texto com $LATEX$ e [[IMG:base64json]] */
 function serializeEditor(editor){
   let out='';
   function walk(node){
@@ -1119,6 +1284,10 @@ function serializeEditor(editor){
       if(node.classList && node.classList.contains('math-node')){
         const latex=node.dataset.latex||'';
         out+='$'+latex+'$';
+      } else if(node.classList && node.classList.contains('img-node')){
+        const payload={src:node.src, align:node.dataset.align||'center', width:parseInt(node.dataset.width||'60')};
+        const b64=btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+        out+='[[IMG:'+b64+']]';
       } else if(node.tagName==='BR'){
         out+='\n';
       } else if(node.tagName==='DIV' || node.tagName==='P'){
@@ -1133,16 +1302,28 @@ function serializeEditor(editor){
   return out;
 }
 
+function parseImgMarker(s){
+  try{ return JSON.parse(decodeURIComponent(escape(atob(s)))) }
+  catch(_){ return null }
+}
+
 function deserializeToEditor(text, editor){
   editor.innerHTML='';
-  const re=/\$([^$]+)\$/g;
+  // Regex que captura $LATEX$ OU [[IMG:BASE64]]
+  const re=/\$([^$]+)\$|\[\[IMG:([A-Za-z0-9+/=]+)\]\]/g;
   let last=0, m;
   while((m=re.exec(text))!==null){
     if(m.index>last){
       appendTextWithBreaks(editor, text.slice(last,m.index));
     }
-    const span=createMathNode(m[1]);
-    editor.appendChild(span);
+    if(m[1]!==undefined){
+      editor.appendChild(createMathNode(m[1]));
+    } else if(m[2]!==undefined){
+      const data=parseImgMarker(m[2]);
+      if(data && data.src){
+        editor.appendChild(createImgNode(data.src, data.align||'center', data.width||60));
+      }
+    }
     last=m.index+m[0].length;
   }
   if(last<text.length) appendTextWithBreaks(editor, text.slice(last));
@@ -1227,39 +1408,61 @@ function openMathEdit(span){
   renderMathEditQuick();
 }
 
-/* Teclado rápido de básico dentro do popup de editar expressão.
-   Reutiliza categoria "Básico" + alguns itens de frações/raízes. */
+/* Teclado COMPLETO com abas dentro do popup Editar expressão.
+   Usa KEYBOARD_CATS (mesmo conjunto do editor manual). */
+let mathEditActiveCat = 0;
+
 function renderMathEditQuick(){
-  const grid=$('mathEditQuick');
-  if(!grid) return;
-  const quick=[
-    {l:'+',text:'+'},{l:'−',text:'-'},{l:'×',text:'\\times'},{l:'÷',text:'\\div'},
-    {l:'=',text:'='},{l:'≠',text:'\\neq'},{l:'<',text:'<'},{l:'>',text:'>'},
-    {l:'≤',text:'\\leq'},{l:'≥',text:'\\geq'},{l:'±',text:'\\pm'},
-    {l:'( )',text:'('},{l:'x²',text:'^{2}'},{l:'x^n',text:'^{}'},
-    {l:'√',text:'\\sqrt{}'},{l:'ⁿ√',text:'\\sqrt[]{}'},
-    {l:'a/b',text:'\\frac{}{}'},{l:'π',text:'\\pi'},{l:'∞',text:'\\infty'},{l:'°',text:'^{\\circ}'}
-  ];
-  grid.innerHTML=quick.map((k,i)=>{
-    let visual=esc(k.l);
-    // Itens que se beneficiam de preview KaTeX
-    if(['√','ⁿ√','a/b','π','∞','x²','±','≤','≥','≠','×','÷'].includes(k.l)){
+  const tabs=$('mathEditTabs');
+  const grid=$('mathEditGrid');
+  if(!tabs || !grid) return;
+  tabs.innerHTML=KEYBOARD_CATS.map((c,i)=>`<button class="kbd-tab${i===mathEditActiveCat?' active':''}" type="button" data-i="${i}">${esc(c.name)}</button>`).join('');
+  tabs.querySelectorAll('.kbd-tab').forEach(b=>b.onclick=()=>{ mathEditActiveCat=parseInt(b.dataset.i); renderMathEditQuick() });
+  const cat=KEYBOARD_CATS[mathEditActiveCat];
+  grid.innerHTML=cat.keys.map((k,i)=>{
+    let content;
+    if(k.latex){
       const tmp=document.createElement('span');
-      const latexPreview={'√':'\\sqrt{x}','ⁿ√':'\\sqrt[n]{x}','a/b':'\\frac{a}{b}','π':'\\pi','∞':'\\infty','x²':'x^{2}','±':'\\pm','≤':'\\leq','≥':'\\geq','≠':'\\neq','×':'\\times','÷':'\\div'}[k.l];
       try{
-        if(window.katex && latexPreview){ katex.render(latexPreview,tmp,{throwOnError:false,output:'html'}); visual=tmp.innerHTML }
-      }catch(_){}
+        if(window.katex) katex.render(sanitizeLatex(k.latex), tmp, {throwOnError:false, displayMode:false, output:'html'});
+        else tmp.textContent=k.l;
+      }catch(_){ tmp.textContent=k.l }
+      content=tmp.innerHTML;
+    } else {
+      content=esc(k.l);
     }
-    return `<button class="qk" data-i="${i}" type="button" title="${escAttr(k.l)}">${visual}</button>`;
+    return `<button class="kbd-key" type="button" data-i="${i}" title="${escAttr(k.t||k.l)}">${content}</button>`;
   }).join('');
-  grid.querySelectorAll('.qk').forEach(b=>{
+  grid.querySelectorAll('.kbd-key').forEach(b=>{
     b.onclick=()=>{
-      const k=quick[parseInt(b.dataset.i)];
+      const k=cat.keys[parseInt(b.dataset.i)];
       const mf=$('mathEditField');
-      try{ mf.focus(); mf.executeCommand(['insert', k.text, {focus:true, feedback:false}]) }
-      catch(_){ try{ mf.insert(k.text) }catch(__){} }
+      // Para inserir no math-field, usamos LaTeX. Texto unicode (π, α, ∈) não são LaTeX nativos,
+      // então convertemos para o equivalente quando aplicável.
+      const insertVal = k.latex || unicodeToLatex(k.text||'');
+      try{ mf.focus(); mf.executeCommand(['insert', insertVal, {focus:true, feedback:false}]) }
+      catch(_){ try{ mf.insert(insertVal) }catch(__){} }
     };
   });
+}
+
+const UNICODE_LATEX_MAP = {
+  'α':'\\alpha','β':'\\beta','γ':'\\gamma','δ':'\\delta','ε':'\\varepsilon','ζ':'\\zeta','η':'\\eta','θ':'\\theta',
+  'ι':'\\iota','κ':'\\kappa','λ':'\\lambda','μ':'\\mu','ν':'\\nu','ξ':'\\xi','π':'\\pi','ρ':'\\rho',
+  'σ':'\\sigma','τ':'\\tau','φ':'\\varphi','χ':'\\chi','ψ':'\\psi','ω':'\\omega',
+  'Γ':'\\Gamma','Δ':'\\Delta','Θ':'\\Theta','Λ':'\\Lambda','Σ':'\\Sigma','Π':'\\Pi','Φ':'\\Phi','Ω':'\\Omega',
+  '×':'\\times','÷':'\\div','≠':'\\neq','≤':'\\leq','≥':'\\geq','≈':'\\approx','±':'\\pm','∞':'\\infty',
+  '·':'\\cdot','°':'^{\\circ}',
+  '∈':'\\in','∉':'\\notin','⊂':'\\subset','⊆':'\\subseteq','⊃':'\\supset','⊇':'\\supseteq',
+  '∪':'\\cup','∩':'\\cap','∅':'\\emptyset','∀':'\\forall','∃':'\\exists','¬':'\\neg',
+  '∧':'\\wedge','∨':'\\vee','⇔':'\\Leftrightarrow','⇒':'\\Rightarrow','→':'\\to','↦':'\\mapsto',
+  '∇':'\\nabla'
+};
+function unicodeToLatex(s){
+  if(!s) return '';
+  let out='';
+  for(const ch of s){ out += (UNICODE_LATEX_MAP[ch] !== undefined) ? UNICODE_LATEX_MAP[ch] : ch }
+  return out;
 }
 
 function closeMathEdit(){
@@ -1512,6 +1715,126 @@ function renderMathText(txt){
 }
 
 buildKeyboard();
+
+/* ===== Inserir imagem no editor manual ===== */
+function compressImageFile(file, maxBytes, cb){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      let w=img.naturalWidth, h=img.naturalHeight;
+      const MAX=1400;
+      if(w>MAX){ h=Math.round(h*(MAX/w)); w=MAX }
+      if(h>MAX){ w=Math.round(w*(MAX/h)); h=MAX }
+      let q=0.9;
+      function attempt(){
+        const cv=document.createElement('canvas');
+        cv.width=w; cv.height=h;
+        cv.getContext('2d').drawImage(img,0,0,w,h);
+        const dataUrl=cv.toDataURL('image/jpeg',q);
+        const bytes=Math.ceil((dataUrl.length-'data:image/jpeg;base64,'.length)*3/4);
+        if(bytes<=maxBytes || q<=0.4){ cb(dataUrl, bytes) }
+        else { q-=0.1; attempt() }
+      }
+      attempt();
+    };
+    img.onerror=()=>cb(null,0);
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function createImgNode(src, align='center', widthPct=60){
+  const im=document.createElement('img');
+  im.className='img-node';
+  im.src=src;
+  im.dataset.align=align;
+  im.dataset.width=String(widthPct);
+  im.style.width=widthPct+'%';
+  im.setAttribute('contenteditable','false');
+  im.addEventListener('click',e=>{
+    e.preventDefault(); e.stopPropagation();
+    selectImgNode(im);
+  });
+  return im;
+}
+
+let selectedImg=null;
+function selectImgNode(im){
+  if(selectedImg) selectedImg.classList.remove('selected');
+  selectedImg=im;
+  im.classList.add('selected');
+  const ctl=$('imgControls');
+  const rect=im.getBoundingClientRect();
+  ctl.classList.add('show');
+  // Posiciona abaixo da imagem, dentro do viewport
+  const ctlW=ctl.offsetWidth||480;
+  let left=rect.left+rect.width/2-ctlW/2;
+  left=Math.max(12, Math.min(window.innerWidth-ctlW-12, left));
+  let top=rect.bottom+8;
+  if(top+60>window.innerHeight) top=rect.top-60;
+  ctl.style.left=left+'px';
+  ctl.style.top=top+'px';
+  // Sincroniza controles
+  ctl.querySelectorAll('button[data-align]').forEach(b=>{
+    b.classList.toggle('active', b.dataset.align===im.dataset.align);
+  });
+  $('imgWidthRange').value=im.dataset.width||'60';
+  $('imgWidthVal').textContent=(im.dataset.width||'60')+'%';
+}
+function hideImgControls(){
+  $('imgControls').classList.remove('show');
+  if(selectedImg){ selectedImg.classList.remove('selected'); selectedImg=null }
+}
+$('manualEditor').addEventListener('click',e=>{
+  if(e.target.classList && e.target.classList.contains('img-node')) return;
+  hideImgControls();
+});
+
+$('btnInsertImg').onclick=()=>$('inpInsertImg').click();
+$('inpInsertImg').onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  compressImageFile(f, 800*1024, (dataUrl,bytes)=>{
+    if(!dataUrl){ alert('Falha ao processar imagem.'); return }
+    if(bytes>800*1024){ alert('Imagem ainda acima de 800kb mesmo após compressão.'); return }
+    const editor=$('manualEditor');
+    editor.focus();
+    const sel=window.getSelection();
+    let range;
+    if(lastEditorRange && editor.contains(lastEditorRange.commonAncestorContainer)) range=lastEditorRange;
+    else if(sel.rangeCount>0 && editor.contains(sel.getRangeAt(0).commonAncestorContainer)) range=sel.getRangeAt(0);
+    else { range=document.createRange(); range.selectNodeContents(editor); range.collapse(false) }
+    range.deleteContents();
+    const node=createImgNode(dataUrl,'center',60);
+    range.insertNode(node);
+    const br=document.createElement('br');
+    node.after(br);
+    range.setStartAfter(br); range.setEndAfter(br);
+    sel.removeAllRanges(); sel.addRange(range);
+    lastEditorRange=range.cloneRange();
+    e.target.value='';
+  });
+};
+
+$('imgControls').querySelectorAll('button[data-align]').forEach(b=>{
+  b.onclick=()=>{
+    if(!selectedImg) return;
+    selectedImg.dataset.align=b.dataset.align;
+    $('imgControls').querySelectorAll('button[data-align]').forEach(x=>x.classList.toggle('active',x===b));
+  };
+});
+$('imgWidthRange').oninput=()=>{
+  if(!selectedImg) return;
+  const v=$('imgWidthRange').value;
+  selectedImg.dataset.width=v;
+  selectedImg.style.width=v+'%';
+  $('imgWidthVal').textContent=v+'%';
+};
+$('imgRemove').onclick=()=>{
+  if(!selectedImg) return;
+  selectedImg.remove();
+  hideImgControls();
+};
 
 /* ===== Limpar tudo ===== */
 $('btnLimpar').onclick=()=>{
