@@ -383,9 +383,121 @@ math-field{
 .auth-loader .sp{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 
+/* ===== Engrenagem de cabeçalho e canvas de edição ===== */
+.doc-header{position:relative}
+.hdr-gear{
+  position:absolute;top:-6px;right:-6px;width:30px;height:30px;border-radius:50%;
+  border:1px solid var(--border);background:#fff;color:#555;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+  box-shadow:0 1px 3px rgba(0,0,0,.08);transition:all .15s;z-index:5;
+}
+.hdr-gear:hover{color:var(--accent);border-color:var(--accent);transform:rotate(30deg)}
+
+.tpl-card{
+  border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--bg2);
+  display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:all .15s;font-family:inherit;
+}
+.tpl-card:hover{border-color:var(--accent);background:var(--bg3)}
+.tpl-card.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(10,132,255,.2)}
+.tpl-card .tpl-name{font-weight:600;font-size:.95rem;color:var(--text)}
+.tpl-card .tpl-thumb{height:80px;border:1px solid var(--border);border-radius:6px;background:#fff;overflow:hidden;position:relative}
+.tpl-card .tpl-actions{display:flex;gap:6px;flex-wrap:wrap}
+.tpl-card .tpl-actions button{padding:6px 10px;font-size:.78rem;border-radius:6px;font-family:inherit}
+
+.tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.tpl-new-card{
+  border:2px dashed var(--border);border-radius:12px;padding:20px;background:transparent;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);
+  font-weight:500;font-size:.9rem;min-height:140px;transition:all .15s;font-family:inherit;
+}
+.tpl-new-card:hover{border-color:var(--accent);color:var(--accent);background:rgba(10,132,255,.05)}
+.tpl-new-card:disabled{opacity:.5;cursor:not-allowed}
+
+/* Layout do editor visual */
+.hdr-editor-box{max-width:1200px !important;width:95vw;height:90vh;display:flex;flex-direction:column}
+.hdr-editor-body{
+  flex:1;display:grid;grid-template-columns:240px 1fr 260px;gap:0;overflow:hidden;min-height:0;
+}
+.hdr-ed-left,.hdr-ed-right{background:var(--bg2);border-right:1px solid var(--border);padding:14px;overflow-y:auto;font-family:inherit}
+.hdr-ed-right{border-right:none;border-left:1px solid var(--border)}
+.hdr-ed-center{padding:20px;overflow:auto;background:#e5e7eb;display:flex;flex-direction:column;align-items:center;gap:12px}
+
+.hdr-ed-section{margin-bottom:14px}
+.hdr-ed-section h4{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);margin:0 0 8px;font-weight:700}
+.hdr-ed-section .row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}
+.hdr-ed-section label{font-size:.72rem;color:var(--text2);display:block;margin-bottom:3px;font-family:inherit}
+.hdr-ed-section input[type=text],.hdr-ed-section input[type=number],.hdr-ed-section select,.hdr-ed-section textarea{
+  width:100%;padding:6px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+  color:var(--text);font-size:.82rem;font-family:inherit;outline:none;box-sizing:border-box;
+}
+.hdr-ed-section input[type=color]{width:100%;height:28px;border:1px solid var(--border);border-radius:6px;background:var(--bg3);cursor:pointer;padding:2px}
+.hdr-ed-section input[type=range]{width:100%}
+.hdr-ed-section .add-btn{
+  width:100%;padding:8px 10px;margin-bottom:6px;text-align:left;display:flex;align-items:center;gap:8px;
+  background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);
+  font-size:.84rem;cursor:pointer;transition:all .12s;font-family:inherit;
+}
+.hdr-ed-section .add-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(10,132,255,.08)}
+.hdr-ed-section .add-btn .ic{width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:.95rem}
+
+/* Canvas */
+.hdr-canvas-wrap{width:666px;max-width:100%}
+.hdr-canvas-label{font-size:.72rem;color:var(--text2);text-align:center;font-family:inherit}
+.hdr-canvas{
+  position:relative;width:666px;background:#fff;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1);
+  font-family:'Inter',sans-serif;color:#111;
+}
+.hdr-canvas.bg-linhas{background-image:linear-gradient(#cdd6e0 1px,transparent 1px);background-size:100% 24px;background-position:0 23px}
+.hdr-canvas.bg-quadriculado{background-image:linear-gradient(#cdd6e0 1px,transparent 1px),linear-gradient(90deg,#cdd6e0 1px,transparent 1px);background-size:20px 20px}
+.hdr-canvas.bg-pontilhado{background-image:radial-gradient(#a0aec0 1px,transparent 1px);background-size:16px 16px}
+
+.hdr-el{position:absolute;cursor:move;user-select:none;box-sizing:border-box}
+.hdr-el.selected{outline:2px dashed var(--accent);outline-offset:1px}
+.hdr-el .hdr-resize{
+  position:absolute;right:-5px;bottom:-5px;width:12px;height:12px;background:var(--accent);
+  border:2px solid #fff;border-radius:50%;cursor:nwse-resize;display:none;
+}
+.hdr-el.selected .hdr-resize{display:block}
+.hdr-el .hdr-resize.rx{bottom:50%;right:-5px;cursor:ew-resize;transform:translateY(50%)}
+.hdr-el-text{white-space:pre-wrap;line-height:1.3;padding:2px}
+.hdr-el-campo{display:flex;align-items:baseline;gap:6px;line-height:1.6;padding:2px}
+.hdr-el-campo .lbl{font-weight:600;white-space:nowrap}
+.hdr-el-campo .lin{flex:1;border-bottom:1px solid #333;min-width:20px;align-self:flex-end}
+.hdr-el-linha{height:0;border-top:1px solid #333}
+.hdr-el-caixa{border:1px solid #333;background:transparent}
+.hdr-el-logo{overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fafafa}
+.hdr-el-logo img{width:100%;height:100%;object-fit:contain;display:block}
+.hdr-el-logo.empty{border:1.5px dashed #bbb}
+.hdr-el-logo .logo-placeholder{font-size:.7rem;color:#888;text-align:center;padding:4px;font-family:inherit}
+.hdr-el-imagem{overflow:hidden}
+.hdr-el-imagem img{width:100%;height:100%;object-fit:contain;display:block}
+
+.hdr-ed-footer{
+  display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid var(--border);
+  background:var(--bg2);
+}
+.hdr-ed-footer .spacer{flex:1}
+
+.hdr-el-delbtn{
+  position:absolute;top:-10px;left:-10px;width:20px;height:20px;border-radius:50%;
+  background:#ff453a;color:#fff;border:1.5px solid #fff;cursor:pointer;font-size:.7rem;
+  display:none;align-items:center;justify-content:center;line-height:1;font-family:inherit;z-index:2;
+}
+.hdr-el.selected .hdr-el-delbtn{display:flex}
+
+/* Header renderizado na prova a partir de template */
+.doc-header.tpl-rendered{display:block !important;padding:0 !important;margin:0 0 20px 0;border:none !important;grid-template-columns:none !important;gap:0 !important}
+.doc-header.tpl-rendered .hdr-canvas{width:100% !important;box-shadow:none !important}
+.doc-header.tpl-rendered .hdr-el{cursor:default}
+.doc-header.tpl-rendered .hdr-el input::placeholder{color:#aaa}
+@media print{
+  .doc-header.tpl-rendered .hdr-el input{border-bottom-color:#111 !important}
+  .doc-header.tpl-rendered .hdr-el input::placeholder{color:transparent !important}
+}
+
 @media print{
   html,body{background:#fff !important;background-image:none !important;overflow:visible !important;height:auto !important}
-  .topbar,.sidebar,.ov,.block .ctrls,.block .handle,.page-num,.doc-toolbar{display:none !important}
+  .topbar,.sidebar,.ov,.block .ctrls,.block .handle,.page-num,.doc-toolbar,.hdr-gear{display:none !important}
   .workspace{display:block !important;height:auto !important}
   .docarea{padding:0 !important;gap:0 !important;display:block !important;overflow:visible !important}
   .page{
@@ -752,6 +864,121 @@ math-field{
       <div style="flex:1"></div>
       <button id="mathEditCancel">Cancelar</button>
       <button class="primary" id="mathEditSave">Salvar</button>
+    </footer>
+  </div>
+</div>
+
+<div class="ov" id="hdrListOv">
+  <div class="ov-box" style="max-width:820px">
+    <header>
+      <h3>Cabeçalhos do professor</h3>
+      <button id="hdrListClose">✕</button>
+    </header>
+    <div class="body">
+      <div style="font-size:.85rem;color:var(--text2);margin-bottom:14px">
+        Crie até 10 modelos de cabeçalho com posicionamento livre, fundo quadriculado, bordas, logo redimensionável e campos personalizados. Clique em um modelo para usá-lo nesta prova.
+      </div>
+      <div class="tpl-grid" id="hdrTplGrid"></div>
+    </div>
+    <footer>
+      <button id="hdrListCancel">Fechar</button>
+      <button id="hdrUsePadrao" class="primary">Usar cabeçalho padrão</button>
+    </footer>
+  </div>
+</div>
+
+<div class="ov" id="hdrEditorOv">
+  <div class="ov-box hdr-editor-box">
+    <header>
+      <h3 id="hdrEditorTitle">Editor de cabeçalho</h3>
+      <button id="hdrEditorClose">✕</button>
+    </header>
+    <div class="hdr-editor-body">
+      <div class="hdr-ed-left">
+        <div class="hdr-ed-section">
+          <h4>Nome do modelo</h4>
+          <input type="text" id="hdrName" placeholder="Ex: Matemática — 9º ano">
+        </div>
+        <div class="hdr-ed-section">
+          <h4>Adicionar elemento</h4>
+          <button class="add-btn" data-add="texto"><span class="ic">T</span> Texto livre</button>
+          <button class="add-btn" data-add="campo"><span class="ic">⎯</span> Campo com linha</button>
+          <button class="add-btn" data-add="logo"><span class="ic">◪</span> Logo da escola</button>
+          <button class="add-btn" data-add="imagem"><span class="ic">🖼</span> Imagem / cabeçalho pronto</button>
+          <button class="add-btn" data-add="linha"><span class="ic">━</span> Linha horizontal</button>
+          <button class="add-btn" data-add="caixa"><span class="ic">▢</span> Caixa / retângulo</button>
+        </div>
+        <div class="hdr-ed-section">
+          <h4>Importar cabeçalho completo</h4>
+          <button class="add-btn" id="hdrImportImg"><span class="ic">⬆</span> Importar imagem</button>
+          <input type="file" id="hdrImportInp" accept="image/*" style="display:none">
+          <div style="font-size:.7rem;color:var(--text2);line-height:1.4">
+            Envia uma imagem do cabeçalho já pronto (scan ou arte) para ser usada como fundo.
+          </div>
+        </div>
+      </div>
+
+      <div class="hdr-ed-center" id="hdrEdCenter">
+        <div class="hdr-canvas-label">Clique nos elementos para editar. Arraste para posicionar.</div>
+        <div class="hdr-canvas-wrap">
+          <div class="hdr-canvas" id="hdrCanvas"></div>
+        </div>
+      </div>
+
+      <div class="hdr-ed-right">
+        <div class="hdr-ed-section">
+          <h4>Altura do cabeçalho</h4>
+          <input type="range" id="hdrAltura" min="80" max="400" value="180">
+          <div style="font-size:.72rem;color:var(--text2);text-align:right" id="hdrAlturaVal">180 px</div>
+        </div>
+        <div class="hdr-ed-section">
+          <h4>Fundo</h4>
+          <select id="hdrFundo">
+            <option value="nenhum">Branco</option>
+            <option value="linhas">Linhas</option>
+            <option value="quadriculado">Quadriculado</option>
+            <option value="pontilhado">Pontilhado</option>
+          </select>
+        </div>
+        <div class="hdr-ed-section">
+          <h4>Borda externa</h4>
+          <div class="row">
+            <div>
+              <label>Espessura</label>
+              <input type="number" id="hdrBW" min="0" max="8" value="0">
+            </div>
+            <div>
+              <label>Arredondar</label>
+              <input type="number" id="hdrBR" min="0" max="40" value="0">
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Estilo</label>
+              <select id="hdrBS">
+                <option value="solid">Contínua</option>
+                <option value="dashed">Tracejada</option>
+                <option value="dotted">Pontilhada</option>
+                <option value="double">Dupla</option>
+              </select>
+            </div>
+            <div>
+              <label>Cor</label>
+              <input type="color" id="hdrBC" value="#111111">
+            </div>
+          </div>
+        </div>
+        <div class="hdr-ed-section" id="hdrPropSel" style="display:none">
+          <h4>Elemento selecionado</h4>
+          <div id="hdrPropBody"></div>
+        </div>
+      </div>
+    </div>
+    <footer class="hdr-ed-footer">
+      <button id="hdrEdDelete" class="pf-danger" style="display:none">Excluir modelo</button>
+      <div class="spacer"></div>
+      <button id="hdrEditorCancel">Cancelar</button>
+      <button class="primary" id="hdrEditorSave">Salvar</button>
     </footer>
   </div>
 </div>
@@ -2104,6 +2331,14 @@ function applyPageScale(){
 window.addEventListener('resize',()=>{clearTimeout(relayoutTimer); relayoutTimer=setTimeout(applyPageScale,100)});
 
 function renderHeader(){
+  const activeTpl = getActiveTemplate();
+  if(activeTpl){
+    const h=document.createElement('div');
+    h.className='doc-header tpl-rendered';
+    renderTemplateCanvas(h, activeTpl, {interactive:true, editable:false});
+    addHeaderGear(h);
+    return h;
+  }
   const h=document.createElement('div');
   const hasLogo = !!headerData.logo;
   h.className='doc-header'+(hasLogo?' has-logo-print':'');
@@ -2146,7 +2381,18 @@ function renderHeader(){
     headerData.logo='';
     renderDoc();
   });
+  addHeaderGear(h);
   return h;
+}
+
+function addHeaderGear(h){
+  const g=document.createElement('button');
+  g.type='button';
+  g.className='hdr-gear';
+  g.title='Gerenciar cabeçalhos';
+  g.innerHTML='⚙';
+  g.onclick=()=>openHeaderList();
+  h.appendChild(g);
 }
 
 function renderBlock(b){
@@ -2306,6 +2552,8 @@ $('salvarProvaOk').onclick=async ()=>{
   const dados={
     nome,
     headerData,
+    activeHeaderTplId: activeHeaderTplId || null,
+    headerCustom: headerCustom || {},
     blocks: blocks.map(b=>({bid:b.bid,type:b.type,qid:b.qid||null,texto:b.texto||null,altura:b.altura||null})),
     atualizadoEm: Date.now()
   };
@@ -2371,6 +2619,8 @@ function loadProva(id, p){
     altura:b.altura||null
   }));
   headerData = Object.assign({escola:'',professor:'',aluno:'',serie:'',data:'',logo:''}, p.headerData||{});
+  activeHeaderTplId = p.activeHeaderTplId || null;
+  headerCustom = p.headerCustom || {};
   currentProvaId = id;
   currentProvaNome = p.nome || '';
   $('provasListOv').classList.remove('show');
@@ -2473,6 +2723,627 @@ document.querySelectorAll('.ov').forEach(ov=>{
   });
   window.addEventListener('scroll',()=>{ tip.classList.remove('show'); currentTarget=null }, true);
 })();
+
+/* ===== Cabeçalhos personalizados (templates) ===== */
+const MAX_HEADERS = 10;
+const HDR_DEFAULT_ALTURA = 180;
+let headerTemplates = {};
+let activeHeaderTplId = null;
+let headerCustom = {};
+let editingHdrTpl = null;
+let editingHdrTplId = null;
+let selectedElId = null;
+let hdrLocalPref = null;
+
+try{ hdrLocalPref = JSON.parse(localStorage.getItem('activeHeaderTplId')||'null') }catch(_){}
+if(hdrLocalPref) activeHeaderTplId = hdrLocalPref;
+
+function persistActiveTpl(){
+  try{ localStorage.setItem('activeHeaderTplId', JSON.stringify(activeHeaderTplId||null)) }catch(_){}
+}
+
+function getActiveTemplate(){
+  if(!activeHeaderTplId) return null;
+  return headerTemplates[activeHeaderTplId] || null;
+}
+
+function subscribeHeaders(){
+  if(!currentUser) return;
+  onValue(ref(db,'cabecalhos/'+currentUser.uid), snap=>{
+    headerTemplates = snap.val() || {};
+    if(activeHeaderTplId && !headerTemplates[activeHeaderTplId]){
+      activeHeaderTplId = null;
+      persistActiveTpl();
+    }
+    renderDoc();
+    if($('hdrListOv').classList.contains('show')) renderHdrList();
+  });
+}
+
+function newTemplate(){
+  return {
+    nome:'Novo cabeçalho',
+    altura: HDR_DEFAULT_ALTURA,
+    fundo:'nenhum',
+    borda:{largura:0, cor:'#111111', radius:0, estilo:'solid'},
+    elementos:[
+      {id:gid(), tipo:'texto', x:220, y:14, w:360, conteudo:'NOME DA ESCOLA', tamanho:16, peso:700, align:'center', cor:'#111111'},
+      {id:gid(), tipo:'logo', x:16, y:14, w:80, h:80, radius:8, borda:0, bordaCor:'#111111', src:''},
+      {id:gid(), tipo:'campo', x:16, y:110, w:420, rotulo:'Aluno(a):', tamanho:13, chave:'aluno'},
+      {id:gid(), tipo:'campo', x:450, y:110, w:200, rotulo:'Data:', tamanho:13, chave:'data'},
+      {id:gid(), tipo:'campo', x:16, y:140, w:320, rotulo:'Professor(a):', tamanho:13, chave:'professor'},
+      {id:gid(), tipo:'campo', x:350, y:140, w:300, rotulo:'Série/Turma:', tamanho:13, chave:'turma'}
+    ]
+  };
+}
+
+function gid(){ return 'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,7) }
+
+function hdrThumbHTML(tpl){
+  const t = JSON.parse(JSON.stringify(tpl));
+  const scale = 0.3;
+  const w = 666*scale, h = (t.altura||HDR_DEFAULT_ALTURA)*scale;
+  const bg = t.fundo==='linhas'?'bg-linhas':t.fundo==='quadriculado'?'bg-quadriculado':t.fundo==='pontilhado'?'bg-pontilhado':'';
+  const borderCss = t.borda && t.borda.largura>0 ? `border:${t.borda.largura*scale}px ${t.borda.estilo||'solid'} ${t.borda.cor||'#111'};border-radius:${(t.borda.radius||0)*scale}px` : '';
+  let els = '';
+  (t.elementos||[]).forEach(el=>{
+    const style = `left:${el.x*scale}px;top:${el.y*scale}px;width:${(el.w||100)*scale}px;`+(el.h?`height:${el.h*scale}px;`:'');
+    if(el.tipo==='texto') els += `<div class="hdr-el" style="${style}font-size:${(el.tamanho||12)*scale}px;font-weight:${el.peso||400};text-align:${el.align||'left'};color:${el.cor||'#111'}">${esc(el.conteudo||'')}</div>`;
+    else if(el.tipo==='campo') els += `<div class="hdr-el" style="${style}font-size:${(el.tamanho||12)*scale}px"><span style="font-weight:600">${esc(el.rotulo||'')}</span><span style="border-bottom:1px solid #333;display:inline-block;width:${((el.w||100)-40)*scale}px;margin-left:2px"></span></div>`;
+    else if(el.tipo==='logo') els += `<div class="hdr-el" style="${style}height:${(el.h||60)*scale}px;border:${el.borda||0}px solid ${el.bordaCor||'#111'};border-radius:${(el.radius||0)*scale}px;background:#fafafa">${el.src?`<img src="${el.src}" style="width:100%;height:100%;object-fit:contain">`:''}</div>`;
+    else if(el.tipo==='imagem' && el.src) els += `<div class="hdr-el" style="${style}height:${(el.h||60)*scale}px"><img src="${el.src}" style="width:100%;height:100%;object-fit:contain"></div>`;
+    else if(el.tipo==='linha') els += `<div class="hdr-el" style="${style}border-top:${(el.espessura||1)}px ${el.estilo||'solid'} ${el.cor||'#333'}"></div>`;
+    else if(el.tipo==='caixa') els += `<div class="hdr-el" style="${style}height:${(el.h||40)*scale}px;border:${(el.borda||1)}px ${el.estilo||'solid'} ${el.bordaCor||'#333'};border-radius:${(el.radius||0)*scale}px;background:${el.fundo||'transparent'}"></div>`;
+  });
+  return `<div class="hdr-canvas ${bg}" style="width:${w}px;height:${h}px;transform-origin:top left;${borderCss};position:relative;box-shadow:none;overflow:hidden">${els}</div>`;
+}
+
+function openHeaderList(){
+  if(!currentUser){ alert('Aguarde autenticação.'); return }
+  renderHdrList();
+  $('hdrListOv').classList.add('show');
+}
+
+function renderHdrList(){
+  const grid=$('hdrTplGrid');
+  const ids = Object.keys(headerTemplates);
+  const count = ids.length;
+  let html = '';
+  ids.forEach(id=>{
+    const t = headerTemplates[id];
+    const active = id===activeHeaderTplId;
+    html += `
+      <div class="tpl-card${active?' active':''}" data-id="${id}">
+        <div class="tpl-thumb">${hdrThumbHTML(t)}</div>
+        <div class="tpl-name">${esc(t.nome||'Sem nome')}</div>
+        <div class="tpl-actions">
+          <button class="primary tpl-use" data-id="${id}">${active?'Em uso':'Usar'}</button>
+          <button class="tpl-edit" data-id="${id}">Editar</button>
+          <button class="tpl-dup" data-id="${id}">Duplicar</button>
+          <button class="tpl-del pf-danger" data-id="${id}">Excluir</button>
+        </div>
+      </div>`;
+  });
+  if(count < MAX_HEADERS){
+    html += `<button class="tpl-new-card" id="hdrNewCard">+ Criar novo cabeçalho<br><span style="font-size:.72rem;font-weight:400">${count}/${MAX_HEADERS}</span></button>`;
+  } else {
+    html += `<div class="tpl-new-card" style="cursor:not-allowed;opacity:.55">Limite de ${MAX_HEADERS} cabeçalhos atingido</div>`;
+  }
+  grid.innerHTML = html;
+  const newBtn=$('hdrNewCard'); if(newBtn) newBtn.onclick=()=>{ openHeaderEditor(null) };
+  grid.querySelectorAll('.tpl-use').forEach(b=>b.onclick=()=>{
+    activeHeaderTplId = b.dataset.id;
+    persistActiveTpl();
+    renderDoc();
+    renderHdrList();
+  });
+  grid.querySelectorAll('.tpl-edit').forEach(b=>b.onclick=()=>openHeaderEditor(b.dataset.id));
+  grid.querySelectorAll('.tpl-dup').forEach(b=>b.onclick=async ()=>{
+    if(Object.keys(headerTemplates).length>=MAX_HEADERS){ alert('Limite de '+MAX_HEADERS+' cabeçalhos atingido.'); return }
+    const src = headerTemplates[b.dataset.id];
+    const cp = JSON.parse(JSON.stringify(src));
+    cp.nome = (cp.nome||'Cabeçalho')+' (cópia)';
+    const r=push(ref(db,'cabecalhos/'+currentUser.uid));
+    await set(r, cp);
+  });
+  grid.querySelectorAll('.tpl-del').forEach(b=>b.onclick=async ()=>{
+    if(!confirm('Excluir este cabeçalho?')) return;
+    await remove(ref(db,'cabecalhos/'+currentUser.uid+'/'+b.dataset.id));
+    if(activeHeaderTplId===b.dataset.id){ activeHeaderTplId=null; persistActiveTpl(); renderDoc() }
+  });
+}
+
+$('hdrListClose').onclick=()=>$('hdrListOv').classList.remove('show');
+$('hdrListCancel').onclick=()=>$('hdrListOv').classList.remove('show');
+$('hdrUsePadrao').onclick=()=>{
+  activeHeaderTplId = null;
+  persistActiveTpl();
+  renderDoc();
+  $('hdrListOv').classList.remove('show');
+};
+
+/* ===== Editor visual do cabeçalho ===== */
+function openHeaderEditor(id){
+  editingHdrTplId = id;
+  editingHdrTpl = id ? JSON.parse(JSON.stringify(headerTemplates[id])) : newTemplate();
+  selectedElId = null;
+  $('hdrEditorTitle').textContent = id ? 'Editar cabeçalho' : 'Novo cabeçalho';
+  $('hdrEdDelete').style.display = id ? 'inline-flex' : 'none';
+  $('hdrName').value = editingHdrTpl.nome || '';
+  $('hdrAltura').value = editingHdrTpl.altura;
+  $('hdrAlturaVal').textContent = editingHdrTpl.altura+' px';
+  $('hdrFundo').value = editingHdrTpl.fundo || 'nenhum';
+  $('hdrBW').value = (editingHdrTpl.borda && editingHdrTpl.borda.largura) || 0;
+  $('hdrBR').value = (editingHdrTpl.borda && editingHdrTpl.borda.radius) || 0;
+  $('hdrBS').value = (editingHdrTpl.borda && editingHdrTpl.borda.estilo) || 'solid';
+  $('hdrBC').value = (editingHdrTpl.borda && editingHdrTpl.borda.cor) || '#111111';
+  $('hdrListOv').classList.remove('show');
+  $('hdrEditorOv').classList.add('show');
+  redrawEditor();
+}
+
+$('hdrEditorClose').onclick=()=>closeHeaderEditor();
+$('hdrEditorCancel').onclick=()=>closeHeaderEditor();
+function closeHeaderEditor(){
+  $('hdrEditorOv').classList.remove('show');
+  editingHdrTpl=null; editingHdrTplId=null; selectedElId=null;
+}
+
+$('hdrEdDelete').onclick=async ()=>{
+  if(!editingHdrTplId) return;
+  if(!confirm('Excluir este cabeçalho?')) return;
+  await remove(ref(db,'cabecalhos/'+currentUser.uid+'/'+editingHdrTplId));
+  if(activeHeaderTplId===editingHdrTplId){ activeHeaderTplId=null; persistActiveTpl(); renderDoc() }
+  closeHeaderEditor();
+};
+
+$('hdrEditorSave').onclick=async ()=>{
+  if(!editingHdrTpl || !currentUser) return;
+  editingHdrTpl.nome = $('hdrName').value.trim() || 'Sem nome';
+  try{
+    $('hdrEditorSave').disabled=true;
+    if(editingHdrTplId){
+      await set(ref(db,'cabecalhos/'+currentUser.uid+'/'+editingHdrTplId), editingHdrTpl);
+    } else {
+      if(Object.keys(headerTemplates).length>=MAX_HEADERS){ alert('Limite de '+MAX_HEADERS+' cabeçalhos atingido.'); return }
+      const r=push(ref(db,'cabecalhos/'+currentUser.uid));
+      await set(r, editingHdrTpl);
+      activeHeaderTplId = r.key;
+      persistActiveTpl();
+    }
+    renderDoc();
+    closeHeaderEditor();
+  }catch(e){ console.error(e); alert('Erro ao salvar: '+e.message) }
+  finally{ $('hdrEditorSave').disabled=false }
+};
+
+$('hdrAltura').addEventListener('input',e=>{
+  if(!editingHdrTpl) return;
+  editingHdrTpl.altura = parseInt(e.target.value)||HDR_DEFAULT_ALTURA;
+  $('hdrAlturaVal').textContent = editingHdrTpl.altura+' px';
+  redrawEditor();
+});
+$('hdrFundo').onchange=e=>{ if(!editingHdrTpl)return; editingHdrTpl.fundo=e.target.value; redrawEditor() };
+function updBorda(){
+  if(!editingHdrTpl)return;
+  editingHdrTpl.borda = {
+    largura: parseInt($('hdrBW').value)||0,
+    radius: parseInt($('hdrBR').value)||0,
+    estilo: $('hdrBS').value,
+    cor: $('hdrBC').value
+  };
+  redrawEditor();
+}
+['hdrBW','hdrBR','hdrBS','hdrBC'].forEach(id=>{ $(id).addEventListener('input',updBorda); $(id).addEventListener('change',updBorda) });
+
+$('hdrName').addEventListener('input',e=>{ if(editingHdrTpl) editingHdrTpl.nome=e.target.value });
+
+document.querySelectorAll('.hdr-ed-left .add-btn[data-add]').forEach(btn=>{
+  btn.onclick=()=>addElement(btn.dataset.add);
+});
+
+$('hdrImportImg').onclick=()=>$('hdrImportInp').click();
+$('hdrImportInp').onchange=e=>{
+  const f=e.target.files[0]; if(!f || !editingHdrTpl) return;
+  compressImageFile(f, 500*1024, (dataUrl)=>{
+    if(!dataUrl){ alert('Falha ao processar imagem.'); return }
+    const el={id:gid(), tipo:'imagem', x:0, y:0, w:666, h:editingHdrTpl.altura, src:dataUrl};
+    editingHdrTpl.elementos = editingHdrTpl.elementos || [];
+    editingHdrTpl.elementos.unshift(el);
+    selectedElId = el.id;
+    redrawEditor();
+  });
+  e.target.value='';
+};
+
+function addElement(tipo){
+  if(!editingHdrTpl) return;
+  const base={id:gid(), tipo, x:20, y:20};
+  if(tipo==='texto') Object.assign(base,{w:300, conteudo:'Texto', tamanho:14, peso:400, align:'left', cor:'#111111'});
+  else if(tipo==='campo') Object.assign(base,{w:300, rotulo:'Rótulo:', tamanho:13, chave:'custom_'+base.id});
+  else if(tipo==='logo') Object.assign(base,{w:80, h:80, radius:8, borda:0, bordaCor:'#111111', src:''});
+  else if(tipo==='imagem') Object.assign(base,{w:200, h:80, src:''});
+  else if(tipo==='linha') Object.assign(base,{w:400, espessura:1, cor:'#111111', estilo:'solid'});
+  else if(tipo==='caixa') Object.assign(base,{w:200, h:60, borda:1, bordaCor:'#111111', radius:0, estilo:'solid', fundo:'transparent'});
+  editingHdrTpl.elementos = editingHdrTpl.elementos || [];
+  editingHdrTpl.elementos.push(base);
+  selectedElId = base.id;
+  redrawEditor();
+}
+
+function redrawEditor(){
+  if(!editingHdrTpl) return;
+  const canvas = $('hdrCanvas');
+  renderTemplateCanvas(canvas, editingHdrTpl, {interactive:false, editable:true});
+  renderPropPanel();
+}
+
+function renderTemplateCanvas(container, tpl, opts){
+  container.innerHTML = '';
+  container.className = 'hdr-canvas';
+  if(tpl.fundo==='linhas') container.classList.add('bg-linhas');
+  else if(tpl.fundo==='quadriculado') container.classList.add('bg-quadriculado');
+  else if(tpl.fundo==='pontilhado') container.classList.add('bg-pontilhado');
+  container.style.height = (tpl.altura||HDR_DEFAULT_ALTURA)+'px';
+  const b = tpl.borda || {};
+  if(b.largura>0){
+    container.style.border = `${b.largura}px ${b.estilo||'solid'} ${b.cor||'#111'}`;
+    container.style.borderRadius = (b.radius||0)+'px';
+  } else {
+    container.style.border='none';
+    container.style.borderRadius = (b.radius||0)+'px';
+  }
+  (tpl.elementos||[]).forEach(el=>{
+    const node = buildElementNode(el, tpl, opts);
+    container.appendChild(node);
+  });
+  if(opts.editable){
+    container.onmousedown = (e)=>{
+      if(e.target===container){
+        selectedElId=null;
+        container.querySelectorAll('.hdr-el').forEach(n=>n.classList.remove('selected'));
+        renderPropPanel();
+      }
+    };
+  }
+}
+
+function buildElementNode(el, tpl, opts){
+  const node = document.createElement('div');
+  node.className = 'hdr-el';
+  node.dataset.id = el.id;
+  node.style.left = el.x+'px';
+  node.style.top = el.y+'px';
+  node.style.width = (el.w||100)+'px';
+  if(el.h) node.style.height = el.h+'px';
+  if(opts.editable && selectedElId===el.id) node.classList.add('selected');
+
+  if(el.tipo==='texto'){
+    const t=document.createElement('div');
+    t.className='hdr-el-text';
+    t.style.fontSize = (el.tamanho||14)+'px';
+    t.style.fontWeight = el.peso||400;
+    t.style.textAlign = el.align||'left';
+    t.style.color = el.cor||'#111';
+    t.textContent = el.conteudo||'';
+    node.appendChild(t);
+  } else if(el.tipo==='campo'){
+    const wrap=document.createElement('div');
+    wrap.className='hdr-el-campo';
+    wrap.style.fontSize = (el.tamanho||13)+'px';
+    const lbl=document.createElement('span');
+    lbl.className='lbl'; lbl.textContent=el.rotulo||'';
+    wrap.appendChild(lbl);
+    if(opts.interactive){
+      const inp=document.createElement('input');
+      inp.type='text';
+      inp.style.cssText='flex:1;border:none;border-bottom:1px solid #333;background:transparent;outline:none;font-family:inherit;font-size:inherit;padding:0 2px';
+      const k = el.chave || el.id;
+      if(['escola','professor','aluno','serie','data','turma'].includes(k)){
+        inp.value = headerData[k==='turma'?'serie':k] || '';
+        inp.oninput = ()=>{ headerData[k==='turma'?'serie':k] = inp.value };
+      } else {
+        inp.value = (headerCustom && headerCustom[k]) || '';
+        inp.oninput = ()=>{ if(!headerCustom) headerCustom={}; headerCustom[k] = inp.value };
+      }
+      wrap.appendChild(inp);
+    } else {
+      const lin=document.createElement('span');
+      lin.className='lin';
+      wrap.appendChild(lin);
+    }
+    node.appendChild(wrap);
+  } else if(el.tipo==='logo'){
+    const box=document.createElement('div');
+    box.className='hdr-el-logo'+(el.src?'':' empty');
+    box.style.border = (el.borda||0)>0 ? `${el.borda}px solid ${el.bordaCor||'#111'}` : '';
+    box.style.borderRadius = (el.radius||0)+'px';
+    box.style.width='100%'; box.style.height='100%';
+    if(el.src){
+      const img=document.createElement('img'); img.src=el.src; box.appendChild(img);
+    } else {
+      const p=document.createElement('div'); p.className='logo-placeholder'; p.textContent=opts.editable?'Clique p/ adicionar logo':'Logo';
+      box.appendChild(p);
+    }
+    node.appendChild(box);
+    if(opts.editable){
+      box.ondblclick=(e)=>{ e.stopPropagation(); pickLogoForElement(el) };
+    }
+  } else if(el.tipo==='imagem'){
+    const box=document.createElement('div');
+    box.className='hdr-el-imagem';
+    box.style.width='100%'; box.style.height='100%';
+    if(el.src){ const img=document.createElement('img'); img.src=el.src; box.appendChild(img) }
+    else { box.style.background='#fafafa';box.style.border='1.5px dashed #bbb';box.style.display='flex';box.style.alignItems='center';box.style.justifyContent='center';
+      const p=document.createElement('div'); p.className='logo-placeholder'; p.textContent='Sem imagem'; box.appendChild(p) }
+    node.appendChild(box);
+    if(opts.editable){ box.ondblclick=(e)=>{ e.stopPropagation(); pickImageForElement(el) } }
+  } else if(el.tipo==='linha'){
+    const l=document.createElement('div');
+    l.className='hdr-el-linha';
+    l.style.borderTop = `${el.espessura||1}px ${el.estilo||'solid'} ${el.cor||'#111'}`;
+    l.style.width='100%';
+    node.appendChild(l);
+  } else if(el.tipo==='caixa'){
+    const c=document.createElement('div');
+    c.className='hdr-el-caixa';
+    c.style.width='100%'; c.style.height='100%';
+    c.style.border = `${el.borda||1}px ${el.estilo||'solid'} ${el.bordaCor||'#111'}`;
+    c.style.borderRadius = (el.radius||0)+'px';
+    c.style.background = el.fundo||'transparent';
+    node.appendChild(c);
+  }
+
+  if(opts.editable){
+    const del=document.createElement('button');
+    del.type='button'; del.className='hdr-el-delbtn'; del.textContent='✕'; del.title='Remover elemento';
+    del.onclick=(e)=>{ e.stopPropagation(); removeElement(el.id) };
+    node.appendChild(del);
+
+    const rz=document.createElement('div'); rz.className='hdr-resize'; node.appendChild(rz);
+    if(['logo','imagem','caixa'].includes(el.tipo)){
+      const rx=document.createElement('div'); rx.className='hdr-resize rx'; node.appendChild(rx);
+    }
+
+    setupDrag(node, el);
+    setupResize(rz, el, true);
+    const rxEl = node.querySelector('.hdr-resize.rx');
+    if(rxEl) setupResize(rxEl, el, false);
+
+    node.addEventListener('mousedown',e=>{
+      if(e.target.classList.contains('hdr-el-delbtn')||e.target.classList.contains('hdr-resize')) return;
+      if(selectedElId!==el.id){
+        selectedElId = el.id;
+        document.querySelectorAll('#hdrCanvas .hdr-el').forEach(n=>n.classList.remove('selected'));
+        node.classList.add('selected');
+        renderPropPanel();
+      }
+    });
+  }
+  return node;
+}
+
+function removeElement(id){
+  if(!editingHdrTpl) return;
+  editingHdrTpl.elementos = (editingHdrTpl.elementos||[]).filter(e=>e.id!==id);
+  if(selectedElId===id) selectedElId=null;
+  redrawEditor();
+}
+
+function updateElementNode(el){
+  const node = $('hdrCanvas').querySelector(`.hdr-el[data-id="${el.id}"]`);
+  if(!node) return;
+  node.style.left = (el.x||0)+'px';
+  node.style.top = (el.y||0)+'px';
+  node.style.width = (el.w||100)+'px';
+  if(el.h!==undefined) node.style.height = el.h+'px';
+  if(el.tipo==='texto'){
+    const t = node.querySelector('.hdr-el-text');
+    if(t){
+      t.style.fontSize = (el.tamanho||14)+'px';
+      t.style.fontWeight = el.peso||400;
+      t.style.textAlign = el.align||'left';
+      t.style.color = el.cor||'#111';
+      t.textContent = el.conteudo||'';
+    }
+  } else if(el.tipo==='campo'){
+    const wrap = node.querySelector('.hdr-el-campo');
+    const lbl = wrap && wrap.querySelector('.lbl');
+    if(wrap) wrap.style.fontSize = (el.tamanho||13)+'px';
+    if(lbl) lbl.textContent = el.rotulo||'';
+  } else if(el.tipo==='logo'){
+    const box = node.querySelector('.hdr-el-logo');
+    if(box){
+      box.style.border = (el.borda||0)>0 ? `${el.borda}px solid ${el.bordaCor||'#111'}` : '';
+      box.style.borderRadius = (el.radius||0)+'px';
+    }
+  } else if(el.tipo==='linha'){
+    const l = node.querySelector('.hdr-el-linha');
+    if(l) l.style.borderTop = `${el.espessura||1}px ${el.estilo||'solid'} ${el.cor||'#111'}`;
+  } else if(el.tipo==='caixa'){
+    const c = node.querySelector('.hdr-el-caixa');
+    if(c){
+      c.style.border = `${el.borda||1}px ${el.estilo||'solid'} ${el.bordaCor||'#111'}`;
+      c.style.borderRadius = (el.radius||0)+'px';
+      c.style.background = el.fundo||'transparent';
+    }
+  }
+}
+
+function setupDrag(node, el){
+  node.addEventListener('mousedown', start);
+  function start(e){
+    if(e.target.classList.contains('hdr-resize')||e.target.classList.contains('hdr-el-delbtn')) return;
+    if(e.target.tagName==='INPUT') return;
+    e.preventDefault();
+    const canvas = $('hdrCanvas');
+    const cr = canvas.getBoundingClientRect();
+    const sx = e.clientX, sy = e.clientY;
+    const ox = el.x, oy = el.y;
+    function mv(ev){
+      const scale = cr.width/666;
+      let nx = ox + (ev.clientX-sx)/scale;
+      let ny = oy + (ev.clientY-sy)/scale;
+      nx = Math.max(0, Math.min(666-(el.w||20), nx));
+      ny = Math.max(0, Math.min((editingHdrTpl.altura||HDR_DEFAULT_ALTURA)-(el.h||10), ny));
+      el.x = Math.round(nx); el.y = Math.round(ny);
+      node.style.left=el.x+'px'; node.style.top=el.y+'px';
+    }
+    function up(){ document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); renderPropPanel() }
+    document.addEventListener('mousemove',mv);
+    document.addEventListener('mouseup',up);
+  }
+}
+
+function setupResize(handle, el, alsoHeight){
+  handle.addEventListener('mousedown', e=>{
+    e.preventDefault(); e.stopPropagation();
+    const canvas = $('hdrCanvas');
+    const node = canvas.querySelector(`.hdr-el[data-id="${el.id}"]`);
+    const cr = canvas.getBoundingClientRect();
+    const sx=e.clientX, sy=e.clientY;
+    const ow=el.w||100, oh=el.h||40;
+    function mv(ev){
+      const scale = cr.width/666;
+      let nw = ow + (ev.clientX-sx)/scale;
+      nw = Math.max(20, Math.min(666-el.x, nw));
+      el.w = Math.round(nw);
+      if(node) node.style.width = el.w+'px';
+      if(alsoHeight){
+        let nh = oh + (ev.clientY-sy)/scale;
+        nh = Math.max(10, Math.min((editingHdrTpl.altura||HDR_DEFAULT_ALTURA)-el.y, nh));
+        el.h = Math.round(nh);
+        if(node) node.style.height = el.h+'px';
+      }
+    }
+    function up(){
+      document.removeEventListener('mousemove',mv);
+      document.removeEventListener('mouseup',up);
+      renderPropPanel();
+    }
+    document.addEventListener('mousemove',mv);
+    document.addEventListener('mouseup',up);
+  });
+}
+
+function pickLogoForElement(el){
+  const inp=document.createElement('input');
+  inp.type='file'; inp.accept='image/*';
+  inp.onchange=ev=>{
+    const f=ev.target.files[0]; if(!f) return;
+    compressImageFile(f, 400*1024, (dataUrl)=>{
+      if(!dataUrl){ alert('Falha ao processar imagem.'); return }
+      el.src=dataUrl;
+      redrawEditor();
+    });
+  };
+  inp.click();
+}
+function pickImageForElement(el){ pickLogoForElement(el) }
+
+function renderPropPanel(){
+  const sel = $('hdrPropSel'), body=$('hdrPropBody');
+  if(!selectedElId || !editingHdrTpl){ sel.style.display='none'; return }
+  const el = (editingHdrTpl.elementos||[]).find(e=>e.id===selectedElId);
+  if(!el){ sel.style.display='none'; return }
+  sel.style.display='block';
+  const typeName = {texto:'Texto',campo:'Campo',logo:'Logo',imagem:'Imagem',linha:'Linha',caixa:'Caixa'}[el.tipo]||el.tipo;
+  let html = `<div style="font-size:.78rem;font-weight:600;color:var(--text);margin-bottom:8px">${typeName}</div>`;
+  html += `<div class="row">
+      <div><label>X</label><input type="number" data-prop="x" value="${el.x||0}"></div>
+      <div><label>Y</label><input type="number" data-prop="y" value="${el.y||0}"></div>
+    </div>
+    <div class="row">
+      <div><label>Largura</label><input type="number" data-prop="w" value="${el.w||100}"></div>
+      ${el.h!==undefined?`<div><label>Altura</label><input type="number" data-prop="h" value="${el.h||40}"></div>`:'<div></div>'}
+    </div>`;
+  if(el.tipo==='texto'){
+    html += `
+      <label>Conteúdo</label>
+      <textarea data-prop="conteudo" rows="2">${esc(el.conteudo||'')}</textarea>
+      <div class="row">
+        <div><label>Tamanho</label><input type="number" data-prop="tamanho" value="${el.tamanho||14}"></div>
+        <div><label>Peso</label><select data-prop="peso"><option value="400" ${el.peso===400?'selected':''}>Normal</option><option value="600" ${el.peso===600?'selected':''}>Semi-bold</option><option value="700" ${el.peso===700?'selected':''}>Negrito</option></select></div>
+      </div>
+      <div class="row">
+        <div><label>Alinhar</label><select data-prop="align"><option value="left" ${el.align==='left'?'selected':''}>Esq</option><option value="center" ${el.align==='center'?'selected':''}>Centro</option><option value="right" ${el.align==='right'?'selected':''}>Dir</option></select></div>
+        <div><label>Cor</label><input type="color" data-prop="cor" value="${el.cor||'#111111'}"></div>
+      </div>`;
+  } else if(el.tipo==='campo'){
+    html += `
+      <label>Rótulo</label>
+      <input type="text" data-prop="rotulo" value="${escAttr(el.rotulo||'')}">
+      <label>Chave (onde o valor é salvo)</label>
+      <select data-prop="chave">
+        <option value="aluno" ${el.chave==='aluno'?'selected':''}>Aluno(a)</option>
+        <option value="professor" ${el.chave==='professor'?'selected':''}>Professor(a)</option>
+        <option value="escola" ${el.chave==='escola'?'selected':''}>Escola</option>
+        <option value="turma" ${el.chave==='turma'?'selected':''}>Série/Turma</option>
+        <option value="data" ${el.chave==='data'?'selected':''}>Data</option>
+        <option value="${el.chave||'custom_'+el.id}" ${el.chave && !['aluno','professor','escola','turma','data'].includes(el.chave)?'selected':''}>Personalizado (${esc(el.chave||'custom')})</option>
+      </select>
+      <label>Tamanho</label>
+      <input type="number" data-prop="tamanho" value="${el.tamanho||13}">`;
+  } else if(el.tipo==='logo' || el.tipo==='imagem'){
+    html += `
+      <button class="add-btn" id="hdrElPickImg" style="margin-top:6px">${el.src?'Trocar imagem':'Adicionar imagem'}</button>
+      ${el.src?'<button class="add-btn" id="hdrElRemImg" style="color:#ff453a">Remover imagem</button>':''}`;
+    if(el.tipo==='logo'){
+      html += `
+        <div class="row">
+          <div><label>Borda</label><input type="number" data-prop="borda" min="0" max="8" value="${el.borda||0}"></div>
+          <div><label>Arredondar</label><input type="number" data-prop="radius" min="0" max="100" value="${el.radius||0}"></div>
+        </div>
+        <label>Cor da borda</label>
+        <input type="color" data-prop="bordaCor" value="${el.bordaCor||'#111111'}">`;
+    }
+  } else if(el.tipo==='linha'){
+    html += `
+      <div class="row">
+        <div><label>Espessura</label><input type="number" data-prop="espessura" min="1" max="10" value="${el.espessura||1}"></div>
+        <div><label>Estilo</label><select data-prop="estilo"><option value="solid" ${el.estilo==='solid'?'selected':''}>Contínua</option><option value="dashed" ${el.estilo==='dashed'?'selected':''}>Tracejada</option><option value="dotted" ${el.estilo==='dotted'?'selected':''}>Pontilhada</option></select></div>
+      </div>
+      <label>Cor</label>
+      <input type="color" data-prop="cor" value="${el.cor||'#111111'}">`;
+  } else if(el.tipo==='caixa'){
+    html += `
+      <div class="row">
+        <div><label>Borda</label><input type="number" data-prop="borda" min="0" max="8" value="${el.borda||1}"></div>
+        <div><label>Arredondar</label><input type="number" data-prop="radius" min="0" max="40" value="${el.radius||0}"></div>
+      </div>
+      <div class="row">
+        <div><label>Estilo</label><select data-prop="estilo"><option value="solid" ${el.estilo==='solid'?'selected':''}>Contínua</option><option value="dashed" ${el.estilo==='dashed'?'selected':''}>Tracejada</option><option value="dotted" ${el.estilo==='dotted'?'selected':''}>Pontilhada</option></select></div>
+        <div><label>Cor da borda</label><input type="color" data-prop="bordaCor" value="${el.bordaCor||'#111111'}"></div>
+      </div>
+      <label>Cor de fundo</label>
+      <input type="color" data-prop="fundo" value="${el.fundo==='transparent'?'#ffffff':(el.fundo||'#ffffff')}">
+      <button class="add-btn" id="hdrElNoFill" style="margin-top:6px">Sem preenchimento</button>`;
+  }
+  html += `<button class="add-btn pf-danger" id="hdrElRemove" style="margin-top:10px;color:#ff453a">Remover elemento</button>`;
+  body.innerHTML = html;
+
+  body.querySelectorAll('[data-prop]').forEach(inp=>{
+    const prop = inp.dataset.prop;
+    const handler = ()=>{
+      let v = inp.value;
+      if(['x','y','w','h','tamanho','borda','radius','espessura','peso'].includes(prop)){
+        v = parseInt(v)||0;
+      }
+      el[prop] = v;
+      updateElementNode(el);
+    };
+    inp.addEventListener('input',handler);
+    inp.addEventListener('change',handler);
+  });
+  const pick=$('hdrElPickImg'); if(pick) pick.onclick=()=>pickLogoForElement(el);
+  const rem=$('hdrElRemImg'); if(rem) rem.onclick=()=>{ el.src=''; redrawEditor() };
+  const noFill=$('hdrElNoFill'); if(noFill) noFill.onclick=()=>{ el.fundo='transparent'; redrawEditor() };
+  const remEl=$('hdrElRemove'); if(remEl) remEl.onclick=()=>removeElement(el.id);
+}
+
+const _waitAuth = setInterval(()=>{
+  if(currentUser){ clearInterval(_waitAuth); subscribeHeaders() }
+},300);
 
 renderDoc();
 </script>
