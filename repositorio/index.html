@@ -172,9 +172,9 @@ body{
   margin-bottom:16px;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;color:#333;outline:none;background:transparent;font-weight:500;
 }
 .doc-header .row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px}
-.doc-header .field{display:flex;flex-direction:column}
+.doc-header .field{display:flex;flex-direction:column;min-width:0}
 .doc-header .field label{font-size:.66rem;text-transform:uppercase;color:#666;font-weight:700;letter-spacing:.6px;margin-bottom:3px;font-family:'Inter',sans-serif}
-.doc-header .field input{border:none;border-bottom:1px solid #888;padding:3px 0;font-size:.9rem;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;color:#111;outline:none;background:transparent}
+.doc-header .field input{width:100%;min-width:0;box-sizing:border-box;border:none;border-bottom:1px solid #888;padding:3px 0;font-size:.9rem;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;color:#111;outline:none;background:transparent}
 
 .blocks-area{flex:1;display:flex;flex-direction:column;gap:10px;min-height:0}
 .block{
@@ -385,7 +385,7 @@ math-field{
 
 @media print{
   html,body{background:#fff !important;background-image:none !important;overflow:visible !important;height:auto !important}
-  .topbar,.sidebar,.ov,.block .ctrls,.block .handle,.page-num{display:none !important}
+  .topbar,.sidebar,.ov,.block .ctrls,.block .handle,.page-num,.doc-toolbar{display:none !important}
   .workspace{display:block !important;height:auto !important}
   .docarea{padding:0 !important;gap:0 !important;display:block !important;overflow:visible !important}
   .page{
@@ -395,6 +395,12 @@ math-field{
   }
   .page:last-child{page-break-after:auto}
   .block{border:none !important;break-inside:avoid;resize:none !important;padding:4px 0 !important}
+  .doc-header input::placeholder{color:transparent !important}
+  .doc-header input{border-bottom-color:#111 !important}
+  .doc-header .logo-box{border:none !important;background:transparent !important}
+  .doc-header .logo-box .logo-hint,.doc-header .logo-box .logo-rem{display:none !important}
+  .doc-header:not(.has-logo-print){grid-template-columns:1fr !important}
+  .doc-header:not(.has-logo-print) .logo-box{display:none !important}
   @page{size:A4;margin:0}
   body.print-bw{filter:grayscale(100%)}
 }
@@ -901,7 +907,7 @@ function renderTextWithMath(container, text, opts={}){
       if(data && data.src){
         const im=document.createElement('img');
         im.src=data.src;
-        im.style.width=(data.width||60)+'%';
+        im.style.width=Math.round((data.width||60)/100*PAGE_TEXT_WIDTH)+'px';
         im.style.display='block';
         const a=data.align||'center';
         if(a==='left'){ im.style.marginLeft='0'; im.style.marginRight='auto' }
@@ -1889,13 +1895,15 @@ function compressImageFile(file, maxBytes, cb){
   reader.readAsDataURL(file);
 }
 
+const PAGE_TEXT_WIDTH=666;
 function createImgNode(src, align='center', widthPct=60){
   const im=document.createElement('img');
   im.className='img-node';
   im.src=src;
   im.dataset.align=align;
   im.dataset.width=String(widthPct);
-  im.style.width=widthPct+'%';
+  im.style.width=Math.round(widthPct/100*PAGE_TEXT_WIDTH)+'px';
+  im.style.maxWidth='100%';
   im.setAttribute('contenteditable','false');
   im.addEventListener('click',e=>{
     e.preventDefault(); e.stopPropagation();
@@ -1972,7 +1980,7 @@ $('imgWidthRange').oninput=()=>{
   if(!selectedImg) return;
   const v=$('imgWidthRange').value;
   selectedImg.dataset.width=v;
-  selectedImg.style.width=v+'%';
+  selectedImg.style.width=Math.round(parseInt(v)/100*PAGE_TEXT_WIDTH)+'px';
   $('imgWidthVal').textContent=v+'%';
 };
 $('imgRemove').onclick=()=>{
@@ -2097,8 +2105,8 @@ window.addEventListener('resize',()=>{clearTimeout(relayoutTimer); relayoutTimer
 
 function renderHeader(){
   const h=document.createElement('div');
-  h.className='doc-header';
   const hasLogo = !!headerData.logo;
+  h.className='doc-header'+(hasLogo?' has-logo-print':'');
   h.innerHTML=`
     <div class="logo-box${hasLogo?' has-logo':''}" title="Clique para ${hasLogo?'trocar':'adicionar'} a logo da escola">
       ${hasLogo?`<img src="${headerData.logo}">`:`<div class="logo-hint">Clique para<br>adicionar logo</div>`}
@@ -2107,9 +2115,9 @@ function renderHeader(){
     </div>
     <div class="header-fields">
       <input class="school" placeholder="Nome da Escola" value="${esc(headerData.escola)}" data-k="escola">
-      <input class="teacher" placeholder="Professor(a): nome do professor" value="${esc(headerData.professor)}" data-k="professor">
+      <input class="teacher" placeholder="Aluno(a): nome do aluno" value="${esc(headerData.aluno)}" data-k="aluno">
       <div class="row">
-        <div class="field"><label>Aluno(a)</label><input placeholder="Nome do aluno" value="${esc(headerData.aluno)}" data-k="aluno"></div>
+        <div class="field"><label>Professor(a)</label><input placeholder="Nome do professor" value="${esc(headerData.professor)}" data-k="professor"></div>
         <div class="field"><label>Série/Turma</label><input placeholder="Ex: 9º ano A" value="${esc(headerData.serie)}" data-k="serie"></div>
         <div class="field"><label>Data</label><input placeholder="__/__/____" value="${esc(headerData.data)}" data-k="data"></div>
       </div>
@@ -2398,7 +2406,12 @@ $('printGo').onclick=()=>{
 };
 
 document.querySelectorAll('.ov').forEach(ov=>{
-  ov.addEventListener('click',e=>{ if(e.target===ov) ov.classList.remove('show') });
+  let downOnBackdrop=false;
+  ov.addEventListener('mousedown',e=>{ downOnBackdrop=(e.target===ov) });
+  ov.addEventListener('click',e=>{
+    if(e.target===ov && downOnBackdrop) ov.classList.remove('show');
+    downOnBackdrop=false;
+  });
 });
 
 /* ===== Tooltip BNCC: delegação global, delay 1.5s, sticky no hover ===== */
