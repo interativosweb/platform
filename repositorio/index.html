@@ -48,7 +48,7 @@ body{
 .brand-icon svg{width:20px;height:20px;color:#fff}
 .brand-text{min-width:0}
 .brand-text h1{
-  font-family:'Lora',Georgia,serif;font-size:1.08rem;font-weight:700;
+  font-family:inherit;font-size:1.08rem;font-weight:700;
   letter-spacing:-.3px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .brand-text .sub{font-size:.74rem;color:var(--text2);font-weight:500;margin-top:1px;letter-spacing:.1px}
@@ -122,42 +122,71 @@ body{
 .preview-manual-text .katex{font-size:1.25em}
 
 /* ===== DOCUMENT AREA ===== */
-.docarea{overflow:auto;padding:24px;display:flex;flex-direction:column;align-items:center;gap:18px}
+.docarea{overflow:auto;padding:24px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.doc-toolbar{
+  width:794px;max-width:100%;display:flex;gap:8px;align-items:center;
+  background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:8px 10px;
+}
+.doc-toolbar button{
+  padding:8px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;
+}
+.doc-toolbar button:hover{border-color:var(--accent);color:var(--accent);background:rgba(10,132,255,.06)}
+.doc-toolbar-info{margin-left:auto;font-size:.78rem;color:var(--text2);font-family:inherit}
+
 .page{
   background:#fff;color:#111;width:794px;min-height:1123px;position:relative;
   box-shadow:0 8px 40px rgba(0,0,0,.55);border-radius:4px;padding:56px 64px;
   display:flex;flex-direction:column;
   transform-origin:top center;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
 }
 .page-num{position:absolute;bottom:18px;right:28px;font-size:.72rem;color:#999;font-weight:500;font-family:'Inter',sans-serif}
 
-.doc-header{border-bottom:2px solid #111;padding-bottom:16px;margin-bottom:24px}
+.doc-header{border-bottom:2px solid #111;padding-bottom:16px;margin-bottom:24px;display:grid;grid-template-columns:96px 1fr;gap:16px;align-items:start}
+.doc-header .logo-box{
+  width:96px;height:96px;border:1.5px dashed #bbb;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;background:#fafafa;overflow:hidden;position:relative;
+  transition:border-color .12s,background .12s;
+}
+.doc-header .logo-box:hover{border-color:#0a84ff;background:#eef6ff}
+.doc-header .logo-box .logo-hint{font-size:.66rem;color:#888;text-align:center;line-height:1.3;padding:6px;font-family:'Inter',sans-serif}
+.doc-header .logo-box img{max-width:100%;max-height:100%;display:block}
+.doc-header .logo-box .logo-rem{
+  position:absolute;top:2px;right:2px;background:rgba(255,255,255,.95);border:1px solid #ccc;
+  border-radius:5px;width:18px;height:18px;font-size:.7rem;cursor:pointer;display:none;
+  align-items:center;justify-content:center;color:#ff453a;font-family:inherit;
+}
+.doc-header .logo-box.has-logo .logo-rem{display:flex}
+.doc-header .logo-box.has-logo .logo-hint{display:none}
+.doc-header .header-fields{min-width:0}
 .doc-header .school{
   width:100%;border:none;border-bottom:1px solid #ccc;font-size:1.15rem;font-weight:700;padding:3px 0;
-  margin-bottom:10px;font-family:'Lora',Georgia,"Times New Roman",serif;color:#111;outline:none;background:transparent;
+  margin-bottom:10px;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;color:#111;outline:none;background:transparent;
   letter-spacing:-.2px;
 }
 .doc-header .school:focus,.doc-header input:focus{border-color:#0a84ff}
 .doc-header .teacher{
   width:100%;border:none;border-bottom:1px dotted #ccc;font-size:.9rem;padding:3px 0;
-  margin-bottom:16px;font-family:'Lora',Georgia,serif;color:#333;outline:none;background:transparent;font-weight:500;
+  margin-bottom:16px;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;color:#333;outline:none;background:transparent;font-weight:500;
 }
 .doc-header .row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px}
 .doc-header .field{display:flex;flex-direction:column}
 .doc-header .field label{font-size:.66rem;text-transform:uppercase;color:#666;font-weight:700;letter-spacing:.6px;margin-bottom:3px;font-family:'Inter',sans-serif}
-.doc-header .field input{border:none;border-bottom:1px solid #888;padding:3px 0;font-size:.9rem;font-family:'Lora',Georgia,serif;color:#111;outline:none;background:transparent}
+.doc-header .field input{border:none;border-bottom:1px solid #888;padding:3px 0;font-size:.9rem;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;color:#111;outline:none;background:transparent}
 
 .blocks-area{flex:1;display:flex;flex-direction:column;gap:10px;min-height:0}
 .block{
   position:relative;background:#fff;border:1.5px dashed transparent;border-radius:4px;padding:6px 8px;
-  min-height:110px;resize:vertical;overflow:hidden;transition:border-color .12s;
+  overflow:hidden;transition:border-color .12s;
 }
 .block:hover{border-color:#bcd6f5}
 .block.dragging{opacity:.35}
 .block.drag-over{border-color:#0a84ff;background:#eef6ff}
-.block img{max-width:100%;max-height:100%;display:block;margin:0 auto;pointer-events:none}
+.block img{max-width:100%;display:block;margin:0 auto;pointer-events:none}
 .block .rendered{
-  width:100%;height:100%;overflow:auto;
+  width:100%;
   font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
   font-size:1.1rem;color:#111;line-height:1.7;padding:6px 8px;
 }
@@ -180,14 +209,14 @@ body{
 }
 .block:hover .handle{display:block}
 .block .handle:active{cursor:grabbing}
-.page-placeholder{color:#999;text-align:center;padding:40px 10px;font-size:.92rem;font-family:'Lora',Georgia,serif;font-style:italic}
+.page-placeholder{color:#999;text-align:center;padding:40px 10px;font-size:.92rem;font-family:inherit;font-style:italic}
 
 /* ===== OVERLAYS ===== */
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
 .ov.show{display:flex}
 .ov-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;max-width:960px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.7)}
 .ov-box header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-.ov-box header h3{font-family:'Lora',Georgia,serif;font-size:1.05rem;font-weight:600;letter-spacing:-.2px}
+.ov-box header h3{font-family:inherit;font-size:1.05rem;font-weight:700;letter-spacing:-.2px}
 .ov-box header button{background:transparent;border:none;color:var(--text2);font-size:1.2rem;cursor:pointer;line-height:1;padding:4px 8px;border-radius:6px;transition:all .15s}
 .ov-box header button:hover{background:var(--bg3);color:var(--text)}
 .ov-box .body{padding:18px 20px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:14px}
@@ -208,7 +237,7 @@ body{
 .preview-footer .pf-warning:hover{background:#ffb54a;border-color:#ffb54a;color:#1a1205}
 
 .print-box{width:440px;padding:24px}
-.print-box h3{font-family:'Lora',Georgia,serif;font-size:1.2rem;font-weight:700;margin-bottom:4px;letter-spacing:-.2px}
+.print-box h3{font-family:inherit;font-size:1.2rem;font-weight:700;margin-bottom:4px;letter-spacing:-.2px}
 .print-box .sub{font-size:.82rem;color:var(--text2);margin-bottom:16px;line-height:1.45}
 .print-box .row{margin-bottom:14px}
 .print-box label{display:block;font-size:.72rem;color:var(--text2);font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:6px}
@@ -308,7 +337,7 @@ math-field{
 }
 .mfield-quick .qk{
   min-width:42px;height:38px;padding:4px 10px;background:var(--bg3);border:1px solid var(--border);
-  border-radius:8px;color:var(--text);font-size:.95rem;font-family:'Lora',Georgia,serif;
+  border-radius:8px;color:var(--text);font-size:.95rem;font-family:inherit;
   cursor:pointer;transition:all .12s;display:inline-flex;align-items:center;justify-content:center;
 }
 .mfield-quick .qk:hover{border-color:var(--accent);color:var(--accent);background:rgba(10,132,255,.08)}
@@ -342,9 +371,10 @@ math-field{
   padding:10px 6px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;
   color:var(--text);font-size:1rem;cursor:pointer;
   transition:all .1s;display:flex;align-items:center;justify-content:center;min-height:46px;
-  line-height:1.1;text-align:center;font-family:'Lora',Georgia,serif;
+  line-height:1.1;text-align:center;font-family:inherit;
 }
 .kbd-key:hover{background:var(--bg4);border-color:var(--accent);transform:translateY(-1px);box-shadow:0 4px 10px rgba(10,132,255,.15)}
+.kbd-key,.mfq-btn{font-family:inherit !important}
 .kbd-key:active{transform:translateY(0)}
 .kbd-key .katex{font-size:.95em;color:var(--text)}
 .kbd-key-label{font-size:.7rem;color:var(--text2);font-family:'Inter',sans-serif;margin-top:2px;line-height:1}
@@ -406,21 +436,18 @@ math-field{
   display:inline-flex;align-items:center;justify-content:center;transition:all .12s;font-family:inherit;
 }
 .chip .x:hover{background:rgba(255,69,58,.3);color:#ff7b72}
-.chip.bncc .tip{
-  position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
-  min-width:320px;max-width:420px;padding:12px 14px;
+.chip.bncc .tip{display:none}
+#bnccTip{
+  position:fixed;min-width:320px;max-width:420px;padding:12px 14px;
   background:#1f1f24;border:1px solid var(--border2);border-radius:10px;
-  font-size:.78rem;line-height:1.5;color:var(--text);font-weight:400;font-family:'Inter',sans-serif;
+  font-size:.78rem;line-height:1.5;color:var(--text);font-weight:400;font-family:inherit;
   letter-spacing:0;text-transform:none;text-align:left;
   box-shadow:0 12px 40px rgba(0,0,0,.7);
-  opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:1000;white-space:normal;
+  opacity:0;pointer-events:none;transition:opacity .12s;z-index:5000;white-space:normal;
+  display:none;
 }
-.chip.bncc .tip::after{
-  content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
-  border:6px solid transparent;border-top-color:#1f1f24;
-}
-.chip.bncc .tip b{color:var(--accent2);display:block;margin-bottom:4px;font-family:'SF Mono',monospace;font-size:.75rem}
-.chip.bncc:hover .tip{opacity:1;transform:translateX(-50%) translateY(-2px)}
+#bnccTip.show{display:block;opacity:1;pointer-events:auto}
+#bnccTip b{color:var(--accent2);display:block;margin-bottom:4px;font-family:'SF Mono',monospace;font-size:.75rem}
 .bncc-actions{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
 .mini-btn{
   padding:7px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;
@@ -453,6 +480,36 @@ math-field{
 .rate-stars span:hover{transform:scale(1.12);color:var(--warning)}
 .rate-stars span.on{color:var(--warning)}
 .rate-info{font-size:.88rem;color:var(--text2);font-family:'Inter',sans-serif}
+
+.comments-block{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.comments-list{display:flex;flex-direction:column;gap:8px;max-height:240px;overflow-y:auto;padding-right:4px}
+.comments-list .empty{color:var(--text3);font-style:italic;font-size:.82rem;padding:6px 0}
+.com-item{
+  background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;
+  display:flex;flex-direction:column;gap:4px;position:relative;
+}
+.com-item .com-head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.74rem;color:var(--text2)}
+.com-item .com-author{font-weight:600;color:var(--text)}
+.com-item .com-time{font-size:.72rem;color:var(--text3)}
+.com-item .com-text{font-size:.88rem;line-height:1.5;color:var(--text);word-wrap:break-word}
+.com-item .com-del{
+  background:transparent;border:none;color:var(--error);font-size:.72rem;font-weight:600;
+  cursor:pointer;padding:2px 6px;border-radius:6px;font-family:inherit;
+}
+.com-item .com-del:hover{background:rgba(255,69,58,.1)}
+.com-form{display:flex;gap:8px;align-items:flex-start}
+.com-form textarea{
+  flex:1;min-height:60px;max-height:140px;padding:9px 11px;background:var(--bg3);
+  border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;
+  font-size:.88rem;line-height:1.45;outline:none;resize:vertical;transition:border-color .15s;
+}
+.com-form textarea:focus{border-color:var(--accent)}
+.com-form button{
+  padding:9px 16px;background:var(--accent);border:1px solid var(--accent);border-radius:8px;
+  color:#fff;font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .15s;
+}
+.com-form button:hover{background:#3a9bff;border-color:#3a9bff}
+.com-form button:disabled{opacity:.6;cursor:not-allowed}
 .rate-info b{color:var(--warning);font-size:1.05rem;font-weight:700}
 .rate-hint{font-size:.74rem;color:var(--text3);font-style:italic;margin-top:6px}
 
@@ -480,6 +537,8 @@ math-field{
 
 <div class="auth-loader" id="authLoader"><div class="sp"></div></div>
 
+<div id="bnccTip"></div>
+
 <div class="topbar">
   <div class="brand">
     <div class="brand-icon">
@@ -496,10 +555,7 @@ math-field{
     </div>
   </div>
   <div class="top-actions">
-    <button id="btnLimpar" title="Remover todas as questões">Limpar</button>
     <button id="btnManual">+ Questão manual</button>
-    <button id="btnSalvarProva" title="Salvar prova atual">Salvar</button>
-    <button id="btnMinhasProvas" title="Abrir provas salvas">Minhas provas</button>
     <a href="admin.html" class="admin" id="linkAdmin" style="display:none" title="Área administrativa">⚙ Cadastrar</a>
     <a href="../Plataforma.html" title="Voltar à plataforma">← Plataforma</a>
     <button class="primary" id="btnPrint">Imprimir</button>
@@ -518,11 +574,19 @@ math-field{
     <div class="qlist" id="qlist"><div class="sid-empty">Carregando banco...</div></div>
   </aside>
 
-  <main class="docarea" id="docArea"></main>
+  <main class="docarea" id="docArea">
+    <div class="doc-toolbar">
+      <button id="btnLimpar" title="Remover todas as questões">Limpar</button>
+      <button id="btnSalvarProva" title="Salvar prova atual">Salvar</button>
+      <button id="btnMinhasProvas" title="Abrir provas salvas">Minhas provas</button>
+      <span class="doc-toolbar-info" id="provaNomeInfo"></span>
+    </div>
+    <div id="docPages"></div>
+  </main>
 </div>
 
 <div class="ov" id="previewOv">
-  <div class="ov-box" style="max-width:640px">
+  <div class="ov-box" style="max-width:760px">
     <header><h3>Pré-visualização da questão</h3><button id="previewClose">✕</button></header>
     <div class="body" id="previewBody"></div>
     <footer class="preview-footer">
@@ -740,7 +804,7 @@ let dragBid=null;
 let editBid=null;
 let editingQid=null;
 let finalizingQid=null;
-let headerData={escola:'',professor:'',aluno:'',serie:'',data:''};
+let headerData={escola:'',professor:'',aluno:'',serie:'',data:'',logo:''};
 let relayoutTimer=null;
 
 let currentUser=null;
@@ -907,6 +971,73 @@ function renderUserRating(qid, q){
   });
 }
 
+function fmtComTime(t){
+  if(!t) return '';
+  const d=new Date(t);
+  const now=Date.now();
+  const diffMin=Math.floor((now-t)/60000);
+  if(diffMin<1) return 'agora';
+  if(diffMin<60) return diffMin+' min';
+  if(diffMin<60*24) return Math.floor(diffMin/60)+' h';
+  return d.toLocaleDateString('pt-BR');
+}
+
+function renderComments(qid, q){
+  const list=$('previewComments'); if(!list) return;
+  const comsObj=(q&&q.comentarios)||{};
+  const items=Object.entries(comsObj).map(([cid,c])=>({cid, ...c})).sort((a,b)=>(a.criadoEm||0)-(b.criadoEm||0));
+  if(!items.length){ list.innerHTML='<div class="empty">Sem comentários ainda. Seja o primeiro a comentar.</div>'; return }
+  const isAdmin = currentUser && currentUser.email===ADMIN_EMAIL;
+  list.innerHTML=items.map(c=>{
+    const canDel = isAdmin || (currentUser && c.autorUid===currentUser.uid);
+    return `<div class="com-item" data-cid="${esc(c.cid)}">
+      <div class="com-head">
+        <span><span class="com-author">${esc(c.autorNome||'Usuário')}</span> · <span class="com-time">${esc(fmtComTime(c.criadoEm))}</span></span>
+        ${canDel?'<button class="com-del" type="button">Remover</button>':''}
+      </div>
+      <div class="com-text">${esc(c.texto||'').replace(/\n/g,'<br>')}</div>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.com-del').forEach(btn=>{
+    btn.onclick=async ()=>{
+      const cid=btn.closest('.com-item').dataset.cid;
+      if(!confirm('Remover este comentário?')) return;
+      try{
+        await remove(ref(db,'questoes/'+qid+'/comentarios/'+cid));
+        if(q.comentarios){ delete q.comentarios[cid]; renderComments(qid,q) }
+      }catch(e){ alert('Erro ao remover: '+e.message) }
+    };
+  });
+}
+
+function setupComments(qid, q){
+  renderComments(qid, q);
+  const inp=$('previewComInput');
+  const send=$('previewComSend');
+  if(!inp || !send) return;
+  send.onclick=async ()=>{
+    if(!currentUser){ alert('Aguarde autenticação.'); return }
+    const t=inp.value.trim(); if(!t) return;
+    send.disabled=true;
+    try{
+      const novaRef=push(ref(db,'questoes/'+qid+'/comentarios'));
+      const cid=novaRef.key;
+      const payload={
+        texto:t,
+        autorUid:currentUser.uid,
+        autorNome: currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : 'Usuário'),
+        criadoEm:Date.now()
+      };
+      await set(novaRef, payload);
+      if(!q.comentarios) q.comentarios={};
+      q.comentarios[cid]=payload;
+      inp.value='';
+      renderComments(qid, q);
+    }catch(e){ alert('Erro ao enviar: '+e.message) }
+    finally{ send.disabled=false }
+  };
+}
+
 function openPreview(qid){
   const q=questoes.find(x=>x.id===qid); if(!q) return;
   currentQid=qid;
@@ -915,6 +1046,16 @@ function openPreview(qid){
   const temasArr = q.temas || (q.tema ? [q.tema] : []);
   const body=$('previewBody');
 
+  const commentsSection = `
+    <h4>Comentários</h4>
+    <div class="comments-block">
+      <div class="comments-list" id="previewComments"></div>
+      <div class="com-form">
+        <textarea id="previewComInput" placeholder="Adicionar um comentário..."></textarea>
+        <button id="previewComSend">Enviar</button>
+      </div>
+    </div>
+  `;
   if(isPendente){
     body.innerHTML=`
       <div class="preview-pend-banner">
@@ -923,6 +1064,7 @@ function openPreview(qid){
       </div>
       <h4>Enunciado</h4>
       <div class="preview-manual-text" id="previewManualText"></div>
+      ${commentsSection}
     `;
     renderTextWithMath($('previewManualText'), q.textoManual||'', {});
   } else if(isManual){
@@ -936,9 +1078,10 @@ function openPreview(qid){
         const desc=BNCC_CODES[code]||'Código personalizado — sem descrição oficial neste sistema.';
         return `<span class="chip bncc">${esc(code)}<span class="tip"><b>${esc(code)}</b>${esc(desc)}</span></span>`;
       }).join('')}</div>`:''}
-      ${q.comentario?`<h4>Comentário</h4><div class="com">${esc(q.comentario)}</div>`:''}
+      ${q.comentario?`<h4>Observação do autor</h4><div class="com">${esc(q.comentario)}</div>`:''}
       <h4>Sua avaliação</h4>
       <div id="previewRateBlock"></div>
+      ${commentsSection}
     `;
     renderTextWithMath($('previewManualText'), q.textoManual||'', {});
     renderUserRating(qid, q);
@@ -952,12 +1095,14 @@ function openPreview(qid){
         const desc=BNCC_CODES[code]||'Código personalizado — sem descrição oficial neste sistema.';
         return `<span class="chip bncc">${esc(code)}<span class="tip"><b>${esc(code)}</b>${esc(desc)}</span></span>`;
       }).join('')}</div>`:''}
-      ${q.comentario?`<h4>Comentário</h4><div class="com">${esc(q.comentario)}</div>`:''}
+      ${q.comentario?`<h4>Observação do autor</h4><div class="com">${esc(q.comentario)}</div>`:''}
       <h4>Sua avaliação</h4>
       <div id="previewRateBlock"></div>
+      ${commentsSection}
     `;
     renderUserRating(qid, q);
   }
+  setupComments(qid, q);
 
   // Ajusta botões do rodapé conforme estado da questão
   const btnEdit=$('previewEdit');
@@ -1859,7 +2004,8 @@ function paginate(){
   const pages=[[]];
   let used=HEADER_H;
   for(const b of blocks){
-    const h=(b.altura||220)+BLOCK_GAP;
+    // Sem altura medida ainda, usa estimativa pequena (60px) — depois do render real, scheduleRelayout repagina.
+    const h=(b.altura||60)+BLOCK_GAP;
     if(used+h>contentArea && pages[pages.length-1].length>0){
       if(pages.length>=MAX_PAGES) break;
       pages.push([b]);
@@ -1873,7 +2019,10 @@ function paginate(){
 }
 
 function renderDoc(){
-  const cont=$('docArea');
+  const cont=$('docPages');
+  // Atualiza info do nome da prova ativa
+  const info=$('provaNomeInfo');
+  if(info) info.textContent = currentProvaNome ? ('Prova ativa: '+currentProvaNome) : '';
   const pages=paginate();
   $('pageCount').textContent=pages.length+' página'+(pages.length>1?'s':'');
   const savedFocusBid=(document.activeElement&&document.activeElement.closest('.block'))?document.activeElement.closest('.block').dataset.bid:null;
@@ -1902,6 +2051,9 @@ function renderDoc(){
     cont.appendChild(page);
   });
 
+  // Mede altura real dos blocos para repaginação consistente
+  measureBlockHeights();
+
   // Apply scale so page fits within docarea width
   applyPageScale();
 
@@ -1912,6 +2064,17 @@ function renderDoc(){
     const el=cont.querySelector('.block[data-bid="'+savedFocusBid+'"]');
     if(el) el.focus();
   }
+}
+
+function measureBlockHeights(){
+  let changed=false;
+  document.querySelectorAll('.block').forEach(el=>{
+    const b=blocks.find(x=>x.bid===el.dataset.bid);
+    if(!b) return;
+    const h=el.offsetHeight;
+    if(h>0 && Math.abs((b.altura||0)-h)>3){ b.altura=h; changed=true }
+  });
+  if(changed) scheduleRelayout();
 }
 
 function applyPageScale(){
@@ -1935,17 +2098,45 @@ window.addEventListener('resize',()=>{clearTimeout(relayoutTimer); relayoutTimer
 function renderHeader(){
   const h=document.createElement('div');
   h.className='doc-header';
+  const hasLogo = !!headerData.logo;
   h.innerHTML=`
-    <input class="school" placeholder="Nome da Escola" value="${esc(headerData.escola)}" data-k="escola">
-    <input class="teacher" placeholder="Professor(a): nome do professor" value="${esc(headerData.professor)}" data-k="professor">
-    <div class="row">
-      <div class="field"><label>Aluno(a)</label><input placeholder="Nome do aluno" value="${esc(headerData.aluno)}" data-k="aluno"></div>
-      <div class="field"><label>Série/Turma</label><input placeholder="Ex: 9º ano A" value="${esc(headerData.serie)}" data-k="serie"></div>
-      <div class="field"><label>Data</label><input placeholder="__/__/____" value="${esc(headerData.data)}" data-k="data"></div>
+    <div class="logo-box${hasLogo?' has-logo':''}" title="Clique para ${hasLogo?'trocar':'adicionar'} a logo da escola">
+      ${hasLogo?`<img src="${headerData.logo}">`:`<div class="logo-hint">Clique para<br>adicionar logo</div>`}
+      <button type="button" class="logo-rem" title="Remover logo">✕</button>
+      <input type="file" accept="image/*" style="display:none" class="logo-input">
+    </div>
+    <div class="header-fields">
+      <input class="school" placeholder="Nome da Escola" value="${esc(headerData.escola)}" data-k="escola">
+      <input class="teacher" placeholder="Professor(a): nome do professor" value="${esc(headerData.professor)}" data-k="professor">
+      <div class="row">
+        <div class="field"><label>Aluno(a)</label><input placeholder="Nome do aluno" value="${esc(headerData.aluno)}" data-k="aluno"></div>
+        <div class="field"><label>Série/Turma</label><input placeholder="Ex: 9º ano A" value="${esc(headerData.serie)}" data-k="serie"></div>
+        <div class="field"><label>Data</label><input placeholder="__/__/____" value="${esc(headerData.data)}" data-k="data"></div>
+      </div>
     </div>
   `;
-  h.querySelectorAll('input').forEach(inp=>{
+  h.querySelectorAll('input[data-k]').forEach(inp=>{
     inp.addEventListener('input',()=>{ headerData[inp.dataset.k]=inp.value });
+  });
+  const box=h.querySelector('.logo-box');
+  const fi=h.querySelector('.logo-input');
+  const rem=h.querySelector('.logo-rem');
+  box.addEventListener('click',e=>{
+    if(e.target===rem) return;
+    fi.click();
+  });
+  fi.addEventListener('change',e=>{
+    const f=e.target.files[0]; if(!f) return;
+    compressImageFile(f, 400*1024, (dataUrl)=>{
+      if(!dataUrl){ alert('Falha ao processar logo.'); return }
+      headerData.logo=dataUrl;
+      renderDoc();
+    });
+  });
+  rem.addEventListener('click',e=>{
+    e.stopPropagation();
+    headerData.logo='';
+    renderDoc();
   });
   return h;
 }
@@ -1954,7 +2145,6 @@ function renderBlock(b){
   const el=document.createElement('div');
   el.className='block';
   el.dataset.bid=b.bid;
-  if(b.altura) el.style.height=b.altura+'px';
 
   if(b.type==='banco'){
     const q=questoes.find(x=>x.id===b.qid);
@@ -1967,23 +2157,17 @@ function renderBlock(b){
       } else if(q.imgQuestao){
         const img=document.createElement('img');
         img.src=q.imgQuestao;
-        img.onload=()=>{
-          if(!b.altura){
-            b.altura=Math.min(img.naturalHeight*((794-128)/img.naturalWidth),900)+20;
-            el.style.height=b.altura+'px';
-            scheduleRelayout();
-          }
-        };
+        img.onload=()=>scheduleRelayout();
         el.appendChild(img);
       } else {
         const w=document.createElement('div');
-        w.style.cssText='color:#999;text-align:center;padding:20px;font-family:Georgia,serif;font-style:italic';
+        w.style.cssText='color:#999;text-align:center;padding:20px;font-family:inherit;font-style:italic';
         w.textContent='Questão sem conteúdo';
         el.appendChild(w);
       }
     }else{
       const w=document.createElement('div');
-      w.style.cssText='color:#999;text-align:center;padding:20px;font-family:Georgia,serif;font-style:italic';
+      w.style.cssText='color:#999;text-align:center;padding:20px;font-family:inherit;font-style:italic';
       w.textContent='Questão removida do banco';
       el.appendChild(w);
     }
@@ -2178,7 +2362,7 @@ function loadProva(id, p){
     texto:b.texto||null,
     altura:b.altura||null
   }));
-  headerData = Object.assign({escola:'',professor:'',aluno:'',serie:'',data:''}, p.headerData||{});
+  headerData = Object.assign({escola:'',professor:'',aluno:'',serie:'',data:'',logo:''}, p.headerData||{});
   currentProvaId = id;
   currentProvaNome = p.nome || '';
   $('provasListOv').classList.remove('show');
@@ -2196,7 +2380,7 @@ $('printGo').onclick=()=>{
   // Remove scale for printing
   document.querySelectorAll('.page').forEach(p=>{p.style.transform=''; p.style.marginBottom=''});
 
-  const cont=$('docArea');
+  const cont=$('docPages');
   const originalHTML=cont.innerHTML;
   if(copies>1){
     let full='';
@@ -2216,6 +2400,66 @@ $('printGo').onclick=()=>{
 document.querySelectorAll('.ov').forEach(ov=>{
   ov.addEventListener('click',e=>{ if(e.target===ov) ov.classList.remove('show') });
 });
+
+/* ===== Tooltip BNCC: delegação global, delay 1.5s, sticky no hover ===== */
+(function setupBnccTooltip(){
+  const tip=$('bnccTip');
+  let showTimer=null, hideTimer=null, currentTarget=null;
+  function positionTip(target){
+    const r=target.getBoundingClientRect();
+    tip.style.visibility='hidden';
+    tip.classList.add('show');
+    const tw=tip.offsetWidth, th=tip.offsetHeight;
+    let left = r.left + r.width/2 - tw/2;
+    left = Math.max(8, Math.min(window.innerWidth-tw-8, left));
+    let top = r.top - th - 10;
+    if(top < 8) top = r.bottom + 10;
+    tip.style.left=left+'px';
+    tip.style.top=top+'px';
+    tip.style.visibility='visible';
+  }
+  function showFor(target){
+    const inner=target.querySelector('.tip');
+    if(!inner) return;
+    tip.innerHTML=inner.innerHTML;
+    positionTip(target);
+    currentTarget=target;
+  }
+  function scheduleShow(target){
+    clearTimeout(hideTimer);
+    if(currentTarget===target && tip.classList.contains('show')) return;
+    clearTimeout(showTimer);
+    showTimer=setTimeout(()=>showFor(target), 250);
+  }
+  function scheduleHide(){
+    clearTimeout(showTimer);
+    hideTimer=setTimeout(()=>{
+      tip.classList.remove('show');
+      currentTarget=null;
+    }, 2000);
+  }
+  document.addEventListener('mouseover',e=>{
+    const chip=e.target.closest('.chip.bncc');
+    if(chip){ scheduleShow(chip); return }
+    if(tip.contains(e.target)){ clearTimeout(hideTimer); return }
+  });
+  document.addEventListener('mouseout',e=>{
+    const chip=e.target.closest('.chip.bncc');
+    if(chip){
+      // Se está indo para o tooltip, cancela hide
+      const to=e.relatedTarget;
+      if(to && (tip.contains(to) || to===tip)) { clearTimeout(hideTimer); return }
+      scheduleHide();
+      return;
+    }
+    if(tip.contains(e.target)){
+      const to=e.relatedTarget;
+      if(to && (tip.contains(to) || (currentTarget && currentTarget.contains(to)))) return;
+      scheduleHide();
+    }
+  });
+  window.addEventListener('scroll',()=>{ tip.classList.remove('show'); currentTarget=null }, true);
+})();
 
 renderDoc();
 </script>
