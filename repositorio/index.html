@@ -3073,6 +3073,7 @@ function renderTemplateCanvas(container, tpl, opts){
   }
 }
 
+const HDR_HAS_HEIGHT = ['logo','imagem','caixa'];
 function buildElementNode(el, tpl, opts){
   const node = document.createElement('div');
   node.className = 'hdr-el tipo-'+el.tipo;
@@ -3080,7 +3081,7 @@ function buildElementNode(el, tpl, opts){
   node.style.left = el.x+'px';
   node.style.top = el.y+'px';
   node.style.width = (el.w||100)+'px';
-  if(el.h) node.style.height = el.h+'px';
+  if(el.h && HDR_HAS_HEIGHT.includes(el.tipo)) node.style.height = el.h+'px';
   if(opts.editable && selectedElId===el.id) node.classList.add('selected');
 
   if(el.tipo==='texto'){
@@ -3201,7 +3202,8 @@ function updateElementNode(el){
   node.style.left = (el.x||0)+'px';
   node.style.top = (el.y||0)+'px';
   node.style.width = (el.w||100)+'px';
-  if(el.h!==undefined) node.style.height = el.h+'px';
+  if(el.h!==undefined && HDR_HAS_HEIGHT.includes(el.tipo)) node.style.height = el.h+'px';
+  else node.style.height = '';
   if(el.tipo==='texto'){
     const t = node.querySelector('.hdr-el-text');
     if(t){
@@ -3408,12 +3410,8 @@ function renderPropPanel(){
   const h4 = sel.querySelector('h4'); if(h4) h4.textContent = '✎ Editando: '+typeName;
   let html = `<div style="font-size:.78rem;font-weight:700;color:var(--accent);margin-bottom:10px;padding:6px 8px;background:rgba(10,132,255,.10);border-radius:6px">${typeName}</div>`;
   html += `<div class="row">
-      <div><label>X</label><input type="number" data-prop="x" value="${el.x||0}"></div>
-      <div><label>Y</label><input type="number" data-prop="y" value="${el.y||0}"></div>
-    </div>
-    <div class="row">
       <div><label>Largura</label><input type="number" data-prop="w" value="${el.w||100}"></div>
-      ${el.h!==undefined?`<div><label>Altura</label><input type="number" data-prop="h" value="${el.h||40}"></div>`:'<div></div>'}
+      ${HDR_HAS_HEIGHT.includes(el.tipo)?`<div><label>Altura</label><input type="number" data-prop="h" value="${el.h||40}"></div>`:'<div></div>'}
     </div>`;
   if(el.tipo==='texto'){
     html += `
@@ -3431,15 +3429,6 @@ function renderPropPanel(){
     html += `
       <label>Rótulo</label>
       <input type="text" data-prop="rotulo" value="${escAttr(el.rotulo||'')}">
-      <label>Chave (onde o valor é salvo)</label>
-      <select data-prop="chave">
-        <option value="aluno" ${el.chave==='aluno'?'selected':''}>Aluno(a)</option>
-        <option value="professor" ${el.chave==='professor'?'selected':''}>Professor(a)</option>
-        <option value="escola" ${el.chave==='escola'?'selected':''}>Escola</option>
-        <option value="turma" ${el.chave==='turma'?'selected':''}>Série/Turma</option>
-        <option value="data" ${el.chave==='data'?'selected':''}>Data</option>
-        <option value="${el.chave||'custom_'+el.id}" ${el.chave && !['aluno','professor','escola','turma','data'].includes(el.chave)?'selected':''}>Personalizado (${esc(el.chave||'custom')})</option>
-      </select>
       <label>Tamanho</label>
       <input type="number" data-prop="tamanho" value="${el.tamanho||13}">`;
   } else if(el.tipo==='logo' || el.tipo==='imagem'){
@@ -3477,10 +3466,6 @@ function renderPropPanel(){
       <input type="color" data-prop="fundo" value="${el.fundo==='transparent'?'#ffffff':(el.fundo||'#ffffff')}">
       <button class="add-btn" id="hdrElNoFill" style="margin-top:6px">Sem preenchimento</button>`;
   }
-  html += `<div class="row" style="margin-top:10px">
-      <button class="add-btn" id="hdrElBack" style="text-align:center;justify-content:center">↓ Para trás</button>
-      <button class="add-btn" id="hdrElForward" style="text-align:center;justify-content:center">↑ Para frente</button>
-    </div>`;
   html += `<button class="add-btn pf-danger" id="hdrElRemove" style="margin-top:10px;color:#ff453a">Remover elemento</button>`;
   body.innerHTML = html;
 
@@ -3500,8 +3485,6 @@ function renderPropPanel(){
   const pick=$('hdrElPickImg'); if(pick) pick.onclick=()=>pickLogoForElement(el);
   const rem=$('hdrElRemImg'); if(rem) rem.onclick=()=>{ el.src=''; redrawEditor() };
   const noFill=$('hdrElNoFill'); if(noFill) noFill.onclick=()=>{ el.fundo='transparent'; redrawEditor() };
-  const back=$('hdrElBack'); if(back) back.onclick=()=>sendBackward(el.id);
-  const fwd=$('hdrElForward'); if(fwd) fwd.onclick=()=>bringForward(el.id);
   const remEl=$('hdrElRemove'); if(remEl) remEl.onclick=()=>removeElement(el.id);
 }
 
