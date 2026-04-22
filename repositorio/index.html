@@ -458,8 +458,15 @@ math-field{
 .hdr-canvas.bg-quadriculado,.page.bg-quadriculado{background-image:linear-gradient(#cdd6e0 1px,transparent 1px),linear-gradient(90deg,#cdd6e0 1px,transparent 1px);background-size:20px 20px}
 .hdr-canvas.bg-pontilhado,.page.bg-pontilhado{background-image:radial-gradient(#a0aec0 1px,transparent 1px);background-size:16px 16px}
 
-.hdr-el{position:absolute;cursor:move;user-select:none;box-sizing:border-box}
-.hdr-el.selected{outline:2px dashed var(--accent);outline-offset:1px}
+.hdr-el{position:absolute;cursor:move;user-select:none;box-sizing:border-box;transition:box-shadow .12s,background-color .12s}
+.hdr-el.selected{
+  outline:2px solid #ff9f0a;outline-offset:3px;
+  box-shadow:0 0 0 4px rgba(255,159,10,.18),0 4px 14px rgba(255,159,10,.28);
+  background:rgba(255,159,10,.06);
+  border-radius:3px;
+}
+.hdr-el.selected.tipo-campo{background:rgba(255,159,10,.14)}
+.hdr-el.selected.tipo-texto{background:rgba(255,159,10,.12)}
 .hdr-el .hdr-resize{
   position:absolute;right:-7px;bottom:-7px;width:16px;height:16px;background:var(--accent);
   border:2px solid #fff;border-radius:50%;cursor:nwse-resize;display:none;z-index:3;
@@ -481,6 +488,24 @@ math-field{
 .hdr-el-logo .logo-placeholder{font-size:.7rem;color:#888;text-align:center;padding:4px;font-family:inherit}
 .hdr-el-imagem{overflow:hidden}
 .hdr-el-imagem img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;margin:0 auto}
+
+/* Paleta de campos prontos embaixo do canvas */
+.hdr-palette{
+  width:666px;max-width:100%;background:var(--bg2);border:1px solid var(--border);
+  border-radius:10px;padding:12px 14px;margin-top:4px;
+}
+.hdr-palette h4{
+  font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);
+  margin:0 0 8px;font-weight:700;font-family:inherit;
+}
+.hdr-palette-grid{display:flex;flex-wrap:wrap;gap:6px}
+.hdr-palette-btn{
+  padding:7px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;
+  transition:all .12s;display:inline-flex;align-items:center;gap:6px;
+}
+.hdr-palette-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(10,132,255,.08)}
+.hdr-palette-btn .plus{color:var(--accent);font-weight:700}
 
 /* Guias de alinhamento (snap) */
 .hdr-snap-guide{
@@ -934,16 +959,16 @@ math-field{
             Envia uma imagem do cabeçalho já pronto (scan ou arte) para ser usada como fundo.
           </div>
         </div>
-        <div class="hdr-ed-section">
-          <h4>Elementos no cabeçalho</h4>
-          <div id="hdrElList" style="display:flex;flex-direction:column;gap:4px"></div>
-        </div>
       </div>
 
       <div class="hdr-ed-center" id="hdrEdCenter">
         <div class="hdr-canvas-label">Clique nos elementos para editar. Arraste para posicionar.</div>
         <div class="hdr-canvas-wrap">
           <div class="hdr-canvas" id="hdrCanvas"></div>
+        </div>
+        <div class="hdr-palette">
+          <h4>Elementos no cabeçalho</h4>
+          <div class="hdr-palette-grid" id="hdrPaletteGrid"></div>
         </div>
       </div>
 
@@ -3019,28 +3044,56 @@ function redrawEditor(){
   const canvas = $('hdrCanvas');
   renderTemplateCanvas(canvas, editingHdrTpl, {interactive:false, editable:true});
   renderPropPanel();
-  renderElementList();
+  renderPaletteGrid();
 }
 
-function renderElementList(){
-  const list = $('hdrElList');
-  if(!list || !editingHdrTpl) return;
-  const arr = editingHdrTpl.elementos || [];
-  if(!arr.length){ list.innerHTML='<div style="font-size:.72rem;color:var(--text2);font-style:italic">Nenhum elemento</div>'; return }
-  // Mostrar de cima para baixo (último item do array fica no topo visualmente)
-  const items = arr.slice().reverse();
-  const labels = {texto:'Texto',campo:'Campo',logo:'Logo',imagem:'Imagem',linha:'Linha',caixa:'Caixa'};
-  list.innerHTML = items.map(el=>{
-    const sel = el.id===selectedElId ? ' style="border-color:var(--accent);background:rgba(10,132,255,.10);color:var(--accent)"' : '';
-    const summary = el.tipo==='texto' ? esc((el.conteudo||'').slice(0,18)) :
-                    el.tipo==='campo' ? esc((el.rotulo||'').slice(0,18)) :
-                    labels[el.tipo]||el.tipo;
-    return `<button class="add-btn" data-elid="${el.id}"${sel} style="font-size:.74rem;padding:5px 8px"><span class="ic">${labels[el.tipo]?labels[el.tipo][0]:'•'}</span>${summary}</button>`;
+const HDR_PRESET_FIELDS = [
+  {rotulo:'Aluno(a):', chave:'aluno', w:420},
+  {rotulo:'Professor(a):', chave:'professor', w:340},
+  {rotulo:'Escola:', chave:'escola', w:380},
+  {rotulo:'Série/Turma:', chave:'turma', w:260},
+  {rotulo:'Data:', chave:'data', w:200},
+  {rotulo:'Bimestre:', chave:'bimestre', w:200},
+  {rotulo:'Disciplina:', chave:'disciplina', w:300},
+  {rotulo:'Nota:', chave:'nota', w:160}
+];
+
+function renderPaletteGrid(){
+  const grid = $('hdrPaletteGrid');
+  if(!grid || !editingHdrTpl) return;
+  const placedKeys = new Set((editingHdrTpl.elementos||[])
+    .filter(e=>e.tipo==='campo' && e.chave)
+    .map(e=>e.chave));
+  grid.innerHTML = HDR_PRESET_FIELDS.map(p=>{
+    const exists = placedKeys.has(p.chave);
+    return `<button class="hdr-palette-btn" data-chave="${p.chave}" ${exists?'disabled style="opacity:.45;cursor:not-allowed"':''} title="${exists?'Já adicionado':'Adicionar ao cabeçalho'}">
+      <span class="plus">${exists?'✓':'+'}</span>${esc(p.rotulo.replace(':',''))}
+    </button>`;
   }).join('');
-  list.querySelectorAll('[data-elid]').forEach(b=>b.onclick=()=>{
-    selectedElId = b.dataset.elid;
-    redrawEditor();
+  grid.querySelectorAll('[data-chave]').forEach(b=>{
+    if(b.disabled) return;
+    b.onclick=()=>{
+      const preset = HDR_PRESET_FIELDS.find(p=>p.chave===b.dataset.chave);
+      if(preset) addPresetField(preset);
+    };
   });
+}
+
+function addPresetField(preset){
+  if(!editingHdrTpl) return;
+  const arr = editingHdrTpl.elementos = editingHdrTpl.elementos || [];
+  if(arr.some(e=>e.tipo==='campo' && e.chave===preset.chave)) return;
+  // Tenta posicionar logo abaixo dos campos existentes
+  const campos = arr.filter(e=>e.tipo==='campo');
+  let y = 20;
+  if(campos.length){
+    const maxBottom = Math.max(...campos.map(e=>(e.y||0) + 24));
+    if(maxBottom + 30 < (editingHdrTpl.altura||HDR_DEFAULT_ALTURA)) y = maxBottom + 6;
+  }
+  const base = {id:gid(), tipo:'campo', x:20, y, w:preset.w||300, rotulo:preset.rotulo, tamanho:13, chave:preset.chave};
+  arr.push(base);
+  selectedElId = base.id;
+  redrawEditor();
 }
 
 function renderTemplateCanvas(container, tpl, opts){
