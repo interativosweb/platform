@@ -1,43 +1,105 @@
 // Base de dados compartilhada: Temas e Habilidades BNCC (Matemática Ensino Médio)
 
 export const TEMAS = [
-  // Conjuntos e números
-  "Conjuntos Numéricos", "Números Reais", "Números Complexos", "Operações com Frações",
-  "Porcentagem", "Razão e Proporção", "Regra de Três Simples", "Regra de Três Composta",
+  // ===== Operações básicas (Fundamental) =====
+  "Adição", "Subtração", "Multiplicação", "Divisão",
+  "Operações com Números Naturais", "Operações com Números Inteiros",
+  "Operações com Números Decimais",
+  "Adição de Frações", "Subtração de Frações",
+  "Adição e Subtração de Frações", "Multiplicação de Frações", "Divisão de Frações",
+  "Operações com Frações", "Simplificação de Frações", "Comparação de Frações",
+  "Frações Equivalentes", "Frações e Números Mistos",
+  "Conversão entre Fração e Decimal", "Dízimas Periódicas",
+  // ===== Conjuntos e números =====
+  "Conjuntos", "Conjuntos Numéricos", "Números Reais", "Números Naturais",
+  "Números Inteiros", "Números Racionais", "Números Irracionais", "Números Complexos",
+  "Números Primos", "MMC", "MDC", "Múltiplos e Divisores", "Divisibilidade",
+  "Potenciação", "Radiciação", "Propriedades das Potências", "Propriedades dos Radicais",
+  "Racionalização de Denominadores", "Expoentes Racionais",
+  // ===== Proporcionalidade e finanças =====
+  "Porcentagem", "Aumentos e Descontos", "Lucro e Prejuízo",
+  "Razão e Proporção", "Grandezas Diretamente Proporcionais", "Grandezas Inversamente Proporcionais",
+  "Regra de Três Simples", "Regra de Três Composta",
   "Juros Simples", "Juros Compostos", "Matemática Financeira",
-  // Álgebra
-  "Expressões Algébricas", "Produtos Notáveis", "Fatoração", "Polinômios",
-  "Equações do 1º Grau", "Equações do 2º Grau", "Inequações", "Sistemas Lineares",
-  "Matrizes", "Determinantes",
-  // Funções
-  "Funções", "Função Afim", "Função Quadrática", "Função Modular",
-  "Função Exponencial", "Função Logarítmica", "Logaritmos",
-  "Função Composta", "Função Inversa",
-  // Sequências
+  // ===== Álgebra =====
+  "Expressões Algébricas", "Monômios", "Polinômios", "Operações com Polinômios",
+  "Produtos Notáveis", "Fatoração", "Divisão de Polinômios",
+  "Equações do 1º Grau", "Equações do 2º Grau",
+  "Equações Biquadradas", "Equações Irracionais", "Equações Modulares",
+  "Equações Exponenciais", "Equações Logarítmicas",
+  "Inequações", "Inequações do 1º Grau", "Inequações do 2º Grau",
+  "Inequações Modulares", "Inequações Exponenciais", "Inequações Logarítmicas",
+  "Sistemas de Equações", "Sistemas Lineares", "Sistemas Não-Lineares",
+  "Matrizes", "Operações com Matrizes", "Matriz Inversa", "Determinantes",
+  "Regra de Cramer", "Escalonamento de Matrizes",
+  // ===== Funções =====
+  "Funções", "Função Afim", "Função Linear", "Função Constante",
+  "Função Quadrática", "Função Modular", "Função Polinomial",
+  "Função Exponencial", "Função Logarítmica", "Logaritmos", "Propriedades dos Logaritmos",
+  "Função Composta", "Função Inversa", "Domínio e Imagem",
+  "Funções Pares e Ímpares", "Crescimento e Decrescimento de Funções",
+  "Estudo do Sinal", "Raízes de Funções", "Vértice da Parábola",
+  // ===== Sequências =====
   "Sequências Numéricas", "Progressão Aritmética", "Progressão Geométrica",
-  // Trigonometria
-  "Trigonometria no Triângulo Retângulo", "Razões Trigonométricas",
-  "Lei dos Senos", "Lei dos Cossenos", "Ciclo Trigonométrico",
+  "Soma de PA", "Soma de PG", "PG Infinita",
+  // ===== Trigonometria =====
+  "Trigonometria", "Trigonometria no Triângulo Retângulo", "Razões Trigonométricas",
+  "Seno", "Cosseno", "Tangente", "Cotangente", "Secante", "Cossecante",
+  "Lei dos Senos", "Lei dos Cossenos", "Área do Triângulo (Trigonometria)",
+  "Ciclo Trigonométrico", "Arcos e Ângulos", "Conversão Grau-Radiano",
   "Funções Trigonométricas", "Equações Trigonométricas", "Identidades Trigonométricas",
-  // Geometria Plana
-  "Geometria Plana", "Ângulos", "Triângulos", "Triângulos Semelhantes",
-  "Congruência de Triângulos", "Teorema de Pitágoras", "Teorema de Tales",
-  "Quadriláteros", "Polígonos", "Circunferência", "Áreas de Figuras Planas",
-  // Geometria Espacial
-  "Geometria Espacial", "Prismas", "Pirâmides", "Cilindros", "Cones", "Esferas",
-  "Poliedros", "Volumes", "Áreas de Superfícies",
-  // Geometria Analítica
-  "Geometria Analítica", "Ponto e Distância", "Equação da Reta",
-  "Equação da Circunferência", "Cônicas", "Elipse", "Hipérbole", "Parábola",
-  // Análise Combinatória / Probabilidade
-  "Análise Combinatória", "Princípio Fundamental da Contagem",
-  "Permutações", "Arranjos", "Combinações", "Probabilidade",
-  "Probabilidade Condicional", "Binômio de Newton",
-  // Estatística
-  "Estatística", "Média", "Mediana", "Moda", "Desvio Padrão", "Variância",
-  "Gráficos e Tabelas", "Amostragem",
-  // Outros
-  "Grandezas e Medidas", "Notação Científica", "Unidades de Medida"
+  "Relações Trigonométricas Fundamentais", "Soma e Diferença de Arcos",
+  "Arco Duplo", "Arco Metade",
+  // ===== Geometria Plana =====
+  "Geometria Plana", "Ponto, Reta e Plano", "Ângulos", "Ângulos entre Paralelas",
+  "Triângulos", "Classificação de Triângulos", "Soma dos Ângulos Internos",
+  "Triângulos Semelhantes", "Semelhança de Triângulos", "Congruência de Triângulos",
+  "Teorema de Pitágoras", "Teorema de Tales",
+  "Relações Métricas no Triângulo Retângulo",
+  "Quadriláteros", "Paralelogramos", "Trapézios", "Losango", "Retângulo", "Quadrado",
+  "Polígonos", "Polígonos Regulares", "Soma dos Ângulos de Polígonos",
+  "Circunferência e Círculo", "Comprimento da Circunferência",
+  "Área do Círculo", "Setor Circular", "Coroa Circular",
+  "Áreas de Figuras Planas", "Perímetro",
+  // ===== Geometria Espacial =====
+  "Geometria Espacial", "Sólidos Geométricos", "Poliedros", "Relação de Euler",
+  "Prismas", "Paralelepípedo", "Cubo", "Pirâmides",
+  "Cilindros", "Cones", "Tronco de Cone", "Esferas",
+  "Volumes", "Áreas de Superfícies", "Princípio de Cavalieri",
+  // ===== Geometria Analítica =====
+  "Geometria Analítica", "Plano Cartesiano", "Ponto e Distância",
+  "Distância entre Dois Pontos", "Ponto Médio", "Coordenadas Cartesianas",
+  "Equação da Reta", "Coeficiente Angular", "Posições Relativas entre Retas",
+  "Distância de Ponto à Reta", "Equação da Circunferência",
+  "Posições Relativas entre Reta e Circunferência",
+  "Cônicas", "Elipse", "Hipérbole", "Parábola",
+  // ===== Análise Combinatória e Probabilidade =====
+  "Análise Combinatória", "Princípio Fundamental da Contagem", "Princípio Aditivo",
+  "Fatorial", "Permutações", "Permutações com Repetição", "Permutações Circulares",
+  "Arranjos", "Combinações", "Combinações com Repetição",
+  "Probabilidade", "Probabilidade Condicional", "Probabilidade da União",
+  "Probabilidade da Intersecção", "Eventos Independentes", "Eventos Mutuamente Exclusivos",
+  "Binômio de Newton", "Triângulo de Pascal",
+  // ===== Estatística =====
+  "Estatística", "Estatística Descritiva", "População e Amostra",
+  "Frequência Absoluta e Relativa", "Distribuição de Frequências",
+  "Média", "Média Aritmética", "Média Ponderada", "Mediana", "Moda",
+  "Desvio Padrão", "Variância", "Amplitude", "Quartis",
+  "Gráficos e Tabelas", "Histograma", "Box-plot", "Gráfico de Setores",
+  "Amostragem", "Pesquisa Estatística",
+  // ===== Números Complexos =====
+  "Forma Algébrica de Complexos", "Forma Trigonométrica de Complexos",
+  "Operações com Complexos", "Módulo e Argumento", "Plano de Argand-Gauss",
+  "Fórmula de De Moivre", "Raízes de Números Complexos",
+  // ===== Polinômios avançado =====
+  "Teorema do Resto", "Teorema de D'Alembert", "Dispositivo de Briot-Ruffini",
+  "Equações Polinomiais", "Relações de Girard", "Multiplicidade de Raízes",
+  // ===== Outros =====
+  "Grandezas e Medidas", "Notação Científica", "Unidades de Medida",
+  "Conversão de Unidades", "Sistema Internacional",
+  "Lógica Matemática", "Tabela Verdade", "Conectivos Lógicos",
+  "Raciocínio Lógico", "Sequências Lógicas",
+  "Matemática do Cotidiano", "Resolução de Problemas"
 ];
 
 // Habilidades BNCC - Matemática Ensino Médio (EM13MAT)
@@ -90,94 +152,243 @@ export const BNCC_CODES = {
 
 // Mapeamento tema → códigos BNCC sugeridos
 export const THEME_TO_BNCC = {
-  "Conjuntos Numéricos": ["EM13MAT103"],
+  // Operações básicas / frações / decimais (pouca cobertura no EM, mas mapeio para o que existe)
+  "Adição": [], "Subtração": [], "Multiplicação": [], "Divisão": [],
+  "Operações com Números Naturais": [], "Operações com Números Inteiros": [],
+  "Operações com Números Decimais": [],
+  "Adição de Frações": [], "Subtração de Frações": [], "Adição e Subtração de Frações": [],
+  "Multiplicação de Frações": [], "Divisão de Frações": [], "Operações com Frações": [],
+  "Simplificação de Frações": [], "Comparação de Frações": [],
+  "Frações Equivalentes": [], "Frações e Números Mistos": [],
+  "Conversão entre Fração e Decimal": [], "Dízimas Periódicas": [],
+  // Conjuntos e números
+  "Conjuntos": [], "Conjuntos Numéricos": ["EM13MAT103"],
   "Números Reais": ["EM13MAT103", "EM13MAT313"],
+  "Números Naturais": [], "Números Inteiros": [], "Números Racionais": [], "Números Irracionais": [],
   "Números Complexos": [],
-  "Operações com Frações": [],
+  "Números Primos": [], "MMC": [], "MDC": [], "Múltiplos e Divisores": [], "Divisibilidade": [],
+  "Potenciação": [], "Radiciação": [], "Propriedades das Potências": [], "Propriedades dos Radicais": [],
+  "Racionalização de Denominadores": [], "Expoentes Racionais": [],
+  // Proporcionalidade e finanças
   "Porcentagem": ["EM13MAT104", "EM13MAT203"],
+  "Aumentos e Descontos": ["EM13MAT104", "EM13MAT203"],
+  "Lucro e Prejuízo": ["EM13MAT203"],
   "Razão e Proporção": ["EM13MAT314"],
+  "Grandezas Diretamente Proporcionais": ["EM13MAT314"],
+  "Grandezas Inversamente Proporcionais": ["EM13MAT314"],
   "Regra de Três Simples": ["EM13MAT314"],
   "Regra de Três Composta": ["EM13MAT314"],
   "Juros Simples": ["EM13MAT203", "EM13MAT303"],
   "Juros Compostos": ["EM13MAT203", "EM13MAT303", "EM13MAT304"],
   "Matemática Financeira": ["EM13MAT203", "EM13MAT303", "EM13MAT304", "EM13MAT305"],
+  // Álgebra
   "Expressões Algébricas": ["EM13MAT301"],
+  "Monômios": ["EM13MAT301"],
+  "Polinômios": ["EM13MAT301", "EM13MAT302"],
+  "Operações com Polinômios": ["EM13MAT301"],
   "Produtos Notáveis": ["EM13MAT301"],
   "Fatoração": ["EM13MAT301"],
-  "Polinômios": ["EM13MAT301", "EM13MAT302"],
+  "Divisão de Polinômios": ["EM13MAT301"],
   "Equações do 1º Grau": ["EM13MAT301", "EM13MAT302", "EM13MAT401"],
   "Equações do 2º Grau": ["EM13MAT302", "EM13MAT402", "EM13MAT503"],
+  "Equações Biquadradas": ["EM13MAT302"],
+  "Equações Irracionais": ["EM13MAT301"],
+  "Equações Modulares": ["EM13MAT405"],
+  "Equações Exponenciais": ["EM13MAT304"],
+  "Equações Logarítmicas": ["EM13MAT305"],
   "Inequações": ["EM13MAT301", "EM13MAT302"],
+  "Inequações do 1º Grau": ["EM13MAT301", "EM13MAT401"],
+  "Inequações do 2º Grau": ["EM13MAT302", "EM13MAT402"],
+  "Inequações Modulares": ["EM13MAT405"],
+  "Inequações Exponenciais": ["EM13MAT304"],
+  "Inequações Logarítmicas": ["EM13MAT305"],
+  "Sistemas de Equações": ["EM13MAT301"],
   "Sistemas Lineares": ["EM13MAT301"],
+  "Sistemas Não-Lineares": ["EM13MAT301"],
   "Matrizes": ["EM13MAT301"],
+  "Operações com Matrizes": ["EM13MAT301"],
+  "Matriz Inversa": ["EM13MAT301"],
   "Determinantes": ["EM13MAT301"],
+  "Regra de Cramer": ["EM13MAT301"],
+  "Escalonamento de Matrizes": ["EM13MAT301"],
+  // Funções
   "Funções": ["EM13MAT101", "EM13MAT401", "EM13MAT402", "EM13MAT404"],
   "Função Afim": ["EM13MAT302", "EM13MAT401", "EM13MAT501", "EM13MAT507"],
+  "Função Linear": ["EM13MAT401", "EM13MAT501"],
+  "Função Constante": ["EM13MAT401"],
   "Função Quadrática": ["EM13MAT302", "EM13MAT402", "EM13MAT502", "EM13MAT503"],
   "Função Modular": ["EM13MAT405"],
+  "Função Polinomial": ["EM13MAT302"],
   "Função Exponencial": ["EM13MAT304", "EM13MAT403", "EM13MAT508"],
   "Função Logarítmica": ["EM13MAT305", "EM13MAT403"],
   "Logaritmos": ["EM13MAT305", "EM13MAT403"],
+  "Propriedades dos Logaritmos": ["EM13MAT305"],
   "Função Composta": ["EM13MAT404"],
   "Função Inversa": ["EM13MAT404"],
+  "Domínio e Imagem": ["EM13MAT404", "EM13MAT405"],
+  "Funções Pares e Ímpares": ["EM13MAT405"],
+  "Crescimento e Decrescimento de Funções": ["EM13MAT403", "EM13MAT404"],
+  "Estudo do Sinal": ["EM13MAT302"],
+  "Raízes de Funções": ["EM13MAT302"],
+  "Vértice da Parábola": ["EM13MAT402", "EM13MAT503"],
+  // Sequências
   "Sequências Numéricas": ["EM13MAT507", "EM13MAT508"],
   "Progressão Aritmética": ["EM13MAT507"],
   "Progressão Geométrica": ["EM13MAT508"],
+  "Soma de PA": ["EM13MAT507"],
+  "Soma de PG": ["EM13MAT508"],
+  "PG Infinita": ["EM13MAT508"],
+  // Trigonometria
+  "Trigonometria": ["EM13MAT306", "EM13MAT308"],
   "Trigonometria no Triângulo Retângulo": ["EM13MAT308"],
   "Razões Trigonométricas": ["EM13MAT308"],
+  "Seno": ["EM13MAT306", "EM13MAT308"],
+  "Cosseno": ["EM13MAT306", "EM13MAT308"],
+  "Tangente": ["EM13MAT306", "EM13MAT308"],
+  "Cotangente": ["EM13MAT306"],
+  "Secante": ["EM13MAT306"],
+  "Cossecante": ["EM13MAT306"],
   "Lei dos Senos": ["EM13MAT308"],
   "Lei dos Cossenos": ["EM13MAT308"],
+  "Área do Triângulo (Trigonometria)": ["EM13MAT201", "EM13MAT308"],
   "Ciclo Trigonométrico": ["EM13MAT306"],
+  "Arcos e Ângulos": ["EM13MAT306"],
+  "Conversão Grau-Radiano": ["EM13MAT306"],
   "Funções Trigonométricas": ["EM13MAT306"],
   "Equações Trigonométricas": ["EM13MAT306"],
   "Identidades Trigonométricas": ["EM13MAT306"],
+  "Relações Trigonométricas Fundamentais": ["EM13MAT306"],
+  "Soma e Diferença de Arcos": ["EM13MAT306"],
+  "Arco Duplo": ["EM13MAT306"],
+  "Arco Metade": ["EM13MAT306"],
+  // Geometria Plana
   "Geometria Plana": ["EM13MAT105", "EM13MAT201", "EM13MAT307"],
+  "Ponto, Reta e Plano": [],
   "Ângulos": ["EM13MAT105"],
+  "Ângulos entre Paralelas": ["EM13MAT105"],
   "Triângulos": ["EM13MAT308"],
+  "Classificação de Triângulos": ["EM13MAT308"],
+  "Soma dos Ângulos Internos": [],
   "Triângulos Semelhantes": ["EM13MAT308"],
+  "Semelhança de Triângulos": ["EM13MAT308"],
   "Congruência de Triângulos": ["EM13MAT308"],
   "Teorema de Pitágoras": ["EM13MAT308"],
   "Teorema de Tales": ["EM13MAT308"],
+  "Relações Métricas no Triângulo Retângulo": ["EM13MAT308"],
   "Quadriláteros": ["EM13MAT307"],
+  "Paralelogramos": ["EM13MAT307"],
+  "Trapézios": ["EM13MAT307"],
+  "Losango": ["EM13MAT307"],
+  "Retângulo": ["EM13MAT307"],
+  "Quadrado": ["EM13MAT307"],
   "Polígonos": ["EM13MAT307", "EM13MAT505", "EM13MAT506"],
-  "Circunferência": ["EM13MAT307"],
+  "Polígonos Regulares": ["EM13MAT505", "EM13MAT506"],
+  "Soma dos Ângulos de Polígonos": ["EM13MAT506"],
+  "Circunferência e Círculo": ["EM13MAT307"],
+  "Comprimento da Circunferência": ["EM13MAT307"],
+  "Área do Círculo": ["EM13MAT201", "EM13MAT307"],
+  "Setor Circular": ["EM13MAT307"],
+  "Coroa Circular": ["EM13MAT307"],
   "Áreas de Figuras Planas": ["EM13MAT201", "EM13MAT307", "EM13MAT506"],
+  "Perímetro": ["EM13MAT201"],
+  // Geometria Espacial
   "Geometria Espacial": ["EM13MAT201", "EM13MAT309", "EM13MAT504"],
+  "Sólidos Geométricos": ["EM13MAT309", "EM13MAT504"],
+  "Poliedros": ["EM13MAT309"],
+  "Relação de Euler": ["EM13MAT309"],
   "Prismas": ["EM13MAT309", "EM13MAT504"],
+  "Paralelepípedo": ["EM13MAT309", "EM13MAT504"],
+  "Cubo": ["EM13MAT309", "EM13MAT504"],
   "Pirâmides": ["EM13MAT309", "EM13MAT504"],
   "Cilindros": ["EM13MAT309", "EM13MAT504"],
   "Cones": ["EM13MAT309", "EM13MAT504"],
+  "Tronco de Cone": ["EM13MAT309"],
   "Esferas": ["EM13MAT309"],
-  "Poliedros": ["EM13MAT309"],
   "Volumes": ["EM13MAT201", "EM13MAT309", "EM13MAT504"],
   "Áreas de Superfícies": ["EM13MAT201", "EM13MAT307", "EM13MAT309"],
+  "Princípio de Cavalieri": ["EM13MAT504"],
+  // Geometria Analítica
   "Geometria Analítica": ["EM13MAT401", "EM13MAT402"],
+  "Plano Cartesiano": ["EM13MAT401"],
   "Ponto e Distância": [],
+  "Distância entre Dois Pontos": [],
+  "Ponto Médio": [],
+  "Coordenadas Cartesianas": ["EM13MAT401"],
   "Equação da Reta": ["EM13MAT401"],
+  "Coeficiente Angular": ["EM13MAT401"],
+  "Posições Relativas entre Retas": ["EM13MAT401"],
+  "Distância de Ponto à Reta": [],
   "Equação da Circunferência": [],
-  "Cônicas": [],
-  "Elipse": [],
-  "Hipérbole": [],
-  "Parábola": ["EM13MAT402"],
+  "Posições Relativas entre Reta e Circunferência": [],
+  "Cônicas": [], "Elipse": [], "Hipérbole": [], "Parábola": ["EM13MAT402"],
+  // Análise Combinatória / Probabilidade
   "Análise Combinatória": ["EM13MAT310"],
   "Princípio Fundamental da Contagem": ["EM13MAT310"],
+  "Princípio Aditivo": ["EM13MAT310"],
+  "Fatorial": ["EM13MAT310"],
   "Permutações": ["EM13MAT310"],
+  "Permutações com Repetição": ["EM13MAT310"],
+  "Permutações Circulares": ["EM13MAT310"],
   "Arranjos": ["EM13MAT310"],
   "Combinações": ["EM13MAT310"],
+  "Combinações com Repetição": ["EM13MAT310"],
   "Probabilidade": ["EM13MAT106", "EM13MAT311", "EM13MAT312", "EM13MAT511"],
   "Probabilidade Condicional": ["EM13MAT311", "EM13MAT312", "EM13MAT511"],
+  "Probabilidade da União": ["EM13MAT311", "EM13MAT312"],
+  "Probabilidade da Intersecção": ["EM13MAT311", "EM13MAT312"],
+  "Eventos Independentes": ["EM13MAT311", "EM13MAT312", "EM13MAT511"],
+  "Eventos Mutuamente Exclusivos": ["EM13MAT311", "EM13MAT511"],
   "Binômio de Newton": ["EM13MAT310"],
+  "Triângulo de Pascal": ["EM13MAT310"],
+  // Estatística
   "Estatística": ["EM13MAT102", "EM13MAT202", "EM13MAT316", "EM13MAT406", "EM13MAT407"],
+  "Estatística Descritiva": ["EM13MAT202", "EM13MAT316"],
+  "População e Amostra": ["EM13MAT202", "EM13MAT406"],
+  "Frequência Absoluta e Relativa": ["EM13MAT406"],
+  "Distribuição de Frequências": ["EM13MAT406", "EM13MAT407"],
   "Média": ["EM13MAT202", "EM13MAT316"],
+  "Média Aritmética": ["EM13MAT316"],
+  "Média Ponderada": ["EM13MAT316"],
   "Mediana": ["EM13MAT202", "EM13MAT316"],
   "Moda": ["EM13MAT202", "EM13MAT316"],
   "Desvio Padrão": ["EM13MAT202", "EM13MAT316"],
   "Variância": ["EM13MAT316"],
+  "Amplitude": ["EM13MAT316"],
+  "Quartis": ["EM13MAT316", "EM13MAT407"],
   "Gráficos e Tabelas": ["EM13MAT102", "EM13MAT406", "EM13MAT407"],
+  "Histograma": ["EM13MAT406", "EM13MAT407"],
+  "Box-plot": ["EM13MAT407"],
+  "Gráfico de Setores": ["EM13MAT102", "EM13MAT406"],
   "Amostragem": ["EM13MAT202", "EM13MAT406"],
+  "Pesquisa Estatística": ["EM13MAT202"],
+  // Complexos
+  "Forma Algébrica de Complexos": [],
+  "Forma Trigonométrica de Complexos": [],
+  "Operações com Complexos": [],
+  "Módulo e Argumento": [],
+  "Plano de Argand-Gauss": [],
+  "Fórmula de De Moivre": [],
+  "Raízes de Números Complexos": [],
+  // Polinômios avançado
+  "Teorema do Resto": ["EM13MAT301"],
+  "Teorema de D'Alembert": ["EM13MAT301"],
+  "Dispositivo de Briot-Ruffini": ["EM13MAT301"],
+  "Equações Polinomiais": ["EM13MAT301"],
+  "Relações de Girard": ["EM13MAT301"],
+  "Multiplicidade de Raízes": ["EM13MAT301"],
+  // Outros
   "Grandezas e Medidas": ["EM13MAT103", "EM13MAT201", "EM13MAT314"],
   "Notação Científica": ["EM13MAT313"],
-  "Unidades de Medida": ["EM13MAT103"]
+  "Unidades de Medida": ["EM13MAT103"],
+  "Conversão de Unidades": ["EM13MAT103"],
+  "Sistema Internacional": ["EM13MAT103"],
+  "Lógica Matemática": ["EM13MAT315"],
+  "Tabela Verdade": ["EM13MAT315"],
+  "Conectivos Lógicos": ["EM13MAT315"],
+  "Raciocínio Lógico": ["EM13MAT315"],
+  "Sequências Lógicas": ["EM13MAT315"],
+  "Matemática do Cotidiano": ["EM13MAT104", "EM13MAT203"],
+  "Resolução de Problemas": ["EM13MAT301", "EM13MAT302"]
 };
 
 // Normaliza texto removendo acentos, deixando minúsculo
@@ -247,12 +458,31 @@ export function fuzzySearchTemas(query, maxResults = 8) {
   return out.slice(0, maxResults).map(o => o.tema);
 }
 
-// Dado um conjunto de temas, retorna BNCC sugeridos (deduplicado, ordenado)
+// Palavras curtas/comuns que não ajudam no matching
+const STOPWORDS = new Set(["de","da","do","das","dos","e","com","ou","em","a","o","as","os","no","na","nos","nas","para","por","um","uma","entre"]);
+
+// Dado um conjunto de temas, retorna BNCC sugeridos (deduplicado, ordenado).
+// Combina mapeamento direto + busca fuzzy de palavras-chave do tema nas descrições da BNCC.
 export function bnccSugeridos(temasSelecionados) {
   const set = new Set();
   for (const tema of temasSelecionados) {
+    // 1) mapeamento direto
     const codes = THEME_TO_BNCC[tema] || [];
     for (const c of codes) set.add(c);
+
+    // 2) busca fuzzy: extrai palavras-chave significativas do tema e procura em cada descrição
+    const words = normalize(tema)
+      .replace(/[^a-z0-9\s]/g, " ")
+      .split(/\s+/)
+      .filter(w => w.length >= 4 && !STOPWORDS.has(w));
+    if (!words.length) continue;
+    for (const [code, desc] of Object.entries(BNCC_CODES)) {
+      const ndesc = normalize(desc);
+      let hits = 0;
+      for (const w of words) if (ndesc.includes(w)) hits++;
+      // Exige que ao menos metade das palavras-chave apareçam, e pelo menos 1
+      if (hits >= Math.max(1, Math.ceil(words.length / 2))) set.add(code);
+    }
   }
   return Array.from(set).sort();
 }
