@@ -302,6 +302,12 @@ input[type=text]:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 
       <label>Comentário</label>
       <textarea id="inpCom" placeholder="Observações, dificuldade, fonte..."></textarea>
 
+      <label>Cadastrar como (autor)</label>
+      <input type="text" id="inpAutor" placeholder="Digite o nome do autor (ou deixe em branco para usar o seu)" autocomplete="off">
+      <div style="font-size:.74rem;color:var(--text3);margin-top:4px;line-height:1.4">
+        O nome aparece nas questões para os outros professores. Em branco = seu nome.
+      </div>
+
       <button class="btn" id="btnSalvar">Salvar questão</button>
       <div class="msg" id="msg"></div>
     </div>
@@ -516,6 +522,9 @@ async function salvar(){
   if(!imgQ){ showMsg('Envie a imagem da questão.','err'); return }
   if(!temasSel.length){ showMsg('Selecione ao menos um tema.','err'); return }
   const com=$('inpCom').value.trim();
+  const u=auth.currentUser;
+  const autorDigitado=$('inpAutor').value.trim();
+  const autorNome = autorDigitado || u.displayName || (u.email ? u.email.split('@')[0] : 'Admin');
   try{
     $('btnSalvar').disabled=true;
     const r=push(ref(db,'questoes'));
@@ -525,7 +534,8 @@ async function salvar(){
       bncc: bnccSel,
       estrelas:stars, comentario:com,
       imgQuestao:imgQ, imgResposta:imgR||null,
-      criadoPor:auth.currentUser.uid,
+      criadoPor:u.uid,
+      criadoPorNome: autorNome,
       criadoEm:Date.now()
     });
     showMsg('Questão salva com sucesso.','ok');
@@ -536,7 +546,7 @@ async function salvar(){
 
 function limpar(){
   imgQ=null; imgR=null; stars=0; temasSel=[]; bnccSel=[];
-  $('inpTema').value=''; $('inpBnccAdd').value=''; $('inpCom').value='';
+  $('inpTema').value=''; $('inpBnccAdd').value=''; $('inpCom').value=''; $('inpAutor').value='';
   ['dropQ','dropR'].forEach(id=>$(id).classList.remove('ok'));
   ['prevQ','prevR'].forEach(id=>{$(id).style.display='none'; $(id).src=''});
   $('txtQ').textContent='Clique para enviar um PNG ou JPEG';
