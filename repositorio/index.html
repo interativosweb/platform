@@ -221,6 +221,13 @@ body{
 .ov-box header button:hover{background:var(--bg3);color:var(--text)}
 .ov-box .body{padding:18px 20px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:14px}
 .ov-box .body .tag{display:inline-block;font-size:.7rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;background:rgba(10,132,255,.1);padding:4px 10px;border-radius:6px;align-self:flex-start}
+.author-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:.74rem;font-weight:600;color:var(--text2);
+  background:var(--bg3);border:1px solid var(--border);
+  padding:4px 10px;border-radius:14px;line-height:1;
+}
+.author-chip svg{color:var(--accent2);flex-shrink:0}
 .ov-box .body img{max-width:100%;border:1px solid var(--border);border-radius:8px;background:#fff}
 .ov-box .body h4{font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.7px;margin-top:4px}
 .ov-box .body .com{font-size:.88rem;color:var(--text);line-height:1.5;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px}
@@ -311,9 +318,15 @@ body{
 .visual-editor .math-node .katex .mord,
 .visual-editor .math-node .katex .mrel,
 .visual-editor .math-node .katex .mbin{margin-left:.05em;margin-right:.05em}
-/* Matrizes com mais respiro */
-.visual-editor .math-node .katex .arraycolsep{width:.7em}
-.visual-editor .math-node .katex .mtable .col-align-c .vlist{padding:.2em 0}
+/* Matrizes / sistemas com mais respiro (editor + prova) */
+.visual-editor .math-node .katex .arraycolsep,
+.block .rendered .katex .arraycolsep{width:1.1em}
+.visual-editor .math-node .katex .mtable .col-align-c .vlist,
+.visual-editor .math-node .katex .mtable .col-align-l .vlist,
+.block .rendered .katex .mtable .col-align-c .vlist,
+.block .rendered .katex .mtable .col-align-l .vlist{padding:.45em 0}
+.visual-editor .math-node .katex .mtable,
+.block .rendered .katex .mtable{margin:.15em 0}
 .visual-editor .math-node::after{
   content:'✎'; font-size:.65rem; color:var(--accent); margin-left:4px; opacity:0; transition:opacity .12s;
   font-family:'Inter',sans-serif; vertical-align:super;
@@ -1103,6 +1116,14 @@ onValue(ref(db,'questoes'), snap=>{
 
 function norm(s){return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
 function esc(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML}
+function authorBadge(q){
+  const nome = (q && (q.criadoPorNome || q.autorNome)) || '';
+  if(!nome) return '';
+  return `<span class="author-chip" title="Cadastrado por ${esc(nome)}">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    ${esc(nome)}
+  </span>`;
+}
 
 $('searchInp').addEventListener('input', renderSidebar);
 function renderSidebar(){
@@ -1340,8 +1361,9 @@ function openPreview(qid){
     body.innerHTML=`
       <div class="preview-pend-banner">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".5" fill="currentColor"/></svg>
-        <span><b>Cadastro pendente.</b> Esta questão foi salva como rascunho. Finalize o cadastro para classificar por tema, BNCC e estrelas.</span>
+        <span><b>Cadastro pendente.</b> Esta questão foi salva como rascunho. Finalize o cadastro para que ela não seja excluída pelo sistema.</span>
       </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${authorBadge(q)}</div>
       <h4>Enunciado</h4>
       <div class="preview-manual-text" id="previewManualText"></div>
       ${commentsSection}
@@ -1349,7 +1371,7 @@ function openPreview(qid){
     renderTextWithMath($('previewManualText'), q.textoManual||'', {});
   } else if(isManual){
     body.innerHTML=`
-      <div style="display:flex;gap:6px;flex-wrap:wrap">${temasArr.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${temasArr.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}${authorBadge(q)}</div>
       <h4>Enunciado</h4>
       <div class="preview-manual-text" id="previewManualText"></div>
       ${q.respostaTexto?`<h4>Resposta (não aparece na prova)</h4><div class="com">${esc(q.respostaTexto)}</div>`:''}
@@ -1367,7 +1389,7 @@ function openPreview(qid){
     renderUserRating(qid, q);
   } else {
     body.innerHTML=`
-      <div style="display:flex;gap:6px;flex-wrap:wrap">${temasArr.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${temasArr.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}${authorBadge(q)}</div>
       <h4>Questão</h4>
       <img src="${q.imgQuestao}">
       ${q.imgResposta?`<h4>Resposta (não aparece na prova)</h4><img src="${q.imgResposta}">`:''}
@@ -1500,6 +1522,7 @@ $('manualAdd').onclick=async ()=>{
       status:'pendente',
       imgQuestao:null,
       criadoPor:currentUser.uid,
+      criadoPorNome: currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : 'Usuário'),
       criadoEm:Date.now()
     });
   }
@@ -1528,7 +1551,6 @@ function openFinalizarPopup(qid){
   renderFinBnccChips();
   renderFinStars();
   $('finalizarOv').classList.add('show');
-  setTimeout(()=>{ try{ $('finInpTema').focus() }catch(_){} }, 80);
 }
 
 function renderFinRespImg(){
@@ -1558,7 +1580,7 @@ function normTema(s){return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,
 (function setupFinTemaAutocomplete(){
   const inp=$('finInpTema'); const dd=$('finAcTema');
   inp.addEventListener('input',()=>updateFinAc(inp.value));
-  inp.addEventListener('focus',()=>updateFinAc(inp.value));
+  inp.addEventListener('click',()=>updateFinAc(inp.value));
   inp.addEventListener('keydown',e=>{
     if(!dd.classList.contains('show')) return;
     if(e.key==='ArrowDown'){ e.preventDefault(); finAcIdx=Math.min(finAcIdx+1,finAcItems.length-1); highlightFinAc() }
@@ -1988,19 +2010,19 @@ const KEYBOARD_CATS = [
       {l:'sin²',latex:'\\sin^{2}{x}'},{l:'cos²',latex:'\\cos^{2}{x}'},{l:'tan²',latex:'\\tan^{2}{x}'},
       {l:'arcsin',latex:'\\arcsin{x}'},{l:'arccos',latex:'\\arccos{x}'},{l:'arctan',latex:'\\arctan{x}'},
       {l:'sinh',latex:'\\sinh{x}'},{l:'cosh',latex:'\\cosh{x}'},{l:'tanh',latex:'\\tanh{x}'},
-      {l:'π',text:'π'},{l:'30°',latex:'30^{\\circ}'},{l:'∡',text:'∡'}
+      {l:'π',latex:'\\pi'},{l:'30°',latex:'30^{\\circ}'},{l:'∡',latex:'\\angle'}
     ]
   },
   {
     name:"Gregas", keys:[
-      {l:'α',text:'α',t:'alfa'},{l:'β',text:'β',t:'beta'},{l:'γ',text:'γ',t:'gama'},{l:'δ',text:'δ',t:'delta'},
-      {l:'ε',text:'ε',t:'épsilon'},{l:'ζ',text:'ζ',t:'zeta'},{l:'η',text:'η',t:'eta'},{l:'θ',text:'θ',t:'teta'},
-      {l:'ι',text:'ι',t:'iota'},{l:'κ',text:'κ',t:'kappa'},{l:'λ',text:'λ',t:'lambda'},{l:'μ',text:'μ',t:'mi'},
-      {l:'ν',text:'ν',t:'ni'},{l:'ξ',text:'ξ',t:'csi'},{l:'π',text:'π',t:'pi'},{l:'ρ',text:'ρ',t:'rô'},
-      {l:'σ',text:'σ',t:'sigma'},{l:'τ',text:'τ',t:'tau'},{l:'φ',text:'φ',t:'fi'},{l:'χ',text:'χ',t:'qui'},
-      {l:'ψ',text:'ψ',t:'psi'},{l:'ω',text:'ω',t:'ômega'},
-      {l:'Γ',text:'Γ',t:'Gama maiúsculo'},{l:'Δ',text:'Δ',t:'Delta maiúsculo'},{l:'Θ',text:'Θ',t:'Teta maiúsculo'},{l:'Λ',text:'Λ',t:'Lambda maiúsculo'},
-      {l:'Σ',text:'Σ',t:'Sigma maiúsculo'},{l:'Π',text:'Π',t:'Pi maiúsculo'},{l:'Φ',text:'Φ',t:'Fi maiúsculo'},{l:'Ω',text:'Ω',t:'Ômega maiúsculo'}
+      {l:'α',latex:'\\alpha',t:'alfa'},{l:'β',latex:'\\beta',t:'beta'},{l:'γ',latex:'\\gamma',t:'gama'},{l:'δ',latex:'\\delta',t:'delta'},
+      {l:'ε',latex:'\\varepsilon',t:'épsilon'},{l:'ζ',latex:'\\zeta',t:'zeta'},{l:'η',latex:'\\eta',t:'eta'},{l:'θ',latex:'\\theta',t:'teta'},
+      {l:'ι',latex:'\\iota',t:'iota'},{l:'κ',latex:'\\kappa',t:'kappa'},{l:'λ',latex:'\\lambda',t:'lambda'},{l:'μ',latex:'\\mu',t:'mi'},
+      {l:'ν',latex:'\\nu',t:'ni'},{l:'ξ',latex:'\\xi',t:'csi'},{l:'π',latex:'\\pi',t:'pi'},{l:'ρ',latex:'\\rho',t:'rô'},
+      {l:'σ',latex:'\\sigma',t:'sigma'},{l:'τ',latex:'\\tau',t:'tau'},{l:'φ',latex:'\\varphi',t:'fi'},{l:'χ',latex:'\\chi',t:'qui'},
+      {l:'ψ',latex:'\\psi',t:'psi'},{l:'ω',latex:'\\omega',t:'ômega'},
+      {l:'Γ',latex:'\\Gamma',t:'Gama maiúsculo'},{l:'Δ',latex:'\\Delta',t:'Delta maiúsculo'},{l:'Θ',latex:'\\Theta',t:'Teta maiúsculo'},{l:'Λ',latex:'\\Lambda',t:'Lambda maiúsculo'},
+      {l:'Σ',latex:'\\Sigma',t:'Sigma maiúsculo'},{l:'Π',latex:'\\Pi',t:'Pi maiúsculo'},{l:'Φ',latex:'\\Phi',t:'Fi maiúsculo'},{l:'Ω',latex:'\\Omega',t:'Ômega maiúsculo'}
     ]
   },
   {
@@ -2011,29 +2033,37 @@ const KEYBOARD_CATS = [
       {l:'lim',latex:'\\lim_{x \\to 0}'},{l:'lim x→∞',latex:'\\lim_{x \\to \\infty}'},
       {l:"f'",latex:"f'(x)"},{l:"f''",latex:"f''(x)"},
       {l:'d/dx',latex:'\\frac{d}{dx}'},{l:'∂/∂x',latex:'\\frac{\\partial}{\\partial x}'},
-      {l:'∇',text:'∇'},{l:'Δ',text:'Δ'},{l:'→',text:'→'},{l:'⇒',text:'⇒'},{l:'↦',text:'↦'}
+      {l:'∇',latex:'\\nabla'},{l:'Δ',latex:'\\Delta'},{l:'→',latex:'\\to'},{l:'⇒',latex:'\\Rightarrow'},{l:'↦',latex:'\\mapsto'}
     ]
   },
   {
     name:"Conjuntos", keys:[
-      {l:'∈',text:'∈',t:'pertence'},{l:'∉',text:'∉',t:'não pertence'},{l:'⊂',text:'⊂',t:'está contido'},{l:'⊆',text:'⊆',t:'está contido ou é igual'},
-      {l:'⊃',text:'⊃',t:'contém'},{l:'⊇',text:'⊇',t:'contém ou é igual'},{l:'∪',text:'∪',t:'união'},{l:'∩',text:'∩',t:'intersecção'},
-      {l:'∅',text:'∅',t:'conjunto vazio'},{l:'∀',text:'∀',t:'para todo'},{l:'∃',text:'∃',t:'existe'},{l:'¬',text:'¬',t:'negação'},
-      {l:'∧',text:'∧',t:'e (conjunção)'},{l:'∨',text:'∨',t:'ou (disjunção)'},{l:'⇔',text:'⇔',t:'se e somente se'},
+      {l:'∈',latex:'\\in',t:'pertence'},{l:'∉',latex:'\\notin',t:'não pertence'},{l:'⊂',latex:'\\subset',t:'está contido'},{l:'⊆',latex:'\\subseteq',t:'está contido ou é igual'},
+      {l:'⊃',latex:'\\supset',t:'contém'},{l:'⊇',latex:'\\supseteq',t:'contém ou é igual'},{l:'∪',latex:'\\cup',t:'união'},{l:'∩',latex:'\\cap',t:'intersecção'},
+      {l:'∅',latex:'\\emptyset',t:'conjunto vazio'},{l:'∀',latex:'\\forall',t:'para todo'},{l:'∃',latex:'\\exists',t:'existe'},{l:'¬',latex:'\\neg',t:'negação'},
+      {l:'∧',latex:'\\wedge',t:'e (conjunção)'},{l:'∨',latex:'\\vee',t:'ou (disjunção)'},{l:'⇔',latex:'\\Leftrightarrow',t:'se e somente se'},
       {l:'ℕ',latex:'\\mathbb{N}',t:'Conjunto dos Naturais'},{l:'ℤ',latex:'\\mathbb{Z}',t:'Conjunto dos Inteiros'},{l:'ℚ',latex:'\\mathbb{Q}',t:'Conjunto dos Racionais'},
       {l:'ℝ',latex:'\\mathbb{R}',t:'Conjunto dos Reais'},{l:'ℂ',latex:'\\mathbb{C}',t:'Conjunto dos Complexos'}
     ]
   },
   {
     name:"Matrizes", keys:[
-      {l:'[2×2]',latex:'\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}'},
-      {l:'[3×3]',latex:'\\begin{pmatrix} a & b & c \\\\ d & e & f \\\\ g & h & i \\end{pmatrix}'},
-      {l:'[2×3]',latex:'\\begin{pmatrix} a & b & c \\\\ d & e & f \\end{pmatrix}'},
-      {l:'[3×2]',latex:'\\begin{pmatrix} a & b \\\\ c & d \\\\ e & f \\end{pmatrix}'},
+      // Colchetes [ ]
+      {l:'[2×2]',latex:'\\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix}',t:'Matriz 2×2 com colchetes'},
+      {l:'[3×3]',latex:'\\begin{bmatrix} a & b & c \\\\ d & e & f \\\\ g & h & i \\end{bmatrix}',t:'Matriz 3×3 com colchetes'},
+      {l:'[2×3]',latex:'\\begin{bmatrix} a & b & c \\\\ d & e & f \\end{bmatrix}',t:'Matriz 2×3 com colchetes'},
+      {l:'[3×2]',latex:'\\begin{bmatrix} a & b \\\\ c & d \\\\ e & f \\end{bmatrix}',t:'Matriz 3×2 com colchetes'},
+      // Parênteses ( )
+      {l:'(2×2)',latex:'\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}',t:'Matriz 2×2 com parênteses'},
+      {l:'(3×3)',latex:'\\begin{pmatrix} a & b & c \\\\ d & e & f \\\\ g & h & i \\end{pmatrix}',t:'Matriz 3×3 com parênteses'},
+      {l:'(2×3)',latex:'\\begin{pmatrix} a & b & c \\\\ d & e & f \\end{pmatrix}',t:'Matriz 2×3 com parênteses'},
+      {l:'(3×2)',latex:'\\begin{pmatrix} a & b \\\\ c & d \\\\ e & f \\end{pmatrix}',t:'Matriz 3×2 com parênteses'},
+      // Determinantes
       {l:'det 2×2',latex:'\\begin{vmatrix} a & b \\\\ c & d \\end{vmatrix}'},
       {l:'det 3×3',latex:'\\begin{vmatrix} a & b & c \\\\ d & e & f \\\\ g & h & i \\end{vmatrix}'},
-      {l:'sistema',latex:'\\begin{cases} x + y = 1 \\\\ x - y = 0 \\end{cases}'},
-      {l:'sist. 3',latex:'\\begin{cases} x + y + z = 0 \\\\ 2x - y = 1 \\\\ x + z = 2 \\end{cases}'},
+      // Sistemas com mais respiro
+      {l:'sistema 2',latex:'\\begin{cases} x + y = 1 \\\\[4pt] x - y = 0 \\end{cases}'},
+      {l:'sistema 3',latex:'\\begin{cases} x + y + z = 0 \\\\[4pt] 2x - y = 1 \\\\[4pt] x + z = 2 \\end{cases}'},
       {l:'v⃗',latex:'\\vec{v}'},{l:'AB⃗',latex:'\\overrightarrow{AB}'}
     ]
   },
