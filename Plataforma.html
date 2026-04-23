@@ -912,26 +912,28 @@
 
     <!-- CHAT COM ADMIN -->
     <style>
-      #chatFab{position:fixed;right:22px;bottom:22px;z-index:7000;width:58px;height:58px;border-radius:18px;border:none;background:linear-gradient(135deg,#ff8a00,#d44700);color:#fff;box-shadow:0 10px 26px rgba(212,71,0,.4);cursor:pointer;display:none;align-items:center;justify-content:center;transition:transform .15s}
+      #chatFab{position:fixed;right:22px;bottom:22px;z-index:4500;width:58px;height:58px;border-radius:18px;border:none;background:linear-gradient(135deg,#0a84ff,#005bb5);color:#fff;box-shadow:0 10px 26px rgba(0,113,227,.4);cursor:pointer;display:none;align-items:center;justify-content:center;transition:transform .15s,opacity .15s}
       #chatFab:hover{transform:translateY(-2px)}
-      #chatBadge{position:absolute;top:-6px;right:-6px;background:#fff;color:#d44700;font-size:.7rem;font-weight:800;min-width:20px;height:20px;border-radius:10px;display:none;align-items:center;justify-content:center;padding:0 6px;box-shadow:0 4px 10px rgba(0,0,0,.18)}
-      #chatPanel{position:fixed;right:22px;bottom:92px;z-index:7001;width:480px;max-width:calc(100vw - 44px);height:580px;max-height:calc(100vh - 130px);background:#fff;border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.18);display:none;flex-direction:column;overflow:hidden;border:1px solid #e5e5ea}
-      #chatPanel .hd{padding:14px 16px;background:linear-gradient(135deg,#ff8a00,#d44700);color:#fff;display:flex;align-items:center;justify-content:space-between}
+      .modal-open #chatFab,.modal-open #chatPanel{display:none !important}
+      #chatBadge{position:absolute;top:-6px;right:-6px;background:#fff;color:#0071e3;font-size:.7rem;font-weight:800;min-width:20px;height:20px;border-radius:10px;display:none;align-items:center;justify-content:center;padding:0 6px;box-shadow:0 4px 10px rgba(0,0,0,.18)}
+      #chatPanel{position:fixed;right:22px;bottom:92px;z-index:4501;width:480px;max-width:calc(100vw - 44px);height:580px;max-height:calc(100vh - 130px);background:#fff;border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.18);display:none;flex-direction:column;overflow:hidden;border:1px solid #e5e5ea}
+      #chatPanel .hd{padding:14px 16px;background:linear-gradient(135deg,#0a84ff,#005bb5);color:#fff;display:flex;align-items:center;justify-content:space-between}
       #chatPanel .msgs{flex:1;overflow-y:auto;padding:14px;background:#fafafa;display:flex;flex-direction:column;gap:8px}
       #chatPanel .msgs .bub{max-width:78%;padding:8px 12px;border-radius:14px;font-size:.92rem;line-height:1.45;word-wrap:break-word;overflow-wrap:anywhere;white-space:pre-wrap}
-      #chatPanel .msgs .bub.mine{align-self:flex-end;background:linear-gradient(135deg,#ff8a00,#d44700);color:#fff;border-bottom-right-radius:4px}
+      #chatPanel .msgs .bub.mine{align-self:flex-end;background:linear-gradient(135deg,#0a84ff,#005bb5);color:#fff;border-bottom-right-radius:4px}
       #chatPanel .msgs .bub.them{align-self:flex-start;background:#fff;color:#1d1d1f;border:1px solid #e5e5ea;border-bottom-left-radius:4px}
       #chatPanel .msgs .bub img{max-width:280px;max-height:280px;border-radius:10px;display:block}
       #chatPanel .msgs .bub audio{max-width:300px;display:block}
       #chatPanel .ft{padding:10px;border-top:1px solid #e5e5ea;display:flex;gap:6px;align-items:flex-end;background:#fff}
       #chatPanel .ft textarea{flex:1;padding:9px 12px;border:1px solid #d2d2d7;border-radius:18px;font-size:.92rem;outline:none;font-family:inherit;resize:none;line-height:1.4;min-height:36px;max-height:120px;overflow-y:auto}
-      #chatPanel .ft textarea:focus{border-color:#ff8a00}
-      #chatPanel .ft .ib{background:#f2f2f7;color:#d44700;border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem}
+      #chatPanel .ft textarea:focus{border-color:#0071e3}
+      #chatPanel .ft .ib{background:#f2f2f7;color:#0071e3;border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+      #chatPanel .ft .ib svg{width:16px;height:16px}
       #chatPanel .ft .ib.rec{background:#ff3b30;color:#fff}
-      #chatPanel .ft .sn{background:linear-gradient(135deg,#ff8a00,#d44700);color:#fff;border:none;border-radius:18px;padding:0 16px;font-weight:700;cursor:pointer;height:36px;flex-shrink:0}
+      #chatPanel .ft .sn{background:linear-gradient(135deg,#0a84ff,#005bb5);color:#fff;border:none;border-radius:18px;padding:0 16px;font-weight:700;cursor:pointer;height:36px;flex-shrink:0}
     </style>
     <button id="chatFab" title="Falar com o administrador">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       <span id="chatBadge">0</span>
     </button>
     <div id="chatPanel">
@@ -941,8 +943,8 @@
       </div>
       <div id="chatMsgs" class="msgs"></div>
       <div class="ft">
-        <button id="chatBtnImg" class="ib" title="Enviar imagem">📷</button>
-        <button id="chatBtnAud" class="ib" title="Gravar áudio">🎤</button>
+        <button id="chatBtnImg" class="ib" title="Enviar imagem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button>
+        <button id="chatBtnAud" class="ib" title="Gravar áudio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
         <textarea id="chatInput" rows="1" placeholder="Escreva uma mensagem..."></textarea>
         <button id="chatSend" class="sn">Enviar</button>
         <input type="file" id="chatFileImg" accept="image/*" style="display:none">
@@ -1195,22 +1197,16 @@
                     tags: ["geometria", "gráficos", "construções", "interativo", "cálculo"]
                 },
                 {
-                    title: "Adição e Subtração de Frações", desc: "Exercícios introdutórios e atividades complementares de adição e subtração de frações.",
-                    url: "adicaoesubtracaodefracoes/gerador_link.html", icon: "",
-                    category: "fracoes", theme: "orange",
-                    tags: ["frações", "equações", "exercícios", "subtração", "adição"]
-                },
-                {
-                    title: "Teorema de Pitágoras", desc: "Atividades para praticar a aplicação do Teorema de Pitágoras em triângulos retângulos.",
-                    url: "#", icon: "", underConstruction: true,
-                    category: "Geometria", theme: "green",
-                    tags: ["Geometria", "Pitágoras", "Hipotenusa", "Cateto",]
-                },
-                {
                     title: "Fluxo de Atividades", desc: "Crie atividades com fluxo visual de questões. Monte percursos personalizados para seus alunos.",
                     url: "fluxoatividades/fluxodolink.html", icon: "",
                     category: "atividades", theme: "purple",
                     tags: ["fluxo", "atividades", "questões", "personalizado", "mapa"]
+                },
+                {
+                    title: "Banco de Questões", desc: "Banco com diversas questões de provas organizadas para professores montarem avaliações rapidamente.",
+                    url: "repositorio/index.html", icon: "",
+                    category: "atividades", theme: "green",
+                    tags: ["banco", "questões", "provas", "professor"]
                 },
                 {
                     title: "Modo Prova", desc: "Gere um link bloqueado a partir de qualquer atividade. Tela cheia forçada, atalhos bloqueados e senha para desbloquear.",
@@ -1219,17 +1215,29 @@
                     tags: ["prova", "bloqueio", "tela cheia", "senha", "exame"]
                 },
                 {
+                    title: "Adição e Subtração de Frações", desc: "Exercícios introdutórios e atividades complementares de adição e subtração de frações.",
+                    url: "adicaoesubtracaodefracoes/gerador_link.html", icon: "",
+                    category: "fracoes", theme: "orange",
+                    tags: ["frações", "equações", "exercícios", "subtração", "adição"]
+                },
+                {
                     title: "Jogos", desc: "Coleção de jogos de matemática para tornar o aprendizado divertido e interativo.",
                     url: "#", icon: "", underConstruction: true,
                     category: "jogos", theme: "yellow",
                     tags: ["jogos", "matemática", "diversão", "interativo", "aprendizado"]
                 },
                 {
-                    title: "Repositório do Professor", desc: "Banco com diversas questões de provas organizadas para professores montarem avaliações rapidamente.",
-                    url: "repositorio/index.html", icon: "",
-                    category: "atividades", theme: "green",
-                    tags: ["repositório", "questões", "provas", "banco", "professor"]
+                    title: "Teorema de Pitágoras", desc: "Atividades para praticar a aplicação do Teorema de Pitágoras em triângulos retângulos.",
+                    url: "#", icon: "", underConstruction: true,
+                    category: "geometria", theme: "green",
+                    tags: ["geometria", "pitágoras", "hipotenusa", "cateto"]
                 },
+                {
+                    title: "Experiências Pibid", desc: "Espaço para os alunos compartilharem suas experiências e relatos do Pibid.",
+                    url: "#", icon: "", underConstruction: true,
+                    category: "atividades", theme: "purple",
+                    tags: ["pibid", "experiências", "relatos", "alunos"]
+                }
             ];
 
             const CAT_LABELS = {
@@ -1296,7 +1304,7 @@
                         '<div class="card-title">' + r.title + '</div>' +
                         '<div class="card-desc">' + r.desc + '</div>' +
                         '<div class="card-footer">' +
-                        '<div class="card-tags">' + r.tags.slice(0, 3).map(t => '<span class="card-tag">' + t + '</span>').join('') + '</div>' +
+                        '<div></div>' +
                         '<div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></div>' +
                         '</div>' +
                         '</div>';
@@ -1331,10 +1339,12 @@
             document.getElementById('wipTitle').textContent = 'Em construção';
             document.getElementById('wipSub').textContent = title + ' está sendo preparada. Em breve estará disponível.';
             ov.classList.add('show');
+            document.body.classList.add('modal-open');
         }
-        document.getElementById('wipClose').addEventListener('click', () => document.getElementById('wipOverlay').classList.remove('show'));
-        document.getElementById('wipOk').addEventListener('click', () => document.getElementById('wipOverlay').classList.remove('show'));
-        document.getElementById('wipOverlay').addEventListener('click', e => { if (e.target.id === 'wipOverlay') document.getElementById('wipOverlay').classList.remove('show'); });
+        function hideWip(){ document.getElementById('wipOverlay').classList.remove('show'); document.body.classList.remove('modal-open') }
+        document.getElementById('wipClose').addEventListener('click', hideWip);
+        document.getElementById('wipOk').addEventListener('click', hideWip);
+        document.getElementById('wipOverlay').addEventListener('click', e => { if (e.target.id === 'wipOverlay') hideWip(); });
 
         // ===== LOG TOOL USAGE =====
         async function logToolUsage(ferramenta) {
@@ -1353,6 +1363,9 @@
             }
         }
 
+        // ===== Helpers para esconder o chatFab quando algum modal está aberto =====
+        function setModalOpen(on){ document.body.classList.toggle('modal-open', !!on) }
+
         // ===== ADMIN GEAR BUTTON =====
         document.getElementById('gearBtn').addEventListener('click', () => {
             if (isAdmin) {
@@ -1365,16 +1378,19 @@
                 document.getElementById('admEmail').value = '';
                 document.getElementById('admSenha').value = '';
                 document.getElementById('admError').classList.remove('show');
+                setModalOpen(true);
             }
         });
 
         document.getElementById('admClose').addEventListener('click', () => {
             document.getElementById('admOverlay').classList.remove('show');
+            setModalOpen(false);
         });
 
         document.getElementById('admOverlay').addEventListener('click', (e) => {
             if (e.target === e.currentTarget) {
                 document.getElementById('admOverlay').classList.remove('show');
+                setModalOpen(false);
             }
         });
 
@@ -1392,6 +1408,7 @@
                 localStorage.setItem('alquilab_adm', 'true');
                 window.open('Administrador.html', '_blank');
                 document.getElementById('admOverlay').classList.remove('show');
+                setModalOpen(false);
             } catch (e) {
                 console.error('Falha ao autenticar admin no Firebase:', e);
                 document.getElementById('admError').classList.add('show');
@@ -1479,7 +1496,7 @@
             function sendPayload(payload) {
                 const m = push(ref(db, 'chats/' + uid + '/messages'));
                 set(m, Object.assign({ from: 'user', ts: Date.now(), nome: nome }, payload));
-                const label = payload.type === 'image' ? '📷 Imagem' : payload.type === 'audio' ? '🎤 Áudio' : (payload.text || '').slice(0, 60);
+                const label = payload.type === 'image' ? '[Imagem]' : payload.type === 'audio' ? '[Áudio]' : (payload.text || '').slice(0, 60);
                 update(threadRef, { atualizadoEm: Date.now(), ultimaMsg: label });
             }
             function autoGrow() {
@@ -1503,6 +1520,8 @@
                 r.readAsDataURL(f);
             });
 
+            const ICON_MIC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>';
+            const ICON_STOP = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>';
             let mediaRec = null, audioChunks = [];
             btnAud.onclick = async () => {
                 if (mediaRec && mediaRec.state === 'recording') { mediaRec.stop(); return }
@@ -1512,14 +1531,14 @@
                     mediaRec.ondataavailable = e => audioChunks.push(e.data);
                     mediaRec.onstop = () => {
                         stream.getTracks().forEach(t => t.stop());
-                        btnAud.classList.remove('rec'); btnAud.textContent = '🎤';
+                        btnAud.classList.remove('rec'); btnAud.innerHTML = ICON_MIC;
                         const blob = new Blob(audioChunks, { type: 'audio/webm' });
                         if (blob.size > MAX_BYTES) { alert('Áudio maior que 800 KB. Grave um mais curto.'); return }
                         const r = new FileReader();
                         r.onload = () => sendPayload({ type: 'audio', data: r.result });
                         r.readAsDataURL(blob);
                     };
-                    mediaRec.start(); btnAud.classList.add('rec'); btnAud.textContent = '⏹';
+                    mediaRec.start(); btnAud.classList.add('rec'); btnAud.innerHTML = ICON_STOP;
                 } catch (e) { alert('Não foi possível acessar o microfone.') }
             };
         }
