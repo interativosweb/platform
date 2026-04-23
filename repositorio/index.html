@@ -81,16 +81,31 @@ body{
 .search-box svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text2)}
 .sidebar-head{
   padding:12px 16px 8px;font-size:.7rem;font-weight:700;color:var(--text2);
-  letter-spacing:1.1px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;
+  letter-spacing:1.1px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;gap:8px;
 }
+.sidebar-head .filter-toggle{
+  display:inline-flex;align-items:center;gap:5px;padding:5px 10px;
+  background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+  color:var(--text2);font-size:.66rem;font-weight:700;letter-spacing:.5px;
+  cursor:pointer;font-family:inherit;text-transform:uppercase;transition:all .12s;
+}
+.sidebar-head .filter-toggle:hover{color:var(--accent);border-color:var(--accent)}
+.sidebar-head .filter-toggle.active{background:var(--accent);border-color:var(--accent);color:#fff}
 .qlist{flex:1;overflow-y:auto;padding:6px 14px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;align-content:start}
 .qitem{
   background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:8px;cursor:pointer;
   transition:border-color .15s,transform .15s,box-shadow .15s;
+  display:flex;flex-direction:column;height:200px;
 }
 .qitem:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 20px rgba(10,132,255,.15)}
-.qitem img{width:100%;max-height:140px;object-fit:contain;border-radius:6px;background:#fff;display:block}
-.qitem .meta{font-size:.72rem;color:var(--text2);display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:4px}
+.qitem.in-prova{border-color:var(--success);box-shadow:0 0 0 2px rgba(48,209,88,.25)}
+.qitem.in-prova:hover{border-color:var(--success);box-shadow:0 6px 20px rgba(48,209,88,.3)}
+.qitem .qitem-thumb{
+  flex:1;width:100%;background:#fff;border-radius:6px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.qitem img{width:100%;height:100%;object-fit:contain;display:block}
+.qitem .meta{font-size:.72rem;color:var(--text2);display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:4px;flex-shrink:0}
 .qitem .tema{color:var(--accent2);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .qitem .stars{color:var(--warning);font-size:.7rem;letter-spacing:1px;flex-shrink:0}
 .qitem.qitem-pendente{border-style:dashed;border-color:var(--warning);background:rgba(255,159,10,.05)}
@@ -101,7 +116,7 @@ body{
   color:#1a1205;background:var(--warning);padding:2px 7px;border-radius:4px;flex-shrink:0;
 }
 .qitem-manual-thumb{
-  width:100%;min-height:90px;max-height:140px;background:#fff;color:#111;
+  width:100%;height:100%;background:#fff;color:#111;
   border-radius:6px;padding:10px;font-size:.74rem;line-height:1.35;
   overflow:hidden;display:block;word-break:break-word;
 }
@@ -117,9 +132,11 @@ body{
 .preview-manual-text{
   background:#fff;color:#111;padding:26px 30px;border-radius:8px;
   font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
-  font-size:1.2rem;line-height:1.75;min-height:90px;word-wrap:break-word;
+  font-size:1.2rem;line-height:1.95;min-height:140px;word-wrap:break-word;
+  overflow-x:auto;
 }
-.preview-manual-text .katex{font-size:1.25em}
+.preview-manual-text .katex{font-size:1.3em}
+.preview-manual-text .math-inline{display:inline-block;margin:4px 2px;vertical-align:middle}
 
 /* ===== DOCUMENT AREA ===== */
 .docarea{overflow:auto;padding:24px;display:flex;flex-direction:column;align-items:center;gap:14px}
@@ -178,12 +195,18 @@ body{
 
 .blocks-area{flex:1;display:flex;flex-direction:column;gap:10px;min-height:0}
 .block{
-  position:relative;background:#fff;border:1.5px dashed transparent;border-radius:4px;padding:6px 8px;
-  overflow:hidden;transition:border-color .12s;
+  position:relative;background:transparent;border:1.5px dashed transparent;border-radius:4px;padding:6px 8px;
+  overflow:hidden;transition:border-color .12s,transform .12s;
 }
 .block:hover{border-color:#bcd6f5}
 .block.dragging{opacity:.35}
-.block.drag-over{border-color:#0a84ff;background:#eef6ff}
+.block.drag-over{border-color:#0a84ff;background:rgba(238,246,255,.6)}
+.block .h-handle{
+  position:absolute;top:4px;left:34px;cursor:ew-resize;padding:3px 8px;
+  background:rgba(255,255,255,.95);border:1px solid #ccc;border-radius:6px;
+  font-size:.78rem;color:#555;display:none;font-weight:700;user-select:none;
+}
+.block:hover .h-handle{display:block}
 .block img{max-width:100%;display:block;margin:0 auto;pointer-events:none}
 .block .rendered{
   width:100%;
@@ -229,7 +252,9 @@ body{
 }
 .author-chip svg{color:var(--accent2);flex-shrink:0}
 .ov-box .body img{max-width:100%;border:1px solid var(--border);border-radius:8px;background:#fff}
-.ov-box .body h4{font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.7px;margin-top:4px}
+.ov-box .body h4{font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.7px;margin-top:18px;margin-bottom:6px;clear:both}
+.ov-box .body .chips{margin-bottom:8px}
+.ov-box .body .chip.bncc{position:static}
 .ov-box .body .com{font-size:.88rem;color:var(--text);line-height:1.5;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px}
 .ov-box footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;align-items:center}
 .ov-box footer button{padding:10px 18px;border-radius:9px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
@@ -318,15 +343,15 @@ body{
 .visual-editor .math-node .katex .mord,
 .visual-editor .math-node .katex .mrel,
 .visual-editor .math-node .katex .mbin{margin-left:.05em;margin-right:.05em}
-/* Matrizes / sistemas com mais respiro (editor + prova) */
+/* Matrizes / sistemas: só colsep (espaço entre colunas). O espaço entre linhas
+   é controlado por \\\\[4pt] no próprio LaTeX para não quebrar o alinhamento dos colchetes. */
 .visual-editor .math-node .katex .arraycolsep,
-.block .rendered .katex .arraycolsep{width:1.1em}
-.visual-editor .math-node .katex .mtable .col-align-c .vlist,
-.visual-editor .math-node .katex .mtable .col-align-l .vlist,
-.block .rendered .katex .mtable .col-align-c .vlist,
-.block .rendered .katex .mtable .col-align-l .vlist{padding:.45em 0}
-.visual-editor .math-node .katex .mtable,
-.block .rendered .katex .mtable{margin:.15em 0}
+.block .rendered .katex .arraycolsep,
+.preview-manual-text .katex .arraycolsep{width:1.1em}
+/* Índice (n) das raízes um pouco menor */
+.visual-editor .math-node .katex .root,
+.block .rendered .katex .root,
+.preview-manual-text .katex .root{font-size:.78em}
 .visual-editor .math-node::after{
   content:'✎'; font-size:.65rem; color:var(--accent); margin-left:4px; opacity:0; transition:opacity .12s;
   font-family:'Inter',sans-serif; vertical-align:super;
@@ -345,6 +370,9 @@ math-field{
   --placeholder-color:#a0a0a8; --placeholder-opacity:.55;
   min-height:100px;
 }
+/* Esconder o ícone de toggle do teclado virtual do MathLive */
+math-field::part(virtual-keyboard-toggle),
+math-field::part(menu-toggle){display:none !important}
 .mfield-quick{
   display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;
 }
@@ -380,6 +408,11 @@ math-field{
   display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px;padding:4px 0;
   max-height:220px;overflow-y:auto;
 }
+/* Categoria "Matrizes": botões maiores e com mais respiro horizontal */
+.kbd-grid.kbd-grid-wide{grid-template-columns:repeat(auto-fill,minmax(118px,1fr));max-height:300px}
+.kbd-grid.kbd-grid-wide .kbd-key{min-height:72px;padding:10px 14px;overflow:hidden}
+.kbd-grid.kbd-grid-wide .kbd-key .katex{font-size:.78em;line-height:1;max-width:100%;display:inline-block;vertical-align:middle}
+.kbd-grid.kbd-grid-wide .kbd-key .katex .arraycolsep{width:.55em}
 .kbd-key{
   padding:10px 6px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;
   color:var(--text);font-size:1rem;cursor:pointer;
@@ -553,7 +586,13 @@ math-field{
 
 @media print{
   html,body{background:#fff !important;background-image:none !important;overflow:visible !important;height:auto !important}
-  .topbar,.sidebar,.ov,.block .ctrls,.block .handle,.page-num,.doc-toolbar,.hdr-gear{display:none !important}
+  /* Garantir que padrões de fundo do papel (linhas/quadriculado/pontilhado) sejam impressos */
+  .page,.page.bg-linhas,.page.bg-quadriculado,.page.bg-pontilhado{
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+    color-adjust:exact !important;
+  }
+  .topbar,.sidebar,.ov,.block .ctrls,.block .handle,.block .h-handle,.page-num,.doc-toolbar,.hdr-gear{display:none !important}
   .workspace{display:block !important;height:auto !important}
   .docarea{padding:0 !important;gap:0 !important;display:block !important;overflow:visible !important}
   .page{
@@ -724,7 +763,7 @@ math-field{
       </svg>
     </div>
     <div class="brand-text">
-      <h1>Montador de Provas</h1>
+      <h1>Montador de Provas <span id="brandUser" style="font-weight:400;color:var(--text2)"></span></h1>
       <div class="sub"><span id="pageCount">1 página</span> · Repositório do Professor</div>
     </div>
   </div>
@@ -744,7 +783,11 @@ math-field{
         <input type="text" id="searchInp" placeholder="Buscar por tema... ex: matrizes">
       </div>
     </div>
-    <div class="sidebar-head"><span>Banco de questões</span><span id="countQ">0</span></div>
+    <div class="sidebar-head">
+      <span>Banco de questões</span>
+      <button type="button" class="filter-toggle" id="btnMinhasQ" title="Mostrar apenas minhas questões">Minhas</button>
+      <span id="countQ" style="margin-left:auto">0</span>
+    </div>
     <div class="qlist" id="qlist"><div class="sid-empty">Carregando banco...</div></div>
   </aside>
 
@@ -760,7 +803,7 @@ math-field{
 </div>
 
 <div class="ov" id="previewOv">
-  <div class="ov-box" style="max-width:760px">
+  <div class="ov-box" style="max-width:920px">
     <header><h3>Pré-visualização da questão</h3><button id="previewClose">✕</button></header>
     <div class="body" id="previewBody"></div>
     <footer class="preview-footer">
@@ -907,7 +950,7 @@ math-field{
         <span>Clique em uma <b>caixa vazia</b> para digitar. Use as <b>setas do teclado</b> para navegar entre numerador, denominador, células da matriz e potências. As caixas que ficarem vazias serão removidas ao salvar.</span>
       </div>
       <div class="mfield-wrap">
-        <math-field id="mathEditField"></math-field>
+        <math-field id="mathEditField" virtual-keyboard-mode="off" math-virtual-keyboard-policy="manual" menu-disabled></math-field>
       </div>
       <div>
         <div class="kbd-tabs" id="mathEditTabs"></div>
@@ -1055,15 +1098,15 @@ math-field{
     <div class="row">
       <label>Tipo de impressão</label>
       <select id="cfgColor">
+        <option value="pb" selected>Preto e branco</option>
         <option value="cor">Colorida</option>
-        <option value="pb">Preto e branco</option>
       </select>
     </div>
     <div class="row">
       <label>Layout</label>
       <select id="cfgLayout">
+        <option value="2face" selected>Frente e verso (configure também na impressora)</option>
         <option value="1face">Somente frente</option>
-        <option value="2face">Frente e verso (configure também na impressora)</option>
       </select>
     </div>
     <div class="foot">
@@ -1105,7 +1148,10 @@ onAuthStateChanged(auth,user=>{
   if(!user){ window.location.href='../index.html'; return }
   currentUser=user;
   if(user.email===ADMIN_EMAIL) $('linkAdmin').style.display='inline-flex';
+  const nome = user.displayName || (user.email ? user.email.split('@')[0] : '');
+  if(nome) $('brandUser').textContent = '— ' + nome;
   $('authLoader').style.display='none';
+  renderSidebar();
 });
 
 onValue(ref(db,'questoes'), snap=>{
@@ -1126,31 +1172,55 @@ function authorBadge(q){
 }
 
 $('searchInp').addEventListener('input', renderSidebar);
+let onlyMine = false;
+$('btnMinhasQ').addEventListener('click', ()=>{
+  onlyMine = !onlyMine;
+  $('btnMinhasQ').classList.toggle('active', onlyMine);
+  renderSidebar();
+});
 function renderSidebar(){
   const q=norm($('searchInp').value.trim());
   let list=questoes;
+  // Filtro: pendentes só visíveis para quem cadastrou
+  if(currentUser){
+    list = list.filter(it=> it.status!=='pendente' || it.criadoPor===currentUser.uid);
+  } else {
+    list = list.filter(it=> it.status!=='pendente');
+  }
+  // Filtro: "Minhas questões"
+  if(onlyMine && currentUser){
+    list = list.filter(it=> it.criadoPor===currentUser.uid);
+  }
   if(q) list=list.filter(it=>
     norm(it.tema).includes(q) ||
     (it.temas||[]).some(t=>norm(t).includes(q)) ||
     (it.bncc||[]).some(b=>norm(b).includes(q)) ||
-    norm(it.comentario||'').includes(q)
+    norm(it.comentario||'').includes(q) ||
+    norm(it.criadoPorNome||'').includes(q)
   );
   $('countQ').textContent=list.length;
   const el=$('qlist');
   if(!list.length){
-    el.innerHTML='<div class="sid-empty">'+(questoes.length?'Nenhuma questão encontrada.':'Banco vazio. O administrador precisa cadastrar questões.')+'</div>';
+    let msg;
+    if(onlyMine) msg='Você ainda não cadastrou nenhuma questão.';
+    else if(q) msg='Nenhuma questão encontrada.';
+    else msg='Banco vazio. Cadastre uma questão usando "+ Questão manual" no topo.';
+    el.innerHTML='<div class="sid-empty">'+msg+'</div>';
     return;
   }
+  // Ids de questões já adicionadas à prova atual (para borda verde)
+  const inProvaIds = new Set(blocks.filter(b=>b.type==='banco' && b.qid).map(b=>b.qid));
   el.innerHTML=list.map(q=>{
     const isPendente = q.status==='pendente';
+    const isInProva = inProvaIds.has(q.id);
     const temaDisplay = isPendente ? 'Pendente' : ((q.temas && q.temas[0]) || q.tema || 'sem tema');
-    let thumb;
+    let thumbInner;
     if(q.imgQuestao){
-      thumb = `<img src="${q.imgQuestao}" alt="" loading="lazy">`;
+      thumbInner = `<img src="${q.imgQuestao}" alt="" loading="lazy">`;
     } else if(q.tipo==='manual' && q.textoManual){
-      thumb = `<div class="qitem-manual-thumb" data-texto="${escAttr(q.textoManual)}"></div>`;
+      thumbInner = `<div class="qitem-manual-thumb" data-texto="${escAttr(q.textoManual)}"></div>`;
     } else {
-      thumb = `<div class="qitem-manual-thumb">—</div>`;
+      thumbInner = `<div class="qitem-manual-thumb">—</div>`;
     }
     const avals = q.avaliacoes || {};
     const vals = Object.values(avals).filter(v=>typeof v==='number' && v>=1 && v<=5);
@@ -1158,16 +1228,18 @@ function renderSidebar(){
     const starsHtml = vals.length
       ? `<span class="stars" title="${vals.length} ${vals.length===1?'avaliação':'avaliações'}">★ ${avg.toFixed(1)}</span>`
       : (q.estrelas?`<span class="stars">${'★'.repeat(q.estrelas)}</span>`:'');
+    const cls = ['qitem'];
+    if(isPendente) cls.push('qitem-pendente');
+    if(isInProva) cls.push('in-prova');
     return `
-    <div class="qitem${isPendente?' qitem-pendente':''}" data-id="${q.id}">
-      ${thumb}
+    <div class="${cls.join(' ')}" data-id="${q.id}">
+      <div class="qitem-thumb">${thumbInner}</div>
       <div class="meta">
         <span class="tema">${esc(temaDisplay)}</span>
         ${isPendente?'<span class="badge-pend">Pendente</span>':starsHtml}
       </div>
     </div>`;
   }).join('');
-  // Renderizar previews de questões manuais
   el.querySelectorAll('.qitem-manual-thumb[data-texto]').forEach(div=>{
     renderTextWithMath(div, div.dataset.texto, {compact:true});
   });
@@ -1290,7 +1362,7 @@ function renderComments(qid, q){
   if(!items.length){ list.innerHTML='<div class="empty">Sem comentários ainda. Seja o primeiro a comentar.</div>'; return }
   const isAdmin = currentUser && currentUser.email===ADMIN_EMAIL;
   list.innerHTML=items.map(c=>{
-    const canDel = isAdmin || (currentUser && c.autorUid===currentUser.uid);
+    const canDel = isAdmin;
     return `<div class="com-item" data-cid="${esc(c.cid)}">
       <div class="com-head">
         <span><span class="com-author">${esc(c.autorNome||'Usuário')}</span> · <span class="com-time">${esc(fmtComTime(c.criadoEm))}</span></span>
@@ -1495,10 +1567,9 @@ $('manualAdd').onclick=async ()=>{
       if(!t){
         await remove(ref(db,'questoes/'+editingQid));
       } else {
-        // Ao editar, a questão volta para pendente (preservando demais dados)
+        // Ao editar, mantém o status atual (não volta para pendente se já foi finalizada)
         await update(ref(db,'questoes/'+editingQid),{
           textoManual:t,
-          status:'pendente',
           atualizadoEm:Date.now()
         });
       }
@@ -1515,6 +1586,13 @@ $('manualAdd').onclick=async ()=>{
   } else if(t){
     // Nova questão manual → vai para o banco como PENDENTE
     if(!currentUser){ alert('Aguarde autenticação.'); return }
+    // Limite silencioso de questões por usuário
+    const QUESTOES_LIMITE_USER = 200;
+    const myCount = questoes.filter(q=>q.criadoPor===currentUser.uid).length;
+    if(myCount >= QUESTOES_LIMITE_USER){
+      alert('Não foi possível salvar a questão no momento. Tente novamente mais tarde.');
+      return;
+    }
     const novaRef=push(ref(db,'questoes'));
     await set(novaRef,{
       tipo:'manual',
@@ -1866,6 +1944,7 @@ function renderMathEditQuick(){
   tabs.innerHTML=KEYBOARD_CATS.map((c,i)=>`<button class="kbd-tab${i===mathEditActiveCat?' active':''}" type="button" data-i="${i}">${esc(c.name)}</button>`).join('');
   tabs.querySelectorAll('.kbd-tab').forEach(b=>b.onclick=()=>{ mathEditActiveCat=parseInt(b.dataset.i); renderMathEditQuick() });
   const cat=KEYBOARD_CATS[mathEditActiveCat];
+  grid.className = 'kbd-grid' + (cat.name==='Matrizes' ? ' kbd-grid-wide' : '');
   grid.innerHTML=cat.keys.map((k,i)=>{
     let content;
     if(k.latex){
@@ -2049,18 +2128,18 @@ const KEYBOARD_CATS = [
   {
     name:"Matrizes", keys:[
       // Colchetes [ ]
-      {l:'[2×2]',latex:'\\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix}',t:'Matriz 2×2 com colchetes'},
-      {l:'[3×3]',latex:'\\begin{bmatrix} a & b & c \\\\ d & e & f \\\\ g & h & i \\end{bmatrix}',t:'Matriz 3×3 com colchetes'},
-      {l:'[2×3]',latex:'\\begin{bmatrix} a & b & c \\\\ d & e & f \\end{bmatrix}',t:'Matriz 2×3 com colchetes'},
-      {l:'[3×2]',latex:'\\begin{bmatrix} a & b \\\\ c & d \\\\ e & f \\end{bmatrix}',t:'Matriz 3×2 com colchetes'},
+      {l:'[2×2]',latex:'\\begin{bmatrix} a & b \\\\[4pt] c & d \\end{bmatrix}',t:'Matriz 2×2 com colchetes'},
+      {l:'[3×3]',latex:'\\begin{bmatrix} a & b & c \\\\[4pt] d & e & f \\\\[4pt] g & h & i \\end{bmatrix}',t:'Matriz 3×3 com colchetes'},
+      {l:'[2×3]',latex:'\\begin{bmatrix} a & b & c \\\\[4pt] d & e & f \\end{bmatrix}',t:'Matriz 2×3 com colchetes'},
+      {l:'[3×2]',latex:'\\begin{bmatrix} a & b \\\\[4pt] c & d \\\\[4pt] e & f \\end{bmatrix}',t:'Matriz 3×2 com colchetes'},
       // Parênteses ( )
-      {l:'(2×2)',latex:'\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}',t:'Matriz 2×2 com parênteses'},
-      {l:'(3×3)',latex:'\\begin{pmatrix} a & b & c \\\\ d & e & f \\\\ g & h & i \\end{pmatrix}',t:'Matriz 3×3 com parênteses'},
-      {l:'(2×3)',latex:'\\begin{pmatrix} a & b & c \\\\ d & e & f \\end{pmatrix}',t:'Matriz 2×3 com parênteses'},
-      {l:'(3×2)',latex:'\\begin{pmatrix} a & b \\\\ c & d \\\\ e & f \\end{pmatrix}',t:'Matriz 3×2 com parênteses'},
+      {l:'(2×2)',latex:'\\begin{pmatrix} a & b \\\\[4pt] c & d \\end{pmatrix}',t:'Matriz 2×2 com parênteses'},
+      {l:'(3×3)',latex:'\\begin{pmatrix} a & b & c \\\\[4pt] d & e & f \\\\[4pt] g & h & i \\end{pmatrix}',t:'Matriz 3×3 com parênteses'},
+      {l:'(2×3)',latex:'\\begin{pmatrix} a & b & c \\\\[4pt] d & e & f \\end{pmatrix}',t:'Matriz 2×3 com parênteses'},
+      {l:'(3×2)',latex:'\\begin{pmatrix} a & b \\\\[4pt] c & d \\\\[4pt] e & f \\end{pmatrix}',t:'Matriz 3×2 com parênteses'},
       // Determinantes
-      {l:'det 2×2',latex:'\\begin{vmatrix} a & b \\\\ c & d \\end{vmatrix}'},
-      {l:'det 3×3',latex:'\\begin{vmatrix} a & b & c \\\\ d & e & f \\\\ g & h & i \\end{vmatrix}'},
+      {l:'det 2×2',latex:'\\begin{vmatrix} a & b \\\\[4pt] c & d \\end{vmatrix}'},
+      {l:'det 3×3',latex:'\\begin{vmatrix} a & b & c \\\\[4pt] d & e & f \\\\[4pt] g & h & i \\end{vmatrix}'},
       // Sistemas com mais respiro
       {l:'sistema 2',latex:'\\begin{cases} x + y = 1 \\\\[4pt] x - y = 0 \\end{cases}'},
       {l:'sistema 3',latex:'\\begin{cases} x + y + z = 0 \\\\[4pt] 2x - y = 1 \\\\[4pt] x + z = 2 \\end{cases}'},
@@ -2093,6 +2172,7 @@ function buildKeyboard(){
 function renderKbdGrid(){
   const grid=$('kbdGrid');
   const cat=KEYBOARD_CATS[activeCat];
+  grid.className = 'kbd-grid' + (cat.name==='Matrizes' ? ' kbd-grid-wide' : '');
   grid.innerHTML=cat.keys.map((k,i)=>{
     let content;
     if(k.latex){
@@ -2371,6 +2451,9 @@ function renderDoc(){
   // Apply scale so page fits within docarea width
   applyPageScale();
 
+  // Atualiza a borda verde dos itens já adicionados à prova
+  renderSidebar();
+
   if(savedHeaderKey){
     const inp=cont.querySelector('[data-k="'+savedHeaderKey+'"]');
     if(inp){ inp.focus(); if(inp.setSelectionRange) try{ inp.setSelectionRange(inp.value.length,inp.value.length) }catch(_){} }
@@ -2549,6 +2632,31 @@ function renderBlock(b){
   handle.title='Arraste para reordenar';
   el.appendChild(handle);
 
+  // Handle horizontal — arraste para mover a questão para esquerda/direita
+  const hHandle=document.createElement('div');
+  hHandle.className='h-handle';
+  hHandle.textContent='⇔';
+  hHandle.title='Arraste para mover horizontalmente';
+  hHandle.addEventListener('mousedown', e=>{
+    e.preventDefault(); e.stopPropagation();
+    const startX = e.clientX;
+    const startOffset = b.offsetX || 0;
+    function mv(ev){
+      let no = startOffset + (ev.clientX - startX);
+      no = Math.max(-300, Math.min(300, no));
+      b.offsetX = Math.round(no);
+      el.style.transform = `translateX(${b.offsetX}px)`;
+    }
+    function up(){
+      document.removeEventListener('mousemove', mv);
+      document.removeEventListener('mouseup', up);
+    }
+    document.addEventListener('mousemove', mv);
+    document.addEventListener('mouseup', up);
+  });
+  el.appendChild(hHandle);
+  if(b.offsetX) el.style.transform = `translateX(${b.offsetX}px)`;
+
   el.draggable=true;
   el.addEventListener('dragstart',e=>{
     dragBid=b.bid;
@@ -2633,7 +2741,7 @@ $('salvarProvaOk').onclick=async ()=>{
     headerData,
     activeHeaderTplId: activeHeaderTplId || null,
     headerCustom: headerCustom || {},
-    blocks: blocks.map(b=>({bid:b.bid,type:b.type,qid:b.qid||null,texto:b.texto||null,altura:b.altura||null})),
+    blocks: blocks.map(b=>({bid:b.bid,type:b.type,qid:b.qid||null,texto:b.texto||null,altura:b.altura||null,offsetX:b.offsetX||0})),
     atualizadoEm: Date.now()
   };
   try{
@@ -2695,7 +2803,8 @@ function loadProva(id, p){
     type:b.type,
     qid:b.qid||null,
     texto:b.texto||null,
-    altura:b.altura||null
+    altura:b.altura||null,
+    offsetX:b.offsetX||0
   }));
   headerData = Object.assign({escola:'',professor:'',aluno:'',serie:'',data:'',logo:''}, p.headerData||{});
   activeHeaderTplId = p.activeHeaderTplId || null;
@@ -2914,7 +3023,7 @@ function renderHdrList(){
     activeHeaderTplId = b.dataset.id;
     persistActiveTpl();
     renderDoc();
-    renderHdrList();
+    $('hdrListOv').classList.remove('show');
   });
   grid.querySelectorAll('.tpl-edit').forEach(b=>b.onclick=()=>openHeaderEditor(b.dataset.id));
   grid.querySelectorAll('.tpl-dup').forEach(b=>b.onclick=async ()=>{
