@@ -1149,10 +1149,10 @@ window.createNewFlow=async function(){
   try{await set(ref(db,'fluxos/'+user.uid+'/'+id),data);closeNewFlowModal();await loadLists();loadFlow(id)}catch(e){console.error(e);alert('Erro.')}
 };
 
-// Voltar salvando antes de sair
+// Voltar salvando antes de sair → vai para a lista de fluxos
 window.voltarComSave=async function(){
   try{ await flushSave() }catch(_){}
-  history.back();
+  window.location.href = 'fluxodolink.html';
 };
 // Save no fechamento da aba/refresh (best-effort)
 window.addEventListener('beforeunload',()=>{
