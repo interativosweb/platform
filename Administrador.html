@@ -1739,6 +1739,14 @@
             const body = document.getElementById('detailBody');
             let html = '';
 
+            // Botão para acessar a conta (visualizar como o usuário)
+            html += `<div style="padding:0 0 14px">
+              <button id="btnAccessAs" style="width:100%;padding:11px 16px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity=.88" onmouseout="this.style.opacity=1">
+                Acessar conta de ${esc(nome)}
+              </button>
+              <div style="font-size:.72rem;color:var(--text-light);margin-top:6px;line-height:1.4">Abre a plataforma visualizando como este usuário.</div>
+            </div>`;
+
             // Registration info section
             html += '<div class="detail-section-title">Informações do Cadastro</div>';
 
@@ -1834,6 +1842,18 @@
 
             body.innerHTML = html;
             detailOverlay.classList.add('show');
+
+            // Liga o botão "Acessar conta" — salva o UID alvo e abre a plataforma
+            const accBtn = document.getElementById('btnAccessAs');
+            if(accBtn){
+              accBtn.onclick = ()=>{
+                try{
+                  localStorage.setItem('alquilab_view_as_uid', uid);
+                  localStorage.setItem('alquilab_view_as_nome', nome);
+                }catch(_){}
+                window.open('Plataforma.html', '_blank');
+              };
+            }
         };
 
         // Keep backward compatibility
@@ -1909,8 +1929,8 @@
                 <div class="chat">
                   <div class="msgs" id="adMsgs"><div class="empty">Selecione um usuário à esquerda</div></div>
                   <div class="inp">
-                    <button class="ibtn" id="adBtnImg" title="Enviar imagem">📷</button>
-                    <button class="ibtn" id="adBtnAud" title="Gravar áudio">🎤</button>
+                    <button class="ibtn" id="adBtnImg" title="Enviar imagem"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button>
+                    <button class="ibtn" id="adBtnAud" title="Gravar áudio"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
                     <textarea id="adInput" rows="1" placeholder="Responder..."></textarea>
                     <button class="send" id="adSend">Enviar</button>
                     <input type="file" id="adFileImg" accept="image/*" style="display:none">
@@ -2016,7 +2036,7 @@
                 if (!activeUid) { alert('Selecione um usuário primeiro.'); return }
                 const m = push(ref(db, 'chats/' + activeUid + '/messages'));
                 set(m, Object.assign({ from: 'admin', ts: Date.now() }, payload));
-                const label = payload.type === 'image' ? '📷 Imagem' : payload.type === 'audio' ? '🎤 Áudio' : (payload.text || '').slice(0, 60);
+                const label = payload.type === 'image' ? '[Imagem]' : payload.type === 'audio' ? '[Áudio]' : (payload.text || '').slice(0, 60);
                 update(ref(db, 'chats/' + activeUid), { atualizadoEm: Date.now(), ultimaMsg: label });
             }
             function autoGrowAd() {
@@ -2040,6 +2060,8 @@
                 r.readAsDataURL(f);
             });
 
+            const AD_ICON_MIC = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>';
+            const AD_ICON_STOP = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>';
             let mediaRec = null, audioChunks = [];
             btnAud.onclick = async () => {
                 if (mediaRec && mediaRec.state === 'recording') { mediaRec.stop(); return }
@@ -2049,14 +2071,14 @@
                     mediaRec.ondataavailable = e => audioChunks.push(e.data);
                     mediaRec.onstop = () => {
                         stream.getTracks().forEach(t => t.stop());
-                        btnAud.classList.remove('rec'); btnAud.textContent = '🎤';
+                        btnAud.classList.remove('rec'); btnAud.innerHTML = AD_ICON_MIC;
                         const blob = new Blob(audioChunks, { type: 'audio/webm' });
                         if (blob.size > MAX_BYTES) { alert('Áudio maior que 800 KB. Grave um mais curto.'); return }
                         const r = new FileReader();
                         r.onload = () => sendPayload({ type: 'audio', data: r.result });
                         r.readAsDataURL(blob);
                     };
-                    mediaRec.start(); btnAud.classList.add('rec'); btnAud.textContent = '⏹';
+                    mediaRec.start(); btnAud.classList.add('rec'); btnAud.innerHTML = AD_ICON_STOP;
                 } catch (e) { alert('Não foi possível acessar o microfone.') }
             };
         })();
