@@ -201,12 +201,12 @@ body{
 .block:hover{border-color:#bcd6f5}
 .block.dragging{opacity:.35}
 .block.drag-over{border-color:#0a84ff;background:rgba(238,246,255,.6)}
-.block .h-handle{
-  position:absolute;top:4px;left:34px;cursor:ew-resize;padding:3px 8px;
+.block .v-handle{
+  position:absolute;top:4px;left:34px;cursor:ns-resize;padding:3px 8px;
   background:rgba(255,255,255,.95);border:1px solid #ccc;border-radius:6px;
   font-size:.78rem;color:#555;display:none;font-weight:700;user-select:none;
 }
-.block:hover .h-handle{display:block}
+.block:hover .v-handle{display:block}
 .block img{max-width:100%;display:block;margin:0 auto;pointer-events:none}
 .block .rendered{
   width:100%;
@@ -592,7 +592,7 @@ math-field::part(menu-toggle){display:none !important}
     print-color-adjust:exact !important;
     color-adjust:exact !important;
   }
-  .topbar,.sidebar,.ov,.block .ctrls,.block .handle,.block .h-handle,.page-num,.doc-toolbar,.hdr-gear{display:none !important}
+  .topbar,.sidebar,.ov,.block .ctrls,.block .handle,.block .v-handle,.page-num,.doc-toolbar,.hdr-gear{display:none !important}
   .workspace{display:block !important;height:auto !important}
   .docarea{padding:0 !important;gap:0 !important;display:block !important;overflow:visible !important}
   .page{
@@ -981,7 +981,8 @@ math-field::part(menu-toggle){display:none !important}
     </div>
     <footer>
       <button id="hdrListCancel">Fechar</button>
-      <button id="hdrUsePadrao" class="primary">Usar cabeçalho padrão</button>
+      <button id="hdrUsePadrao">Usar cabeçalho padrão</button>
+      <button id="hdrConcluir" class="primary">Concluído</button>
     </footer>
   </div>
 </div>
@@ -1208,11 +1209,11 @@ function renderSidebar(){
     el.innerHTML='<div class="sid-empty">'+msg+'</div>';
     return;
   }
-  // Ids de questões já adicionadas à prova atual (para borda verde)
-  const inProvaIds = new Set(blocks.filter(b=>b.type==='banco' && b.qid).map(b=>b.qid));
+  // Borda verde: questões CRIADAS pelo usuário logado (independente de estarem na prova)
+  const myUid = currentUser ? currentUser.uid : null;
   el.innerHTML=list.map(q=>{
     const isPendente = q.status==='pendente';
-    const isInProva = inProvaIds.has(q.id);
+    const isMine = myUid && q.criadoPor === myUid;
     const temaDisplay = isPendente ? 'Pendente' : ((q.temas && q.temas[0]) || q.tema || 'sem tema');
     let thumbInner;
     if(q.imgQuestao){
@@ -1230,7 +1231,7 @@ function renderSidebar(){
       : (q.estrelas?`<span class="stars">${'★'.repeat(q.estrelas)}</span>`:'');
     const cls = ['qitem'];
     if(isPendente) cls.push('qitem-pendente');
-    if(isInProva) cls.push('in-prova');
+    if(isMine) cls.push('in-prova');
     return `
     <div class="${cls.join(' ')}" data-id="${q.id}">
       <div class="qitem-thumb">${thumbInner}</div>
@@ -2198,6 +2199,12 @@ let lastEditorRange=null;
 $('manualEditor').addEventListener('mouseup',saveRange);
 $('manualEditor').addEventListener('keyup',saveRange);
 $('manualEditor').addEventListener('focus',saveRange);
+// Colar texto sempre sem formatação: pega só o texto plano da área de transferência
+$('manualEditor').addEventListener('paste', e=>{
+  e.preventDefault();
+  const text = (e.clipboardData || window.clipboardData).getData('text/plain') || '';
+  document.execCommand('insertText', false, text);
+});
 
 function saveRange(){
   const sel=window.getSelection();
@@ -2632,20 +2639,20 @@ function renderBlock(b){
   handle.title='Arraste para reordenar';
   el.appendChild(handle);
 
-  // Handle horizontal — arraste para mover a questão para esquerda/direita
-  const hHandle=document.createElement('div');
-  hHandle.className='h-handle';
-  hHandle.textContent='⇔';
-  hHandle.title='Arraste para mover horizontalmente';
-  hHandle.addEventListener('mousedown', e=>{
+  // Handle vertical — arraste para mover a questão para cima/baixo
+  const vHandle=document.createElement('div');
+  vHandle.className='v-handle';
+  vHandle.textContent='⇅';
+  vHandle.title='Arraste para mover verticalmente';
+  vHandle.addEventListener('mousedown', e=>{
     e.preventDefault(); e.stopPropagation();
-    const startX = e.clientX;
-    const startOffset = b.offsetX || 0;
+    const startY = e.clientY;
+    const startOffset = b.offsetY || 0;
     function mv(ev){
-      let no = startOffset + (ev.clientX - startX);
+      let no = startOffset + (ev.clientY - startY);
       no = Math.max(-300, Math.min(300, no));
-      b.offsetX = Math.round(no);
-      el.style.transform = `translateX(${b.offsetX}px)`;
+      b.offsetY = Math.round(no);
+      el.style.transform = `translateY(${b.offsetY}px)`;
     }
     function up(){
       document.removeEventListener('mousemove', mv);
@@ -2654,8 +2661,8 @@ function renderBlock(b){
     document.addEventListener('mousemove', mv);
     document.addEventListener('mouseup', up);
   });
-  el.appendChild(hHandle);
-  if(b.offsetX) el.style.transform = `translateX(${b.offsetX}px)`;
+  el.appendChild(vHandle);
+  if(b.offsetY) el.style.transform = `translateY(${b.offsetY}px)`;
 
   el.draggable=true;
   el.addEventListener('dragstart',e=>{
@@ -2741,7 +2748,7 @@ $('salvarProvaOk').onclick=async ()=>{
     headerData,
     activeHeaderTplId: activeHeaderTplId || null,
     headerCustom: headerCustom || {},
-    blocks: blocks.map(b=>({bid:b.bid,type:b.type,qid:b.qid||null,texto:b.texto||null,altura:b.altura||null,offsetX:b.offsetX||0})),
+    blocks: blocks.map(b=>({bid:b.bid,type:b.type,qid:b.qid||null,texto:b.texto||null,altura:b.altura||null,offsetY:b.offsetY||0})),
     atualizadoEm: Date.now()
   };
   try{
@@ -2804,7 +2811,7 @@ function loadProva(id, p){
     qid:b.qid||null,
     texto:b.texto||null,
     altura:b.altura||null,
-    offsetX:b.offsetX||0
+    offsetY:b.offsetY||0
   }));
   headerData = Object.assign({escola:'',professor:'',aluno:'',serie:'',data:'',logo:''}, p.headerData||{});
   activeHeaderTplId = p.activeHeaderTplId || null;
@@ -3043,6 +3050,12 @@ function renderHdrList(){
 
 $('hdrListClose').onclick=()=>$('hdrListOv').classList.remove('show');
 $('hdrListCancel').onclick=()=>$('hdrListOv').classList.remove('show');
+$('hdrConcluir').onclick=()=>{
+  // Apenas salva a seleção atual e fecha. O activeHeaderTplId já está salvo em localStorage.
+  persistActiveTpl();
+  renderDoc();
+  $('hdrListOv').classList.remove('show');
+};
 $('hdrUsePadrao').onclick=()=>{
   activeHeaderTplId = null;
   persistActiveTpl();
@@ -3237,10 +3250,16 @@ function addPresetField(preset){
 
 function renderTemplateCanvas(container, tpl, opts){
   container.innerHTML = '';
-  container.className = 'hdr-canvas';
-  if(tpl.fundo==='linhas') container.classList.add('bg-linhas');
-  else if(tpl.fundo==='quadriculado') container.classList.add('bg-quadriculado');
-  else if(tpl.fundo==='pontilhado') container.classList.add('bg-pontilhado');
+  // Remove classes de fundo anteriores mas preserva outras (como doc-header, tpl-rendered)
+  container.classList.remove('bg-linhas','bg-quadriculado','bg-pontilhado');
+  container.classList.add('hdr-canvas');
+  // No modo editor (editable) mostramos o preview do fundo; na prova (tpl-rendered), o fundo vem da página — mantém o canvas transparente
+  const isPreviewOnly = opts && opts.editable;
+  if(isPreviewOnly){
+    if(tpl.fundo==='linhas') container.classList.add('bg-linhas');
+    else if(tpl.fundo==='quadriculado') container.classList.add('bg-quadriculado');
+    else if(tpl.fundo==='pontilhado') container.classList.add('bg-pontilhado');
+  }
   container.style.height = (tpl.altura||HDR_DEFAULT_ALTURA)+'px';
   const b = tpl.borda || {};
   if(b.largura>0){
