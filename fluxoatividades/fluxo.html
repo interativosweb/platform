@@ -562,8 +562,43 @@ onAuthStateChanged(auth,u=>{
   user=u;
   loadLists();
   const urlId=new URLSearchParams(location.search).get('id');
-  if(urlId) loadFlow(urlId); else showSB();
+  if(urlId) loadFlow(urlId); else initNewFlowInMemory();
 });
+
+function initNewFlowInMemory(){
+  const sid=uid();
+  flowId=null;
+  flow={nome:'',nodes:{[sid]:{id:sid,tipo:'inicio',titulo:'Início',x:300,y:300,cor:'#34c759',conexoes:{}}}};
+  $('flowNameInput').value='';
+  // Garante que o DOM esteja pronto/pintado antes de renderizar e centralizar
+  const doRender=()=>{
+    renderAll();
+    try{history=[];historyIdx=-1;pushHistory()}catch(_){}
+    // Evita salvar um fluxo vazio automaticamente só por abrir a página
+    clearTimeout(saveT); saveT=null;
+    dirty=false;
+    $('saveBadge').textContent='Novo';
+    $('saveBadge').className='save-badge pending';
+    // Centraliza no nó inicial (com fallback caso wrap ainda não tenha layout)
+    const st=flow.nodes[sid];
+    const cw=wrap.clientWidth||document.documentElement.clientWidth||800;
+    const ch=wrap.clientHeight||document.documentElement.clientHeight||600;
+    if(st){panX=-st.x*zoom+cw/2;panY=-st.y*zoom+ch/2;applyTransform()}
+  };
+  // Tenta imediatamente; se o layout ainda não estiver pronto, repete no próximo frame
+  doRender();
+  requestAnimationFrame(()=>{
+    // Reposiciona após layout (caso wrap.clientWidth tenha sido 0 na primeira chamada)
+    const st=flow.nodes[sid];
+    if(st && wrap.clientWidth){
+      panX=-st.x*zoom+wrap.clientWidth/2;
+      panY=-st.y*zoom+wrap.clientHeight/2;
+      applyTransform();
+    }
+    // Se por algum motivo o nó não está no DOM, força novo render
+    if(!nodesL.querySelector('[data-id="'+sid+'"]')) renderAll();
+  });
+}
 
 /* ══════════════ FLOW CRUD ══════════════ */
 async function loadLists(){
@@ -599,13 +634,34 @@ async function copyAdminFlow(fid){
     await loadLists();loadFlow(nid);
   }catch(e){console.error(e);alert('Erro.')}
 }
+let _saving=false;
 async function saveFlow(){
-  if(!flowId||!user)return;
+  if(!user||_saving)return;
+  _saving=true;
+  const nomeParaSalvar = (flow.nome && flow.nome.trim()) || 'Sem título';
   $('saveBadge').textContent='Salvando...';$('saveBadge').className='save-badge pending';
   try{
-    await update(ref(db,'fluxos/'+user.uid+'/'+flowId),{nome:flow.nome,nodes:flow.nodes||{},atualizadoEm:new Date().toISOString()});
+    if(!flowId){
+      // Primeira gravação: cria o fluxo no Firebase e assume o id
+      flowId='fl_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+      await set(ref(db,'fluxos/'+user.uid+'/'+flowId),{
+        nome: nomeParaSalvar,
+        nodes: flow.nodes||{},
+        criadoEm: new Date().toISOString(),
+        atualizadoEm: new Date().toISOString()
+      });
+      window.history.replaceState(null,'','?id='+flowId);
+      loadLists();
+    } else {
+      await update(ref(db,'fluxos/'+user.uid+'/'+flowId),{
+        nome: nomeParaSalvar,
+        nodes: flow.nodes||{},
+        atualizadoEm: new Date().toISOString()
+      });
+    }
     $('saveBadge').textContent='Salvo';$('saveBadge').className='save-badge ok';dirty=false;
   }catch(e){console.error(e);$('saveBadge').textContent='Erro';$('saveBadge').className='save-badge pending'}
+  finally{ _saving=false }
 }
 function markDirty(){dirty=true;$('saveBadge').textContent='...';$('saveBadge').className='save-badge pending';clearTimeout(saveT);saveT=setTimeout(saveFlow,1200)}
 function pushHistory(){
@@ -637,7 +693,6 @@ function countQuestionNodes(){
   return Object.values(flow.nodes||{}).filter(n=>n.tipo==='multipla_escolha'||n.tipo==='dissertativa'||n.tipo==='fim').length;
 }
 window.addNode=function(tipo){
-  if(!flowId){alert('Crie ou abra um fluxo primeiro.');return}
   if((tipo==='multipla_escolha'||tipo==='dissertativa'||tipo==='fim') && countQuestionNodes()>=MAX_NODES){
     alert('Limite de '+MAX_NODES+' nós atingido para esta atividade.');return;
   }
@@ -651,7 +706,6 @@ window.addNode=function(tipo){
 };
 
 window.toggleProvaMode=function(){
-  if(!flowId){alert('Abra um fluxo primeiro.');return}
   if(flow.provaMode){
     if(confirm('Desativar Modo Prova?')){flow.provaMode=null;renderAll();pushHistory()}
     return;
@@ -669,7 +723,6 @@ window.saveProvaMode=function(){
 };
 
 window.addModifier=function(kind){
-  if(!flowId){alert('Crie ou abra um fluxo primeiro.');return}
   const id=uid();
   const center=clientToCanvas(wrap.clientWidth/2,wrap.clientHeight/2);
   const m={id,tipo:'mod_'+kind,x:center.x-100,y:center.y-16,kind,attachedTo:null,position:null};
@@ -1106,7 +1159,6 @@ document.addEventListener('keydown',e=>{
 /* Double click on canvas → add MC */
 wrap.addEventListener('dblclick',e=>{
   if(e.target.closest('.node'))return;
-  if(!flowId)return;
   const pt=clientToCanvas(e.clientX,e.clientY);
   const id=uid();
   flow.nodes[id]={id,tipo:'multipla_escolha',x:pt.x-100,y:pt.y-30,cor:'#0071e3',conexoes:{},pergunta:'',opcoes:['','','',''],correta:0,resolucao:'',showResolucao:false,resolucaoImg:null};
