@@ -199,7 +199,7 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 
 <!-- HEADER -->
 <div class="header">
-  <button class="btn-h" onclick="history.back()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg> Voltar</button>
+  <button class="btn-h" onclick="voltarComSave()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg> Voltar</button>
   <input id="flowNameInput" class="flow-name-input" placeholder="Nome do fluxo..." spellcheck="false">
   <span id="saveBadge" class="save-badge ok">Salvo</span>
   <button class="btn-h" id="btnSidebarToggle">Fluxos</button>
@@ -663,7 +663,18 @@ async function saveFlow(){
   }catch(e){console.error(e);$('saveBadge').textContent='Erro';$('saveBadge').className='save-badge pending'}
   finally{ _saving=false }
 }
-function markDirty(){dirty=true;$('saveBadge').textContent='...';$('saveBadge').className='save-badge pending';clearTimeout(saveT);saveT=setTimeout(saveFlow,1200)}
+function markDirty(){
+  dirty=true;
+  $('saveBadge').textContent='...';$('saveBadge').className='save-badge pending';
+  clearTimeout(saveT);
+  // Primeira gravação (fluxo ainda não existe no Firebase) → debounce curto para salvar rapidamente
+  const delay = flowId ? 800 : 300;
+  saveT=setTimeout(saveFlow,delay);
+}
+async function flushSave(){
+  clearTimeout(saveT);saveT=null;
+  if(dirty||!flowId) await saveFlow();
+}
 function pushHistory(){
   try{
     const snap=JSON.stringify(flow);
@@ -1137,6 +1148,18 @@ window.createNewFlow=async function(){
   const data={nome,criadoEm:new Date().toISOString(),atualizadoEm:new Date().toISOString(),nodes:{[sid]:{id:sid,tipo:'inicio',titulo:'Início',x:300,y:300,cor:'#34c759',conexoes:{}}}};
   try{await set(ref(db,'fluxos/'+user.uid+'/'+id),data);closeNewFlowModal();await loadLists();loadFlow(id)}catch(e){console.error(e);alert('Erro.')}
 };
+
+// Voltar salvando antes de sair
+window.voltarComSave=async function(){
+  try{ await flushSave() }catch(_){}
+  history.back();
+};
+// Save no fechamento da aba/refresh (best-effort)
+window.addEventListener('beforeunload',()=>{
+  if(dirty||!flowId){
+    try{ clearTimeout(saveT); saveFlow() }catch(_){}
+  }
+});
 
 /* ══════════════ KEYBOARD ══════════════ */
 document.addEventListener('keydown',e=>{
