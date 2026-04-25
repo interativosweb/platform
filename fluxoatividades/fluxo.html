@@ -18,8 +18,8 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 .btn-h{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--text);display:flex;align-items:center;gap:4px}
 .btn-h:hover{background:var(--bg3)}
 .btn-h svg{width:14px;height:14px}
-.flow-name-input{flex:1;border:none;background:transparent;font:inherit;font-weight:700;font-size:.95rem;text-align:center;outline:none;color:var(--text);min-width:0}
-.flow-name-input:focus{background:var(--bg3);border-radius:6px}
+.flow-name-input{width:240px;max-width:32vw;border:1px solid var(--border);background:var(--bg3);padding:6px 12px;border-radius:8px;font:inherit;font-weight:600;font-size:.88rem;text-align:left;outline:none;color:var(--text);min-width:0;transition:border-color .15s}
+.flow-name-input:focus{border-color:var(--accent)}
 .save-badge{font-size:.7rem;font-weight:600;white-space:nowrap;padding:3px 8px;border-radius:6px}
 .save-badge.ok{background:rgba(52,199,89,.12);color:var(--success)}
 .save-badge.pending{background:rgba(255,149,0,.12);color:var(--warn)}
