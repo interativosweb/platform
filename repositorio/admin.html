@@ -578,9 +578,19 @@ function renderList(){
   if(!list.length){ el.innerHTML='<div class="empty">'+(allQuestoes.length?'Nenhuma questão encontrada.':'Nenhuma questão cadastrada ainda.')+'</div>'; return }
   el.innerHTML=list.map(q=>{
     const temasArr=q.temas||(q.tema?[q.tema]:[]);
+    let thumbHtml;
+    if(q.imgQuestao){
+      thumbHtml=`<img class="q-thumb" src="${q.imgQuestao}" alt="">`;
+    } else if(q.tipo==='manual' && q.textoManual){
+      // mini-preview de texto: até 80 chars sem markup latex/img
+      const plain=(q.textoManual||'').replace(/\$[^$]+\$/g,'…').replace(/\[\[IMG:[^\]]+\]\]/g,'').replace(/\s+/g,' ').slice(0,80);
+      thumbHtml=`<div class="q-thumb" style="display:flex;align-items:center;justify-content:center;padding:4px;font-size:.62rem;color:#444;line-height:1.2;text-align:center;overflow:hidden">${esc(plain)||'<span style="color:#bbb">manual</span>'}</div>`;
+    } else {
+      thumbHtml=`<div class="q-thumb" style="display:flex;align-items:center;justify-content:center;color:#bbb;font-size:.7rem">—</div>`;
+    }
     return `
     <div class="q-row">
-      <img class="q-thumb" src="${q.imgQuestao}" alt="">
+      ${thumbHtml}
       <div class="q-meta">
         <div class="q-tema">${temasArr.map(t=>`<span class="q-tema-tag">${esc(t)}</span>`).join('')||'<span style="color:var(--text3)">sem tema</span>'}</div>
         ${q.bncc&&q.bncc.length?`<div class="q-bncc">${q.bncc.map(esc).join(' · ')}</div>`:''}
