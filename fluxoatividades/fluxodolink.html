@@ -227,7 +227,7 @@ body{background-color:var(--bg);background-image:linear-gradient(rgba(10,132,255
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import{getDatabase,ref,set,get,update,remove,push}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{getDatabase,ref,set,get,update,remove,push,onValue}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig={apiKey:"AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",authDomain:"profbase-5f9b0.firebaseapp.com",databaseURL:"https://profbase-5f9b0-default-rtdb.firebaseio.com",projectId:"profbase-5f9b0",storageBucket:"profbase-5f9b0.firebasestorage.app",messagingSenderId:"826412057766",appId:"1:826412057766:web:729e6e24ce7587417fe067"};
 const app=initializeApp(firebaseConfig);
@@ -260,28 +260,40 @@ onAuthStateChanged(auth,async user=>{
   $('authWarn').style.display='none';
   $('mainContent').style.display='block';
   currentUser=user;
-  await loadData();
+  subscribeData();
 });
 
-/* ── LOAD DATA ── */
-async function loadData(){
-  // Load flows
-  try{
-    const snap=await get(ref(db,'fluxos/'+currentUser.uid));
+/* ── LOAD DATA (live listeners) ── */
+let _flowsUnsub=null, _linksUnsub=null;
+function subscribeData(){
+  // Subscribe a fluxos do usuário em tempo real
+  if(_flowsUnsub) try{ _flowsUnsub() }catch(_){}
+  _flowsUnsub = onValue(ref(db,'fluxos/'+currentUser.uid), snap=>{
     myFlows=[];
     if(snap.exists()) snap.forEach(c=>myFlows.push({id:c.key,...c.val()}));
-  }catch(e){console.error(e)}
+    // Mais recentes primeiro
+    myFlows.sort((a,b)=>{
+      const ta = new Date(a.atualizadoEm||a.criadoEm||0).getTime();
+      const tb = new Date(b.atualizadoEm||b.criadoEm||0).getTime();
+      return tb - ta;
+    });
+    renderActivities();
+  }, err=>{ console.error('[fluxos] erro:', err) });
 
-  // Load links
-  try{
-    const snap=await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo'));
+  // Subscribe a links de turma do usuário
+  if(_linksUnsub) try{ _linksUnsub() }catch(_){}
+  _linksUnsub = onValue(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo'), snap=>{
     myLinks=[];
     if(snap.exists()) snap.forEach(c=>myLinks.push({id:c.key,...c.val()}));
-  }catch(e){console.error(e)}
-
-  renderActivities();
-  renderLinks();
+    renderLinks();
+  }, err=>{ console.error('[links] erro:', err) });
 }
+
+// Recarrega quando volta para a aba (caso algum cache atrapalhe)
+window.addEventListener('focus', ()=>{ if(currentUser) subscribeData() });
+
+// Compatibilidade: re-subscribe sob demanda (usada após excluir/criar etc.)
+async function loadData(){ if(currentUser) subscribeData() }
 
 /* ── RENDER ACTIVITIES ── */
 function renderActivities(){
