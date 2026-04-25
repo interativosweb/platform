@@ -52,6 +52,8 @@ body{
   letter-spacing:-.3px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .brand-text .sub{font-size:.74rem;color:var(--text2);font-weight:500;margin-top:1px;letter-spacing:.1px}
+.brand-user-chip{display:none;margin-left:8px;padding:3px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:14px;font-size:.72rem;font-weight:600;color:var(--text2);vertical-align:middle;cursor:default;user-select:none}
+.brand-user-chip:not(:empty){display:inline-block}
 .top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .top-actions button,.top-actions a{
   padding:9px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:9px;
@@ -159,6 +161,19 @@ body{
   font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
 }
 .page-num{position:absolute;bottom:18px;right:28px;font-size:.72rem;color:#999;font-weight:500;font-family:'Inter',sans-serif}
+.extra-page-rm{
+  position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;
+  border:1px solid #ccc;background:rgba(255,255,255,.95);color:#ff453a;cursor:pointer;
+  font-size:.85rem;font-weight:700;display:flex;align-items:center;justify-content:center;
+  z-index:5;transition:all .15s;
+}
+.extra-page-rm:hover{background:#ff453a;color:#fff;border-color:#ff453a}
+.add-page-bar{display:flex;gap:10px;justify-content:center;margin:18px auto 4px;width:794px;max-width:100%;flex-wrap:wrap}
+.add-page-btn{
+  padding:10px 18px;background:var(--bg2);border:1px dashed var(--border2);border-radius:10px;
+  color:var(--text2);font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;
+}
+.add-page-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(10,132,255,.06)}
 
 .doc-header{border-bottom:2px solid #111;padding-bottom:16px;margin-bottom:24px;display:grid;grid-template-columns:96px 1fr;gap:16px;align-items:start}
 .doc-header .logo-box{
@@ -444,7 +459,8 @@ math-field::part(menu-toggle){display:none !important}
   display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:all .15s;font-family:inherit;
 }
 .tpl-card:hover{border-color:var(--accent);background:var(--bg3)}
-.tpl-card.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(10,132,255,.2)}
+.tpl-card.active{border-color:var(--success) !important;box-shadow:0 0 0 2px rgba(48,209,88,.28);background:rgba(48,209,88,.05)}
+.tpl-card.active .tpl-name::before{content:'● ';color:var(--success);font-size:.85em}
 .tpl-card .tpl-name{font-weight:600;font-size:.95rem;color:var(--text)}
 .tpl-card .tpl-thumb{height:80px;border:1px solid var(--border);border-radius:6px;background:#fff;overflow:hidden;position:relative}
 .tpl-card .tpl-actions{display:flex;gap:6px;flex-wrap:wrap}
@@ -592,12 +608,12 @@ math-field::part(menu-toggle){display:none !important}
     print-color-adjust:exact !important;
     color-adjust:exact !important;
   }
-  .topbar,.sidebar,.ov,.block .ctrls,.block .handle,.block .v-handle,.page-num,.doc-toolbar,.hdr-gear{display:none !important}
+  .topbar,.sidebar,.ov,.block .ctrls,.block .handle,.block .v-handle,.page-num,.doc-toolbar,.hdr-gear,.extra-page-rm,.add-page-bar{display:none !important}
   .workspace{display:block !important;height:auto !important}
   .docarea{padding:0 !important;gap:0 !important;display:block !important;overflow:visible !important}
   .page{
     box-shadow:none !important;margin:0 !important;page-break-after:always;
-    width:auto !important;min-height:auto !important;padding:14mm 16mm !important;border-radius:0 !important;
+    width:auto !important;min-height:297mm !important;padding:14mm 16mm !important;border-radius:0 !important;
     transform:none !important;
   }
   .page:last-child{page-break-after:auto}
@@ -763,7 +779,7 @@ math-field::part(menu-toggle){display:none !important}
       </svg>
     </div>
     <div class="brand-text">
-      <h1>Montador de Provas <span id="brandUser" style="font-weight:400;color:var(--text2)"></span></h1>
+      <h1>Montador de Provas <span id="brandUser" class="brand-user-chip"></span></h1>
       <div class="sub"><span id="pageCount">1 página</span> · Banco de Questões</div>
     </div>
   </div>
@@ -796,6 +812,7 @@ math-field::part(menu-toggle){display:none !important}
       <button id="btnLimpar" title="Remover todas as questões">Limpar</button>
       <button id="btnSalvarProva" title="Salvar prova atual">Salvar</button>
       <button id="btnMinhasProvas" title="Abrir provas salvas">Minhas provas</button>
+      <button id="btnNovaProva" title="Iniciar uma prova nova em branco">+ Nova prova</button>
       <span class="doc-toolbar-info" id="provaNomeInfo"></span>
     </div>
     <div id="docPages"></div>
@@ -1136,6 +1153,7 @@ const $=id=>document.getElementById(id);
 
 let questoes=[];
 let blocks=[];
+let extraPages=[]; // folhas extras adicionadas pelo usuário: [{type:'comHeader'|'semHeader'}]
 let currentQid=null;
 let dragBid=null;
 let editBid=null;
@@ -1150,7 +1168,7 @@ onAuthStateChanged(auth,user=>{
   currentUser=user;
   if(user.email===ADMIN_EMAIL) $('linkAdmin').style.display='inline-flex';
   const nome = user.displayName || (user.email ? user.email.split('@')[0] : '');
-  if(nome) $('brandUser').textContent = '— ' + nome;
+  if(nome) $('brandUser').textContent = nome;
   $('authLoader').style.display='none';
   renderSidebar();
 });
@@ -1173,6 +1191,36 @@ function authorBadge(q){
 }
 
 $('searchInp').addEventListener('input', renderSidebar);
+
+// Memorizar e restaurar a posição de scroll da lista de questões (sidebar) e do documento
+(function setupScrollMemory(){
+  const SS_QLIST = 'banco_qlist_scroll';
+  const SS_DOC   = 'banco_doc_scroll';
+  function save(){
+    try{
+      const ql=$('qlist'); if(ql) sessionStorage.setItem(SS_QLIST, String(ql.scrollTop||0));
+      const da=$('docArea'); if(da) sessionStorage.setItem(SS_DOC, String(da.scrollTop||0));
+    }catch(_){}
+  }
+  function restore(){
+    try{
+      const ql=$('qlist'); if(ql){ const v=parseInt(sessionStorage.getItem(SS_QLIST)||'0'); if(v) ql.scrollTop=v }
+      const da=$('docArea'); if(da){ const v=parseInt(sessionStorage.getItem(SS_DOC)||'0'); if(v) da.scrollTop=v }
+    }catch(_){}
+  }
+  // Salva durante o uso (debounced)
+  let t=null;
+  function schedule(){ clearTimeout(t); t=setTimeout(save, 250) }
+  setTimeout(()=>{
+    const ql=$('qlist'); if(ql) ql.addEventListener('scroll', schedule, {passive:true});
+    const da=$('docArea'); if(da) da.addEventListener('scroll', schedule, {passive:true});
+  }, 200);
+  // Restaura quando o conteúdo carrega (várias vezes — pega o último estado pintado)
+  window.addEventListener('load', ()=> setTimeout(restore, 300));
+  document.addEventListener('DOMContentLoaded', ()=> setTimeout(restore, 600));
+  // Salva ao sair
+  window.addEventListener('beforeunload', save);
+})();
 let onlyMine = false;
 $('btnMinhasQ').addEventListener('click', ()=>{
   onlyMine = !onlyMine;
@@ -2390,6 +2438,15 @@ $('btnLimpar').onclick=()=>{
     renderDoc();
   }
 };
+$('btnNovaProva').onclick=()=>{
+  if((blocks.length || currentProvaId) && !confirm('Iniciar uma nova prova em branco? As alterações não salvas serão perdidas.')) return;
+  blocks=[];
+  currentProvaId=null;
+  currentProvaNome='';
+  // Mantém o cabeçalho e dados (escola, professor, etc.) por conveniência
+  extraPages=[]; // limpa folhas extras
+  renderDoc();
+};
 
 /* ===== Pagination ===== */
 const MAX_PAGES=10;
@@ -2430,6 +2487,7 @@ function renderDoc(){
   cont.innerHTML='';
   const tpl = getActiveTemplate();
   const pageBgClass = tpl && tpl.fundo && tpl.fundo!=='nenhum' ? ('bg-'+tpl.fundo) : '';
+  const totalPages = pages.length + (extraPages?extraPages.length:0);
   pages.forEach((pageBlocks,pi)=>{
     const page=document.createElement('div');
     page.className='page'+(pageBgClass?' '+pageBgClass:'');
@@ -2447,10 +2505,44 @@ function renderDoc(){
     page.appendChild(area);
     const num=document.createElement('div');
     num.className='page-num';
-    num.textContent='Página '+(pi+1)+' de '+pages.length;
+    num.textContent='Página '+(pi+1)+' de '+totalPages;
     page.appendChild(num);
     cont.appendChild(page);
   });
+  // Folhas extras adicionadas pelo usuário (em branco, com ou sem cabeçalho)
+  (extraPages||[]).forEach((ep,ei)=>{
+    const page=document.createElement('div');
+    page.className='page'+(pageBgClass?' '+pageBgClass:'');
+    if(ep.type==='comHeader') page.appendChild(renderHeader());
+    const area=document.createElement('div');
+    area.className='blocks-area';
+    area.dataset.extra=ei;
+    page.appendChild(area);
+    // Botão remover folha extra (não imprime)
+    const rm=document.createElement('button');
+    rm.className='extra-page-rm';
+    rm.title='Remover esta folha';
+    rm.textContent='✕';
+    rm.onclick=()=>{ extraPages.splice(ei,1); renderDoc() };
+    page.appendChild(rm);
+    const num=document.createElement('div');
+    num.className='page-num';
+    num.textContent='Página '+(pages.length+ei+1)+' de '+totalPages;
+    page.appendChild(num);
+    cont.appendChild(page);
+  });
+  $('pageCount').textContent=totalPages+' página'+(totalPages>1?'s':'');
+  // Barra de adicionar folha (não imprime)
+  const addBar=document.createElement('div');
+  addBar.className='add-page-bar';
+  addBar.innerHTML=`
+    <button class="add-page-btn" data-type="comHeader">+ Adicionar folha com cabeçalho</button>
+    <button class="add-page-btn" data-type="semHeader">+ Adicionar folha sem cabeçalho</button>
+  `;
+  addBar.querySelectorAll('.add-page-btn').forEach(b=>{
+    b.onclick=()=>{ extraPages.push({type:b.dataset.type}); renderDoc() };
+  });
+  cont.appendChild(addBar);
 
   // Mede altura real dos blocos para repaginação consistente
   measureBlockHeights();
@@ -2504,7 +2596,10 @@ function renderHeader(){
   if(activeTpl){
     const h=document.createElement('div');
     h.className='doc-header tpl-rendered';
-    renderTemplateCanvas(h, activeTpl, {interactive:true, editable:false});
+    // Canvas separado dentro do header (para a regra .doc-header.tpl-rendered .hdr-canvas funcionar)
+    const canvasEl=document.createElement('div');
+    h.appendChild(canvasEl);
+    renderTemplateCanvas(canvasEl, activeTpl, {interactive:true, editable:false});
     addHeaderGear(h);
     return h;
   }
@@ -2650,7 +2745,7 @@ function renderBlock(b){
     const startOffset = b.offsetY || 0;
     function mv(ev){
       let no = startOffset + (ev.clientY - startY);
-      no = Math.max(-300, Math.min(300, no));
+      no = Math.max(-900, Math.min(900, no));
       b.offsetY = Math.round(no);
       el.style.transform = `translateY(${b.offsetY}px)`;
     }
@@ -2749,6 +2844,7 @@ $('salvarProvaOk').onclick=async ()=>{
     activeHeaderTplId: activeHeaderTplId || null,
     headerCustom: headerCustom || {},
     blocks: blocks.map(b=>({bid:b.bid,type:b.type,qid:b.qid||null,texto:b.texto||null,altura:b.altura||null,offsetY:b.offsetY||0})),
+    extraPages: (extraPages||[]).map(ep=>({type:ep.type})),
     atualizadoEm: Date.now()
   };
   try{
@@ -2813,6 +2909,7 @@ function loadProva(id, p){
     altura:b.altura||null,
     offsetY:b.offsetY||0
   }));
+  extraPages = (p.extraPages||[]).map(ep=>({type:ep.type||'comHeader'}));
   headerData = Object.assign({escola:'',professor:'',aluno:'',serie:'',data:'',logo:''}, p.headerData||{});
   activeHeaderTplId = p.activeHeaderTplId || null;
   headerCustom = p.headerCustom || {};
@@ -3105,6 +3202,9 @@ $('hdrEditorSave').onclick=async ()=>{
     $('hdrEditorSave').disabled=true;
     if(editingHdrTplId){
       await set(ref(db,'cabecalhos/'+currentUser.uid+'/'+editingHdrTplId), editingHdrTpl);
+      // Auto-aplicar o cabeçalho que acabou de ser modificado
+      activeHeaderTplId = editingHdrTplId;
+      persistActiveTpl();
     } else {
       if(Object.keys(headerTemplates).length>=MAX_HEADERS){ alert('Limite de '+MAX_HEADERS+' cabeçalhos atingido.'); return }
       const r=push(ref(db,'cabecalhos/'+currentUser.uid));
