@@ -264,25 +264,71 @@ onAuthStateChanged(auth,async user=>{
 });
 
 /* ── LOAD DATA (live listeners) ── */
-let _flowsUnsub=null, _linksUnsub=null;
+let _flowsUnsub=null, _linksUnsub=null, _idxUnsub=null;
+
+// Mescla um conjunto de fluxos em myFlows (sem duplicatas), ordena e re-renderiza
+function mergeAndRender(items){
+  const known=new Map(myFlows.map(f=>[f.id,f]));
+  items.forEach(f=>{ if(f && f.id) known.set(f.id, {...known.get(f.id), ...f}) });
+  myFlows = Array.from(known.values());
+  myFlows.sort((a,b)=>{
+    const ta = new Date(a.atualizadoEm||a.criadoEm||0).getTime();
+    const tb = new Date(b.atualizadoEm||b.criadoEm||0).getTime();
+    return tb - ta;
+  });
+  renderActivities();
+}
+
 function subscribeData(){
-  // Subscribe a fluxos do usuário em tempo real
+  // Reset
+  myFlows = [];
+  // 1) Listener principal: fluxos no caminho fluxos/<currentUser.uid>
   if(_flowsUnsub) try{ _flowsUnsub() }catch(_){}
   _flowsUnsub = onValue(ref(db,'fluxos/'+currentUser.uid), snap=>{
-    myFlows=[];
-    if(snap.exists()) snap.forEach(c=>myFlows.push({id:c.key,...c.val()}));
-    // Mais recentes primeiro
-    myFlows.sort((a,b)=>{
-      const ta = new Date(a.atualizadoEm||a.criadoEm||0).getTime();
-      const tb = new Date(b.atualizadoEm||b.criadoEm||0).getTime();
-      return tb - ta;
-    });
-    renderActivities();
+    const arr=[];
+    if(snap.exists()) snap.forEach(c=>arr.push({id:c.key,...c.val()}));
+    mergeAndRender(arr);
+    // Auto-migração: garante que cada fluxo está indexado em meus_fluxos
+    (async ()=>{
+      for(const f of arr){
+        try{
+          const ix=await get(ref(db,'usuarios/'+currentUser.uid+'/meus_fluxos/'+f.id));
+          if(!ix.exists()){
+            await set(ref(db,'usuarios/'+currentUser.uid+'/meus_fluxos/'+f.id),{
+              nome:f.nome||'Sem título', ownerUid:currentUser.uid,
+              criadoEm:f.criadoEm||new Date().toISOString(),
+              atualizadoEm:f.atualizadoEm||new Date().toISOString()
+            });
+          }
+        }catch(_){}
+      }
+    })();
   }, err=>{ console.error('[fluxos] erro:', err) });
 
-  // Tentativa adicional: tenta ler o nó fluxos completo (caso existam fluxos órfãos
-  // sob outros UIDs com criadoPor=currentUser.uid, ou para o admin ver tudo).
-  // Se a regra de leitura permitir, completa myFlows com esses extras.
+  // 2) Listener do índice usuarios/<uid>/meus_fluxos — mais confiável (UID não muda)
+  if(_idxUnsub) try{ _idxUnsub() }catch(_){}
+  _idxUnsub = onValue(ref(db,'usuarios/'+currentUser.uid+'/meus_fluxos'), async snap=>{
+    if(!snap.exists()) return;
+    const indexEntries=[];
+    snap.forEach(c=>{ indexEntries.push({id:c.key, ...c.val()}) });
+    // Para cada entrada do índice, busca os dados completos do fluxo (no caminho do owner)
+    const fetched=[];
+    for(const ie of indexEntries){
+      try{
+        const owner = ie.ownerUid || currentUser.uid;
+        const fsnap = await get(ref(db,'fluxos/'+owner+'/'+ie.id));
+        if(fsnap.exists()){
+          fetched.push({id:ie.id, ...fsnap.val()});
+        } else {
+          // Fallback: usa apenas os metadados do índice
+          fetched.push({id:ie.id, nome:ie.nome||'Sem título', atualizadoEm:ie.atualizadoEm, criadoEm:ie.criadoEm, _ownerUid:owner});
+        }
+      }catch(e){ console.warn('[idx] falha buscando fluxo', ie.id, e) }
+    }
+    mergeAndRender(fetched);
+  }, err=>{ console.error('[meus_fluxos] erro:', err) });
+
+  // 3) Tentativa: lê toda a raiz fluxos para capturar fluxos órfãos (admin ou criadoPor=eu)
   (async ()=>{
     try{
       const rootSnap = await get(ref(db,'fluxos'));
@@ -294,30 +340,18 @@ function subscribeData(){
         const userFlows = all[uidKey]||{};
         Object.keys(userFlows).forEach(fid=>{
           const f = userFlows[fid]||{};
-          // Já está em myFlows (do listener principal)? Pula.
-          if(uidKey===currentUser.uid) return;
-          // Mostra para admin OU se o fluxo foi criado pelo usuário atual (campo criadoPor)
+          if(uidKey===currentUser.uid) return; // já vem pelo listener principal
           const ownedByMe = f.criadoPor && f.criadoPor===currentUser.uid;
           if(isAdmin || ownedByMe){
             extras.push({id:fid, _ownerUid:uidKey, ...f});
           }
         });
       });
-      if(extras.length){
-        // Mescla evitando duplicatas
-        const knownIds = new Set(myFlows.map(x=>x.id));
-        extras.forEach(f=>{ if(!knownIds.has(f.id)) myFlows.push(f) });
-        myFlows.sort((a,b)=>{
-          const ta = new Date(a.atualizadoEm||a.criadoEm||0).getTime();
-          const tb = new Date(b.atualizadoEm||b.criadoEm||0).getTime();
-          return tb - ta;
-        });
-        renderActivities();
-      }
-    }catch(e){ /* sem permissão para ler raiz — silencioso */ }
+      if(extras.length) mergeAndRender(extras);
+    }catch(e){ /* permissão negada — silencioso */ }
   })();
 
-  // Subscribe a links de turma do usuário
+  // 4) Listener dos links de turma
   if(_linksUnsub) try{ _linksUnsub() }catch(_){}
   _linksUnsub = onValue(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo'), snap=>{
     myLinks=[];
@@ -354,9 +388,17 @@ function renderActivities(){
 window.deleteActivity=async function(fluxoId){
   if(!confirm('Excluir esta atividade? Esta ação não pode ser desfeita.')) return;
   try{
-    await remove(ref(db,'fluxos/'+currentUser.uid+'/'+fluxoId));
+    // Descobre o owner do fluxo (pode ser outro UID se for "órfão")
+    const f = myFlows.find(x=>x.id===fluxoId);
+    const owner = (f && f._ownerUid) || currentUser.uid;
+    const updates={};
+    updates['fluxos/'+owner+'/'+fluxoId] = null;
+    updates['usuarios/'+currentUser.uid+'/meus_fluxos/'+fluxoId] = null;
+    await update(ref(db), updates);
+    // Remove localmente
+    myFlows = myFlows.filter(x=>x.id!==fluxoId);
+    renderActivities();
     toast('Atividade excluída');
-    await loadData();
   }catch(e){console.error(e);alert('Erro ao excluir.')}
 };
 
