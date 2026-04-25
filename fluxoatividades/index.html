@@ -283,9 +283,7 @@ header.app-header{
   <div class="hlogo">Atividade <span>AlquiLab</span></div>
   <div class="header-right" id="headerRight" style="display:none">
     <span class="chip" id="badgeNome">Aluno</span>
-    <span class="chip" id="badgeSerie">Série</span>
-    <span class="chip green" id="badgeAcertos">0 acertos</span>
-    <span class="chip red" id="badgeErros">0 erros</span>
+    <span class="chip" id="badgeCodigo" title="Seu código de acesso. Anote para retomar de outro dispositivo." style="cursor:pointer;font-family:'SF Mono','JetBrains Mono',Consolas,monospace;letter-spacing:.06em">CÓDIGO</span>
   </div>
 </header>
 
@@ -310,9 +308,13 @@ header.app-header{
 <div id="loginModal" class="modal-overlay">
   <div class="modal">
     <h2>Identificação</h2>
-    <p>Digite seu nome para entrar na atividade.</p>
+    <p>Digite seu nome para entrar — ou cole seu código se já começou antes.</p>
     <div id="turmaInfo" style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:.88rem;color:var(--text2);line-height:1.5"></div>
     <input type="text" id="inputNome" placeholder="Qual o seu nome?" maxlength="15">
+    <div style="display:flex;align-items:center;gap:10px;margin:10px 0;color:var(--text3);font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;font-weight:600">
+      <div style="flex:1;height:1px;background:var(--border)"></div><span>ou</span><div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
+    <input type="text" id="inputCodigo" placeholder="Cole seu código (#nome12345)" maxlength="30" style="font-family:'SF Mono',monospace;letter-spacing:.05em">
     <div class="aviso" id="loginAviso"></div>
     <button class="btn-entrar" onclick="realizarLogin()">Entrar</button>
   </div>
@@ -348,6 +350,13 @@ const basePath=turmaId?'turmas_fluxo/'+turmaId+'/':'';
 
 let alunoId=localStorage.getItem('fluxo_firebaseId');
 let alunoNome='',alunoSerie='',turmaInfo=null;
+let alunoCodigo=localStorage.getItem('fluxo_codigo')||'';
+
+function gerarCodigoAluno(nome){
+  const base=(nome||'aluno').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z]/g,'').slice(0,8) || 'aluno';
+  const num=String(Math.floor(10000+Math.random()*90000));
+  return '#'+base+num;
+}
 let fluxoData=null,atividadeId=null,flowOwnerId=null;
 let nodeAtual=null,fluxoPercorrido=[],respostas={};
 let acertos=0,erros=0,totalNodes=0,answered=false;
@@ -391,28 +400,78 @@ async function init(){
 }
 
 window.realizarLogin=async function(){
+  // Caso 1: aluno colou um código de retomada
+  const codigoInput=($('inputCodigo')&&$('inputCodigo').value||'').trim();
+  if(codigoInput){
+    const codigo = codigoInput.startsWith('#') ? codigoInput : ('#'+codigoInput);
+    try{
+      const snap=await db.ref(basePath+'alunos').once('value');
+      const data=snap.val()||{};
+      let foundKey=null, foundData=null;
+      Object.keys(data).forEach(k=>{ if(data[k] && data[k].codigo===codigo){ foundKey=k; foundData=data[k] } });
+      if(!foundKey){ $('loginAviso').textContent='Código não encontrado.'; return }
+      alunoId=foundKey;
+      localStorage.setItem('fluxo_firebaseId',alunoId);
+      alunoNome=foundData.nome||'Aluno';
+      alunoSerie=foundData.serie||alunoSerie||'—';
+      alunoCodigo=codigo;
+      localStorage.setItem('fluxo_nome',alunoNome);
+      localStorage.setItem('fluxo_serie',alunoSerie);
+      localStorage.setItem('fluxo_codigo',alunoCodigo);
+      acertos=foundData.acertos||0; erros=foundData.erros||0;
+      fluxoPercorrido=foundData.fluxoPercorrido||[]; respostas=foundData.respostas||{};
+      await db.ref(basePath+'alunos/'+alunoId).update({status:'online',ultimoAcesso:new Date().toISOString()});
+      $('loginModal').classList.remove('show');
+      maybeActivateProva();
+      startFlow();
+      return;
+    }catch(e){ console.error(e); $('loginAviso').textContent='Erro ao validar código.'; return }
+  }
+  // Caso 2: novo aluno (nome)
   const nome=$('inputNome').value.trim();
-  if(!nome){$('loginAviso').textContent='Digite seu nome.';return}
+  if(!nome){$('loginAviso').textContent='Digite seu nome ou um código de retomada.';return}
   if(nome.includes(' ')){$('loginAviso').textContent='Apenas o primeiro nome.';return}
   if(nome.length>15){$('loginAviso').textContent='Máximo 15 letras.';return}
   alunoNome=nome.charAt(0).toUpperCase()+nome.slice(1).toLowerCase();
   if(!alunoSerie) alunoSerie='—';
+  alunoCodigo = gerarCodigoAluno(alunoNome);
   localStorage.setItem('fluxo_nome',alunoNome);
   localStorage.setItem('fluxo_serie',alunoSerie);
+  localStorage.setItem('fluxo_codigo',alunoCodigo);
   if(!alunoId){const newRef=db.ref(basePath+'alunos').push();alunoId=newRef.key;localStorage.setItem('fluxo_firebaseId',alunoId)}
   await db.ref(basePath+'alunos/'+alunoId).update({
-    nome:alunoNome,serie:alunoSerie,entrouEm:new Date().toISOString(),
+    nome:alunoNome,serie:alunoSerie,codigo:alunoCodigo,entrouEm:new Date().toISOString(),
     status:'online',acertos:0,erros:0,fluxoPercorrido:[],respostas:{}
   });
   $('loginModal').classList.remove('show');
+  // Mostra o código numa caixa para o aluno copiar
+  showCodigoPopup(alunoCodigo);
   maybeActivateProva();
   startFlow();
 };
 
+function showCodigoPopup(codigo){
+  const ov = document.createElement('div');
+  ov.className='modal-overlay show';
+  ov.style.zIndex='9500';
+  ov.innerHTML=`<div class="modal" style="text-align:center">
+    <h2 style="color:var(--accent)">Seu código de acesso</h2>
+    <p>Anote este código. Você pode usá-lo para retomar a atividade em outro computador ou se fechar o navegador.</p>
+    <div style="font-family:'SF Mono',monospace;font-size:1.6rem;font-weight:800;color:var(--accent);background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;margin:14px 0;letter-spacing:.06em;word-break:break-all">${codigo}</div>
+    <button class="btn-entrar" onclick="this.closest('.modal-overlay').remove()">Entendi</button>
+  </div>`;
+  document.body.appendChild(ov);
+}
+
 async function syncStudent(){
   if(!alunoId){const newRef=db.ref(basePath+'alunos').push();alunoId=newRef.key;localStorage.setItem('fluxo_firebaseId',alunoId)}
+  // Garante que tem código (caso aluno antigo sem código)
+  if(!alunoCodigo){
+    alunoCodigo = gerarCodigoAluno(alunoNome);
+    localStorage.setItem('fluxo_codigo', alunoCodigo);
+  }
   await db.ref(basePath+'alunos/'+alunoId).update({
-    nome:alunoNome,serie:alunoSerie,entrouEm:new Date().toISOString(),
+    nome:alunoNome,serie:alunoSerie,codigo:alunoCodigo,
     status:'online',ultimoAcesso:new Date().toISOString()
   });
   try{
@@ -421,6 +480,8 @@ async function syncStudent(){
       const d=snap.val();
       acertos=d.acertos||0;erros=d.erros||0;
       fluxoPercorrido=d.fluxoPercorrido||[];respostas=d.respostas||{};
+      // Sincroniza código do servidor (autoritativo)
+      if(d.codigo){ alunoCodigo=d.codigo; localStorage.setItem('fluxo_codigo',alunoCodigo) }
     }
   }catch(e){}
 }
@@ -796,9 +857,17 @@ function saveProgress(){
 }
 function updateBadges(){
   $('badgeNome').textContent=alunoNome||'Aluno';
-  $('badgeSerie').textContent=alunoSerie||'—';
-  $('badgeAcertos').textContent='✓ '+acertos;
-  $('badgeErros').textContent='✕ '+erros;
+  const codigoEl=$('badgeCodigo');
+  if(codigoEl){
+    codigoEl.textContent = alunoCodigo || '—';
+    codigoEl.onclick=()=>{
+      if(!alunoCodigo) return;
+      try{ navigator.clipboard.writeText(alunoCodigo) }catch(_){}
+      const orig=codigoEl.textContent;
+      codigoEl.textContent='✓ Copiado';
+      setTimeout(()=>{ codigoEl.textContent=alunoCodigo },1200);
+    };
+  }
 }
 function updateProgress(){
   const n=Object.keys(respostas).length;
