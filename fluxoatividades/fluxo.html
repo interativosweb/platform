@@ -721,6 +721,15 @@ function doUndo(){if(historyIdx<=0) return;historyIdx--;flow=JSON.parse(history[
 function doRedo(){if(historyIdx>=history.length-1) return;historyIdx++;flow=JSON.parse(history[historyIdx]);$('flowNameInput').value=flow.nome||'';renderAll();markDirty();updateUndoButtons()}
 
 $('flowNameInput').addEventListener('input',e=>{flow.nome=e.target.value;markDirty()});
+// Pressionar Enter no nome do fluxo → salva imediatamente e tira o foco
+$('flowNameInput').addEventListener('keydown', async e=>{
+  if(e.key==='Enter'){
+    e.preventDefault();
+    flow.nome = e.target.value;
+    try{ await flushSave() }catch(_){}
+    e.target.blur();
+  }
+});
 
 $('btnUndo').onclick=doUndo;
 $('btnRedo').onclick=doRedo;
