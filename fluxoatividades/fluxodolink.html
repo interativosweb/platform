@@ -488,8 +488,10 @@ window.deleteLink=async function(linkId){
   try{
     await remove(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+linkId));
     await remove(ref(db,'turmas_fluxo/'+linkId));
+    // Atualização local imediata
+    myLinks = myLinks.filter(l=>l.id!==linkId);
+    renderLinks();
     toast('Link excluído');
-    await loadData();
   }catch(e){console.error(e);alert('Erro ao excluir.')}
 };
 
@@ -535,9 +537,10 @@ window.gerarLink=async function(){
   }
 
   const turmaId='tfl_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  // Firebase strips null em multi-path update; usamos string vazia (será reescrita ao conectar)
   const dados={
     escola,serie,turma,
-    atividadeId:null,
+    atividadeId:'',
     criadoPor:currentUser.uid,
     criadoEm:new Date().toISOString()
   };
@@ -547,9 +550,17 @@ window.gerarLink=async function(){
     updates['usuarios/'+currentUser.uid+'/turmas_fluxo/'+turmaId]=dados;
     updates['turmas_fluxo/'+turmaId]=dados;
     await update(ref(db),updates);
+
+    // Atualização local imediata (não depende do listener disparar)
+    if(!myLinks.some(l=>l.id===turmaId)){
+      myLinks.unshift({id:turmaId, ...dados});
+    }
+    renderLinks();
+
     closeGerarModal();
     toast('Link gerado! Agora conecte uma atividade.');
-    await loadData();
+    // Re-subscribe para garantir que o listener pegue o novo link também
+    if(currentUser) subscribeData();
   }catch(e){console.error(e);$('glAviso').textContent='Erro ao gerar link.'}
 };
 
@@ -586,9 +597,13 @@ window.confirmConnect=async function(){
     updates['usuarios/'+currentUser.uid+'/turmas_fluxo/'+connectingLinkId+'/atividadeId']=selectedConnectFlowId;
     updates['turmas_fluxo/'+connectingLinkId+'/atividadeId']=selectedConnectFlowId;
     await update(ref(db),updates);
+    // Atualização local imediata
+    const lk = myLinks.find(l=>l.id===connectingLinkId);
+    if(lk) lk.atividadeId = selectedConnectFlowId;
+    renderLinks();
     closeConnectModal();
     toast('Atividade conectada com sucesso!');
-    await loadData();
+    if(currentUser) subscribeData();
   }catch(e){console.error(e);alert('Erro ao conectar.')}
 };
 
