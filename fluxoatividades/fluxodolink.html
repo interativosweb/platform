@@ -280,6 +280,43 @@ function subscribeData(){
     renderActivities();
   }, err=>{ console.error('[fluxos] erro:', err) });
 
+  // Tentativa adicional: tenta ler o nó fluxos completo (caso existam fluxos órfãos
+  // sob outros UIDs com criadoPor=currentUser.uid, ou para o admin ver tudo).
+  // Se a regra de leitura permitir, completa myFlows com esses extras.
+  (async ()=>{
+    try{
+      const rootSnap = await get(ref(db,'fluxos'));
+      if(!rootSnap.exists()) return;
+      const all = rootSnap.val()||{};
+      const isAdmin = currentUser.email === ADM_EMAIL;
+      const extras=[];
+      Object.keys(all).forEach(uidKey=>{
+        const userFlows = all[uidKey]||{};
+        Object.keys(userFlows).forEach(fid=>{
+          const f = userFlows[fid]||{};
+          // Já está em myFlows (do listener principal)? Pula.
+          if(uidKey===currentUser.uid) return;
+          // Mostra para admin OU se o fluxo foi criado pelo usuário atual (campo criadoPor)
+          const ownedByMe = f.criadoPor && f.criadoPor===currentUser.uid;
+          if(isAdmin || ownedByMe){
+            extras.push({id:fid, _ownerUid:uidKey, ...f});
+          }
+        });
+      });
+      if(extras.length){
+        // Mescla evitando duplicatas
+        const knownIds = new Set(myFlows.map(x=>x.id));
+        extras.forEach(f=>{ if(!knownIds.has(f.id)) myFlows.push(f) });
+        myFlows.sort((a,b)=>{
+          const ta = new Date(a.atualizadoEm||a.criadoEm||0).getTime();
+          const tb = new Date(b.atualizadoEm||b.criadoEm||0).getTime();
+          return tb - ta;
+        });
+        renderActivities();
+      }
+    }catch(e){ /* sem permissão para ler raiz — silencioso */ }
+  })();
+
   // Subscribe a links de turma do usuário
   if(_linksUnsub) try{ _linksUnsub() }catch(_){}
   _linksUnsub = onValue(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo'), snap=>{
