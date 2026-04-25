@@ -201,7 +201,7 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 <div class="header">
   <button class="btn-h" onclick="voltarComSave()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg> Voltar</button>
   <input id="flowNameInput" class="flow-name-input" placeholder="Nome do fluxo..." spellcheck="false">
-  <span id="saveBadge" class="save-badge ok">Salvo</span>
+  <span id="saveBadge" class="save-badge pending">Carregando...</span>
   <button class="btn-h" id="btnSidebarToggle">Fluxos</button>
 </div>
 
@@ -389,7 +389,7 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import{getDatabase,ref,set,get,update,remove}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{getDatabase,ref,set,get,update,remove,push}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const fbConf={apiKey:"AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",authDomain:"profbase-5f9b0.firebaseapp.com",databaseURL:"https://profbase-5f9b0-default-rtdb.firebaseio.com",projectId:"profbase-5f9b0",storageBucket:"profbase-5f9b0.firebasestorage.app",messagingSenderId:"826412057766",appId:"1:826412057766:web:729e6e24ce7587417fe067"};
 const app=initializeApp(fbConf),auth=getAuth(app),db=getDatabase(app);
@@ -634,46 +634,72 @@ async function copyAdminFlow(fid){
     await loadLists();loadFlow(nid);
   }catch(e){console.error(e);alert('Erro.')}
 }
-let _saving=false;
-async function saveFlow(){
-  if(!user||_saving)return;
-  _saving=true;
-  const nomeParaSalvar = (flow.nome && flow.nome.trim()) || 'Sem título';
-  $('saveBadge').textContent='Salvando...';$('saveBadge').className='save-badge pending';
-  try{
-    if(!flowId){
-      // Primeira gravação: cria o fluxo no Firebase e assume o id
-      flowId='fl_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
-      await set(ref(db,'fluxos/'+user.uid+'/'+flowId),{
-        nome: nomeParaSalvar,
-        nodes: flow.nodes||{},
-        criadoEm: new Date().toISOString(),
-        atualizadoEm: new Date().toISOString()
-      });
-      window.history.replaceState(null,'','?id='+flowId);
-      loadLists();
-    } else {
-      await update(ref(db,'fluxos/'+user.uid+'/'+flowId),{
-        nome: nomeParaSalvar,
-        nodes: flow.nodes||{},
-        atualizadoEm: new Date().toISOString()
-      });
+let _savePromise=null;
+function _doSave(){
+  // Fila: encadeia em cima do save anterior (se houver) para serializar gravações
+  const prev = _savePromise || Promise.resolve();
+  const cur = prev.catch(()=>{}).then(async ()=>{
+    if(!user) return;
+    if(!dirty && flowId) return; // nada a salvar
+    const nomeParaSalvar = (flow.nome && flow.nome.trim()) || 'Novo Fluxo sem título';
+    // snapshot do estado para gravar (evita corridas com edições durante o await)
+    const snapNodes = JSON.parse(JSON.stringify(flow.nodes||{}));
+    const snapProvaMode = flow.provaMode ? JSON.parse(JSON.stringify(flow.provaMode)) : null;
+    const wasDirty = dirty;
+    dirty = false;
+    $('saveBadge').textContent='Salvando...';$('saveBadge').className='save-badge pending';
+    try{
+      if(!flowId){
+        // Primeira gravação: usa push() do próprio Firebase para gerar o ID
+        const newRef = push(ref(db,'fluxos/'+user.uid));
+        flowId = newRef.key;
+        const payload = {
+          nome: nomeParaSalvar,
+          nodes: snapNodes,
+          criadoEm: new Date().toISOString(),
+          atualizadoEm: new Date().toISOString()
+        };
+        if(snapProvaMode) payload.provaMode = snapProvaMode;
+        await set(newRef, payload);
+        try{ window.history.replaceState(null,'','?id='+flowId) }catch(_){}
+        loadLists();
+      } else {
+        const payload = {
+          nome: nomeParaSalvar,
+          nodes: snapNodes,
+          atualizadoEm: new Date().toISOString()
+        };
+        if(snapProvaMode) payload.provaMode = snapProvaMode; else payload.provaMode = null;
+        await update(ref(db,'fluxos/'+user.uid+'/'+flowId), payload);
+      }
+      $('saveBadge').textContent='Salvo';$('saveBadge').className='save-badge ok';
+    }catch(e){
+      console.error('[saveFlow] erro:', e);
+      // restaura dirty para tentar de novo
+      if(wasDirty) dirty = true;
+      $('saveBadge').textContent='Erro ao salvar';$('saveBadge').className='save-badge pending';
+      throw e;
     }
-    $('saveBadge').textContent='Salvo';$('saveBadge').className='save-badge ok';dirty=false;
-  }catch(e){console.error(e);$('saveBadge').textContent='Erro';$('saveBadge').className='save-badge pending'}
-  finally{ _saving=false }
+  });
+  _savePromise = cur;
+  return cur;
+}
+async function saveFlow(){
+  try{ await _doSave() }catch(_){}
 }
 function markDirty(){
   dirty=true;
   $('saveBadge').textContent='...';$('saveBadge').className='save-badge pending';
   clearTimeout(saveT);
-  // Primeira gravação (fluxo ainda não existe no Firebase) → debounce curto para salvar rapidamente
-  const delay = flowId ? 800 : 300;
+  const delay = flowId ? 600 : 250; // primeira gravação dispara mais rápido
   saveT=setTimeout(saveFlow,delay);
 }
 async function flushSave(){
   clearTimeout(saveT);saveT=null;
-  if(dirty||!flowId) await saveFlow();
+  // Espera qualquer save em curso terminar
+  if(_savePromise){ try{ await _savePromise }catch(_){} }
+  // Se ainda está dirty ou se nunca foi salvo, salva agora
+  if(dirty||!flowId){ try{ await _doSave() }catch(_){} }
 }
 function pushHistory(){
   try{
