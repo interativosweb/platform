@@ -624,6 +624,18 @@ async function loadFlow(fid){
     // Center on start node
     const st=Object.values(flow.nodes).find(n=>n.tipo==='inicio');
     if(st){panX=-st.x*zoom+wrap.clientWidth/2;panY=-st.y*zoom+wrap.clientHeight/2;applyTransform()}
+    // Migração silenciosa: garante que o fluxo aparece no índice usuarios/<uid>/meus_fluxos
+    try{
+      const idxSnap = await get(ref(db,'usuarios/'+user.uid+'/meus_fluxos/'+fid));
+      if(!idxSnap.exists()){
+        await set(ref(db,'usuarios/'+user.uid+'/meus_fluxos/'+fid), {
+          nome: d.nome||'Sem título',
+          ownerUid: user.uid,
+          criadoEm: d.criadoEm||new Date().toISOString(),
+          atualizadoEm: d.atualizadoEm||new Date().toISOString()
+        });
+      }
+    }catch(_){}
   }catch(e){console.error(e);alert('Erro ao carregar.')}
 }
 async function copyAdminFlow(fid){
@@ -656,11 +668,22 @@ function _doSave(){
         const payload = {
           nome: nomeParaSalvar,
           nodes: snapNodes,
+          criadoPor: user.uid,
+          criadoPorEmail: user.email||null,
           criadoEm: new Date().toISOString(),
           atualizadoEm: new Date().toISOString()
         };
         if(snapProvaMode) payload.provaMode = snapProvaMode;
-        await set(newRef, payload);
+        // Multi-path update: escreve no caminho do dono E no índice usuarios/<uid>/meus_fluxos
+        const updates={};
+        updates['fluxos/'+user.uid+'/'+flowId] = payload;
+        updates['usuarios/'+user.uid+'/meus_fluxos/'+flowId] = {
+          nome: nomeParaSalvar,
+          ownerUid: user.uid,
+          atualizadoEm: payload.atualizadoEm,
+          criadoEm: payload.criadoEm
+        };
+        await update(ref(db), updates);
         try{ window.history.replaceState(null,'','?id='+flowId) }catch(_){}
         loadLists();
       } else {
@@ -670,7 +693,16 @@ function _doSave(){
           atualizadoEm: new Date().toISOString()
         };
         if(snapProvaMode) payload.provaMode = snapProvaMode; else payload.provaMode = null;
-        await update(ref(db,'fluxos/'+user.uid+'/'+flowId), payload);
+        // Multi-path: atualiza fluxo + índice
+        const updates={};
+        updates['fluxos/'+user.uid+'/'+flowId+'/nome'] = nomeParaSalvar;
+        updates['fluxos/'+user.uid+'/'+flowId+'/nodes'] = snapNodes;
+        updates['fluxos/'+user.uid+'/'+flowId+'/atualizadoEm'] = payload.atualizadoEm;
+        updates['fluxos/'+user.uid+'/'+flowId+'/provaMode'] = snapProvaMode||null;
+        updates['usuarios/'+user.uid+'/meus_fluxos/'+flowId+'/nome'] = nomeParaSalvar;
+        updates['usuarios/'+user.uid+'/meus_fluxos/'+flowId+'/atualizadoEm'] = payload.atualizadoEm;
+        updates['usuarios/'+user.uid+'/meus_fluxos/'+flowId+'/ownerUid'] = user.uid;
+        await update(ref(db), updates);
       }
       $('saveBadge').textContent='Salvo';$('saveBadge').className='save-badge ok';
     }catch(e){
