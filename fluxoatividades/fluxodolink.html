@@ -195,7 +195,9 @@ body{background-color:var(--bg);background-image:linear-gradient(rgba(10,132,255
   <div class="row"><span>Cache local:</span><span class="v" id="dCache">—</span></div>
   <div class="row"><span>Servidor:</span><span class="v" id="dServer">—</span></div>
   <div class="row"><span>Último save:</span><span class="v" id="dSave">—</span></div>
+  <div class="row"><span>Auto-sync:</span><span class="v" id="dSync">—</span></div>
   <div class="row"><span>Último erro:</span><span class="v err" id="dErr">—</span></div>
+  <button id="dForceSync" style="margin-top:8px;width:100%;padding:6px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:inherit">↻ Sincronizar agora</button>
 </div>
 
 <!-- MODAL: GERAR LINK -->
@@ -309,7 +311,7 @@ function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show')
    Se cache=N mas servidor=0 → write não está chegando ao Firebase.
    Se cache=0 mas você criou link → localStorage não está persistindo.
 */
-const DIAG = {uid:'—', cache:'—', server:'—', save:'—', err:'—'};
+const DIAG = {uid:'—', cache:'—', server:'—', save:'—', sync:'—', err:'—'};
 function diag(field, value){
   if(field) DIAG[field] = value;
   const p=$('diagPanel'); if(!p) return;
@@ -318,6 +320,7 @@ function diag(field, value){
   $('dCache').textContent  = DIAG.cache;
   $('dServer').textContent = DIAG.server;
   $('dSave').textContent   = DIAG.save;
+  if($('dSync')) $('dSync').textContent = DIAG.sync;
   $('dErr').textContent    = DIAG.err;
   console.log('[DIAG]', JSON.stringify(DIAG));
 }
@@ -350,6 +353,8 @@ onAuthStateChanged(auth,async user=>{
   diag('cache', myLinks.length+' link(s)');
   renderLinks();
   subscribeData();
+  // Sincronização periódica — corrige writes que não persistiram
+  startPeriodicSync();
 });
 
 /* ── LOAD DATA (live listeners) ── */
@@ -580,6 +585,86 @@ async function initialLinksFetchAndRecover(){
 
 // Compatibilidade: re-subscribe sob demanda (usada após excluir/criar etc.)
 async function loadData(){ if(currentUser) subscribeData() }
+
+/* ── SINCRONIZAÇÃO PERIÓDICA ──────────────────────────────────────
+   A cada N segundos, lê o servidor e compara com myLinks.
+   Para cada item local que NÃO está no servidor, regrava.
+   Para cada item do servidor que NÃO está local, adiciona.
+   Cobre o cenário onde set() reportou sucesso mas o item sumiu
+   do servidor (problemas de regra, trigger, conexão flaky etc.). */
+let _syncTimer=null, _syncRunning=false;
+async function syncWithServer(reason){
+  if(!currentUser) return;
+  if(_syncRunning){ console.log('[sync] já rodando, pulando'); return }
+  _syncRunning=true;
+  try{
+    const snap = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo'));
+    const fromDb=[];
+    if(snap.exists()) snap.forEach(c=>fromDb.push({id:c.key,...c.val()}));
+    const serverIds=new Set(fromDb.map(l=>l.id));
+
+    // Itens em myLinks que não estão no servidor → regrava
+    const missing = myLinks.filter(l=>!serverIds.has(l.id));
+    let recovered=0;
+    if(missing.length){
+      console.warn('[sync]',reason||'periódica','— regravando',missing.length,'item(s)');
+      for(const lk of missing){
+        try{
+          const dados = {
+            escola: lk.escola||'',
+            serie:  lk.serie||'',
+            turma:  lk.turma||'',
+            atividadeId: lk.atividadeId||'',
+            criadoPor: currentUser.uid,
+            criadoEm:  lk.criadoEm || new Date().toISOString()
+          };
+          await set(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+lk.id), dados);
+          try{ await set(ref(db,'turmas_fluxo/'+lk.id), dados) }catch(_){}
+          // Verifica
+          const v = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+lk.id));
+          if(v.exists()){
+            recovered++;
+            serverIds.add(lk.id);
+            fromDb.push({id:lk.id, ...dados});
+          } else {
+            console.error('[sync] ❌ regravado mas não persistiu:', lk.id);
+            diag('err','Item '+lk.id.slice(-6)+' não persiste — checar Firebase');
+          }
+        }catch(e){ console.error('[sync] erro:', lk.id, e) }
+      }
+    }
+    // Atualiza myLinks com merge (servidor + locais não-servidor)
+    const merged = [...fromDb];
+    const mids = new Set(merged.map(l=>l.id));
+    for(const lk of myLinks){ if(!mids.has(lk.id)) merged.push(lk); }
+    myLinks = merged;
+    myLinks.sort((a,b)=>{
+      const ta=new Date(a.criadoEm||0).getTime();
+      const tb=new Date(b.criadoEm||0).getTime();
+      return tb-ta;
+    });
+    saveLocalCache();
+    diag('cache', myLinks.length+' link(s)');
+    diag('server', fromDb.length+' link(s)');
+    diag('sync', new Date().toLocaleTimeString()+(recovered?` (+${recovered} recuperados)`:' (ok)'));
+    renderLinks();
+  }catch(e){
+    console.error('[sync] falha:', e);
+    diag('err','Sync: '+(e.code||e.message||''));
+  }finally{
+    _syncRunning=false;
+  }
+}
+function startPeriodicSync(){
+  if(_syncTimer) clearInterval(_syncTimer);
+  _syncTimer = setInterval(()=>syncWithServer('periódica'), 8000);
+}
+
+// Botão "Sincronizar agora"
+document.addEventListener('DOMContentLoaded',()=>{
+  const b=document.getElementById('dForceSync');
+  if(b) b.onclick=()=>syncWithServer('manual');
+});
 
 /* ── RENDER ACTIVITIES ── */
 function renderActivities(){
