@@ -716,7 +716,79 @@ function startPeriodicSync(){
 document.addEventListener('DOMContentLoaded',()=>{
   const b=document.getElementById('dForceSync');
   if(b) b.onclick=()=>syncWithServer('manual');
+  const dp=document.getElementById('dDiagPaths');
+  if(dp) dp.onclick=diagnosePathsViaRest;
 });
+
+/* ── DIAGNÓSTICO VIA REST API ────────────────────────────
+   Bypassa o SDK do Firebase e consulta direto a REST API.
+   Útil pra detectar quando o SDK está retornando dados em cache
+   diferentes do que está realmente no servidor. */
+async function diagnosePathsViaRest(){
+  const out=document.getElementById('dDiagPathsResult');
+  if(!out||!currentUser) return;
+  out.innerHTML='⏳ Consultando REST API…';
+  try{
+    const idToken = await currentUser.getIdToken(true);
+    const dbUrl = 'https://profbase-5f9b0-default-rtdb.firebaseio.com';
+    const userPath = `${dbUrl}/usuarios/${currentUser.uid}/turmas_fluxo.json?auth=${idToken}`;
+
+    // 1) Lê o caminho do usuário via REST (bypass SDK cache)
+    const r1 = await fetch(userPath);
+    const userData = await r1.json();
+    const userKeys = userData ? Object.keys(userData) : [];
+
+    // 2) Lê o cache local
+    const cached = loadLocalCache();
+    const cachedIds = cached.map(l=>l.id);
+
+    // 3) Para cada item no cache, tenta ler do nó público turmas_fluxo/<id>
+    const publicResults = [];
+    for(const id of cachedIds){
+      try{
+        const r = await fetch(`${dbUrl}/turmas_fluxo/${id}.json?auth=${idToken}`);
+        const d = await r.json();
+        publicResults.push({id, exists: d!==null, criadoPor: d ? d.criadoPor : null});
+      }catch(_){
+        publicResults.push({id, exists: false, error: true});
+      }
+    }
+
+    // 4) Compara: SDK get() vs REST get()
+    let sdkCount = 0;
+    try{
+      const sdkSnap = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo'));
+      if(sdkSnap.exists()) sdkSnap.forEach(c=>sdkCount++);
+    }catch(_){}
+
+    // Monta relatório
+    const lines = [];
+    lines.push(`<b style="color:var(--accent)">UID:</b> ${esc(currentUser.uid)}`);
+    lines.push(`<b style="color:var(--accent)">SDK get(usuarios/uid/turmas_fluxo):</b> ${sdkCount} item(s)`);
+    lines.push(`<b style="color:var(--accent)">REST get(usuarios/uid/turmas_fluxo):</b> ${userKeys.length} item(s)`);
+    if(userKeys.length){
+      lines.push(`<span style="color:var(--text2)">→ IDs no servidor (REST): ${userKeys.map(k=>k.slice(-8)).join(', ')}</span>`);
+    }
+    lines.push(`<b style="color:var(--accent)">Cache local:</b> ${cached.length} item(s)`);
+    if(cached.length){
+      lines.push(`<span style="color:var(--text2)">→ IDs no cache: ${cachedIds.map(k=>k.slice(-8)).join(', ')}</span>`);
+    }
+    lines.push(`<b style="color:var(--accent)">Verificação cada item no nó público (turmas_fluxo/&lt;id&gt;):</b>`);
+    for(const r of publicResults){
+      const status = r.exists ? '<span style="color:var(--success)">✅ existe</span>' : '<span style="color:var(--error)">❌ não existe</span>';
+      const owner = r.criadoPor ? ` (criadoPor: ...${r.criadoPor.slice(-6)})` : '';
+      lines.push(`&nbsp;&nbsp;<code>...${r.id.slice(-8)}</code> → ${status}${owner}`);
+    }
+    if(sdkCount !== userKeys.length){
+      lines.push('<br><b style="color:var(--error)">⚠️ MISMATCH: SDK e REST retornam quantidades diferentes! Cache do SDK pode estar corrompido.</b>');
+    }
+    out.innerHTML = lines.join('<br>');
+    console.log('[REST DIAG] resultado:', {sdkCount, restCount: userKeys.length, userKeys, cachedIds, publicResults});
+  }catch(e){
+    out.innerHTML = '<span style="color:var(--error)">Erro: '+esc(e.message||'')+'</span>';
+    console.error('[REST DIAG] falhou:', e);
+  }
+}
 
 /* ── RENDER ACTIVITIES ── */
 function renderActivities(){
@@ -757,6 +829,7 @@ window.deleteActivity=async function(fluxoId){
 /* ── RENDER LINKS ── */
 function renderLinks(){
   $('linkCount').textContent=myLinks.length;
+  console.log('[renderLinks] myLinks =', myLinks.length, 'item(s):', myLinks.map(l=>({id:l.id, escola:l.escola, turma:l.turma})));
   if(!myLinks.length){
     $('linkList').innerHTML='<div class="empty-msg">Nenhum link criado ainda. Clique em "Gerar link para turma".</div>';
     return;
@@ -790,6 +863,14 @@ function renderLinks(){
       </div>
     </div>`;
   }).join('');
+  // Verifica se a quantidade de cards no DOM bate com myLinks
+  const domCount = $('linkList').querySelectorAll('.link-card').length;
+  if(domCount !== myLinks.length){
+    console.error('[renderLinks] ⚠️ MISMATCH: DOM tem', domCount, 'cards mas myLinks tem', myLinks.length);
+    diag('err','Render mismatch: DOM='+domCount+' myLinks='+myLinks.length);
+  } else {
+    console.log('[renderLinks] ✅ DOM com', domCount, 'cards (igual a myLinks)');
+  }
 }
 
 function getFlowName(flowId){
