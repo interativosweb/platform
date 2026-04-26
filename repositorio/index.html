@@ -593,6 +593,8 @@ math-field::part(menu-toggle){display:none !important}
 .doc-header.tpl-rendered{display:block !important;padding:0 !important;margin:0 0 20px 0;border:none !important;grid-template-columns:none !important;gap:0 !important}
 /* Quando a prova já aplica o fundo na página, o cabeçalho não repete */
 .doc-header.tpl-rendered .hdr-canvas{width:100% !important;box-shadow:none !important;background-image:none !important;background:transparent !important}
+.doc-header.tpl-rendered .hdr-canvas.force-white-bg{background:#ffffff !important;background-image:none !important}
+.hdr-canvas.force-white-bg{background:#ffffff !important;background-image:none !important}
 .doc-header.tpl-rendered .hdr-el{cursor:default}
 .doc-header.tpl-rendered .hdr-el input::placeholder{color:#aaa}
 @media print{
@@ -1112,6 +1114,16 @@ math-field::part(menu-toggle){display:none !important}
           </label>
           <div style="font-size:.7rem;color:var(--text3);line-height:1.4;margin-top:4px">
             Útil quando a folha tem fundo quadriculado/pontilhado mas você quer que apenas o cabeçalho fique branco.
+          </div>
+        </div>
+        <div class="hdr-ed-section" id="hdrPadraoSection" style="display:none;background:rgba(94,92,230,.08);border:1px solid rgba(94,92,230,.35);border-radius:8px;padding:10px">
+          <h4 style="color:#a48cff">Cabeçalho padrão (admin)</h4>
+          <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--text2);cursor:pointer">
+            <input type="checkbox" id="hdrIsPadrao" style="margin:0">
+            Definir como padrão para todos os usuários
+          </label>
+          <div style="font-size:.7rem;color:var(--text3);line-height:1.4;margin-top:4px">
+            Quando ativo, este cabeçalho fica disponível para qualquer pessoa que abrir a plataforma.
           </div>
         </div>
         <div class="hdr-ed-section">
@@ -3307,17 +3319,49 @@ function getActiveTemplate(){
   return headerTemplates[activeHeaderTplId] || null;
 }
 
-function subscribeHeaders(){
-  if(!currentUser) return;
-  onValue(ref(db,'cabecalhos/'+currentUser.uid), snap=>{
-    headerTemplates = snap.val() || {};
-    if(activeHeaderTplId && !headerTemplates[activeHeaderTplId]){
-      activeHeaderTplId = null;
+/* Mantém duas fontes de templates:
+   - cabecalhos/<uid>     → templates do próprio usuário
+   - cabecalhos_padrao    → templates definidos pelo admin como padrão (visíveis a todos)
+   O merge mostra os padrão com flag _isPadrao=true (não-editáveis pelo usuário comum).
+   Se nenhum cabeçalho está ativo e existe pelo menos 1 padrão, usa o primeiro padrão. */
+let _ownTemplates = {};
+let _adminTemplates = {};
+function rebuildHeaderTemplates(){
+  const merged = {};
+  Object.entries(_adminTemplates).forEach(([id,t])=>{
+    merged['padrao_'+id] = {...t, _isPadrao:true, _padraoOriginalId:id};
+  });
+  Object.entries(_ownTemplates).forEach(([id,t])=>{
+    merged[id] = t;
+  });
+  headerTemplates = merged;
+  // Se não há ativo e existe padrão, usa o primeiro padrão automaticamente
+  if(!activeHeaderTplId){
+    const padraoIds = Object.keys(headerTemplates).filter(k=>k.startsWith('padrao_'));
+    if(padraoIds.length){
+      activeHeaderTplId = padraoIds[0];
       persistActiveTpl();
     }
-    renderDoc();
-    if($('hdrListOv').classList.contains('show')) renderHdrList();
+  }
+  if(activeHeaderTplId && !headerTemplates[activeHeaderTplId]){
+    activeHeaderTplId = null;
+    persistActiveTpl();
+  }
+  renderDoc();
+  if($('hdrListOv').classList.contains('show')) renderHdrList();
+}
+function subscribeHeaders(){
+  if(!currentUser) return;
+  // Templates próprios do usuário
+  onValue(ref(db,'cabecalhos/'+currentUser.uid), snap=>{
+    _ownTemplates = snap.val() || {};
+    rebuildHeaderTemplates();
   });
+  // Templates padrão do admin (todos os usuários veem)
+  onValue(ref(db,'cabecalhos_padrao'), snap=>{
+    _adminTemplates = snap.val() || {};
+    rebuildHeaderTemplates();
+  }, err=>{ console.warn('[cabecalhos_padrao] erro:', err) });
 }
 
 function newTemplate(){
@@ -3367,26 +3411,36 @@ function openHeaderList(){
 function renderHdrList(){
   const grid=$('hdrTplGrid');
   const ids = Object.keys(headerTemplates);
-  const count = ids.length;
+  const ownIds = ids.filter(id=>!id.startsWith('padrao_'));
+  const isAdmin = currentUser && currentUser.email===ADMIN_EMAIL;
   let html = '';
   ids.forEach(id=>{
     const t = headerTemplates[id];
     const active = id===activeHeaderTplId;
+    const isPadrao = !!t._isPadrao;
+    const canModifyPadrao = isPadrao && isAdmin;
+    const padraoBadge = isPadrao
+      ? '<span style="display:inline-block;padding:2px 7px;border-radius:6px;background:rgba(94,92,230,.18);border:1px solid rgba(94,92,230,.45);color:#a48cff;font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-left:6px">Padrão</span>'
+      : '';
+    // Para padrão: usuário comum só pode "Usar" e "Duplicar". Admin pode tudo.
+    const showEdit   = !isPadrao || canModifyPadrao;
+    const showRename = !isPadrao || canModifyPadrao;
+    const showDel    = !isPadrao || canModifyPadrao;
     html += `
-      <div class="tpl-card${active?' active':''}" data-id="${id}">
+      <div class="tpl-card${active?' active':''}${isPadrao?' tpl-padrao':''}" data-id="${id}">
         <div class="tpl-thumb">${hdrThumbHTML(t)}</div>
-        <div class="tpl-name">${esc(t.nome||'Sem nome')}</div>
+        <div class="tpl-name">${esc(t.nome||'Sem nome')}${padraoBadge}</div>
         <div class="tpl-actions">
           <button class="primary tpl-use" data-id="${id}">${active?'Em uso':'Usar'}</button>
-          <button class="tpl-edit" data-id="${id}">Editar</button>
-          <button class="tpl-rename" data-id="${id}">Renomear</button>
+          ${showEdit?`<button class="tpl-edit" data-id="${id}">Editar</button>`:''}
+          ${showRename?`<button class="tpl-rename" data-id="${id}">Renomear</button>`:''}
           <button class="tpl-dup" data-id="${id}">Duplicar</button>
-          <button class="tpl-del pf-danger" data-id="${id}">Excluir</button>
+          ${showDel?`<button class="tpl-del pf-danger" data-id="${id}">Excluir</button>`:''}
         </div>
       </div>`;
   });
-  if(count < MAX_HEADERS){
-    html += `<button class="tpl-new-card" id="hdrNewCard">+ Criar novo cabeçalho<br><span style="font-size:.72rem;font-weight:400">${count}/${MAX_HEADERS}</span></button>`;
+  if(ownIds.length < MAX_HEADERS){
+    html += `<button class="tpl-new-card" id="hdrNewCard">+ Criar novo cabeçalho<br><span style="font-size:.72rem;font-weight:400">${ownIds.length}/${MAX_HEADERS}</span></button>`;
   } else {
     html += `<div class="tpl-new-card" style="cursor:not-allowed;opacity:.55">Limite de ${MAX_HEADERS} cabeçalhos atingido</div>`;
   }
@@ -3407,21 +3461,36 @@ function renderHdrList(){
     const nome = novoNome.trim().slice(0,80);
     if(!nome) return;
     try{
-      await update(ref(db,'cabecalhos/'+currentUser.uid+'/'+id), {nome});
+      // Se é um padrão (admin), salva em cabecalhos_padrao
+      if(tpl._isPadrao){
+        await update(ref(db,'cabecalhos_padrao/'+tpl._padraoOriginalId), {nome});
+      } else {
+        await update(ref(db,'cabecalhos/'+currentUser.uid+'/'+id), {nome});
+      }
     }catch(e){ alert('Erro ao renomear: '+e.message) }
   });
   grid.querySelectorAll('.tpl-dup').forEach(b=>b.onclick=async ()=>{
-    if(Object.keys(headerTemplates).length>=MAX_HEADERS){ alert('Limite de '+MAX_HEADERS+' cabeçalhos atingido.'); return }
+    const ownIds = Object.keys(headerTemplates).filter(k=>!k.startsWith('padrao_'));
+    if(ownIds.length>=MAX_HEADERS){ alert('Limite de '+MAX_HEADERS+' cabeçalhos atingido.'); return }
     const src = headerTemplates[b.dataset.id];
     const cp = JSON.parse(JSON.stringify(src));
+    // Remove flags internas ao duplicar (sempre vira um próprio do usuário)
+    delete cp._isPadrao;
+    delete cp._padraoOriginalId;
     cp.nome = (cp.nome||'Cabeçalho')+' (cópia)';
     const r=push(ref(db,'cabecalhos/'+currentUser.uid));
     await set(r, cp);
   });
   grid.querySelectorAll('.tpl-del').forEach(b=>b.onclick=async ()=>{
+    const id=b.dataset.id;
+    const tpl=headerTemplates[id]; if(!tpl) return;
     if(!confirm('Excluir este cabeçalho?')) return;
-    await remove(ref(db,'cabecalhos/'+currentUser.uid+'/'+b.dataset.id));
-    if(activeHeaderTplId===b.dataset.id){ activeHeaderTplId=null; persistActiveTpl(); renderDoc() }
+    if(tpl._isPadrao){
+      await remove(ref(db,'cabecalhos_padrao/'+tpl._padraoOriginalId));
+    } else {
+      await remove(ref(db,'cabecalhos/'+currentUser.uid+'/'+id));
+    }
+    if(activeHeaderTplId===id){ activeHeaderTplId=null; persistActiveTpl(); renderDoc() }
   });
 }
 
@@ -3445,7 +3514,9 @@ function openHeaderEditor(id){
   editingHdrTplId = id;
   editingHdrTpl = id ? JSON.parse(JSON.stringify(headerTemplates[id])) : newTemplate();
   selectedElId = null;
-  $('hdrEditorTitle').textContent = id ? 'Editar cabeçalho' : 'Novo cabeçalho';
+  const isAdmin = currentUser && currentUser.email===ADMIN_EMAIL;
+  const isPadrao = !!(editingHdrTpl && editingHdrTpl._isPadrao);
+  $('hdrEditorTitle').textContent = id ? (isPadrao?'Editar cabeçalho padrão':'Editar cabeçalho') : 'Novo cabeçalho';
   $('hdrEdDelete').style.display = id ? 'inline-flex' : 'none';
   $('hdrName').value = editingHdrTpl.nome || '';
   $('hdrAltura').value = editingHdrTpl.altura;
@@ -3456,6 +3527,12 @@ function openHeaderEditor(id){
   $('hdrBR').value = (editingHdrTpl.borda && editingHdrTpl.borda.radius) || 0;
   $('hdrBS').value = (editingHdrTpl.borda && editingHdrTpl.borda.estilo) || 'solid';
   $('hdrBC').value = (editingHdrTpl.borda && editingHdrTpl.borda.cor) || '#111111';
+  // Seção "Definir como padrão" — só aparece para admin
+  const padraoSec = $('hdrPadraoSection');
+  if(padraoSec){
+    padraoSec.style.display = isAdmin ? 'block' : 'none';
+    $('hdrIsPadrao').checked = isPadrao;
+  }
   $('hdrListOv').classList.remove('show');
   $('hdrEditorOv').classList.add('show');
   redrawEditor();
@@ -3471,7 +3548,13 @@ function closeHeaderEditor(){
 $('hdrEdDelete').onclick=async ()=>{
   if(!editingHdrTplId) return;
   if(!confirm('Excluir este cabeçalho?')) return;
-  await remove(ref(db,'cabecalhos/'+currentUser.uid+'/'+editingHdrTplId));
+  // Se estamos editando um padrão, deleta de cabecalhos_padrao
+  const tpl = headerTemplates[editingHdrTplId];
+  if(tpl && tpl._isPadrao){
+    await remove(ref(db,'cabecalhos_padrao/'+tpl._padraoOriginalId));
+  } else {
+    await remove(ref(db,'cabecalhos/'+currentUser.uid+'/'+editingHdrTplId));
+  }
   if(activeHeaderTplId===editingHdrTplId){ activeHeaderTplId=null; persistActiveTpl(); renderDoc() }
   closeHeaderEditor();
 };
@@ -3479,18 +3562,53 @@ $('hdrEdDelete').onclick=async ()=>{
 $('hdrEditorSave').onclick=async ()=>{
   if(!editingHdrTpl || !currentUser) return;
   editingHdrTpl.nome = $('hdrName').value.trim() || 'Sem nome';
+  const isAdmin = currentUser.email===ADMIN_EMAIL;
+  const wantsPadrao = isAdmin && $('hdrIsPadrao') && $('hdrIsPadrao').checked;
+  // Limpa flags internas antes de salvar (não vai pro Firebase)
+  const payload = JSON.parse(JSON.stringify(editingHdrTpl));
+  delete payload._isPadrao;
+  delete payload._padraoOriginalId;
   try{
     $('hdrEditorSave').disabled=true;
+    const wasPadrao = !!(editingHdrTpl._isPadrao);
+    const originalPadraoId = editingHdrTpl._padraoOriginalId;
     if(editingHdrTplId){
-      await set(ref(db,'cabecalhos/'+currentUser.uid+'/'+editingHdrTplId), editingHdrTpl);
-      // Auto-aplicar o cabeçalho que acabou de ser modificado
-      activeHeaderTplId = editingHdrTplId;
+      // Editando algo existente
+      if(wasPadrao && wantsPadrao){
+        // Continuou padrão → atualiza em cabecalhos_padrao
+        await set(ref(db,'cabecalhos_padrao/'+originalPadraoId), payload);
+        activeHeaderTplId = 'padrao_'+originalPadraoId;
+      } else if(wasPadrao && !wantsPadrao){
+        // Era padrão, mas admin desmarcou → remove de padrão e cria como próprio
+        await remove(ref(db,'cabecalhos_padrao/'+originalPadraoId));
+        const r=push(ref(db,'cabecalhos/'+currentUser.uid));
+        await set(r, payload);
+        activeHeaderTplId = r.key;
+      } else if(!wasPadrao && wantsPadrao){
+        // Não era padrão e admin marcou como padrão → move pra cabecalhos_padrao
+        await remove(ref(db,'cabecalhos/'+currentUser.uid+'/'+editingHdrTplId));
+        const r=push(ref(db,'cabecalhos_padrao'));
+        await set(r, payload);
+        activeHeaderTplId = 'padrao_'+r.key;
+      } else {
+        // Próprio normal
+        await set(ref(db,'cabecalhos/'+currentUser.uid+'/'+editingHdrTplId), payload);
+        activeHeaderTplId = editingHdrTplId;
+      }
       persistActiveTpl();
     } else {
-      if(Object.keys(headerTemplates).length>=MAX_HEADERS){ alert('Limite de '+MAX_HEADERS+' cabeçalhos atingido.'); return }
-      const r=push(ref(db,'cabecalhos/'+currentUser.uid));
-      await set(r, editingHdrTpl);
-      activeHeaderTplId = r.key;
+      // Criando novo
+      if(wantsPadrao){
+        const r=push(ref(db,'cabecalhos_padrao'));
+        await set(r, payload);
+        activeHeaderTplId = 'padrao_'+r.key;
+      } else {
+        const ownIds = Object.keys(headerTemplates).filter(k=>!k.startsWith('padrao_'));
+        if(ownIds.length>=MAX_HEADERS){ alert('Limite de '+MAX_HEADERS+' cabeçalhos atingido.'); return }
+        const r=push(ref(db,'cabecalhos/'+currentUser.uid));
+        await set(r, payload);
+        activeHeaderTplId = r.key;
+      }
       persistActiveTpl();
     }
     renderDoc();
@@ -3633,25 +3751,18 @@ function addPresetField(preset){
 function renderTemplateCanvas(container, tpl, opts){
   container.innerHTML = '';
   // Remove classes de fundo anteriores mas preserva outras (como doc-header, tpl-rendered)
-  container.classList.remove('bg-linhas','bg-quadriculado','bg-pontilhado');
+  container.classList.remove('bg-linhas','bg-quadriculado','bg-pontilhado','force-white-bg');
   container.classList.add('hdr-canvas');
+  container.style.background = '';
   // No modo editor (editable) mostramos o preview do fundo; na prova (tpl-rendered), o fundo vem da página — mantém o canvas transparente
   const isPreviewOnly = opts && opts.editable;
-  if(isPreviewOnly){
-    // Se o usuário marcou "manter cabeçalho com fundo branco", o preview do
-    // editor já mostra branco — independente do tpl.fundo escolhido.
-    if(tpl.fundoBrancoCabecalho){
-      container.style.background = '#ffffff';
-    } else {
-      container.style.background = '';
-      if(tpl.fundo==='linhas') container.classList.add('bg-linhas');
-      else if(tpl.fundo==='quadriculado') container.classList.add('bg-quadriculado');
-      else if(tpl.fundo==='pontilhado') container.classList.add('bg-pontilhado');
-    }
-  } else {
-    // Render real (na prova): se o usuário marcou para manter o cabeçalho
-    // branco, força o fundo do header a sobrescrever o fundo da página.
-    container.style.background = tpl.fundoBrancoCabecalho ? '#ffffff' : '';
+  if(tpl.fundoBrancoCabecalho){
+    // Em ambos os modos (editor e prova), força fundo branco no cabeçalho
+    container.classList.add('force-white-bg');
+  } else if(isPreviewOnly){
+    if(tpl.fundo==='linhas') container.classList.add('bg-linhas');
+    else if(tpl.fundo==='quadriculado') container.classList.add('bg-quadriculado');
+    else if(tpl.fundo==='pontilhado') container.classList.add('bg-pontilhado');
   }
   container.style.height = (tpl.altura||HDR_DEFAULT_ALTURA)+'px';
   const b = tpl.borda || {};
