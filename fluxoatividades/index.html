@@ -391,12 +391,59 @@ async function init(){
   if(savedNome){
     alunoNome=savedNome;
     await syncStudent();
-    maybeActivateProva();
-    startFlow();
+    askProvaThenStart();
   }else{
     $('loginModal').classList.add('show');
     setTimeout(()=>$('inputNome').focus(),100);
   }
+}
+
+/* Antes de iniciar o fluxo, se for modo prova, mostra tela "Iniciar Prova"
+   que captura o gesto do usuário necessário para entrar em fullscreen. */
+function askProvaThenStart(){
+  if(fluxoData && fluxoData.provaMode){
+    showProvaStartScreen();
+  }else{
+    startFlow();
+  }
+}
+
+function showProvaStartScreen(){
+  const ov=document.createElement('div');
+  ov.className='modal-overlay show';
+  ov.id='provaStartOv';
+  ov.style.zIndex='9700';
+  ov.innerHTML=`<div class="modal" style="max-width:480px;text-align:center">
+    <div style="display:inline-block;padding:6px 16px;border-radius:50px;background:rgba(255,159,10,.16);border:1px solid rgba(255,159,10,.45);color:#ff9f0a;font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px">Modo Prova</div>
+    <h2 style="font-size:1.4rem;margin-bottom:8px">Atividade em Modo Prova</h2>
+    <p style="font-size:.9rem;line-height:1.6;color:var(--text2);margin-bottom:18px">
+      Esta atividade está em <b style="color:var(--text)">Modo Prova</b>. Ao iniciar, o navegador entrará em <b>tela cheia</b> e o sistema vai bloquear:<br><br>
+      • Trocar de aba ou janela<br>
+      • Sair da tela cheia (Esc, F11)<br>
+      • Atalhos de cópia, colar, recarregar<br>
+      • Menu de contexto (clique direito)<br><br>
+      Apenas o professor poderá desbloquear com a senha.
+    </p>
+    <button class="btn-entrar" id="btnIniciarProva" style="background:linear-gradient(135deg,#ff8a00,#ff2d6f)">Iniciar Modo Prova</button>
+  </div>`;
+  document.body.appendChild(ov);
+  setTimeout(()=>{
+    const btn=document.getElementById('btnIniciarProva');
+    if(btn){
+      btn.onclick=async ()=>{
+        // Gesto do usuário — pode entrar em fullscreen aqui
+        try{
+          if(document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
+          else if(document.documentElement.webkitRequestFullscreen) await document.documentElement.webkitRequestFullscreen();
+          else if(document.documentElement.mozRequestFullScreen) await document.documentElement.mozRequestFullScreen();
+        }catch(e){ console.warn('Fullscreen falhou:',e) }
+        provaActive=true;
+        installProvaHandlers();
+        ov.remove();
+        startFlow();
+      };
+    }
+  },50);
 }
 
 window.realizarLogin=async function(){
@@ -422,8 +469,7 @@ window.realizarLogin=async function(){
       fluxoPercorrido=foundData.fluxoPercorrido||[]; respostas=foundData.respostas||{};
       await db.ref(basePath+'alunos/'+alunoId).update({status:'online',ultimoAcesso:new Date().toISOString()});
       $('loginModal').classList.remove('show');
-      maybeActivateProva();
-      startFlow();
+      askProvaThenStart();
       return;
     }catch(e){ console.error(e); $('loginAviso').textContent='Erro ao validar código.'; return }
   }
@@ -445,12 +491,10 @@ window.realizarLogin=async function(){
   });
   $('loginModal').classList.remove('show');
   // Mostra o código numa caixa para o aluno copiar
-  showCodigoPopup(alunoCodigo);
-  maybeActivateProva();
-  startFlow();
+  showCodigoPopup(alunoCodigo, ()=>{ askProvaThenStart() });
 };
 
-function showCodigoPopup(codigo){
+function showCodigoPopup(codigo, onClose){
   const ov = document.createElement('div');
   ov.className='modal-overlay show';
   ov.style.zIndex='9500';
@@ -458,9 +502,13 @@ function showCodigoPopup(codigo){
     <h2 style="color:var(--accent)">Seu código de acesso</h2>
     <p>Anote este código. Você pode usá-lo para retomar a atividade em outro computador ou se fechar o navegador.</p>
     <div style="font-family:'SF Mono',monospace;font-size:1.6rem;font-weight:800;color:var(--accent);background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;margin:14px 0;letter-spacing:.06em;word-break:break-all">${codigo}</div>
-    <button class="btn-entrar" onclick="this.closest('.modal-overlay').remove()">Entendi</button>
+    <button class="btn-entrar" id="btnCodigoOk">Entendi</button>
   </div>`;
   document.body.appendChild(ov);
+  setTimeout(()=>{
+    const b=document.getElementById('btnCodigoOk');
+    if(b) b.onclick=()=>{ ov.remove(); if(typeof onClose==='function') onClose() };
+  },20);
 }
 
 async function syncStudent(){
