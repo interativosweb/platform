@@ -388,11 +388,14 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 <!-- SCRIPTS -->
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import{getAuth,onAuthStateChanged,setPersistence,browserLocalPersistence}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import{getDatabase,ref,set,get,update,remove,push}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const fbConf={apiKey:"AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",authDomain:"profbase-5f9b0.firebaseapp.com",databaseURL:"https://profbase-5f9b0-default-rtdb.firebaseio.com",projectId:"profbase-5f9b0",storageBucket:"profbase-5f9b0.firebasestorage.app",messagingSenderId:"826412057766",appId:"1:826412057766:web:729e6e24ce7587417fe067"};
 const app=initializeApp(fbConf),auth=getAuth(app),db=getDatabase(app);
+
+// Garante persistência de sessão entre reloads
+try { await setPersistence(auth, browserLocalPersistence); } catch(e) { console.warn('[AUTH] setPersistence falhou:', e); }
 const ADM='gilbertofernandessc@gmail.com';
 
 /* ── ELEMENTS ── */
