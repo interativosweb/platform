@@ -306,6 +306,30 @@ function esc(s){const d=document.createElement('div');d.textContent=s||'';return
 
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
 
+/* ── REST API helpers (bypassa cache do SDK) ────────────────────
+   O SDK do Firebase tem cache local que pode ficar dessincronizado,
+   especialmente em modo anônimo. Pra leitura confiável, usamos REST. */
+const FB_DB_URL = 'https://profbase-5f9b0-default-rtdb.firebaseio.com';
+async function fetchViaRest(path){
+  if(!currentUser) return null;
+  const idToken = await currentUser.getIdToken();
+  const url = `${FB_DB_URL}/${path}.json?auth=${idToken}`;
+  const r = await fetch(url);
+  if(!r.ok) throw new Error('REST '+r.status);
+  return r.json();
+}
+async function fetchLinksViaRest(){
+  const data = await fetchViaRest('usuarios/'+currentUser.uid+'/turmas_fluxo');
+  if(!data) return [];
+  return Object.entries(data).map(([id,v])=>({id, ...v}));
+}
+async function verifyLinkExistsViaRest(linkId){
+  try{
+    const data = await fetchViaRest('usuarios/'+currentUser.uid+'/turmas_fluxo/'+linkId);
+    return data !== null;
+  }catch(_){ return false }
+}
+
 /* ── DIAGNÓSTICO ────────────────────────────────────────────
    Mostra um painel no canto inferior direito com:
    - UID atual (truncado)
@@ -555,21 +579,21 @@ async function subscribeData(){
    - O listener vai ter dados corretos antes mesmo de inscrever */
 async function initialLinksFetchAndRecover(){
   if(!currentUser) return;
-  let snap=null;
+  // USA REST API em vez do SDK — SDK tem cache local que pode estar
+  // dessincronizado (já confirmado pelo diagnóstico: SDK retorna 2 itens
+  // quando o servidor tem 30).
+  let fromDb=[];
   try{
-    snap = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo'));
+    fromDb = await fetchLinksViaRest();
   }catch(e){
-    console.error('[initial fetch links] erro:', e);
-    diag('err','GET falhou: '+(e.code||e.message||'?'));
+    console.error('[initial fetch links REST] erro:', e);
+    diag('err','GET REST falhou: '+(e.message||'?'));
     diag('server','ERRO');
-    // Mantém o que está em myLinks (do cache)
     renderLinks();
     return;
   }
-  const fromDb=[];
-  if(snap && snap.exists()) snap.forEach(c=>fromDb.push({id:c.key,...c.val()}));
-  diag('server', fromDb.length+' link(s)');
-  console.log('[DIAG] get servidor →', fromDb);
+  diag('server', fromDb.length+' link(s) [REST]');
+  console.log('[DIAG] REST servidor →', fromDb.length, 'item(s)');
 
   const cached = loadLocalCache();
   console.log('[DIAG] cache local →', cached);
@@ -601,14 +625,14 @@ async function initialLinksFetchAndRecover(){
         await set(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+lk.id), dados);
         try{ await set(ref(db,'turmas_fluxo/'+lk.id), dados) }catch(_){}
 
-        // Verifica se realmente persistiu agora
-        const v = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+lk.id));
-        if(v.exists()){
+        // Verifica via REST (não confia no cache do SDK)
+        const exists = await verifyLinkExistsViaRest(lk.id);
+        if(exists){
           console.log('[recover] ✅ persistiu', lk.id);
           recovered++;
         } else {
-          console.error('[recover] ❌ regravado mas não persistiu!', lk.id, '— provavelmente regra do Firebase está bloqueando ou um trigger está apagando');
-          diag('err','Item '+lk.id.slice(-6)+' não persiste mesmo após regravar — checar regras do Firebase');
+          console.error('[recover] ❌ regravado mas não persistiu!', lk.id);
+          diag('err','Item '+lk.id.slice(-6)+' não persiste mesmo após regravar');
         }
       }catch(e){
         console.error('[recover] erro regravando', lk.id, e);
@@ -650,9 +674,8 @@ async function syncWithServer(reason){
   if(_syncRunning){ console.log('[sync] já rodando, pulando'); return }
   _syncRunning=true;
   try{
-    const snap = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo'));
-    const fromDb=[];
-    if(snap.exists()) snap.forEach(c=>fromDb.push({id:c.key,...c.val()}));
+    // USA REST em vez do SDK pra ler estado real do servidor
+    const fromDb = await fetchLinksViaRest();
     const serverIds=new Set(fromDb.map(l=>l.id));
 
     // Itens em myLinks que não estão no servidor → regrava
@@ -672,9 +695,9 @@ async function syncWithServer(reason){
           };
           await set(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+lk.id), dados);
           try{ await set(ref(db,'turmas_fluxo/'+lk.id), dados) }catch(_){}
-          // Verifica
-          const v = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+lk.id));
-          if(v.exists()){
+          // Verifica via REST (bypass SDK cache)
+          const exists = await verifyLinkExistsViaRest(lk.id);
+          if(exists){
             recovered++;
             serverIds.add(lk.id);
             fromDb.push({id:lk.id, ...dados});
@@ -992,32 +1015,19 @@ window.gerarLink=async function(){
       diag('err','Pública falhou: '+(epub.code||epub.message||''));
     }
 
-    // VERIFICAÇÃO IMEDIATA: lê de volta do servidor para confirmar que persistiu
+    // VERIFICAÇÃO IMEDIATA via REST (bypass SDK cache)
     try{
-      const verify = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+turmaId));
-      if(!verify.exists()){
-        console.error('[DIAG] ❌ Save reportou sucesso, mas readback retornou vazio!');
-        diag('err','Save não persistiu! (sem erro mas dados sumiram)');
+      const exists = await verifyLinkExistsViaRest(turmaId);
+      if(!exists){
+        console.error('[DIAG] ❌ Save reportou sucesso, mas REST não encontra!');
+        diag('err','Save não persistiu! (REST confirmou ausência)');
       } else {
-        console.log('[DIAG] ✅ Verificação readback imediata OK');
-        diag('save', new Date().toLocaleTimeString()+' (verif. imediata)');
+        console.log('[DIAG] ✅ Verificação REST OK — dado está no servidor');
+        diag('save', new Date().toLocaleTimeString()+' (REST OK)');
       }
     }catch(eVerify){
-      console.error('[DIAG] readback falhou:', eVerify);
+      console.error('[DIAG] verify REST falhou:', eVerify);
     }
-    // VERIFICAÇÃO TARDIA: aguarda 3s e verifica de novo. Se sumiu nesse intervalo,
-    // alguma coisa (regra, trigger, outra aba) está apagando o dado.
-    setTimeout(async ()=>{
-      try{
-        const verify2 = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+turmaId));
-        if(!verify2.exists()){
-          console.error('[DIAG] ❌❌ DADO SUMIU APÓS 3s! Algo está apagando seus writes.');
-          diag('err','Dado SUMIU 3s após save — trigger/regra apagando!');
-        } else {
-          console.log('[DIAG] ✅ Verificação tardia (3s) OK — dado persistiu');
-        }
-      }catch(_){}
-    }, 3000);
 
     // Atualização local imediata (não depende do listener disparar)
     _pendingIds.add(turmaId);
