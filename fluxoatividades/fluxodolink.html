@@ -351,17 +351,24 @@ function subscribeData(){
     }catch(e){ /* permissão negada — silencioso */ }
   })();
 
-  // 4) Listener dos links de turma
+  // 4) Listener dos links de turma — preserva itens criados localmente (otimistas)
   if(_linksUnsub) try{ _linksUnsub() }catch(_){}
   _linksUnsub = onValue(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo'), snap=>{
-    myLinks=[];
-    if(snap.exists()) snap.forEach(c=>myLinks.push({id:c.key,...c.val()}));
+    const fromDb=[];
+    if(snap.exists()) snap.forEach(c=>fromDb.push({id:c.key,...c.val()}));
+    // Mescla: primeiro o que veio do Firebase, depois preserva quaisquer otimistas locais
+    const seen=new Set(fromDb.map(l=>l.id));
+    const localOnly=myLinks.filter(l=>!seen.has(l.id));
+    myLinks=[...fromDb, ...localOnly];
+    // Ordena: mais novo primeiro (criadoEm desc)
+    myLinks.sort((a,b)=>{
+      const ta=new Date(a.criadoEm||0).getTime();
+      const tb=new Date(b.criadoEm||0).getTime();
+      return tb-ta;
+    });
     renderLinks();
-  }, err=>{ console.error('[links] erro:', err) });
+  }, err=>{ console.error('[links] erro:', err); renderLinks(); });
 }
-
-// Recarrega quando volta para a aba (caso algum cache atrapalhe)
-window.addEventListener('focus', ()=>{ if(currentUser) subscribeData() });
 
 // Compatibilidade: re-subscribe sob demanda (usada após excluir/criar etc.)
 async function loadData(){ if(currentUser) subscribeData() }
@@ -559,8 +566,7 @@ window.gerarLink=async function(){
 
     closeGerarModal();
     toast('Link gerado! Agora conecte uma atividade.');
-    // Re-subscribe para garantir que o listener pegue o novo link também
-    if(currentUser) subscribeData();
+    // Listener ativo já vai detectar a mudança — não precisa re-subscribe
   }catch(e){console.error(e);$('glAviso').textContent='Erro ao gerar link.'}
 };
 
@@ -603,7 +609,6 @@ window.confirmConnect=async function(){
     renderLinks();
     closeConnectModal();
     toast('Atividade conectada com sucesso!');
-    if(currentUser) subscribeData();
   }catch(e){console.error(e);alert('Erro ao conectar.')}
 };
 
