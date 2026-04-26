@@ -230,7 +230,7 @@ body{background-color:var(--bg);background-image:linear-gradient(rgba(10,132,255
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import{getDatabase,ref,set,get,update,remove,push,onValue}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{getDatabase,ref,set,get,update,remove}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig={apiKey:"AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",authDomain:"profbase-5f9b0.firebaseapp.com",databaseURL:"https://profbase-5f9b0-default-rtdb.firebaseio.com",projectId:"profbase-5f9b0",storageBucket:"profbase-5f9b0.firebasestorage.app",messagingSenderId:"826412057766",appId:"1:826412057766:web:729e6e24ce7587417fe067"};
 const app=initializeApp(firebaseConfig);
@@ -245,22 +245,6 @@ let myFlows=[];
 let myLinks=[];
 let connectingLinkId=null;
 let selectedConnectFlowId=null;
-// IDs criados/atualizados nesta sessão — usado para preservar otimistas
-// até o Firebase sincronizar (e não acumular cache stale).
-const _pendingIds = new Set();
-
-/* Cache local dos links (chaveado por uid) — usado só para mostrar
-   instantaneamente os links já criados enquanto o Firebase carrega.
-   O Firebase continua sendo a fonte da verdade. */
-function cacheKey(){ return currentUser ? 'fluxo_links_cache_'+currentUser.uid : null }
-function loadLocalCache(){
-  const k=cacheKey(); if(!k) return [];
-  try{ return JSON.parse(localStorage.getItem(k)||'[]') }catch(_){ return [] }
-}
-function saveLocalCache(){
-  const k=cacheKey(); if(!k) return;
-  try{ localStorage.setItem(k, JSON.stringify(myLinks||[])) }catch(_){}
-}
 
 function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
 
@@ -279,21 +263,80 @@ onAuthStateChanged(auth,async user=>{
   $('authWarn').style.display='none';
   $('mainContent').style.display='block';
   currentUser=user;
-  // Mostra imediatamente do cache local (mesmo antes do Firebase responder)
-  // para evitar a sensação de que "sumiu" no reload.
-  myLinks = loadLocalCache();
-  renderLinks();
-  subscribeData();
+  // Carrega tudo via get() — mesma abordagem do Geolab que funciona perfeitamente
+  await Promise.all([carregarLinks(), carregarFluxos()]);
 });
 
-/* ── LOAD DATA (live listeners) ── */
-let _flowsUnsub=null, _linksUnsub=null, _idxUnsub=null;
+/* ── CARREGAR LINKS (get() único, igual ao Geolab) ── */
+async function carregarLinks(){
+  if(!currentUser) return;
+  try{
+    const snap = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo'));
+    myLinks=[];
+    if(snap.exists()){
+      snap.forEach(c=>myLinks.push({id:c.key, ...c.val()}));
+    }
+    myLinks.sort((a,b)=>{
+      const ta=new Date(a.criadoEm||0).getTime();
+      const tb=new Date(b.criadoEm||0).getTime();
+      return tb-ta;
+    });
+    renderLinks();
+  }catch(e){
+    console.error('[carregarLinks] erro:', e);
+    $('linkList').innerHTML='<div class="empty-msg" style="color:var(--error)">Erro ao carregar links: '+esc(e.message||'')+'</div>';
+  }
+}
 
-// Mescla um conjunto de fluxos em myFlows (sem duplicatas), ordena e re-renderiza
-function mergeAndRender(items){
-  const known=new Map(myFlows.map(f=>[f.id,f]));
-  items.forEach(f=>{ if(f && f.id) known.set(f.id, {...known.get(f.id), ...f}) });
-  myFlows = Array.from(known.values());
+/* ── CARREGAR FLUXOS (atividades) ── */
+async function carregarFluxos(){
+  if(!currentUser) return;
+  myFlows=[];
+  // 1) Caminho próprio: fluxos/<uid>
+  try{
+    const snap = await get(ref(db,'fluxos/'+currentUser.uid));
+    if(snap.exists()){
+      snap.forEach(c=>myFlows.push({id:c.key, ...c.val()}));
+    }
+  }catch(e){ console.warn('[fluxos] erro:', e) }
+
+  // 2) Índice usuarios/<uid>/meus_fluxos (para fluxos de outros owners — admin etc.)
+  try{
+    const snap = await get(ref(db,'usuarios/'+currentUser.uid+'/meus_fluxos'));
+    if(snap.exists()){
+      const knownIds = new Set(myFlows.map(f=>f.id));
+      const entries=[]; snap.forEach(c=>entries.push({id:c.key, ...c.val()}));
+      for(const ie of entries){
+        if(knownIds.has(ie.id)) continue;
+        const owner = ie.ownerUid || currentUser.uid;
+        try{
+          const fsnap = await get(ref(db,'fluxos/'+owner+'/'+ie.id));
+          if(fsnap.exists()) myFlows.push({id:ie.id, _ownerUid:owner, ...fsnap.val()});
+          else myFlows.push({id:ie.id, _ownerUid:owner, nome:ie.nome||'Sem título', criadoEm:ie.criadoEm, atualizadoEm:ie.atualizadoEm});
+        }catch(_){
+          myFlows.push({id:ie.id, _ownerUid:owner, nome:ie.nome||'Sem título', criadoEm:ie.criadoEm, atualizadoEm:ie.atualizadoEm});
+        }
+      }
+    }
+  }catch(e){ console.warn('[meus_fluxos] erro:', e) }
+
+  // 3) Auto-migração: garante que cada fluxo próprio está indexado em meus_fluxos
+  (async ()=>{
+    for(const f of myFlows){
+      if(f._ownerUid && f._ownerUid!==currentUser.uid) continue;
+      try{
+        const ix=await get(ref(db,'usuarios/'+currentUser.uid+'/meus_fluxos/'+f.id));
+        if(!ix.exists()){
+          await set(ref(db,'usuarios/'+currentUser.uid+'/meus_fluxos/'+f.id),{
+            nome:f.nome||'Sem título', ownerUid:currentUser.uid,
+            criadoEm:f.criadoEm||new Date().toISOString(),
+            atualizadoEm:f.atualizadoEm||new Date().toISOString()
+          });
+        }
+      }catch(_){}
+    }
+  })();
+
   myFlows.sort((a,b)=>{
     const ta = new Date(a.atualizadoEm||a.criadoEm||0).getTime();
     const tb = new Date(b.atualizadoEm||b.criadoEm||0).getTime();
@@ -301,177 +344,6 @@ function mergeAndRender(items){
   });
   renderActivities();
 }
-
-async function subscribeData(){
-  // Reset
-  myFlows = [];
-
-  // 0) Antes de tudo: verifica/recupera os links da turma
-  await initialLinksFetchAndRecover();
-
-  // 1) Listener principal: fluxos no caminho fluxos/<currentUser.uid>
-  if(_flowsUnsub) try{ _flowsUnsub() }catch(_){}
-  _flowsUnsub = onValue(ref(db,'fluxos/'+currentUser.uid), snap=>{
-    const arr=[];
-    if(snap.exists()) snap.forEach(c=>arr.push({id:c.key,...c.val()}));
-    mergeAndRender(arr);
-    // Auto-migração: garante que cada fluxo está indexado em meus_fluxos
-    (async ()=>{
-      for(const f of arr){
-        try{
-          const ix=await get(ref(db,'usuarios/'+currentUser.uid+'/meus_fluxos/'+f.id));
-          if(!ix.exists()){
-            await set(ref(db,'usuarios/'+currentUser.uid+'/meus_fluxos/'+f.id),{
-              nome:f.nome||'Sem título', ownerUid:currentUser.uid,
-              criadoEm:f.criadoEm||new Date().toISOString(),
-              atualizadoEm:f.atualizadoEm||new Date().toISOString()
-            });
-          }
-        }catch(_){}
-      }
-    })();
-  }, err=>{ console.error('[fluxos] erro:', err) });
-
-  // 2) Listener do índice usuarios/<uid>/meus_fluxos — mais confiável (UID não muda)
-  if(_idxUnsub) try{ _idxUnsub() }catch(_){}
-  _idxUnsub = onValue(ref(db,'usuarios/'+currentUser.uid+'/meus_fluxos'), async snap=>{
-    if(!snap.exists()) return;
-    const indexEntries=[];
-    snap.forEach(c=>{ indexEntries.push({id:c.key, ...c.val()}) });
-    // Para cada entrada do índice, busca os dados completos do fluxo (no caminho do owner)
-    const fetched=[];
-    for(const ie of indexEntries){
-      try{
-        const owner = ie.ownerUid || currentUser.uid;
-        const fsnap = await get(ref(db,'fluxos/'+owner+'/'+ie.id));
-        if(fsnap.exists()){
-          fetched.push({id:ie.id, ...fsnap.val()});
-        } else {
-          // Fallback: usa apenas os metadados do índice
-          fetched.push({id:ie.id, nome:ie.nome||'Sem título', atualizadoEm:ie.atualizadoEm, criadoEm:ie.criadoEm, _ownerUid:owner});
-        }
-      }catch(e){ console.warn('[idx] falha buscando fluxo', ie.id, e) }
-    }
-    mergeAndRender(fetched);
-  }, err=>{ console.error('[meus_fluxos] erro:', err) });
-
-  // 3) Tentativa: lê toda a raiz fluxos para capturar fluxos órfãos (admin ou criadoPor=eu)
-  (async ()=>{
-    try{
-      const rootSnap = await get(ref(db,'fluxos'));
-      if(!rootSnap.exists()) return;
-      const all = rootSnap.val()||{};
-      const isAdmin = currentUser.email === ADM_EMAIL;
-      const extras=[];
-      Object.keys(all).forEach(uidKey=>{
-        const userFlows = all[uidKey]||{};
-        Object.keys(userFlows).forEach(fid=>{
-          const f = userFlows[fid]||{};
-          if(uidKey===currentUser.uid) return; // já vem pelo listener principal
-          const ownedByMe = f.criadoPor && f.criadoPor===currentUser.uid;
-          if(isAdmin || ownedByMe){
-            extras.push({id:fid, _ownerUid:uidKey, ...f});
-          }
-        });
-      });
-      if(extras.length) mergeAndRender(extras);
-    }catch(e){ /* permissão negada — silencioso */ }
-  })();
-
-  // 4) Listener dos links de turma (após a recuperação inicial)
-  if(_linksUnsub) try{ _linksUnsub() }catch(_){}
-  _linksUnsub = onValue(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo'), snap=>{
-    const fromDb=[];
-    if(snap.exists()) snap.forEach(c=>fromDb.push({id:c.key,...c.val()}));
-
-    // PROTEÇÃO: se o servidor responder vazio mas a UI tem itens não-pendentes
-    // (cache + dados já recuperados), trata como glitch e NÃO apaga.
-    // Isso evita que o cache seja destruído por uma resposta espúria.
-    const haveNonPending = myLinks.some(l => !_pendingIds.has(l.id));
-    if(fromDb.length===0 && haveNonPending){
-      console.warn('[links listener] respondeu vazio com cache não-vazio — ignorando para preservar dados');
-      return;
-    }
-
-    const seen=new Set(fromDb.map(l=>l.id));
-    const pendingOnly=myLinks.filter(l=>!seen.has(l.id) && _pendingIds.has(l.id));
-    fromDb.forEach(l=>_pendingIds.delete(l.id));
-    myLinks=[...fromDb, ...pendingOnly];
-    myLinks.sort((a,b)=>{
-      const ta=new Date(a.criadoEm||0).getTime();
-      const tb=new Date(b.criadoEm||0).getTime();
-      return tb-ta;
-    });
-    saveLocalCache();
-    renderLinks();
-  }, err=>{
-    console.error('[links] erro:', err);
-    // Mesmo em erro, exibimos o que houver em myLinks (do cache local)
-    renderLinks();
-  });
-}
-
-/* Faz um fetch inicial dos links e, se o servidor estiver vazio mas o cache
-   local tem itens, regrava-os no servidor (recuperação automática).
-   Cobre os cenários:
-   - O write anterior falhou silenciosamente (regra/permissão)
-   - Auth UID mudou entre sessões (rara, mas possível)
-   - O listener vai ter dados corretos antes mesmo de inscrever */
-async function initialLinksFetchAndRecover(){
-  if(!currentUser) return;
-  let snap=null;
-  try{
-    snap = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo'));
-  }catch(e){
-    console.error('[initial fetch links] erro:', e);
-    // Mantém o que está em myLinks (do cache)
-    renderLinks();
-    return;
-  }
-  const fromDb=[];
-  if(snap && snap.exists()) snap.forEach(c=>fromDb.push({id:c.key,...c.val()}));
-
-  const cached = loadLocalCache();
-
-  if(fromDb.length===0 && cached.length>0){
-    // Cenário de "sumiu": servidor vazio mas cache tem itens.
-    // Recupera regravando cada item no servidor.
-    console.warn('[recover] Servidor vazio mas cache local tem',cached.length,'links — recriando…');
-    let recovered=0;
-    for(const lk of cached){
-      try{
-        const dados = {
-          escola: lk.escola||'',
-          serie:  lk.serie||'',
-          turma:  lk.turma||'',
-          atividadeId: lk.atividadeId||'',
-          criadoPor: currentUser.uid,
-          criadoEm:  lk.criadoEm || new Date().toISOString()
-        };
-        await set(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+lk.id), dados);
-        try{ await set(ref(db,'turmas_fluxo/'+lk.id), dados) }catch(_){}
-        recovered++;
-      }catch(e){
-        console.error('[recover] Falha ao recriar link',lk.id,e);
-      }
-    }
-    console.warn('[recover] Recriados',recovered,'de',cached.length,'links');
-    myLinks = cached.slice();
-  } else {
-    // Servidor tem dados (ou tudo vazio). Servidor é a verdade.
-    myLinks = fromDb;
-  }
-  myLinks.sort((a,b)=>{
-    const ta=new Date(a.criadoEm||0).getTime();
-    const tb=new Date(b.criadoEm||0).getTime();
-    return tb-ta;
-  });
-  saveLocalCache();
-  renderLinks();
-}
-
-// Compatibilidade: re-subscribe sob demanda (usada após excluir/criar etc.)
-async function loadData(){ if(currentUser) subscribeData() }
 
 /* ── RENDER ACTIVITIES ── */
 function renderActivities(){
@@ -502,11 +374,9 @@ window.deleteActivity=async function(fluxoId){
     updates['fluxos/'+owner+'/'+fluxoId] = null;
     updates['usuarios/'+currentUser.uid+'/meus_fluxos/'+fluxoId] = null;
     await update(ref(db), updates);
-    // Remove localmente
-    myFlows = myFlows.filter(x=>x.id!==fluxoId);
-    renderActivities();
     toast('Atividade excluída');
-  }catch(e){console.error(e);alert('Erro ao excluir.')}
+    await carregarFluxos();
+  }catch(e){console.error(e);alert('Erro ao excluir: '+(e.message||e.code||''))}
 };
 
 /* ── RENDER LINKS ── */
@@ -593,13 +463,12 @@ document.addEventListener('copy',e=>{
 window.deleteLink=async function(linkId){
   if(!confirm('Excluir este link de turma?')) return;
   try{
-    await remove(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+linkId));
-    try{ await remove(ref(db,'turmas_fluxo/'+linkId)) }catch(_){}
-    // Atualização local imediata
-    myLinks = myLinks.filter(l=>l.id!==linkId);
-    saveLocalCache();
-    renderLinks();
+    const updates={};
+    updates['usuarios/'+currentUser.uid+'/turmas_fluxo/'+linkId]=null;
+    updates['turmas_fluxo/'+linkId]=null;
+    await update(ref(db),updates);
     toast('Link excluído');
+    await carregarLinks();
   }catch(e){console.error(e);alert('Erro ao excluir: '+(e.message||e.code||''))}
 };
 
@@ -653,26 +522,18 @@ window.gerarLink=async function(){
   };
 
   try{
-    // Escritas individuais para garantir que o índice do usuário SEMPRE seja
-    // gravado, mesmo se a regra do nó público falhar por algum motivo.
-    // (Em multi-path update, falha em qualquer caminho cancela tudo.)
-    await set(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+turmaId), dados);
-    try{
-      await set(ref(db,'turmas_fluxo/'+turmaId), dados);
-    }catch(epub){
-      console.warn('Cópia pública falhou (não crítica):', epub);
-    }
-
-    // Atualização local imediata (não depende do listener disparar)
-    _pendingIds.add(turmaId);
-    if(!myLinks.some(l=>l.id===turmaId)){
-      myLinks.unshift({id:turmaId, ...dados});
-    }
-    saveLocalCache();
-    renderLinks();
+    // Mesma estratégia do Geolab: multi-path update. Falha em qualquer
+    // caminho cancela tudo — o que é o comportamento desejado para
+    // garantir consistência entre o índice do usuário e a cópia pública.
+    const updates={};
+    updates['usuarios/'+currentUser.uid+'/turmas_fluxo/'+turmaId]=dados;
+    updates['turmas_fluxo/'+turmaId]=dados;
+    await update(ref(db),updates);
 
     closeGerarModal();
     toast('Link gerado! Agora conecte uma atividade.');
+    // Recarrega do servidor — fonte da verdade
+    await carregarLinks();
   }catch(e){
     console.error('Erro ao gerar link:',e);
     $('glAviso').textContent='Erro ao gerar link: '+(e.message||e.code||'');
@@ -708,15 +569,13 @@ window.selectConnectFlow=function(el,flowId){
 window.confirmConnect=async function(){
   if(!connectingLinkId||!selectedConnectFlowId) return;
   try{
-    await set(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+connectingLinkId+'/atividadeId'), selectedConnectFlowId);
-    try{ await set(ref(db,'turmas_fluxo/'+connectingLinkId+'/atividadeId'), selectedConnectFlowId) }catch(_){}
-    // Atualização local imediata
-    const lk = myLinks.find(l=>l.id===connectingLinkId);
-    if(lk) lk.atividadeId = selectedConnectFlowId;
-    saveLocalCache();
-    renderLinks();
+    const updates={};
+    updates['usuarios/'+currentUser.uid+'/turmas_fluxo/'+connectingLinkId+'/atividadeId']=selectedConnectFlowId;
+    updates['turmas_fluxo/'+connectingLinkId+'/atividadeId']=selectedConnectFlowId;
+    await update(ref(db),updates);
     closeConnectModal();
     toast('Atividade conectada com sucesso!');
+    await carregarLinks();
   }catch(e){console.error(e);alert('Erro ao conectar: '+(e.message||e.code||''))}
 };
 
