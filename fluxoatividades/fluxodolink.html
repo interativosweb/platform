@@ -33,21 +33,23 @@ body{background-color:var(--bg);background-image:linear-gradient(rgba(10,132,255
 .section-title{font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .section-title .count{background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;font-size:.7rem;display:flex;align-items:center;justify-content:center}
 
-/* Link cards */
-.link-card{background:var(--bg2);border-radius:var(--radius);padding:18px 20px;margin-bottom:10px;box-shadow:0 4px 18px rgba(0,0,0,.4);border:1px solid var(--border)}
-.link-card-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.link-card-head .turma-badge{background:rgba(10,132,255,.18);color:var(--accent);padding:4px 10px;border-radius:6px;font-size:.72rem;font-weight:700}
-.link-card-head .escola{font-weight:600;font-size:.9rem;flex:1;color:var(--text)}
-.link-card-head .date{font-size:.72rem;color:var(--text2)}
+/* Link cards — grid compacto (estilo geolab) */
+#linkList{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.link-card{background:var(--bg2);border-radius:14px;padding:14px 14px 12px;box-shadow:0 4px 14px rgba(0,0,0,.35);border:1px solid var(--border);display:flex;flex-direction:column;gap:8px;transition:transform .15s,box-shadow .15s,border-color .15s}
+.link-card:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.45);border-color:#3a3a3e}
+.link-card-head{display:flex;align-items:flex-start;gap:8px;justify-content:space-between}
+.link-card-head .turma-badge{background:rgba(10,132,255,.18);color:var(--accent);padding:3px 8px;border-radius:6px;font-size:.66rem;font-weight:700;white-space:nowrap}
+.link-card-head .escola{font-weight:700;font-size:.88rem;color:var(--text);line-height:1.3;flex:1;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical}
+.link-card-head .date{font-size:.66rem;color:var(--text2);white-space:nowrap}
 
-.link-card-body{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.link-card-body .atividade-tag{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;font-size:.8rem;font-weight:600}
+.link-card-body{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.link-card-body .atividade-tag{display:flex;align-items:center;gap:4px;padding:4px 9px;border-radius:6px;font-size:.72rem;font-weight:600}
 .atividade-tag.connected{background:rgba(48,209,88,.15);color:var(--success)}
 .atividade-tag.empty{background:rgba(255,159,10,.15);color:var(--warn);cursor:pointer}
 .atividade-tag.empty:hover{background:rgba(255,159,10,.25)}
 
-.link-card-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.link-card-actions button,.link-card-actions a{padding:6px 14px;border-radius:8px;border:none;font-size:.78rem;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.link-card-actions{display:flex;gap:6px;flex-wrap:wrap}
+.link-card-actions button,.link-card-actions a{padding:5px 10px;border-radius:7px;border:none;font-size:.7rem;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:3px;line-height:1}
 .btn-copy{background:var(--accent);color:#fff}
 .btn-copy:hover{opacity:.9}
 .btn-copy.disabled{background:#3a3a3e;color:#8e8e93;cursor:not-allowed}
@@ -55,10 +57,10 @@ body{background-color:var(--bg);background-image:linear-gradient(rgba(10,132,255
 .btn-panel:hover{background:#2a2a2e}
 .btn-open{background:rgba(48,209,88,.15);color:var(--success)}
 .btn-open:hover{background:rgba(48,209,88,.25)}
-.btn-del{background:none;border:1px solid var(--border);color:var(--error);font-size:.75rem}
+.btn-del{background:none;border:1px solid var(--border);color:var(--error);font-size:.68rem}
 .btn-del:hover{background:rgba(255,69,58,.1)}
 
-.link-url{font-size:.72rem;color:var(--text2);word-break:break-all;margin-top:6px;padding:6px 10px;background:var(--bg3);border-radius:6px;border:1px solid var(--border)}
+.link-url{font-size:.65rem;color:var(--text2);word-break:break-all;padding:5px 8px;background:var(--bg3);border-radius:6px;border:1px solid var(--border);font-family:'SF Mono',Consolas,monospace;line-height:1.3;max-height:32px;overflow:hidden}
 
 /* Activity cards */
 .act-card{background:var(--bg2);border-radius:var(--radius);padding:16px 18px;margin-bottom:8px;box-shadow:0 4px 14px rgba(0,0,0,.35);border:1px solid var(--border);display:flex;align-items:center;gap:12px}
@@ -77,6 +79,7 @@ body{background-color:var(--bg);background-image:linear-gradient(rgba(10,132,255
 
 /* Empty */
 .empty-msg{text-align:center;padding:30px;color:var(--text2);font-size:.9rem;background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border)}
+#linkList .empty-msg{grid-column:1/-1}
 
 /* Modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:1000}
@@ -242,6 +245,22 @@ let myFlows=[];
 let myLinks=[];
 let connectingLinkId=null;
 let selectedConnectFlowId=null;
+// IDs criados/atualizados nesta sessão — usado para preservar otimistas
+// até o Firebase sincronizar (e não acumular cache stale).
+const _pendingIds = new Set();
+
+/* Cache local dos links (chaveado por uid) — usado só para mostrar
+   instantaneamente os links já criados enquanto o Firebase carrega.
+   O Firebase continua sendo a fonte da verdade. */
+function cacheKey(){ return currentUser ? 'fluxo_links_cache_'+currentUser.uid : null }
+function loadLocalCache(){
+  const k=cacheKey(); if(!k) return [];
+  try{ return JSON.parse(localStorage.getItem(k)||'[]') }catch(_){ return [] }
+}
+function saveLocalCache(){
+  const k=cacheKey(); if(!k) return;
+  try{ localStorage.setItem(k, JSON.stringify(myLinks||[])) }catch(_){}
+}
 
 function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
 
@@ -260,6 +279,10 @@ onAuthStateChanged(auth,async user=>{
   $('authWarn').style.display='none';
   $('mainContent').style.display='block';
   currentUser=user;
+  // Mostra imediatamente do cache local (mesmo antes do Firebase responder)
+  // para evitar a sensação de que "sumiu" no reload.
+  myLinks = loadLocalCache();
+  renderLinks();
   subscribeData();
 });
 
@@ -356,18 +379,30 @@ function subscribeData(){
   _linksUnsub = onValue(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo'), snap=>{
     const fromDb=[];
     if(snap.exists()) snap.forEach(c=>fromDb.push({id:c.key,...c.val()}));
-    // Mescla: primeiro o que veio do Firebase, depois preserva quaisquer otimistas locais
+    // Firebase é a fonte da verdade. Só preservamos itens otimistas que
+    // foram criados nesta sessão e ainda não chegaram pelo listener
+    // (janela de race entre `set()` e o evento). Itens vindos só do cache
+    // local (recarregamento) NÃO são preservados aqui — eles serão
+    // sobrescritos pelo Firebase, evitando ressuscitar o que foi excluído
+    // em outro dispositivo.
     const seen=new Set(fromDb.map(l=>l.id));
-    const localOnly=myLinks.filter(l=>!seen.has(l.id));
-    myLinks=[...fromDb, ...localOnly];
-    // Ordena: mais novo primeiro (criadoEm desc)
+    const pendingOnly=myLinks.filter(l=>!seen.has(l.id) && _pendingIds.has(l.id));
+    // Limpa pendentes que já chegaram do servidor
+    fromDb.forEach(l=>_pendingIds.delete(l.id));
+    myLinks=[...fromDb, ...pendingOnly];
+    // Ordena: mais novo primeiro
     myLinks.sort((a,b)=>{
       const ta=new Date(a.criadoEm||0).getTime();
       const tb=new Date(b.criadoEm||0).getTime();
       return tb-ta;
     });
+    saveLocalCache();
     renderLinks();
-  }, err=>{ console.error('[links] erro:', err); renderLinks(); });
+  }, err=>{
+    console.error('[links] erro:', err);
+    // Mesmo em erro, exibimos o que houver em myLinks (do cache local)
+    renderLinks();
+  });
 }
 
 // Compatibilidade: re-subscribe sob demanda (usada após excluir/criar etc.)
@@ -494,12 +529,13 @@ window.deleteLink=async function(linkId){
   if(!confirm('Excluir este link de turma?')) return;
   try{
     await remove(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+linkId));
-    await remove(ref(db,'turmas_fluxo/'+linkId));
+    try{ await remove(ref(db,'turmas_fluxo/'+linkId)) }catch(_){}
     // Atualização local imediata
     myLinks = myLinks.filter(l=>l.id!==linkId);
+    saveLocalCache();
     renderLinks();
     toast('Link excluído');
-  }catch(e){console.error(e);alert('Erro ao excluir.')}
+  }catch(e){console.error(e);alert('Erro ao excluir: '+(e.message||e.code||''))}
 };
 
 /* ── GERAR LINK MODAL ── */
@@ -544,7 +580,6 @@ window.gerarLink=async function(){
   }
 
   const turmaId='tfl_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-  // Firebase strips null em multi-path update; usamos string vazia (será reescrita ao conectar)
   const dados={
     escola,serie,turma,
     atividadeId:'',
@@ -553,21 +588,30 @@ window.gerarLink=async function(){
   };
 
   try{
-    const updates={};
-    updates['usuarios/'+currentUser.uid+'/turmas_fluxo/'+turmaId]=dados;
-    updates['turmas_fluxo/'+turmaId]=dados;
-    await update(ref(db),updates);
+    // Escritas individuais para garantir que o índice do usuário SEMPRE seja
+    // gravado, mesmo se a regra do nó público falhar por algum motivo.
+    // (Em multi-path update, falha em qualquer caminho cancela tudo.)
+    await set(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+turmaId), dados);
+    try{
+      await set(ref(db,'turmas_fluxo/'+turmaId), dados);
+    }catch(epub){
+      console.warn('Cópia pública falhou (não crítica):', epub);
+    }
 
     // Atualização local imediata (não depende do listener disparar)
+    _pendingIds.add(turmaId);
     if(!myLinks.some(l=>l.id===turmaId)){
       myLinks.unshift({id:turmaId, ...dados});
     }
+    saveLocalCache();
     renderLinks();
 
     closeGerarModal();
     toast('Link gerado! Agora conecte uma atividade.');
-    // Listener ativo já vai detectar a mudança — não precisa re-subscribe
-  }catch(e){console.error(e);$('glAviso').textContent='Erro ao gerar link.'}
+  }catch(e){
+    console.error('Erro ao gerar link:',e);
+    $('glAviso').textContent='Erro ao gerar link: '+(e.message||e.code||'');
+  }
 };
 
 /* ── CONNECT MODAL ── */
@@ -599,17 +643,16 @@ window.selectConnectFlow=function(el,flowId){
 window.confirmConnect=async function(){
   if(!connectingLinkId||!selectedConnectFlowId) return;
   try{
-    const updates={};
-    updates['usuarios/'+currentUser.uid+'/turmas_fluxo/'+connectingLinkId+'/atividadeId']=selectedConnectFlowId;
-    updates['turmas_fluxo/'+connectingLinkId+'/atividadeId']=selectedConnectFlowId;
-    await update(ref(db),updates);
+    await set(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+connectingLinkId+'/atividadeId'), selectedConnectFlowId);
+    try{ await set(ref(db,'turmas_fluxo/'+connectingLinkId+'/atividadeId'), selectedConnectFlowId) }catch(_){}
     // Atualização local imediata
     const lk = myLinks.find(l=>l.id===connectingLinkId);
     if(lk) lk.atividadeId = selectedConnectFlowId;
+    saveLocalCache();
     renderLinks();
     closeConnectModal();
     toast('Atividade conectada com sucesso!');
-  }catch(e){console.error(e);alert('Erro ao conectar.')}
+  }catch(e){console.error(e);alert('Erro ao conectar: '+(e.message||e.code||''))}
 };
 
 </script>
