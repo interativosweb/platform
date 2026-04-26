@@ -450,25 +450,38 @@ async function subscribeData(){
     const fromDb=[];
     if(snap.exists()) snap.forEach(c=>fromDb.push({id:c.key,...c.val()}));
 
-    // PROTEÇÃO: se o servidor responder vazio mas a UI tem itens não-pendentes
-    // (cache + dados já recuperados), trata como glitch e NÃO apaga.
-    // Isso evita que o cache seja destruído por uma resposta espúria.
-    const haveNonPending = myLinks.some(l => !_pendingIds.has(l.id));
-    if(fromDb.length===0 && haveNonPending){
-      console.warn('[links listener] respondeu vazio com cache não-vazio — ignorando para preservar dados');
-      return;
+    // PROTEÇÃO FORTE: nunca permitir que o listener REMOVA itens que estão
+    // em myLinks. Só atualiza valores existentes ou adiciona novos.
+    // Para excluir, usar deleteLink (que filtra myLinks explicitamente).
+    // Isso impede que respostas espúrias do servidor apaguem a UI.
+    const fromDbMap = new Map(fromDb.map(l=>[l.id, l]));
+    const merged = [];
+    const seenIds = new Set();
+    // Primeiro: itens atualizados a partir do servidor (preserva ordem que estava em myLinks)
+    for(const lk of myLinks){
+      if(fromDbMap.has(lk.id)){
+        merged.push(fromDbMap.get(lk.id));
+        seenIds.add(lk.id);
+      } else {
+        // Não está no servidor — preserva o local (não apaga)
+        merged.push(lk);
+        seenIds.add(lk.id);
+      }
     }
-
-    const seen=new Set(fromDb.map(l=>l.id));
-    const pendingOnly=myLinks.filter(l=>!seen.has(l.id) && _pendingIds.has(l.id));
+    // Depois: itens novos do servidor que não estavam em myLinks
+    for(const lk of fromDb){
+      if(!seenIds.has(lk.id)) merged.push(lk);
+    }
     fromDb.forEach(l=>_pendingIds.delete(l.id));
-    myLinks=[...fromDb, ...pendingOnly];
+    myLinks = merged;
     myLinks.sort((a,b)=>{
       const ta=new Date(a.criadoEm||0).getTime();
       const tb=new Date(b.criadoEm||0).getTime();
       return tb-ta;
     });
     saveLocalCache();
+    diag('server', fromDb.length+' link(s) ['+new Date().toLocaleTimeString()+']');
+    diag('cache', myLinks.length+' link(s)');
     renderLinks();
   }, err=>{
     console.error('[links] erro:', err);
@@ -502,13 +515,22 @@ async function initialLinksFetchAndRecover(){
   console.log('[DIAG] get servidor →', fromDb);
 
   const cached = loadLocalCache();
+  console.log('[DIAG] cache local →', cached);
 
-  if(fromDb.length===0 && cached.length>0){
-    // Cenário de "sumiu": servidor vazio mas cache tem itens.
-    // Recupera regravando cada item no servidor.
-    console.warn('[recover] Servidor vazio mas cache local tem',cached.length,'links — recriando…');
-    let recovered=0;
-    for(const lk of cached){
+  // ESTRATÉGIA DE MERGE + RECOVERY:
+  // - Itens em AMBOS (cache e servidor): o servidor é a verdade (pega valores do servidor)
+  // - Itens só no SERVIDOR: adiciona (foram criados em outro lugar)
+  // - Itens só no CACHE: REGRAVA no servidor (não persistiu por algum motivo)
+  //   e adiciona ao resultado.
+  const serverIds = new Set(fromDb.map(l=>l.id));
+  const cacheIds  = new Set(cached.map(l=>l.id));
+  const missingInServer = cached.filter(l=>!serverIds.has(l.id));
+
+  if(missingInServer.length > 0){
+    console.warn('[recover] '+missingInServer.length+' item(s) do cache NÃO estão no servidor. Regravando…');
+    diag('err','Recuperando '+missingInServer.length+' link(s) que não persistiram');
+    let recovered = 0;
+    for(const lk of missingInServer){
       try{
         const dados = {
           escola: lk.escola||'',
@@ -518,25 +540,41 @@ async function initialLinksFetchAndRecover(){
           criadoPor: currentUser.uid,
           criadoEm:  lk.criadoEm || new Date().toISOString()
         };
+        console.log('[recover] regravando', lk.id, dados);
         await set(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+lk.id), dados);
         try{ await set(ref(db,'turmas_fluxo/'+lk.id), dados) }catch(_){}
-        recovered++;
+
+        // Verifica se realmente persistiu agora
+        const v = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+lk.id));
+        if(v.exists()){
+          console.log('[recover] ✅ persistiu', lk.id);
+          recovered++;
+        } else {
+          console.error('[recover] ❌ regravado mas não persistiu!', lk.id, '— provavelmente regra do Firebase está bloqueando ou um trigger está apagando');
+          diag('err','Item '+lk.id.slice(-6)+' não persiste mesmo após regravar — checar regras do Firebase');
+        }
       }catch(e){
-        console.error('[recover] Falha ao recriar link',lk.id,e);
+        console.error('[recover] erro regravando', lk.id, e);
+        diag('err','Erro recovery: '+(e.code||e.message||''));
       }
     }
-    console.warn('[recover] Recriados',recovered,'de',cached.length,'links');
-    myLinks = cached.slice();
-  } else {
-    // Servidor tem dados (ou tudo vazio). Servidor é a verdade.
-    myLinks = fromDb;
+    console.warn('[recover] Recuperados',recovered,'de',missingInServer.length);
   }
+
+  // Resultado: união (servidor como verdade onde existem, cache como fallback onde faltam)
+  const merged = [...fromDb];
+  const mergedIds = new Set(merged.map(l=>l.id));
+  for(const lk of cached){
+    if(!mergedIds.has(lk.id)) merged.push(lk);
+  }
+  myLinks = merged;
   myLinks.sort((a,b)=>{
     const ta=new Date(a.criadoEm||0).getTime();
     const tb=new Date(b.criadoEm||0).getTime();
     return tb-ta;
   });
   saveLocalCache();
+  diag('cache', myLinks.length+' link(s) (após merge)');
   renderLinks();
 }
 
