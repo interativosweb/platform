@@ -118,11 +118,6 @@ body{background-color:var(--bg);background-image:linear-gradient(rgba(10,132,255
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#141418;color:#fff;border:1px solid var(--border);padding:10px 24px;border-radius:50px;font-size:.85rem;font-weight:600;z-index:2000;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.5)}
 .toast.show{opacity:1}
 
-/* Banner de migração */
-.migrate-banner{background:linear-gradient(90deg,rgba(191,90,242,.15),rgba(10,132,255,.15));border:1px solid rgba(191,90,242,.4);border-radius:12px;padding:14px 18px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.migrate-banner span{font-size:.85rem;color:var(--text)}
-.migrate-banner button{background:var(--purple);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:.8rem;font-weight:600;cursor:pointer}
-
 /* Painel de diagnóstico (canto inferior direito) */
 .diag-panel{position:fixed;bottom:14px;right:14px;background:rgba(20,20,28,.95);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-family:'SF Mono',Consolas,monospace;font-size:.7rem;color:var(--text2);z-index:1500;max-width:340px;box-shadow:0 8px 22px rgba(0,0,0,.5);line-height:1.55}
 .diag-panel b{color:var(--text);font-weight:700}
@@ -158,12 +153,6 @@ body{background-color:var(--bg);background-image:linear-gradient(rgba(10,132,255
 
   <!-- MAIN CONTENT (hidden until auth) -->
   <div id="mainContent" style="display:none">
-
-    <!-- Banner de migração (aparece se detectar dados de sessão anterior com UID diferente) -->
-    <div id="migrateBanner" class="migrate-banner" style="display:none">
-      <span>📦 Detectamos dados de uma sessão anterior. Deseja associá-los a esta conta?</span>
-      <button onclick="migrateOldData()">Trazer dados para cá</button>
-    </div>
 
     <!-- Entry cards -->
     <div class="entry-cards">
@@ -204,19 +193,16 @@ body{background-color:var(--bg);background-image:linear-gradient(rgba(10,132,255
   </div>
   <div id="dIncognitoWarn" class="row" style="display:none;background:rgba(255,159,10,.12);padding:6px 8px;border-radius:6px;border:1px solid rgba(255,159,10,.4);margin-bottom:6px;flex-direction:column;gap:2px">
     <span style="color:var(--warn);font-weight:700;font-size:.7rem">⚠️ Modo anônimo detectado</span>
-    <span style="font-size:.62rem;color:var(--text2);line-height:1.4">Dados são mantidos localmente e sincronizados quando possível.</span>
+    <span style="font-size:.62rem;color:var(--text2);line-height:1.4">Dados só sobrevivem se persistirem no servidor. Use o mesmo login na próxima vez.</span>
   </div>
   <div class="row"><span>UID:</span><span class="v" id="dUid" style="cursor:pointer;text-decoration:underline" title="Clique para copiar UID completo">—</span></div>
   <div class="row"><span>Cache local:</span><span class="v" id="dCache">—</span></div>
   <div class="row"><span>Servidor:</span><span class="v" id="dServer">—</span></div>
   <div class="row"><span>Último save:</span><span class="v" id="dSave">—</span></div>
   <div class="row"><span>Auto-sync:</span><span class="v" id="dSync">—</span></div>
-  <div class="row"><span>Pendentes:</span><span class="v" id="dPending">—</span></div>
   <div class="row"><span>Último erro:</span><span class="v err" id="dErr">—</span></div>
   <button id="dForceSync" style="margin-top:8px;width:100%;padding:6px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:inherit">↻ Sincronizar agora</button>
   <a id="dFirebaseLink" href="#" target="_blank" style="display:block;margin-top:6px;text-align:center;padding:5px;background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:.65rem;text-decoration:none;font-weight:600">🔥 Abrir no Firebase Console</a>
-  <button id="dDiagPaths" style="margin-top:6px;width:100%;padding:5px;background:var(--purple);color:#fff;border:none;border-radius:6px;font-size:.65rem;font-weight:700;cursor:pointer;font-family:inherit">🔍 Diagnosticar caminhos (REST)</button>
-  <div id="dDiagPathsResult" style="margin-top:6px;font-size:.62rem;color:var(--text2);max-height:120px;overflow-y:auto"></div>
 </div>
 
 <!-- MODAL: GERAR LINK -->
@@ -274,439 +260,474 @@ body{background-color:var(--bg);background-image:linear-gradient(rgba(10,132,255
 </div>
 
 <script type="module">
-/* ============================================================
-   ALQUILAB — FLUXO DE ATIVIDADES (Local-First + Firebase Sync)
-   ============================================================ */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, signInAnonymously
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import {
-  getDatabase, ref, set, get, update, remove, onValue
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import{getDatabase,ref,set,get,update,remove,push,onValue}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-/* ── Firebase Config ── */
-const firebaseConfig = {
-  apiKey: "AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",
-  authDomain: "profbase-5f9b0.firebaseapp.com",
-  databaseURL: "https://profbase-5f9b0-default-rtdb.firebaseio.com",
-  projectId: "profbase-5f9b0",
-  storageBucket: "profbase-5f9b0.firebasestorage.app",
-  messagingSenderId: "826412057766",
-  appId: "1:826412057766:web:729e6e24ce7587417fe067"
-};
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+const firebaseConfig={apiKey:"AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",authDomain:"profbase-5f9b0.firebaseapp.com",databaseURL:"https://profbase-5f9b0-default-rtdb.firebaseio.com",projectId:"profbase-5f9b0",storageBucket:"profbase-5f9b0.firebasestorage.app",messagingSenderId:"826412057766",appId:"1:826412057766:web:729e6e24ce7587417fe067"};
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getDatabase(app);
 
-const ADM_EMAIL = 'gilbertofernandessc@gmail.com';
-const $ = id => document.getElementById(id);
+const ADM_EMAIL='gilbertofernandessc@gmail.com';
+const $=id=>document.getElementById(id);
 
-/* ── Estado global (mantido para compatibilidade com UI) ── */
-let currentUser = null;
-let myFlows = [];
-let myLinks = [];
-let connectingLinkId = null;
-let selectedConnectFlowId = null;
+let currentUser=null;
+let myFlows=[];
+let myLinks=[];
+let connectingLinkId=null;
+let selectedConnectFlowId=null;
+// IDs criados/atualizados nesta sessão — usado para preservar otimistas
+// até o Firebase sincronizar (e não acumular cache stale).
+const _pendingIds = new Set();
 
-/* ── Constantes de cache ── */
-const LS_KEY = 'alquilab_fluxov2_state';
-const LS_META = 'alquilab_fluxov2_meta';
-const SYNC_INTERVAL = 10000;
-
-/* ============================================================
-   1. LOCAL STORAGE STATE (Fonte primária)
-   ============================================================ */
-function getLocalState() {
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return { links: [], flows: [], v: 2 };
-    return JSON.parse(raw);
-  } catch (e) { return { links: [], flows: [], v: 2 }; }
+/* Cache local dos links (chaveado por uid) — usado só para mostrar
+   instantaneamente os links já criados enquanto o Firebase carrega.
+   O Firebase continua sendo a fonte da verdade. */
+function cacheKey(){ return currentUser ? 'fluxo_links_cache_'+currentUser.uid : null }
+function loadLocalCache(){
+  const k=cacheKey(); if(!k) return [];
+  try{ return JSON.parse(localStorage.getItem(k)||'[]') }catch(_){ return [] }
 }
-function setLocalState(obj) {
-  try {
-    localStorage.setItem(LS_KEY, JSON.stringify({ ...obj, v: 2 }));
-  } catch (e) {
-    diag('err', 'localStorage full? ' + (e.message || ''));
+function saveLocalCache(){
+  const k=cacheKey(); if(!k) return;
+  try{
+    localStorage.setItem(k, JSON.stringify(myLinks||[]));
+    console.log('[DIAG] 💾 Cache salvo:', myLinks.length, 'item(s) na chave', k);
+  }catch(e){
+    console.error('[DIAG] ❌ Falha ao salvar cache:', e);
+    diag('err','localStorage cheio? '+(e.message||''));
   }
 }
-function getMeta() {
-  try { return JSON.parse(localStorage.getItem(LS_META) || '{}'); } catch (e) { return {}; }
-}
-function setMeta(obj) {
-  localStorage.setItem(LS_META, JSON.stringify(obj));
+
+function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
+
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+
+/* ── DIAGNÓSTICO ────────────────────────────────────────────
+   Mostra um painel no canto inferior direito com:
+   - UID atual (truncado)
+   - Quantidade de links no cache local
+   - Quantidade de links no servidor (após get())
+   - Último save (timestamp)
+   - Último erro
+   Se você está testando: olhe esse painel ANTES e DEPOIS de recarregar.
+   Se o UID muda → problema de auth não-persistente.
+   Se cache=N mas servidor=0 → write não está chegando ao Firebase.
+   Se cache=0 mas você criou link → localStorage não está persistindo.
+*/
+const DIAG = {uid:'—', cache:'—', server:'—', save:'—', sync:'—', err:'—'};
+function diag(field, value){
+  if(field) DIAG[field] = value;
+  const p=$('diagPanel'); if(!p) return;
+  p.style.display='block';
+  $('dUid').textContent    = DIAG.uid;
+  $('dCache').textContent  = DIAG.cache;
+  $('dServer').textContent = DIAG.server;
+  $('dSave').textContent   = DIAG.save;
+  if($('dSync')) $('dSync').textContent = DIAG.sync;
+  $('dErr').textContent    = DIAG.err;
+  console.log('[DIAG]', JSON.stringify(DIAG));
 }
 
-/* Fila de operações pendentes (para retry quando voltar online) */
-let pendingOps = []; // {type:'save'|'remove'|'connect', payload, tries:0}
-function addPending(op) {
-  pendingOps.push({ ...op, tries: 0, ts: Date.now() });
-  diag('pending', pendingOps.length);
-}
-function removePending(id) {
-  pendingOps = pendingOps.filter(p => p.payload?.id !== id);
-  diag('pending', pendingOps.length);
-}
+function scrollToSection(id){document.getElementById(id).scrollIntoView({behavior:'smooth'})}
+window.scrollToSection=scrollToSection;
 
-/* ============================================================
-   2. HELPERS & DIAGNÓSTICO
-   ============================================================ */
-const DIAG = { uid: '—', cache: '—', server: '—', save: '—', sync: '—', pending: '—', err: '—' };
-function diag(field, value) {
-  if (field) DIAG[field] = value;
-  const p = $('diagPanel'); if (!p) return;
-  p.style.display = 'block';
-  if ($('dUid')) $('dUid').textContent = DIAG.uid;
-  if ($('dCache')) $('dCache').textContent = DIAG.cache;
-  if ($('dServer')) $('dServer').textContent = DIAG.server;
-  if ($('dSave')) $('dSave').textContent = DIAG.save;
-  if ($('dSync')) $('dSync').textContent = DIAG.sync;
-  if ($('dPending')) $('dPending').textContent = DIAG.pending;
-  if ($('dErr')) $('dErr').textContent = DIAG.err;
-}
-
-function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
-function toast(msg) {
-  const t = $('toast'); t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-async function detectIncognito() {
-  try {
-    if (navigator.storage && navigator.storage.estimate) {
+/* Detecta modo anônimo/incognito */
+async function detectIncognito(){
+  try{
+    if(navigator.storage && navigator.storage.estimate){
       const est = await navigator.storage.estimate();
-      if ((est.quota || 0) / 1024 / 1024 < 200) return true;
+      // Em incognito, o quota é geralmente menor que 120MB
+      const quotaMB = (est.quota||0)/1024/1024;
+      if(quotaMB < 200) return true;
     }
-  } catch (_) { }
-  return new Promise(r => {
-    try {
+  }catch(_){}
+  // Fallback: tenta criar IndexedDB temporário
+  return new Promise(r=>{
+    try{
       const req = indexedDB.open('test_incognito');
-      req.onerror = () => r(true);
-      req.onsuccess = () => { try { indexedDB.deleteDatabase('test_incognito'); } catch (_) { } r(false); };
-    } catch (_) { r(true); }
+      req.onerror = ()=>r(true);
+      req.onsuccess = ()=>{ try{indexedDB.deleteDatabase('test_incognito')}catch(_){} r(false) };
+    }catch(_){ r(true) }
   });
 }
 
-/* ============================================================
-   3. AUTH (Persistência + Anônimo Fallback)
-   ============================================================ */
-// Força persistência local (sobrevive a reloads, mas não modo anônimo em alguns navegadores)
-setPersistence(auth, browserLocalPersistence).catch(() => { });
-
-onAuthStateChanged(auth, async user => {
-  if (!user) {
-    // Fallback: login anônimo automático para nunca travar a tela
-    try {
-      await signInAnonymously(auth);
-      return; // vai disparar este callback novamente com user anônimo
-    } catch (e) {
-      $('authWarn').style.display = 'block';
-      $('mainContent').style.display = 'none';
-      diag('err', 'Auth anônimo falhou: ' + (e.code || e.message));
-      return;
-    }
+/* ── AUTH ── */
+onAuthStateChanged(auth,async user=>{
+  if(!user){
+    $('authWarn').style.display='block';
+    $('mainContent').style.display='none';
+    return;
   }
-
-  $('authWarn').style.display = 'none';
-  $('mainContent').style.display = 'block';
-  currentUser = user;
-
-  // UID no painel
+  $('authWarn').style.display='none';
+  $('mainContent').style.display='block';
+  currentUser=user;
+  // UID completo clicável (pra copiar e comparar entre sessões)
   const uidEl = $('dUid');
-  if (uidEl) {
-    uidEl.textContent = user.uid.slice(0, 10) + '…';
-    uidEl.title = 'Clique para copiar: ' + user.uid;
-    uidEl.onclick = () => {
-      navigator.clipboard.writeText(user.uid).then(() => {
-        const o = uidEl.textContent; uidEl.textContent = '✓ copiado';
-        setTimeout(() => uidEl.textContent = o, 1500);
-      }).catch(() => { });
+  if(uidEl){
+    uidEl.textContent = user.uid.slice(0,10)+'…';
+    uidEl.title = 'Clique para copiar: '+user.uid;
+    uidEl.onclick = ()=>{
+      navigator.clipboard.writeText(user.uid).then(()=>{
+        const orig = uidEl.textContent;
+        uidEl.textContent='✓ copiado';
+        setTimeout(()=>uidEl.textContent=orig, 1500);
+      }).catch(()=>{});
     };
   }
-  diag('uid', user.uid.slice(0, 10) + '…');
-
-  // Link Firebase Console
+  diag('uid', user.uid.slice(0,10)+'…');
+  // Link direto pro Firebase Console
   const fbLink = $('dFirebaseLink');
-  if (fbLink) fbLink.href = `https://console.firebase.google.com/project/profbase-5f9b0/database/profbase-5f9b0-default-rtdb/data/usuarios/${user.uid}/turmas_fluxo`;
-
-  // Aviso incognito
+  if(fbLink){
+    fbLink.href = `https://console.firebase.google.com/project/profbase-5f9b0/database/profbase-5f9b0-default-rtdb/data/usuarios/${user.uid}/turmas_fluxo`;
+  }
+  // Detecta incognito e mostra aviso
   const isIncognito = await detectIncognito();
-  if (isIncognito) {
-    const w = $('dIncognitoWarn');
-    if (w) w.style.display = 'flex';
+  if(isIncognito){
+    const warn = $('dIncognitoWarn');
+    if(warn) warn.style.display='flex';
+    console.warn('[DIAG] ⚠️ Modo anônimo/incognito detectado');
   }
-
-  // Verifica mudança de UID e oferece migração
-  const meta = getMeta();
-  if (meta.lastUid && meta.lastUid !== user.uid && hasLocalData()) {
-    $('migrateBanner').style.display = 'flex';
-  } else {
-    $('migrateBanner').style.display = 'none';
-  }
-  // Sempre atualiza lastUid para a sessão atual
-  setMeta({ ...meta, lastUid: user.uid });
-
-  // === LOCAL-FIRST LOAD ===
-  // 1. Carrega imediatamente do cache local (tela nunca fica em branco)
-  const local = getLocalState();
-  myLinks = local.links || [];
-  myFlows = local.flows || [];
-  diag('cache', `${myLinks.length} link(s), ${myFlows.length} fluxo(s)`);
+  // Verifica se o UID mudou desde a última visita (causa comum de "sumiço")
+  try{
+    const lastUid = localStorage.getItem('fluxo_last_uid');
+    if(lastUid && lastUid!==user.uid){
+      console.warn('[DIAG] UID MUDOU! Anterior:',lastUid,'Atual:',user.uid);
+      diag('err','UID mudou desde última visita! Anterior: '+lastUid.slice(0,10)+'…');
+    }
+    localStorage.setItem('fluxo_last_uid', user.uid);
+  }catch(_){}
+  // Mostra imediatamente do cache local
+  myLinks = loadLocalCache();
+  diag('cache', myLinks.length+' link(s)');
   renderLinks();
-  renderActivities();
-
-  // 2. Inscreve listeners Firebase (sync em background)
   subscribeData();
-
-  // 3. Inicia sync periódico e processamento de pendentes
+  // Sincronização periódica — corrige writes que não persistiram
   startPeriodicSync();
-  processPendingOps();
 });
 
-function hasLocalData() {
-  const s = getLocalState();
-  return (s.links && s.links.length) || (s.flows && s.flows.length);
+/* ── LOAD DATA (live listeners) ── */
+let _flowsUnsub=null, _linksUnsub=null, _idxUnsub=null;
+
+// Mescla um conjunto de fluxos em myFlows (sem duplicatas), ordena e re-renderiza
+function mergeAndRender(items){
+  const known=new Map(myFlows.map(f=>[f.id,f]));
+  items.forEach(f=>{ if(f && f.id) known.set(f.id, {...known.get(f.id), ...f}) });
+  myFlows = Array.from(known.values());
+  myFlows.sort((a,b)=>{
+    const ta = new Date(a.atualizadoEm||a.criadoEm||0).getTime();
+    const tb = new Date(b.atualizadoEm||b.criadoEm||0).getTime();
+    return tb - ta;
+  });
+  renderActivities();
 }
 
-/* ============================================================
-   4. DATA SYNC ENGINE (Local-First)
-   ============================================================ */
-let _flowsUnsub = null, _linksUnsub = null, _idxUnsub = null;
+async function subscribeData(){
+  // Reset
+  myFlows = [];
 
-function subscribeData() {
-  myFlows = myFlows || [];
-  myLinks = myLinks || [];
+  // 0) Antes de tudo: verifica/recupera os links da turma
+  await initialLinksFetchAndRecover();
 
-  // 1) Listener de fluxos no path do usuário
-  if (_flowsUnsub) try { _flowsUnsub(); } catch (_) { }
-  _flowsUnsub = onValue(ref(db, 'fluxos/' + currentUser.uid), snap => {
-    const arr = [];
-    if (snap.exists()) snap.forEach(c => arr.push({ id: c.key, ...c.val() }));
-    mergeFlows(arr);
-    // Auto-indexa
-    (async () => {
-      for (const f of arr) {
-        try {
-          const ix = await get(ref(db, 'usuarios/' + currentUser.uid + '/meus_fluxos/' + f.id));
-          if (!ix.exists()) {
-            await set(ref(db, 'usuarios/' + currentUser.uid + '/meus_fluxos/' + f.id), {
-              nome: f.nome || 'Sem título', ownerUid: currentUser.uid,
-              criadoEm: f.criadoEm || new Date().toISOString(),
-              atualizadoEm: f.atualizadoEm || new Date().toISOString()
+  // 1) Listener principal: fluxos no caminho fluxos/<currentUser.uid>
+  if(_flowsUnsub) try{ _flowsUnsub() }catch(_){}
+  _flowsUnsub = onValue(ref(db,'fluxos/'+currentUser.uid), snap=>{
+    const arr=[];
+    if(snap.exists()) snap.forEach(c=>arr.push({id:c.key,...c.val()}));
+    mergeAndRender(arr);
+    // Auto-migração: garante que cada fluxo está indexado em meus_fluxos
+    (async ()=>{
+      for(const f of arr){
+        try{
+          const ix=await get(ref(db,'usuarios/'+currentUser.uid+'/meus_fluxos/'+f.id));
+          if(!ix.exists()){
+            await set(ref(db,'usuarios/'+currentUser.uid+'/meus_fluxos/'+f.id),{
+              nome:f.nome||'Sem título', ownerUid:currentUser.uid,
+              criadoEm:f.criadoEm||new Date().toISOString(),
+              atualizadoEm:f.atualizadoEm||new Date().toISOString()
             });
           }
-        } catch (_) { }
+        }catch(_){}
       }
     })();
-  }, err => { console.error('[fluxos] erro:', err); });
+  }, err=>{ console.error('[fluxos] erro:', err) });
 
-  // 2) Listener do índice meus_fluxos
-  if (_idxUnsub) try { _idxUnsub(); } catch (_) { }
-  _idxUnsub = onValue(ref(db, 'usuarios/' + currentUser.uid + '/meus_fluxos'), async snap => {
-    if (!snap.exists()) return;
-    const entries = []; snap.forEach(c => entries.push({ id: c.key, ...c.val() }));
-    const fetched = [];
-    for (const ie of entries) {
-      try {
+  // 2) Listener do índice usuarios/<uid>/meus_fluxos — mais confiável (UID não muda)
+  if(_idxUnsub) try{ _idxUnsub() }catch(_){}
+  _idxUnsub = onValue(ref(db,'usuarios/'+currentUser.uid+'/meus_fluxos'), async snap=>{
+    if(!snap.exists()) return;
+    const indexEntries=[];
+    snap.forEach(c=>{ indexEntries.push({id:c.key, ...c.val()}) });
+    // Para cada entrada do índice, busca os dados completos do fluxo (no caminho do owner)
+    const fetched=[];
+    for(const ie of indexEntries){
+      try{
         const owner = ie.ownerUid || currentUser.uid;
-        const fsnap = await get(ref(db, 'fluxos/' + owner + '/' + ie.id));
-        if (fsnap.exists()) fetched.push({ id: ie.id, ...fsnap.val() });
-        else fetched.push({ id: ie.id, nome: ie.nome || 'Sem título', atualizadoEm: ie.atualizadoEm, criadoEm: ie.criadoEm, _ownerUid: owner });
-      } catch (e) { console.warn('[idx] falha buscando fluxo', ie.id, e); }
+        const fsnap = await get(ref(db,'fluxos/'+owner+'/'+ie.id));
+        if(fsnap.exists()){
+          fetched.push({id:ie.id, ...fsnap.val()});
+        } else {
+          // Fallback: usa apenas os metadados do índice
+          fetched.push({id:ie.id, nome:ie.nome||'Sem título', atualizadoEm:ie.atualizadoEm, criadoEm:ie.criadoEm, _ownerUid:owner});
+        }
+      }catch(e){ console.warn('[idx] falha buscando fluxo', ie.id, e) }
     }
-    mergeFlows(fetched);
-  }, err => { console.error('[meus_fluxos] erro:', err); });
+    mergeAndRender(fetched);
+  }, err=>{ console.error('[meus_fluxos] erro:', err) });
 
-  // 3) Busca órfãos (admin ou criadoPor=eu)
-  (async () => {
-    try {
-      const rootSnap = await get(ref(db, 'fluxos'));
-      if (!rootSnap.exists()) return;
-      const all = rootSnap.val() || {};
+  // 3) Tentativa: lê toda a raiz fluxos para capturar fluxos órfãos (admin ou criadoPor=eu)
+  (async ()=>{
+    try{
+      const rootSnap = await get(ref(db,'fluxos'));
+      if(!rootSnap.exists()) return;
+      const all = rootSnap.val()||{};
       const isAdmin = currentUser.email === ADM_EMAIL;
-      const extras = [];
-      Object.keys(all).forEach(uidKey => {
-        const userFlows = all[uidKey] || {};
-        Object.keys(userFlows).forEach(fid => {
-          const f = userFlows[fid] || {};
-          if (uidKey === currentUser.uid) return;
-          if (isAdmin || (f.criadoPor && f.criadoPor === currentUser.uid)) {
-            extras.push({ id: fid, _ownerUid: uidKey, ...f });
+      const extras=[];
+      Object.keys(all).forEach(uidKey=>{
+        const userFlows = all[uidKey]||{};
+        Object.keys(userFlows).forEach(fid=>{
+          const f = userFlows[fid]||{};
+          if(uidKey===currentUser.uid) return; // já vem pelo listener principal
+          const ownedByMe = f.criadoPor && f.criadoPor===currentUser.uid;
+          if(isAdmin || ownedByMe){
+            extras.push({id:fid, _ownerUid:uidKey, ...f});
           }
         });
       });
-      if (extras.length) mergeFlows(extras);
-    } catch (e) { /* silencioso */ }
+      if(extras.length) mergeAndRender(extras);
+    }catch(e){ /* permissão negada — silencioso */ }
   })();
 
-  // 4) Listener de links de turma (CRÍTICO: nunca apaga local se servidor vier vazio)
-  if (_linksUnsub) try { _linksUnsub(); } catch (_) { }
-  _linksUnsub = onValue(ref(db, 'usuarios/' + currentUser.uid + '/turmas_fluxo'), snap => {
-    const fromDb = [];
-    if (snap.exists()) snap.forEach(c => fromDb.push({ id: c.key, ...c.val() }));
+  // 4) Listener dos links de turma (após a recuperação inicial)
+  if(_linksUnsub) try{ _linksUnsub() }catch(_){}
+  _linksUnsub = onValue(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo'), snap=>{
+    const fromDb=[];
+    if(snap.exists()) snap.forEach(c=>fromDb.push({id:c.key,...c.val()}));
 
-    diag('server', fromDb.length + ' link(s) [' + new Date().toLocaleTimeString() + ']');
-
-    if (fromDb.length === 0 && myLinks.length > 0) {
-      // Servidor vazio mas local tem dados → faz upload dos locais (recovery)
-      console.log('[SYNC] Servidor vazio, local tem', myLinks.length, 'item(s). Re-enviando...');
-      pushAllLinksToServer();
-      return; // mantém myLinks intactos
+    // PROTEÇÃO FORTE: nunca permitir que o listener REMOVA itens que estão
+    // em myLinks. Só atualiza valores existentes ou adiciona novos.
+    // Para excluir, usar deleteLink (que filtra myLinks explicitamente).
+    // Isso impede que respostas espúrias do servidor apaguem a UI.
+    const fromDbMap = new Map(fromDb.map(l=>[l.id, l]));
+    const merged = [];
+    const seenIds = new Set();
+    // Primeiro: itens atualizados a partir do servidor (preserva ordem que estava em myLinks)
+    for(const lk of myLinks){
+      if(fromDbMap.has(lk.id)){
+        merged.push(fromDbMap.get(lk.id));
+        seenIds.add(lk.id);
+      } else {
+        // Não está no servidor — preserva o local (não apaga)
+        merged.push(lk);
+        seenIds.add(lk.id);
+      }
     }
-
-    mergeLinks(fromDb, 'server');
-  }, err => {
-    console.error('[links] erro listener:', err);
-    diag('err', 'Listener: ' + (err.code || err.message));
+    // Depois: itens novos do servidor que não estavam em myLinks
+    for(const lk of fromDb){
+      if(!seenIds.has(lk.id)) merged.push(lk);
+    }
+    fromDb.forEach(l=>_pendingIds.delete(l.id));
+    myLinks = merged;
+    myLinks.sort((a,b)=>{
+      const ta=new Date(a.criadoEm||0).getTime();
+      const tb=new Date(b.criadoEm||0).getTime();
+      return tb-ta;
+    });
+    saveLocalCache();
+    diag('server', fromDb.length+' link(s) ['+new Date().toLocaleTimeString()+']');
+    diag('cache', myLinks.length+' link(s)');
+    renderLinks();
+  }, err=>{
+    console.error('[links] erro:', err);
+    // Mesmo em erro, exibimos o que houver em myLinks (do cache local)
+    renderLinks();
   });
 }
 
-/* ── Merge inteligente de FLUXOS ── */
-function mergeFlows(serverItems) {
-  const map = new Map(myFlows.map(f => [f.id, f]));
-  serverItems.forEach(s => {
-    if (!s || !s.id) return;
-    const local = map.get(s.id);
-    if (!local) {
-      map.set(s.id, s);
-    } else {
-      const tSrv = new Date(s.atualizadoEm || s.criadoEm || 0).getTime();
-      const tLoc = new Date(local.atualizadoEm || local.criadoEm || 0).getTime();
-      if (tSrv >= tLoc) map.set(s.id, { ...local, ...s });
-    }
-  });
-  myFlows = Array.from(map.values());
-  myFlows.sort((a, b) => {
-    const ta = new Date(a.atualizadoEm || a.criadoEm || 0).getTime();
-    const tb = new Date(b.atualizadoEm || b.criadoEm || 0).getTime();
-    return tb - ta;
-  });
-  // Salva local
-  const state = getLocalState();
-  state.flows = myFlows;
-  setLocalState(state);
-  renderActivities();
-}
+/* Faz um fetch inicial dos links e, se o servidor estiver vazio mas o cache
+   local tem itens, regrava-os no servidor (recuperação automática).
+   Cobre os cenários:
+   - O write anterior falhou silenciosamente (regra/permissão)
+   - Auth UID mudou entre sessões (rara, mas possível)
+   - O listener vai ter dados corretos antes mesmo de inscrever */
+async function initialLinksFetchAndRecover(){
+  if(!currentUser) return;
+  let snap=null;
+  try{
+    snap = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo'));
+  }catch(e){
+    console.error('[initial fetch links] erro:', e);
+    diag('err','GET falhou: '+(e.code||e.message||'?'));
+    diag('server','ERRO');
+    // Mantém o que está em myLinks (do cache)
+    renderLinks();
+    return;
+  }
+  const fromDb=[];
+  if(snap && snap.exists()) snap.forEach(c=>fromDb.push({id:c.key,...c.val()}));
+  diag('server', fromDb.length+' link(s)');
+  console.log('[DIAG] get servidor →', fromDb);
 
-/* ── Merge inteligente de LINKS ── */
-function mergeLinks(serverItems, source) {
-  const map = new Map(myLinks.map(l => [l.id, l]));
-  serverItems.forEach(s => {
-    if (!s || !s.id) return;
-    const local = map.get(s.id);
-    if (!local) {
-      map.set(s.id, s);
-    } else {
-      const tSrv = new Date(s.atualizadoEm || s.criadoEm || 0).getTime();
-      const tLoc = new Date(local.atualizadoEm || local.criadoEm || 0).getTime();
-      // Servidor ganha se mais novo, mas preserva campos locais que possam faltar no servidor
-      if (tSrv >= tLoc) map.set(s.id, { ...local, ...s });
+  const cached = loadLocalCache();
+  console.log('[DIAG] cache local →', cached);
+
+  // ESTRATÉGIA DE MERGE + RECOVERY:
+  // - Itens em AMBOS (cache e servidor): o servidor é a verdade (pega valores do servidor)
+  // - Itens só no SERVIDOR: adiciona (foram criados em outro lugar)
+  // - Itens só no CACHE: REGRAVA no servidor (não persistiu por algum motivo)
+  //   e adiciona ao resultado.
+  const serverIds = new Set(fromDb.map(l=>l.id));
+  const cacheIds  = new Set(cached.map(l=>l.id));
+  const missingInServer = cached.filter(l=>!serverIds.has(l.id));
+
+  if(missingInServer.length > 0){
+    console.warn('[recover] '+missingInServer.length+' item(s) do cache NÃO estão no servidor. Regravando…');
+    diag('err','Recuperando '+missingInServer.length+' link(s) que não persistiram');
+    let recovered = 0;
+    for(const lk of missingInServer){
+      try{
+        const dados = {
+          escola: lk.escola||'',
+          serie:  lk.serie||'',
+          turma:  lk.turma||'',
+          atividadeId: lk.atividadeId||'',
+          criadoPor: currentUser.uid,
+          criadoEm:  lk.criadoEm || new Date().toISOString()
+        };
+        console.log('[recover] regravando', lk.id, dados);
+        await set(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+lk.id), dados);
+        try{ await set(ref(db,'turmas_fluxo/'+lk.id), dados) }catch(_){}
+
+        // Verifica se realmente persistiu agora
+        const v = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+lk.id));
+        if(v.exists()){
+          console.log('[recover] ✅ persistiu', lk.id);
+          recovered++;
+        } else {
+          console.error('[recover] ❌ regravado mas não persistiu!', lk.id, '— provavelmente regra do Firebase está bloqueando ou um trigger está apagando');
+          diag('err','Item '+lk.id.slice(-6)+' não persiste mesmo após regravar — checar regras do Firebase');
+        }
+      }catch(e){
+        console.error('[recover] erro regravando', lk.id, e);
+        diag('err','Erro recovery: '+(e.code||e.message||''));
+      }
     }
+    console.warn('[recover] Recuperados',recovered,'de',missingInServer.length);
+  }
+
+  // Resultado: união (servidor como verdade onde existem, cache como fallback onde faltam)
+  const merged = [...fromDb];
+  const mergedIds = new Set(merged.map(l=>l.id));
+  for(const lk of cached){
+    if(!mergedIds.has(lk.id)) merged.push(lk);
+  }
+  myLinks = merged;
+  myLinks.sort((a,b)=>{
+    const ta=new Date(a.criadoEm||0).getTime();
+    const tb=new Date(b.criadoEm||0).getTime();
+    return tb-ta;
   });
-  myLinks = Array.from(map.values());
-  myLinks.sort((a, b) => {
-    const ta = new Date(a.criadoEm || 0).getTime();
-    const tb = new Date(b.criadoEm || 0).getTime();
-    return tb - ta;
-  });
-  const state = getLocalState();
-  state.links = myLinks;
-  setLocalState(state);
-  diag('cache', myLinks.length + ' link(s)');
+  saveLocalCache();
+  diag('cache', myLinks.length+' link(s) (após merge)');
   renderLinks();
 }
 
-/* ── Envia todos os links locais para o servidor (recovery) ── */
-async function pushAllLinksToServer() {
-  if (!currentUser) return;
-  let ok = 0;
-  for (const lk of myLinks) {
-    try {
-      const dados = {
-        escola: lk.escola || '',
-        serie: lk.serie || '',
-        turma: lk.turma || '',
-        atividadeId: lk.atividadeId || '',
-        criadoPor: currentUser.uid,
-        criadoEm: lk.criadoEm || new Date().toISOString()
-      };
-      await set(ref(db, 'usuarios/' + currentUser.uid + '/turmas_fluxo/' + lk.id), dados);
-      ok++;
-    } catch (e) {
-      console.error('[recovery] falha ao re-enviar', lk.id, e);
-    }
-  }
-  diag('sync', `Recovery: ${ok}/${myLinks.length} re-enviados`);
-  toast(ok > 0 ? `${ok} link(s) sincronizados com a conta atual.` : 'Não foi possível sincronizar agora.');
-}
+// Compatibilidade: re-subscribe sob demanda (usada após excluir/criar etc.)
+async function loadData(){ if(currentUser) subscribeData() }
 
-/* ── Migração manual (banner) ── */
-window.migrateOldData = async function () {
-  $('migrateBanner').style.display = 'none';
-  await pushAllLinksToServer();
-  toast('Dados migrados para a conta atual!');
-};
+/* ── SINCRONIZAÇÃO PERIÓDICA ──────────────────────────────────────
+   A cada N segundos, lê o servidor e compara com myLinks.
+   Para cada item local que NÃO está no servidor, regrava.
+   Para cada item do servidor que NÃO está local, adiciona.
+   Cobre o cenário onde set() reportou sucesso mas o item sumiu
+   do servidor (problemas de regra, trigger, conexão flaky etc.). */
+let _syncTimer=null, _syncRunning=false;
+async function syncWithServer(reason){
+  if(!currentUser) return;
+  if(_syncRunning){ console.log('[sync] já rodando, pulando'); return }
+  _syncRunning=true;
+  try{
+    const snap = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo'));
+    const fromDb=[];
+    if(snap.exists()) snap.forEach(c=>fromDb.push({id:c.key,...c.val()}));
+    const serverIds=new Set(fromDb.map(l=>l.id));
 
-/* ── Sync periódico + retry de pendentes ── */
-let _syncTimer = null;
-function startPeriodicSync() {
-  if (_syncTimer) clearInterval(_syncTimer);
-  _syncTimer = setInterval(() => {
-    syncWithServer();
-    processPendingOps();
-  }, SYNC_INTERVAL);
-}
-
-async function syncWithServer() {
-  if (!currentUser || pendingOps.length === 0) return;
-  diag('sync', 'Verificando...');
-  // Re-tenta pendentes
-  await processPendingOps();
-}
-
-async function processPendingOps() {
-  if (!currentUser || pendingOps.length === 0) return;
-  const stillPending = [];
-  for (const op of pendingOps) {
-    op.tries = (op.tries || 0) + 1;
-    try {
-      if (op.type === 'save') {
-        await set(ref(db, 'usuarios/' + currentUser.uid + '/turmas_fluxo/' + op.payload.id), op.payload.data);
-      } else if (op.type === 'remove') {
-        await remove(ref(db, 'usuarios/' + currentUser.uid + '/turmas_fluxo/' + op.payload.id));
-      } else if (op.type === 'connect') {
-        await set(ref(db, 'usuarios/' + currentUser.uid + '/turmas_fluxo/' + op.payload.id + '/atividadeId'), op.payload.flowId);
+    // Itens em myLinks que não estão no servidor → regrava
+    const missing = myLinks.filter(l=>!serverIds.has(l.id));
+    let recovered=0;
+    if(missing.length){
+      console.warn('[sync]',reason||'periódica','— regravando',missing.length,'item(s)');
+      for(const lk of missing){
+        try{
+          const dados = {
+            escola: lk.escola||'',
+            serie:  lk.serie||'',
+            turma:  lk.turma||'',
+            atividadeId: lk.atividadeId||'',
+            criadoPor: currentUser.uid,
+            criadoEm:  lk.criadoEm || new Date().toISOString()
+          };
+          await set(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+lk.id), dados);
+          try{ await set(ref(db,'turmas_fluxo/'+lk.id), dados) }catch(_){}
+          // Verifica
+          const v = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+lk.id));
+          if(v.exists()){
+            recovered++;
+            serverIds.add(lk.id);
+            fromDb.push({id:lk.id, ...dados});
+          } else {
+            console.error('[sync] ❌ regravado mas não persistiu:', lk.id);
+            diag('err','Item '+lk.id.slice(-6)+' não persiste — checar Firebase');
+          }
+        }catch(e){ console.error('[sync] erro:', lk.id, e) }
       }
-      console.log('[pending] ✅ resolvido', op.type, op.payload.id);
-    } catch (e) {
-      if (op.tries < 5) stillPending.push(op);
-      else console.error('[pending] ❌ desistido após 5 tentativas', op);
     }
+    // Atualiza myLinks com merge (servidor + locais não-servidor)
+    const merged = [...fromDb];
+    const mids = new Set(merged.map(l=>l.id));
+    for(const lk of myLinks){ if(!mids.has(lk.id)) merged.push(lk); }
+    myLinks = merged;
+    myLinks.sort((a,b)=>{
+      const ta=new Date(a.criadoEm||0).getTime();
+      const tb=new Date(b.criadoEm||0).getTime();
+      return tb-ta;
+    });
+    saveLocalCache();
+    diag('cache', myLinks.length+' link(s)');
+    diag('server', fromDb.length+' link(s)');
+    diag('sync', new Date().toLocaleTimeString()+(recovered?` (+${recovered} recuperados)`:' (ok)'));
+    renderLinks();
+  }catch(e){
+    console.error('[sync] falha:', e);
+    diag('err','Sync: '+(e.code||e.message||''));
+  }finally{
+    _syncRunning=false;
   }
-  pendingOps = stillPending;
-  diag('pending', pendingOps.length);
+}
+function startPeriodicSync(){
+  if(_syncTimer) clearInterval(_syncTimer);
+  _syncTimer = setInterval(()=>syncWithServer('periódica'), 8000);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const b = document.getElementById('dForceSync');
-  if (b) b.onclick = () => { syncWithServer(); processPendingOps(); };
+// Botão "Sincronizar agora"
+document.addEventListener('DOMContentLoaded',()=>{
+  const b=document.getElementById('dForceSync');
+  if(b) b.onclick=()=>syncWithServer('manual');
 });
 
-/* ============================================================
-   5. UI RENDER (compatível com código anterior)
-   ============================================================ */
-function renderActivities() {
-  $('actCount').textContent = myFlows.length;
-  if (!myFlows.length) {
-    $('actList').innerHTML = '<div class="empty-msg">Nenhuma atividade criada. Clique em "Criar Nova Atividade" para começar.</div>';
+/* ── RENDER ACTIVITIES ── */
+function renderActivities(){
+  $('actCount').textContent=myFlows.length;
+  if(!myFlows.length){
+    $('actList').innerHTML='<div class="empty-msg">Nenhuma atividade criada. Clique em "Criar Nova Atividade" para começar.</div>';
     return;
   }
-  $('actList').innerHTML = myFlows.map(f => `
+  $('actList').innerHTML=myFlows.map(f=>`
     <div class="act-card">
       <div class="act-dot"></div>
-      <div class="act-name">${esc(f.nome || 'Sem nome')}</div>
-      <div class="act-date">${f.atualizadoEm ? new Date(f.atualizadoEm).toLocaleDateString('pt-BR') : ''}</div>
+      <div class="act-name">${esc(f.nome||'Sem nome')}</div>
+      <div class="act-date">${f.atualizadoEm?new Date(f.atualizadoEm).toLocaleDateString('pt-BR'):''}</div>
       <div class="act-actions">
         <button class="btn-edit" onclick="location.href='fluxo.html?id=${f.id}'">Editar</button>
         <button class="btn-rm" onclick="deleteActivity('${f.id}')">Excluir</button>
@@ -714,230 +735,265 @@ function renderActivities() {
     </div>`).join('');
 }
 
-function renderLinks() {
-  $('linkCount').textContent = myLinks.length;
-  if (!myLinks.length) {
-    $('linkList').innerHTML = '<div class="empty-msg">Nenhum link criado ainda. Clique em "Gerar link para turma".</div>';
+window.deleteActivity=async function(fluxoId){
+  if(!confirm('Excluir esta atividade? Esta ação não pode ser desfeita.')) return;
+  try{
+    // Descobre o owner do fluxo (pode ser outro UID se for "órfão")
+    const f = myFlows.find(x=>x.id===fluxoId);
+    const owner = (f && f._ownerUid) || currentUser.uid;
+    const updates={};
+    updates['fluxos/'+owner+'/'+fluxoId] = null;
+    updates['usuarios/'+currentUser.uid+'/meus_fluxos/'+fluxoId] = null;
+    await update(ref(db), updates);
+    // Remove localmente
+    myFlows = myFlows.filter(x=>x.id!==fluxoId);
+    renderActivities();
+    toast('Atividade excluída');
+  }catch(e){console.error(e);alert('Erro ao excluir.')}
+};
+
+/* ── RENDER LINKS ── */
+function renderLinks(){
+  $('linkCount').textContent=myLinks.length;
+  if(!myLinks.length){
+    $('linkList').innerHTML='<div class="empty-msg">Nenhum link criado ainda. Clique em "Gerar link para turma".</div>';
     return;
   }
-  $('linkList').innerHTML = myLinks.map(lk => {
-    const url = buildStudentUrl(lk.id);
-    const panelUrl = buildPanelUrl(lk.id);
-    const flowName = lk.atividadeId ? getFlowName(lk.atividadeId) : null;
-    const hasActivity = !!lk.atividadeId;
-    return `
+  $('linkList').innerHTML=myLinks.map(lk=>{
+    const url=buildStudentUrl(lk.id);
+    const panelUrl=buildPanelUrl(lk.id);
+    const flowName=lk.atividadeId?getFlowName(lk.atividadeId):null;
+    const hasActivity=!!lk.atividadeId;
+
+    return`
     <div class="link-card">
       <div class="link-card-head">
-        <span class="turma-badge">${esc(lk.serie || '')}º · Turma ${esc(lk.turma || '')}</span>
-        <span class="escola">${esc(lk.escola || '')}</span>
-        <span class="date">${lk.criadoEm ? new Date(lk.criadoEm).toLocaleDateString('pt-BR') : ''}</span>
+        <span class="turma-badge">${esc(lk.serie||'')}º · Turma ${esc(lk.turma||'')}</span>
+        <span class="escola">${esc(lk.escola||'')}</span>
+        <span class="date">${lk.criadoEm?new Date(lk.criadoEm).toLocaleDateString('pt-BR'):''}</span>
       </div>
       <div class="link-card-body">
         ${hasActivity
-        ? `<span class="atividade-tag connected">&#10003; ${esc(flowName || 'Atividade conectada')}</span>`
-        : `<span class="atividade-tag empty" onclick="openConnectModal('${lk.id}')">&#9888; Conectar atividade</span>`
-      }
+          ?`<span class="atividade-tag connected">&#10003; ${esc(flowName||'Atividade conectada')}</span>`
+          :`<span class="atividade-tag empty" onclick="openConnectModal('${lk.id}')">&#9888; Conectar atividade</span>`
+        }
       </div>
       <div class="link-url">${esc(url)}</div>
       <div class="link-card-actions">
-        <button class="btn-copy ${hasActivity ? '' : 'disabled'}" onclick="copyLink('${lk.id}',${hasActivity})">Copiar Link</button>
-        ${hasActivity ? `<a class="btn-open" href="${esc(url)}" target="_blank">Abrir</a>` : ''}
-        ${hasActivity ? `<a class="btn-panel" href="${esc(panelUrl)}" target="_blank">Classificação</a>` : ''}
-        ${!hasActivity ? `<button class="btn-panel" onclick="openConnectModal('${lk.id}')">Conectar</button>` : ''}
+        <button class="btn-copy ${hasActivity?'':'disabled'}" onclick="copyLink('${lk.id}',${hasActivity})">Copiar Link</button>
+        ${hasActivity?`<a class="btn-open" href="${esc(url)}" target="_blank">Abrir</a>`:''}
+        ${hasActivity?`<a class="btn-panel" href="${esc(panelUrl)}" target="_blank">Classificação</a>`:''}
+        ${!hasActivity?`<button class="btn-panel" onclick="openConnectModal('${lk.id}')">Conectar</button>`:''}
         <button class="btn-del" onclick="deleteLink('${lk.id}')">Excluir</button>
       </div>
     </div>`;
   }).join('');
 }
 
-function getFlowName(flowId) {
-  const f = myFlows.find(x => x.id === flowId);
-  return f ? f.nome : 'Atividade';
+function getFlowName(flowId){
+  const f=myFlows.find(x=>x.id===flowId);
+  return f?f.nome:'Atividade';
 }
 
-function buildStudentUrl(turmaId) {
-  const base = location.href.replace(/\/fluxodolink\.html.*$/, '');
-  return base + '/index.html?turmaId=' + turmaId;
-}
-function buildPanelUrl(turmaId) {
-  const base = location.href.replace(/\/fluxodolink\.html.*$/, '');
-  return base + '/classificacao.html?turmaId=' + turmaId;
+function buildStudentUrl(turmaId){
+  const base=location.href.replace(/\/fluxodolink\.html.*$/,'');
+  return base+'/index.html?turmaId='+turmaId;
 }
 
-/* ============================================================
-   6. AÇÕES DO USUÁRIO (Local-first, depois Firebase)
-   ============================================================ */
-window.deleteActivity = async function (fluxoId) {
-  if (!confirm('Excluir esta atividade? Esta ação não pode ser desfeita.')) return;
-  try {
-    const f = myFlows.find(x => x.id === fluxoId);
-    const owner = (f && f._ownerUid) || currentUser.uid;
-    const updates = {};
-    updates['fluxos/' + owner + '/' + fluxoId] = null;
-    updates['usuarios/' + currentUser.uid + '/meus_fluxos/' + fluxoId] = null;
-    await update(ref(db), updates);
-    myFlows = myFlows.filter(x => x.id !== fluxoId);
-    const state = getLocalState(); state.flows = myFlows; setLocalState(state);
-    renderActivities();
-    toast('Atividade excluída');
-  } catch (e) { console.error(e); alert('Erro ao excluir.'); }
-};
+function buildPanelUrl(turmaId){
+  const base=location.href.replace(/\/fluxodolink\.html.*$/,'');
+  return base+'/classificacao.html?turmaId='+turmaId;
+}
 
-window.copyLink = function (linkId, hasActivity) {
-  if (!hasActivity) { toast('Conecte uma atividade antes de copiar o link!'); return; }
-  const url = buildStudentUrl(linkId);
-  navigator.clipboard.writeText(url).then(() => toast('Link copiado!')).catch(() => {
-    const ta = document.createElement('textarea'); ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+/* ── COPY LINK ── */
+window.copyLink=function(linkId,hasActivity){
+  if(!hasActivity){
+    toast('Conecte uma atividade antes de copiar o link!');
+    return;
+  }
+  const url=buildStudentUrl(linkId);
+  navigator.clipboard.writeText(url).then(()=>toast('Link copiado!')).catch(()=>{
+    // Fallback
+    const ta=document.createElement('textarea');
+    ta.value=url;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();
     toast('Link copiado!');
   });
 };
 
-document.addEventListener('copy', e => {
-  const sel = window.getSelection().toString();
-  myLinks.forEach(lk => {
-    if (!lk.atividadeId && sel.includes(lk.id)) {
-      e.preventDefault(); toast('Conecte uma atividade antes de copiar o link!');
+// Block Ctrl+C when no activity connected
+document.addEventListener('copy',e=>{
+  const sel=window.getSelection().toString();
+  // Check if copied text looks like a student URL without activity
+  myLinks.forEach(lk=>{
+    if(!lk.atividadeId&&sel.includes(lk.id)){
+      e.preventDefault();
+      toast('Conecte uma atividade antes de copiar o link!');
     }
   });
 });
 
-window.deleteLink = async function (linkId) {
-  if (!confirm('Excluir este link de turma?')) return;
-  // 1. Remove local IMEDIATAMENTE (nunca espera Firebase)
-  myLinks = myLinks.filter(l => l.id !== linkId);
-  const state = getLocalState(); state.links = myLinks; setLocalState(state);
-  renderLinks();
-  toast('Link excluído');
-  // 2. Tenta Firebase em background
-  try {
-    await remove(ref(db, 'usuarios/' + currentUser.uid + '/turmas_fluxo/' + linkId));
-    try { await remove(ref(db, 'turmas_fluxo/' + linkId)); } catch (_) { }
-    removePending(linkId);
-  } catch (e) {
-    console.error('[deleteLink] Firebase falhou, mantido na fila', e);
-    addPending({ type: 'remove', payload: { id: linkId } });
-    diag('err', 'Del falhou: ' + (e.code || e.message));
-  }
+/* ── DELETE LINK ── */
+window.deleteLink=async function(linkId){
+  if(!confirm('Excluir este link de turma?')) return;
+  try{
+    await remove(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+linkId));
+    try{ await remove(ref(db,'turmas_fluxo/'+linkId)) }catch(_){}
+    // Atualização local imediata
+    myLinks = myLinks.filter(l=>l.id!==linkId);
+    saveLocalCache();
+    renderLinks();
+    toast('Link excluído');
+  }catch(e){console.error(e);alert('Erro ao excluir: '+(e.message||e.code||''))}
 };
 
-/* ── Modal Gerar Link ── */
-$('btnGerarLink').onclick = () => {
-  $('glEscola').value = '';
-  $('glAviso').textContent = '';
-  $('glSerieOutro').style.display = 'none';
-  $('glTurmaOutro').style.display = 'none';
-  document.querySelectorAll('input[name=glSerie]').forEach(r => r.checked = false);
-  document.querySelectorAll('input[name=glTurma]').forEach(r => r.checked = false);
+/* ── GERAR LINK MODAL ── */
+$('btnGerarLink').onclick=()=>{
+  $('glEscola').value='';
+  $('glAviso').textContent='';
+  $('glSerieOutro').style.display='none';
+  $('glTurmaOutro').style.display='none';
+  document.querySelectorAll('input[name=glSerie]').forEach(r=>r.checked=false);
+  document.querySelectorAll('input[name=glTurma]').forEach(r=>r.checked=false);
   $('gerarModal').classList.add('show');
 };
-window.closeGerarModal = () => $('gerarModal').classList.remove('show');
+window.closeGerarModal=()=>$('gerarModal').classList.remove('show');
 
-document.querySelectorAll('input[name=glSerie]').forEach(r => {
-  r.onchange = () => $('glSerieOutro').style.display = r.value === 'outro' ? 'block' : 'none';
+// Show "outro" inputs
+document.querySelectorAll('input[name=glSerie]').forEach(r=>{
+  r.onchange=()=>$('glSerieOutro').style.display=r.value==='outro'?'block':'none';
 });
-document.querySelectorAll('input[name=glTurma]').forEach(r => {
-  r.onchange = () => $('glTurmaOutro').style.display = r.value === 'outro' ? 'block' : 'none';
+document.querySelectorAll('input[name=glTurma]').forEach(r=>{
+  r.onchange=()=>$('glTurmaOutro').style.display=r.value==='outro'?'block':'none';
 });
 
-window.gerarLink = async function () {
-  const escola = $('glEscola').value.trim();
-  const serieRadio = document.querySelector('input[name=glSerie]:checked');
-  const turmaRadio = document.querySelector('input[name=glTurma]:checked');
+window.gerarLink=async function(){
+  const escola=$('glEscola').value.trim();
+  const serieRadio=document.querySelector('input[name=glSerie]:checked');
+  const turmaRadio=document.querySelector('input[name=glTurma]:checked');
 
-  if (!escola || !serieRadio || !turmaRadio) {
-    $('glAviso').textContent = 'Preencha todos os campos.'; return;
+  if(!escola||!serieRadio||!turmaRadio){
+    $('glAviso').textContent='Preencha todos os campos.';
+    return;
   }
-  let serie = serieRadio.value;
-  let turma = turmaRadio.value;
-  if (serie === 'outro') { serie = $('glSerieOutro').value.trim(); if (!serie) { $('glAviso').textContent = 'Digite a série.'; return; } }
-  if (turma === 'outro') { turma = $('glTurmaOutro').value.trim(); if (!turma) { $('glAviso').textContent = 'Digite a turma.'; return; } }
 
-  const turmaId = 'tfl_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  const agora = new Date().toISOString();
-  const novoLink = {
-    id: turmaId,
-    escola, serie, turma,
-    atividadeId: '',
-    criadoPor: currentUser.uid,
-    criadoEm: agora,
-    atualizadoEm: agora
+  let serie=serieRadio.value;
+  let turma=turmaRadio.value;
+  if(serie==='outro'){
+    serie=$('glSerieOutro').value.trim();
+    if(!serie){$('glAviso').textContent='Digite a série.';return}
+  }
+  if(turma==='outro'){
+    turma=$('glTurmaOutro').value.trim();
+    if(!turma){$('glAviso').textContent='Digite a turma.';return}
+  }
+
+  const turmaId='tfl_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const dados={
+    escola,serie,turma,
+    atividadeId:'',
+    criadoPor:currentUser.uid,
+    criadoEm:new Date().toISOString()
   };
 
-  // === LOCAL-FIRST ===
-  myLinks.unshift(novoLink);
-  const state = getLocalState(); state.links = myLinks; setLocalState(state);
-  renderLinks();
-  diag('cache', myLinks.length + ' link(s)');
-  closeGerarModal();
-  toast('Link gerado! Sincronizando...');
-
-  // === BACKGROUND SYNC (Firebase) ===
-  const dados = {
-    escola, serie, turma,
-    atividadeId: '',
-    criadoPor: currentUser.uid,
-    criadoEm: agora
-  };
-  try {
-    await set(ref(db, 'usuarios/' + currentUser.uid + '/turmas_fluxo/' + turmaId), dados);
-    diag('save', new Date().toLocaleTimeString() + ' (ok)');
-    try { await set(ref(db, 'turmas_fluxo/' + turmaId), dados); } catch (ep) {
-      diag('err', 'Pública: ' + (ep.code || ep.message));
+  try{
+    console.log('[DIAG] Tentando salvar em usuarios/'+currentUser.uid+'/turmas_fluxo/'+turmaId);
+    // Escritas individuais para garantir que o índice do usuário SEMPRE seja
+    // gravado, mesmo se a regra do nó público falhar por algum motivo.
+    await set(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+turmaId), dados);
+    console.log('[DIAG] ✅ Save no índice do usuário OK');
+    try{
+      await set(ref(db,'turmas_fluxo/'+turmaId), dados);
+      console.log('[DIAG] ✅ Save no nó público OK');
+    }catch(epub){
+      console.warn('[DIAG] ⚠️ Cópia pública falhou (não crítica):', epub);
+      diag('err','Pública falhou: '+(epub.code||epub.message||''));
     }
-  } catch (e) {
-    console.error('[gerarLink] Firebase falhou, adicionado à fila', e);
-    addPending({ type: 'save', payload: { id: turmaId, data: dados } });
-    diag('err', 'Save fila: ' + (e.code || e.message));
-    toast('Salvo localmente. Sincronizaremos quando a conexão voltar.');
+
+    // VERIFICAÇÃO IMEDIATA: lê de volta do servidor para confirmar que persistiu
+    try{
+      const verify = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+turmaId));
+      if(!verify.exists()){
+        console.error('[DIAG] ❌ Save reportou sucesso, mas readback retornou vazio!');
+        diag('err','Save não persistiu! (sem erro mas dados sumiram)');
+      } else {
+        console.log('[DIAG] ✅ Verificação readback imediata OK');
+        diag('save', new Date().toLocaleTimeString()+' (verif. imediata)');
+      }
+    }catch(eVerify){
+      console.error('[DIAG] readback falhou:', eVerify);
+    }
+    // VERIFICAÇÃO TARDIA: aguarda 3s e verifica de novo. Se sumiu nesse intervalo,
+    // alguma coisa (regra, trigger, outra aba) está apagando o dado.
+    setTimeout(async ()=>{
+      try{
+        const verify2 = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+turmaId));
+        if(!verify2.exists()){
+          console.error('[DIAG] ❌❌ DADO SUMIU APÓS 3s! Algo está apagando seus writes.');
+          diag('err','Dado SUMIU 3s após save — trigger/regra apagando!');
+        } else {
+          console.log('[DIAG] ✅ Verificação tardia (3s) OK — dado persistiu');
+        }
+      }catch(_){}
+    }, 3000);
+
+    // Atualização local imediata (não depende do listener disparar)
+    _pendingIds.add(turmaId);
+    if(!myLinks.some(l=>l.id===turmaId)){
+      myLinks.unshift({id:turmaId, ...dados});
+    }
+    saveLocalCache();
+    diag('cache', myLinks.length+' link(s)');
+    renderLinks();
+
+    closeGerarModal();
+    toast('Link gerado! Agora conecte uma atividade.');
+  }catch(e){
+    console.error('[DIAG] ❌ Erro ao gerar link:',e);
+    diag('err','SAVE: '+(e.code||e.message||''));
+    $('glAviso').textContent='Erro ao gerar link: '+(e.message||e.code||'');
   }
 };
 
-/* ── Connect Modal ── */
-window.openConnectModal = function (linkId) {
-  connectingLinkId = linkId;
-  selectedConnectFlowId = null;
-  $('btnConfirmConnect').disabled = true;
-  const list = $('connectList');
-  if (!myFlows.length) {
-    list.innerHTML = '<div class="empty-msg">Nenhuma atividade criada. Crie uma atividade primeiro.</div>';
-  } else {
-    list.innerHTML = myFlows.map(f => `
+/* ── CONNECT MODAL ── */
+window.openConnectModal=function(linkId){
+  connectingLinkId=linkId;
+  selectedConnectFlowId=null;
+  $('btnConfirmConnect').disabled=true;
+
+  const list=$('connectList');
+  if(!myFlows.length){
+    list.innerHTML='<div class="empty-msg">Nenhuma atividade criada. Crie uma atividade primeiro.</div>';
+  }else{
+    list.innerHTML=myFlows.map(f=>`
       <div class="connect-item" data-id="${f.id}" onclick="selectConnectFlow(this,'${f.id}')">
-        ${esc(f.nome || 'Sem nome')}
+        ${esc(f.nome||'Sem nome')}
       </div>`).join('');
   }
   $('connectModal').classList.add('show');
 };
-window.closeConnectModal = () => { $('connectModal').classList.remove('show'); connectingLinkId = null; };
-window.selectConnectFlow = function (el, flowId) {
-  selectedConnectFlowId = flowId;
-  $('connectList').querySelectorAll('.connect-item').forEach(e => e.classList.remove('sel'));
+window.closeConnectModal=()=>{$('connectModal').classList.remove('show');connectingLinkId=null};
+
+window.selectConnectFlow=function(el,flowId){
+  selectedConnectFlowId=flowId;
+  $('connectList').querySelectorAll('.connect-item').forEach(e=>e.classList.remove('sel'));
   el.classList.add('sel');
-  $('btnConfirmConnect').disabled = false;
-};
-window.confirmConnect = async function () {
-  if (!connectingLinkId || !selectedConnectFlowId) return;
-  // Local-first
-  const lk = myLinks.find(l => l.id === connectingLinkId);
-  if (lk) { lk.atividadeId = selectedConnectFlowId; lk.atualizadoEm = new Date().toISOString(); }
-  const state = getLocalState(); state.links = myLinks; setLocalState(state);
-  renderLinks();
-  closeConnectModal();
-  toast('Atividade conectada! Sincronizando...');
-  // Background sync
-  try {
-    await set(ref(db, 'usuarios/' + currentUser.uid + '/turmas_fluxo/' + connectingLinkId + '/atividadeId'), selectedConnectFlowId);
-    try { await set(ref(db, 'turmas_fluxo/' + connectingLinkId + '/atividadeId'), selectedConnectFlowId); } catch (_) { }
-  } catch (e) {
-    addPending({ type: 'connect', payload: { id: connectingLinkId, flowId: selectedConnectFlowId } });
-    diag('err', 'Connect fila: ' + (e.code || e.message));
-  }
+  $('btnConfirmConnect').disabled=false;
 };
 
-/* ============================================================
-   7. EXPOSE HELPERS GLOBAIS (compatibilidade)
-   ============================================================ */
-window.scrollToSection = id => document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+window.confirmConnect=async function(){
+  if(!connectingLinkId||!selectedConnectFlowId) return;
+  try{
+    await set(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+connectingLinkId+'/atividadeId'), selectedConnectFlowId);
+    try{ await set(ref(db,'turmas_fluxo/'+connectingLinkId+'/atividadeId'), selectedConnectFlowId) }catch(_){}
+    // Atualização local imediata
+    const lk = myLinks.find(l=>l.id===connectingLinkId);
+    if(lk) lk.atividadeId = selectedConnectFlowId;
+    saveLocalCache();
+    renderLinks();
+    closeConnectModal();
+    toast('Atividade conectada com sucesso!');
+  }catch(e){console.error(e);alert('Erro ao conectar: '+(e.message||e.code||''))}
+};
 
 </script>
 </body>
