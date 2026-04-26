@@ -302,9 +302,13 @@ function mergeAndRender(items){
   renderActivities();
 }
 
-function subscribeData(){
+async function subscribeData(){
   // Reset
   myFlows = [];
+
+  // 0) Antes de tudo: verifica/recupera os links da turma
+  await initialLinksFetchAndRecover();
+
   // 1) Listener principal: fluxos no caminho fluxos/<currentUser.uid>
   if(_flowsUnsub) try{ _flowsUnsub() }catch(_){}
   _flowsUnsub = onValue(ref(db,'fluxos/'+currentUser.uid), snap=>{
@@ -374,23 +378,25 @@ function subscribeData(){
     }catch(e){ /* permissão negada — silencioso */ }
   })();
 
-  // 4) Listener dos links de turma — preserva itens criados localmente (otimistas)
+  // 4) Listener dos links de turma (após a recuperação inicial)
   if(_linksUnsub) try{ _linksUnsub() }catch(_){}
   _linksUnsub = onValue(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo'), snap=>{
     const fromDb=[];
     if(snap.exists()) snap.forEach(c=>fromDb.push({id:c.key,...c.val()}));
-    // Firebase é a fonte da verdade. Só preservamos itens otimistas que
-    // foram criados nesta sessão e ainda não chegaram pelo listener
-    // (janela de race entre `set()` e o evento). Itens vindos só do cache
-    // local (recarregamento) NÃO são preservados aqui — eles serão
-    // sobrescritos pelo Firebase, evitando ressuscitar o que foi excluído
-    // em outro dispositivo.
+
+    // PROTEÇÃO: se o servidor responder vazio mas a UI tem itens não-pendentes
+    // (cache + dados já recuperados), trata como glitch e NÃO apaga.
+    // Isso evita que o cache seja destruído por uma resposta espúria.
+    const haveNonPending = myLinks.some(l => !_pendingIds.has(l.id));
+    if(fromDb.length===0 && haveNonPending){
+      console.warn('[links listener] respondeu vazio com cache não-vazio — ignorando para preservar dados');
+      return;
+    }
+
     const seen=new Set(fromDb.map(l=>l.id));
     const pendingOnly=myLinks.filter(l=>!seen.has(l.id) && _pendingIds.has(l.id));
-    // Limpa pendentes que já chegaram do servidor
     fromDb.forEach(l=>_pendingIds.delete(l.id));
     myLinks=[...fromDb, ...pendingOnly];
-    // Ordena: mais novo primeiro
     myLinks.sort((a,b)=>{
       const ta=new Date(a.criadoEm||0).getTime();
       const tb=new Date(b.criadoEm||0).getTime();
@@ -403,6 +409,65 @@ function subscribeData(){
     // Mesmo em erro, exibimos o que houver em myLinks (do cache local)
     renderLinks();
   });
+}
+
+/* Faz um fetch inicial dos links e, se o servidor estiver vazio mas o cache
+   local tem itens, regrava-os no servidor (recuperação automática).
+   Cobre os cenários:
+   - O write anterior falhou silenciosamente (regra/permissão)
+   - Auth UID mudou entre sessões (rara, mas possível)
+   - O listener vai ter dados corretos antes mesmo de inscrever */
+async function initialLinksFetchAndRecover(){
+  if(!currentUser) return;
+  let snap=null;
+  try{
+    snap = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo'));
+  }catch(e){
+    console.error('[initial fetch links] erro:', e);
+    // Mantém o que está em myLinks (do cache)
+    renderLinks();
+    return;
+  }
+  const fromDb=[];
+  if(snap && snap.exists()) snap.forEach(c=>fromDb.push({id:c.key,...c.val()}));
+
+  const cached = loadLocalCache();
+
+  if(fromDb.length===0 && cached.length>0){
+    // Cenário de "sumiu": servidor vazio mas cache tem itens.
+    // Recupera regravando cada item no servidor.
+    console.warn('[recover] Servidor vazio mas cache local tem',cached.length,'links — recriando…');
+    let recovered=0;
+    for(const lk of cached){
+      try{
+        const dados = {
+          escola: lk.escola||'',
+          serie:  lk.serie||'',
+          turma:  lk.turma||'',
+          atividadeId: lk.atividadeId||'',
+          criadoPor: currentUser.uid,
+          criadoEm:  lk.criadoEm || new Date().toISOString()
+        };
+        await set(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+lk.id), dados);
+        try{ await set(ref(db,'turmas_fluxo/'+lk.id), dados) }catch(_){}
+        recovered++;
+      }catch(e){
+        console.error('[recover] Falha ao recriar link',lk.id,e);
+      }
+    }
+    console.warn('[recover] Recriados',recovered,'de',cached.length,'links');
+    myLinks = cached.slice();
+  } else {
+    // Servidor tem dados (ou tudo vazio). Servidor é a verdade.
+    myLinks = fromDb;
+  }
+  myLinks.sort((a,b)=>{
+    const ta=new Date(a.criadoEm||0).getTime();
+    const tb=new Date(b.criadoEm||0).getTime();
+    return tb-ta;
+  });
+  saveLocalCache();
+  renderLinks();
 }
 
 // Compatibilidade: re-subscribe sob demanda (usada após excluir/criar etc.)
