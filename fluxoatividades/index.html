@@ -530,6 +530,24 @@ async function syncStudent(){
       fluxoPercorrido=d.fluxoPercorrido||[];respostas=d.respostas||{};
       // Sincroniza código do servidor (autoritativo)
       if(d.codigo){ alunoCodigo=d.codigo; localStorage.setItem('fluxo_codigo',alunoCodigo) }
+    } else {
+      // Firebase vazio — tenta restaurar do cache local
+      try{
+        const cached = localStorage.getItem('fluxo_progress_'+turmaId+'_'+alunoId);
+        if(cached){
+          const d = JSON.parse(cached);
+          acertos=d.acertos||0;erros=d.erros||0;
+          fluxoPercorrido=d.fluxoPercorrido||[];respostas=d.respostas||{};
+          nodeAtual=d.nodeAtual||null;
+          console.log('[sync] Progresso restaurado do cache local');
+          // Regrava no Firebase
+          await db.ref(basePath+'alunos/'+alunoId).update({
+            acertos,erros,fluxoPercorrido,respostas,nodeAtual,
+            nome:alunoNome,serie:alunoSerie,codigo:alunoCodigo,
+            status:'online',ultimoAcesso:new Date().toISOString()
+          });
+        }
+      }catch(_){}
     }
   }catch(e){}
 }
@@ -898,9 +916,17 @@ function showEndScreen(){
 
 function saveProgress(){
   if(!alunoId)return;
-  db.ref(basePath+'alunos/'+alunoId).update({
+  const progressData = {
     acertos,erros,fluxoPercorrido,respostas,nodeAtual,
     ultimoAcesso:new Date().toISOString()
+  };
+  // Salva localmente PRIMEIRO (nunca perde dados mesmo offline)
+  try{
+    localStorage.setItem('fluxo_progress_'+turmaId+'_'+alunoId, JSON.stringify(progressData));
+  }catch(_){}
+  // Depois tenta salvar no Firebase
+  db.ref(basePath+'alunos/'+alunoId).update(progressData).catch(e=>{
+    console.warn('[saveProgress] Firebase falhou, dados salvos localmente:', e.message||e);
   });
 }
 function updateBadges(){
