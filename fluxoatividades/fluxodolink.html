@@ -118,6 +118,18 @@ body{background-color:var(--bg);background-image:linear-gradient(rgba(10,132,255
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#141418;color:#fff;border:1px solid var(--border);padding:10px 24px;border-radius:50px;font-size:.85rem;font-weight:600;z-index:2000;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.5)}
 .toast.show{opacity:1}
 
+/* Painel de diagnóstico (canto inferior direito) */
+.diag-panel{position:fixed;bottom:14px;right:14px;background:rgba(20,20,28,.95);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-family:'SF Mono',Consolas,monospace;font-size:.7rem;color:var(--text2);z-index:1500;max-width:340px;box-shadow:0 8px 22px rgba(0,0,0,.5);line-height:1.55}
+.diag-panel b{color:var(--text);font-weight:700}
+.diag-panel .row{display:flex;justify-content:space-between;gap:10px;margin:2px 0}
+.diag-panel .row .v{color:var(--accent)}
+.diag-panel .row .v.warn{color:var(--warn)}
+.diag-panel .row .v.err{color:var(--error)}
+.diag-panel .row .v.ok{color:var(--success)}
+.diag-panel .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.diag-panel .head .ttl{font-weight:700;color:var(--text);font-size:.74rem}
+.diag-panel .head .x{background:none;border:none;color:var(--text2);cursor:pointer;font-size:.9rem;padding:0 4px}
+
 @media(max-width:600px){.entry-cards{grid-template-columns:1fr}.act-card{flex-wrap:wrap}}
 </style>
 </head>
@@ -172,6 +184,19 @@ body{background-color:var(--bg);background-image:linear-gradient(rgba(10,132,255
 
 <!-- TOAST -->
 <div id="toast" class="toast"></div>
+
+<!-- PAINEL DE DIAGNÓSTICO -->
+<div id="diagPanel" class="diag-panel" style="display:none">
+  <div class="head">
+    <span class="ttl">🔧 Diagnóstico</span>
+    <button class="x" onclick="document.getElementById('diagPanel').style.display='none'">✕</button>
+  </div>
+  <div class="row"><span>UID:</span><span class="v" id="dUid">—</span></div>
+  <div class="row"><span>Cache local:</span><span class="v" id="dCache">—</span></div>
+  <div class="row"><span>Servidor:</span><span class="v" id="dServer">—</span></div>
+  <div class="row"><span>Último save:</span><span class="v" id="dSave">—</span></div>
+  <div class="row"><span>Último erro:</span><span class="v err" id="dErr">—</span></div>
+</div>
 
 <!-- MODAL: GERAR LINK -->
 <div id="gerarModal" class="modal-overlay">
@@ -259,12 +284,43 @@ function loadLocalCache(){
 }
 function saveLocalCache(){
   const k=cacheKey(); if(!k) return;
-  try{ localStorage.setItem(k, JSON.stringify(myLinks||[])) }catch(_){}
+  try{
+    localStorage.setItem(k, JSON.stringify(myLinks||[]));
+    console.log('[DIAG] 💾 Cache salvo:', myLinks.length, 'item(s) na chave', k);
+  }catch(e){
+    console.error('[DIAG] ❌ Falha ao salvar cache:', e);
+    diag('err','localStorage cheio? '+(e.message||''));
+  }
 }
 
 function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
 
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+
+/* ── DIAGNÓSTICO ────────────────────────────────────────────
+   Mostra um painel no canto inferior direito com:
+   - UID atual (truncado)
+   - Quantidade de links no cache local
+   - Quantidade de links no servidor (após get())
+   - Último save (timestamp)
+   - Último erro
+   Se você está testando: olhe esse painel ANTES e DEPOIS de recarregar.
+   Se o UID muda → problema de auth não-persistente.
+   Se cache=N mas servidor=0 → write não está chegando ao Firebase.
+   Se cache=0 mas você criou link → localStorage não está persistindo.
+*/
+const DIAG = {uid:'—', cache:'—', server:'—', save:'—', err:'—'};
+function diag(field, value){
+  if(field) DIAG[field] = value;
+  const p=$('diagPanel'); if(!p) return;
+  p.style.display='block';
+  $('dUid').textContent    = DIAG.uid;
+  $('dCache').textContent  = DIAG.cache;
+  $('dServer').textContent = DIAG.server;
+  $('dSave').textContent   = DIAG.save;
+  $('dErr').textContent    = DIAG.err;
+  console.log('[DIAG]', JSON.stringify(DIAG));
+}
 
 function scrollToSection(id){document.getElementById(id).scrollIntoView({behavior:'smooth'})}
 window.scrollToSection=scrollToSection;
@@ -279,9 +335,19 @@ onAuthStateChanged(auth,async user=>{
   $('authWarn').style.display='none';
   $('mainContent').style.display='block';
   currentUser=user;
-  // Mostra imediatamente do cache local (mesmo antes do Firebase responder)
-  // para evitar a sensação de que "sumiu" no reload.
+  diag('uid', user.uid.slice(0,10)+'…');
+  // Verifica se o UID mudou desde a última visita (causa comum de "sumiço")
+  try{
+    const lastUid = localStorage.getItem('fluxo_last_uid');
+    if(lastUid && lastUid!==user.uid){
+      console.warn('[DIAG] UID MUDOU! Anterior:',lastUid,'Atual:',user.uid);
+      diag('err','UID mudou desde última visita!');
+    }
+    localStorage.setItem('fluxo_last_uid', user.uid);
+  }catch(_){}
+  // Mostra imediatamente do cache local
   myLinks = loadLocalCache();
+  diag('cache', myLinks.length+' link(s)');
   renderLinks();
   subscribeData();
 });
@@ -424,12 +490,16 @@ async function initialLinksFetchAndRecover(){
     snap = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo'));
   }catch(e){
     console.error('[initial fetch links] erro:', e);
+    diag('err','GET falhou: '+(e.code||e.message||'?'));
+    diag('server','ERRO');
     // Mantém o que está em myLinks (do cache)
     renderLinks();
     return;
   }
   const fromDb=[];
   if(snap && snap.exists()) snap.forEach(c=>fromDb.push({id:c.key,...c.val()}));
+  diag('server', fromDb.length+' link(s)');
+  console.log('[DIAG] get servidor →', fromDb);
 
   const cached = loadLocalCache();
 
@@ -653,14 +723,31 @@ window.gerarLink=async function(){
   };
 
   try{
+    console.log('[DIAG] Tentando salvar em usuarios/'+currentUser.uid+'/turmas_fluxo/'+turmaId);
     // Escritas individuais para garantir que o índice do usuário SEMPRE seja
     // gravado, mesmo se a regra do nó público falhar por algum motivo.
-    // (Em multi-path update, falha em qualquer caminho cancela tudo.)
     await set(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+turmaId), dados);
+    console.log('[DIAG] ✅ Save no índice do usuário OK');
     try{
       await set(ref(db,'turmas_fluxo/'+turmaId), dados);
+      console.log('[DIAG] ✅ Save no nó público OK');
     }catch(epub){
-      console.warn('Cópia pública falhou (não crítica):', epub);
+      console.warn('[DIAG] ⚠️ Cópia pública falhou (não crítica):', epub);
+      diag('err','Pública falhou: '+(epub.code||epub.message||''));
+    }
+
+    // VERIFICAÇÃO IMEDIATA: lê de volta do servidor para confirmar que persistiu
+    try{
+      const verify = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+turmaId));
+      if(!verify.exists()){
+        console.error('[DIAG] ❌ Save reportou sucesso, mas readback retornou vazio!');
+        diag('err','Save não persistiu! (sem erro mas dados sumiram)');
+      } else {
+        console.log('[DIAG] ✅ Verificação readback OK');
+        diag('save', new Date().toLocaleTimeString());
+      }
+    }catch(eVerify){
+      console.error('[DIAG] readback falhou:', eVerify);
     }
 
     // Atualização local imediata (não depende do listener disparar)
@@ -669,12 +756,14 @@ window.gerarLink=async function(){
       myLinks.unshift({id:turmaId, ...dados});
     }
     saveLocalCache();
+    diag('cache', myLinks.length+' link(s)');
     renderLinks();
 
     closeGerarModal();
     toast('Link gerado! Agora conecte uma atividade.');
   }catch(e){
-    console.error('Erro ao gerar link:',e);
+    console.error('[DIAG] ❌ Erro ao gerar link:',e);
+    diag('err','SAVE: '+(e.code||e.message||''));
     $('glAviso').textContent='Erro ao gerar link: '+(e.message||e.code||'');
   }
 };
