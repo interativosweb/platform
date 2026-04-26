@@ -191,13 +191,18 @@ body{background-color:var(--bg);background-image:linear-gradient(rgba(10,132,255
     <span class="ttl">🔧 Diagnóstico</span>
     <button class="x" onclick="document.getElementById('diagPanel').style.display='none'">✕</button>
   </div>
-  <div class="row"><span>UID:</span><span class="v" id="dUid">—</span></div>
+  <div id="dIncognitoWarn" class="row" style="display:none;background:rgba(255,159,10,.12);padding:6px 8px;border-radius:6px;border:1px solid rgba(255,159,10,.4);margin-bottom:6px;flex-direction:column;gap:2px">
+    <span style="color:var(--warn);font-weight:700;font-size:.7rem">⚠️ Modo anônimo detectado</span>
+    <span style="font-size:.62rem;color:var(--text2);line-height:1.4">Dados só sobrevivem se persistirem no servidor. Use o mesmo login na próxima vez.</span>
+  </div>
+  <div class="row"><span>UID:</span><span class="v" id="dUid" style="cursor:pointer;text-decoration:underline" title="Clique para copiar UID completo">—</span></div>
   <div class="row"><span>Cache local:</span><span class="v" id="dCache">—</span></div>
   <div class="row"><span>Servidor:</span><span class="v" id="dServer">—</span></div>
   <div class="row"><span>Último save:</span><span class="v" id="dSave">—</span></div>
   <div class="row"><span>Auto-sync:</span><span class="v" id="dSync">—</span></div>
   <div class="row"><span>Último erro:</span><span class="v err" id="dErr">—</span></div>
   <button id="dForceSync" style="margin-top:8px;width:100%;padding:6px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:inherit">↻ Sincronizar agora</button>
+  <a id="dFirebaseLink" href="#" target="_blank" style="display:block;margin-top:6px;text-align:center;padding:5px;background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:.65rem;text-decoration:none;font-weight:600">🔥 Abrir no Firebase Console</a>
 </div>
 
 <!-- MODAL: GERAR LINK -->
@@ -328,6 +333,26 @@ function diag(field, value){
 function scrollToSection(id){document.getElementById(id).scrollIntoView({behavior:'smooth'})}
 window.scrollToSection=scrollToSection;
 
+/* Detecta modo anônimo/incognito */
+async function detectIncognito(){
+  try{
+    if(navigator.storage && navigator.storage.estimate){
+      const est = await navigator.storage.estimate();
+      // Em incognito, o quota é geralmente menor que 120MB
+      const quotaMB = (est.quota||0)/1024/1024;
+      if(quotaMB < 200) return true;
+    }
+  }catch(_){}
+  // Fallback: tenta criar IndexedDB temporário
+  return new Promise(r=>{
+    try{
+      const req = indexedDB.open('test_incognito');
+      req.onerror = ()=>r(true);
+      req.onsuccess = ()=>{ try{indexedDB.deleteDatabase('test_incognito')}catch(_){} r(false) };
+    }catch(_){ r(true) }
+  });
+}
+
 /* ── AUTH ── */
 onAuthStateChanged(auth,async user=>{
   if(!user){
@@ -338,13 +363,38 @@ onAuthStateChanged(auth,async user=>{
   $('authWarn').style.display='none';
   $('mainContent').style.display='block';
   currentUser=user;
+  // UID completo clicável (pra copiar e comparar entre sessões)
+  const uidEl = $('dUid');
+  if(uidEl){
+    uidEl.textContent = user.uid.slice(0,10)+'…';
+    uidEl.title = 'Clique para copiar: '+user.uid;
+    uidEl.onclick = ()=>{
+      navigator.clipboard.writeText(user.uid).then(()=>{
+        const orig = uidEl.textContent;
+        uidEl.textContent='✓ copiado';
+        setTimeout(()=>uidEl.textContent=orig, 1500);
+      }).catch(()=>{});
+    };
+  }
   diag('uid', user.uid.slice(0,10)+'…');
+  // Link direto pro Firebase Console
+  const fbLink = $('dFirebaseLink');
+  if(fbLink){
+    fbLink.href = `https://console.firebase.google.com/project/profbase-5f9b0/database/profbase-5f9b0-default-rtdb/data/usuarios/${user.uid}/turmas_fluxo`;
+  }
+  // Detecta incognito e mostra aviso
+  const isIncognito = await detectIncognito();
+  if(isIncognito){
+    const warn = $('dIncognitoWarn');
+    if(warn) warn.style.display='flex';
+    console.warn('[DIAG] ⚠️ Modo anônimo/incognito detectado');
+  }
   // Verifica se o UID mudou desde a última visita (causa comum de "sumiço")
   try{
     const lastUid = localStorage.getItem('fluxo_last_uid');
     if(lastUid && lastUid!==user.uid){
       console.warn('[DIAG] UID MUDOU! Anterior:',lastUid,'Atual:',user.uid);
-      diag('err','UID mudou desde última visita!');
+      diag('err','UID mudou desde última visita! Anterior: '+lastUid.slice(0,10)+'…');
     }
     localStorage.setItem('fluxo_last_uid', user.uid);
   }catch(_){}
@@ -866,12 +916,25 @@ window.gerarLink=async function(){
         console.error('[DIAG] ❌ Save reportou sucesso, mas readback retornou vazio!');
         diag('err','Save não persistiu! (sem erro mas dados sumiram)');
       } else {
-        console.log('[DIAG] ✅ Verificação readback OK');
-        diag('save', new Date().toLocaleTimeString());
+        console.log('[DIAG] ✅ Verificação readback imediata OK');
+        diag('save', new Date().toLocaleTimeString()+' (verif. imediata)');
       }
     }catch(eVerify){
       console.error('[DIAG] readback falhou:', eVerify);
     }
+    // VERIFICAÇÃO TARDIA: aguarda 3s e verifica de novo. Se sumiu nesse intervalo,
+    // alguma coisa (regra, trigger, outra aba) está apagando o dado.
+    setTimeout(async ()=>{
+      try{
+        const verify2 = await get(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+turmaId));
+        if(!verify2.exists()){
+          console.error('[DIAG] ❌❌ DADO SUMIU APÓS 3s! Algo está apagando seus writes.');
+          diag('err','Dado SUMIU 3s após save — trigger/regra apagando!');
+        } else {
+          console.log('[DIAG] ✅ Verificação tardia (3s) OK — dado persistiu');
+        }
+      }catch(_){}
+    }, 3000);
 
     // Atualização local imediata (não depende do listener disparar)
     _pendingIds.add(turmaId);
