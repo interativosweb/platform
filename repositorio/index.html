@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Banco de Questões — Montador de Provas</title>
+<title>Atividades, Listas, Provas e Questões</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
@@ -701,6 +701,33 @@ math-field::part(menu-toggle){display:none !important}
 .star-rating span:hover{transform:scale(1.1)}
 .star-rating span.on{color:var(--warning)}
 
+/* Grupo de botões de opção (IA, Dificuldade, Visibilidade) */
+.opt-grp{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.opt-grp .opt-btn{
+  padding:9px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  color:var(--text2);font-size:.84rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;
+}
+.opt-grp .opt-btn:hover{border-color:var(--accent);color:var(--accent)}
+.opt-grp .opt-btn.on{background:rgba(10,132,255,.18);border-color:var(--accent);color:var(--accent)}
+.opt-grp .opt-btn[data-v="dificil"].on,.opt-grp .opt-btn[data-v="upd"].on{background:rgba(255,69,58,.15);border-color:var(--error);color:#ff6961}
+.opt-grp .opt-btn[data-v="medio"].on{background:rgba(255,159,10,.15);border-color:#ff9f0a;color:#ffb340}
+.opt-grp .opt-btn[data-v="facil"].on{background:rgba(48,209,88,.15);border-color:var(--success);color:#5fdb7e}
+.opt-grp .opt-btn[data-v="privado"].on{background:rgba(94,92,230,.15);border-color:#5e5ce6;color:#a48cff}
+.opt-grp .opt-btn[data-v="sim"].on{background:rgba(94,92,230,.15);border-color:#5e5ce6;color:#a48cff}
+
+/* Código único da questão */
+.qcode-badge{
+  display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:6px;
+  background:rgba(10,132,255,.13);border:1px solid rgba(10,132,255,.35);
+  font-family:'SF Mono','JetBrains Mono',Consolas,monospace;font-size:.72rem;font-weight:700;
+  color:var(--accent2);letter-spacing:.05em;
+}
+.qmod-badge{
+  display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:6px;
+  background:rgba(255,69,58,.14);border:1px solid rgba(255,69,58,.42);
+  color:#ff6961;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+}
+
 .rate-widget{display:flex;gap:16px;align-items:center;margin-top:4px}
 .rate-stars{display:flex;gap:6px;user-select:none}
 .rate-stars span{
@@ -779,8 +806,8 @@ math-field::part(menu-toggle){display:none !important}
       </svg>
     </div>
     <div class="brand-text">
-      <h1>Montador de Provas <span id="brandUser" class="brand-user-chip"></span></h1>
-      <div class="sub"><span id="pageCount">1 página</span> · Banco de Questões</div>
+      <h1>Atividades, Listas, Provas e Questões <span id="brandUser" class="brand-user-chip"></span></h1>
+      <div class="sub"><span id="pageCount">1 página</span> · Banco</div>
     </div>
   </div>
   <div class="top-actions">
@@ -827,6 +854,7 @@ math-field::part(menu-toggle){display:none !important}
       <div class="pf-left">
         <button id="previewDelete" class="pf-danger" style="display:none">Remover</button>
         <button id="previewEdit" style="display:none">Editar</button>
+        <button id="previewDuplicate" style="display:none">Duplicar</button>
       </div>
       <div class="pf-right">
         <button id="previewCancel">Cancelar</button>
@@ -881,7 +909,13 @@ math-field::part(menu-toggle){display:none !important}
   <div class="ov-box" style="max-width:720px">
     <header><h3>Finalizar cadastro da questão</h3><button id="finClose">✕</button></header>
     <div class="body fin-form">
-      <div style="font-size:.82rem;color:var(--text2);line-height:1.5">Classifique a questão com tema, habilidades da BNCC e nível de dificuldade. Isso facilita encontrá-la no banco.</div>
+      <div style="font-size:.82rem;color:var(--text2);line-height:1.5">Classifique a questão com tema, habilidades da BNCC e dificuldade. Isso facilita encontrá-la no banco.</div>
+
+      <label>Essa questão foi produzida com uso de IA?</label>
+      <div class="opt-grp" id="finIaGrp" data-name="finIa">
+        <button type="button" class="opt-btn" data-v="sim">Sim</button>
+        <button type="button" class="opt-btn" data-v="nao">Não</button>
+      </div>
 
       <label for="finInpTema">Tema</label>
       <div class="ac-wrap">
@@ -901,9 +935,12 @@ math-field::part(menu-toggle){display:none !important}
         <button type="button" id="finBtnAddBncc">Adicionar</button>
       </div>
 
-      <label>Nível (estrelas)</label>
-      <div class="star-rating" id="finStars">
-        <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
+      <label>Dificuldade</label>
+      <div class="opt-grp" id="finDifGrp" data-name="finDif">
+        <button type="button" class="opt-btn" data-v="facil">Fácil</button>
+        <button type="button" class="opt-btn" data-v="medio">Médio</button>
+        <button type="button" class="opt-btn" data-v="upd">Um pouco difícil</button>
+        <button type="button" class="opt-btn" data-v="dificil">Difícil</button>
       </div>
 
       <label>Resposta — texto (opcional)</label>
@@ -922,6 +959,15 @@ math-field::part(menu-toggle){display:none !important}
 
       <label>Comentário (opcional)</label>
       <textarea id="finInpCom" placeholder="Observações, dicas..."></textarea>
+
+      <label>Visibilidade</label>
+      <div class="opt-grp" id="finVisGrp" data-name="finVis">
+        <button type="button" class="opt-btn" data-v="publico">Pública</button>
+        <button type="button" class="opt-btn" data-v="privado">Privada</button>
+      </div>
+
+      <label for="finInpRef">Referência da questão</label>
+      <input type="text" id="finInpRef" placeholder="Ex: ENEM 2019, IFC Campus Sombrio 2022, Livro Tal pg. 45...">
     </div>
     <footer>
       <button id="finCancel">Cancelar</button>
@@ -1053,13 +1099,20 @@ math-field::part(menu-toggle){display:none !important}
           <div style="font-size:.72rem;color:var(--text2);text-align:right" id="hdrAlturaVal">180 px</div>
         </div>
         <div class="hdr-ed-section">
-          <h4>Fundo</h4>
+          <h4>Fundo da folha</h4>
           <select id="hdrFundo">
             <option value="nenhum">Branco</option>
             <option value="linhas">Linhas</option>
             <option value="quadriculado">Quadriculado</option>
             <option value="pontilhado">Pontilhado</option>
           </select>
+          <label style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:.78rem;color:var(--text2);cursor:pointer">
+            <input type="checkbox" id="hdrBrancoCab" style="margin:0">
+            Manter o cabeçalho com fundo branco
+          </label>
+          <div style="font-size:.7rem;color:var(--text3);line-height:1.4;margin-top:4px">
+            Útil quando a folha tem fundo quadriculado/pontilhado mas você quer que apenas o cabeçalho fique branco.
+          </div>
         </div>
         <div class="hdr-ed-section">
           <h4>Borda externa</h4>
@@ -1140,7 +1193,7 @@ math-field::part(menu-toggle){display:none !important}
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {getAuth,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import {getDatabase,ref,onValue,push,set,update,remove} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import {getDatabase,ref,onValue,push,set,update,remove,get,runTransaction} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import {TEMAS,BNCC_CODES,fuzzySearchTemas,bnccSugeridos} from "./dados.js";
 
 const firebaseConfig={apiKey:"AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",authDomain:"profbase-5f9b0.firebaseapp.com",databaseURL:"https://profbase-5f9b0-default-rtdb.firebaseio.com",projectId:"profbase-5f9b0",storageBucket:"profbase-5f9b0.firebasestorage.app",messagingSenderId:"826412057766",appId:"1:826412057766:web:729e6e24ce7587417fe067"};
@@ -1163,15 +1216,63 @@ let headerData={escola:'',professor:'',aluno:'',serie:'',data:'',logo:''};
 let relayoutTimer=null;
 
 let currentUser=null;
-onAuthStateChanged(auth,user=>{
+onAuthStateChanged(auth,async user=>{
   if(!user){ window.location.href='../index.html'; return }
   currentUser=user;
   if(user.email===ADMIN_EMAIL) $('linkAdmin').style.display='inline-flex';
   const nome = user.displayName || (user.email ? user.email.split('@')[0] : '');
   if(nome) $('brandUser').textContent = nome;
   $('authLoader').style.display='none';
+  // Verifica bloqueio (modo pânico) silenciosamente
+  try{
+    const snap = await get(ref(db,'usuarios/'+user.uid+'/blocked'));
+    if(snap && snap.exists() && snap.val()===true){
+      mostrarBloqueio();
+      return;
+    }
+  }catch(_){}
   renderSidebar();
 });
+
+/* ===== Modo pânico (oculto): bloqueia usuário se >20 exclusões no mesmo dia ===== */
+function hojeKey(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+async function registrarExclusaoEAvaliar(){
+  if(!currentUser) return false; // não bloqueia
+  const dia=hojeKey();
+  try{
+    const node = ref(db,'usuarios/'+currentUser.uid+'/log_delete/'+dia);
+    const tx = await runTransaction(node, cur => (typeof cur==='number'?cur:0)+1);
+    const total = tx.snapshot.val() || 1;
+    if(total > 20){
+      // Bloqueia
+      await set(ref(db,'usuarios/'+currentUser.uid+'/blocked'), true);
+      await set(ref(db,'usuarios/'+currentUser.uid+'/blocked_at'), Date.now());
+      mostrarBloqueio();
+      return true;
+    }
+  }catch(e){ console.warn('log_delete falhou:', e) }
+  return false;
+}
+function mostrarBloqueio(){
+  // Overlay simples e silencioso (não revela motivo específico além do necessário)
+  let ov=document.getElementById('panicOv');
+  if(!ov){
+    ov=document.createElement('div');
+    ov.id='panicOv';
+    ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(20px)';
+    ov.innerHTML='<div style="max-width:460px;text-align:center;background:#161620;border:1px solid #2a2a36;border-radius:18px;padding:36px 30px;color:#f4f4f8;font-family:Inter,system-ui,sans-serif">'
+      +'<div style="display:inline-block;padding:6px 14px;border-radius:50px;background:rgba(255,45,111,.15);border:1px solid rgba(255,45,111,.45);color:#ff2d6f;font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px">Conta suspensa</div>'
+      +'<h2 style="font-size:1.3rem;margin-bottom:10px">Acesso temporariamente bloqueado</h2>'
+      +'<p style="color:#8a8aa0;font-size:.92rem;line-height:1.55;margin-bottom:18px">Detectamos atividade incomum nesta conta. Entre em contato com o administrador para reativar seu acesso.</p>'
+      +'<button id="panicLogout" style="padding:11px 26px;background:#0A84FF;color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit">Sair</button>'
+      +'</div>';
+    document.body.appendChild(ov);
+    document.getElementById('panicLogout').onclick=()=>{ try{ auth.signOut() }catch(_){} window.location.href='../index.html' };
+  }
+}
 
 onValue(ref(db,'questoes'), snap=>{
   const data=snap.val()||{};
@@ -1188,6 +1289,14 @@ function authorBadge(q){
     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     ${esc(nome)}
   </span>`;
+}
+function codigoBadge(q){
+  if(!q || !q.codigo) return '';
+  return `<span class="qcode-badge" title="Código único da questão">${esc(q.codigo)}</span>`;
+}
+function modificadaBadge(q){
+  if(!q || !q.modificada) return '';
+  return `<span class="qmod-badge" title="Esta questão foi duplicada e modificada a partir de outra">Modificada</span>`;
 }
 
 $('searchInp').addEventListener('input', renderSidebar);
@@ -1230,23 +1339,41 @@ $('btnMinhasQ').addEventListener('click', ()=>{
 function renderSidebar(){
   const q=norm($('searchInp').value.trim());
   let list=questoes;
+  const myUidF = currentUser ? currentUser.uid : null;
+  const isAdminF = currentUser && currentUser.email===ADMIN_EMAIL;
   // Filtro: pendentes só visíveis para quem cadastrou
   if(currentUser){
     list = list.filter(it=> it.status!=='pendente' || it.criadoPor===currentUser.uid);
   } else {
     list = list.filter(it=> it.status!=='pendente');
   }
+  // Filtro: questões privadas só visíveis para o próprio autor (admin sempre vê)
+  list = list.filter(it=>{
+    if(it.visibilidade!=='privado') return true;
+    return isAdminF || (myUidF && it.criadoPor===myUidF);
+  });
   // Filtro: "Minhas questões"
   if(onlyMine && currentUser){
     list = list.filter(it=> it.criadoPor===currentUser.uid);
   }
-  if(q) list=list.filter(it=>
-    norm(it.tema).includes(q) ||
-    (it.temas||[]).some(t=>norm(t).includes(q)) ||
-    (it.bncc||[]).some(b=>norm(b).includes(q)) ||
-    norm(it.comentario||'').includes(q) ||
-    norm(it.criadoPorNome||'').includes(q)
-  );
+  if(q){
+    // Busca inteligente: divide a query em termos e exige que TODOS apareçam
+    // em algum dos campos pesquisáveis (tema, temas, bncc, comentário, autor,
+    // referência, código). Permite buscas como "Matrizes IFC Campus Sombrio".
+    const terms = q.split(/\s+/).filter(Boolean);
+    list = list.filter(it=>{
+      const haystack = [
+        it.tema,
+        ...(it.temas||[]),
+        ...(it.bncc||[]),
+        it.comentario,
+        it.criadoPorNome,
+        it.referencia,
+        it.codigo,
+      ].map(s=>norm(s||'')).join('  ');
+      return terms.every(t=>haystack.includes(t));
+    });
+  }
   $('countQ').textContent=list.length;
   const el=$('qlist');
   if(!list.length){
@@ -1280,12 +1407,17 @@ function renderSidebar(){
     const cls = ['qitem'];
     if(isPendente) cls.push('qitem-pendente');
     if(isMine) cls.push('in-prova');
+    const codeChip = q.codigo ? `<span class="qcode-badge">${esc(q.codigo)}</span>` : '';
+    const modChip  = q.modificada ? `<span class="qmod-badge">Modificada</span>` : '';
     return `
     <div class="${cls.join(' ')}" data-id="${q.id}">
       <div class="qitem-thumb">${thumbInner}</div>
       <div class="meta">
         <span class="tema">${esc(temaDisplay)}</span>
-        ${isPendente?'<span class="badge-pend">Pendente</span>':starsHtml}
+        <span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          ${modChip}${codeChip}
+          ${isPendente?'<span class="badge-pend">Pendente</span>':starsHtml}
+        </span>
       </div>
     </div>`;
   }).join('');
@@ -1484,7 +1616,7 @@ function openPreview(qid){
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".5" fill="currentColor"/></svg>
         <span><b>Cadastro pendente.</b> Esta questão foi salva como rascunho. Finalize o cadastro para que ela não seja excluída pelo sistema.</span>
       </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${authorBadge(q)}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${modificadaBadge(q)}${codigoBadge(q)}${authorBadge(q)}</div>
       <h4>Enunciado</h4>
       <div class="preview-manual-text" id="previewManualText"></div>
       ${commentsSection}
@@ -1492,7 +1624,7 @@ function openPreview(qid){
     renderTextWithMath($('previewManualText'), q.textoManual||'', {});
   } else if(isManual){
     body.innerHTML=`
-      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${temasArr.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}${authorBadge(q)}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${modificadaBadge(q)}${codigoBadge(q)}${temasArr.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}${authorBadge(q)}</div>
       <h4>Enunciado</h4>
       <div class="preview-manual-text" id="previewManualText"></div>
       ${q.respostaTexto?`<h4>Resposta (não aparece na prova)</h4><div class="com">${esc(q.respostaTexto)}</div>`:''}
@@ -1510,7 +1642,7 @@ function openPreview(qid){
     renderUserRating(qid, q);
   } else {
     body.innerHTML=`
-      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${temasArr.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}${authorBadge(q)}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${modificadaBadge(q)}${codigoBadge(q)}${temasArr.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}${authorBadge(q)}</div>
       <h4>Questão</h4>
       <img src="${q.imgQuestao}">
       ${q.imgResposta?`<h4>Resposta (não aparece na prova)</h4><img src="${q.imgResposta}">`:''}
@@ -1532,19 +1664,26 @@ function openPreview(qid){
   const btnFin=$('previewFin');
   const btnDel=$('previewDelete');
   const btnAdd=$('previewAdd');
+  const btnDup=$('previewDuplicate');
   const isAdmin = currentUser && currentUser.email===ADMIN_EMAIL;
   const isOwner = currentUser && q.criadoPor && q.criadoPor===currentUser.uid;
   const canEdit = isAdmin || isOwner;
+  // Limite silencioso de 30 dias para modificar a própria questão.
+  // Admin nunca é limitado.
+  const THIRTY_DAYS = 30*24*60*60*1000;
+  const editExpirado = !isAdmin && q.criadoEm && (Date.now() - q.criadoEm) > THIRTY_DAYS;
   if(isManual){
-    btnEdit.style.display = canEdit ? 'inline-flex' : 'none';
+    btnEdit.style.display = (canEdit && !editExpirado) ? 'inline-flex' : 'none';
     btnDel.style.display = canEdit ? 'inline-flex' : 'none';
     btnFin.style.display = (isPendente && canEdit) ? 'inline-flex' : 'none';
     btnAdd.style.display='inline-flex';
+    if(btnDup) btnDup.style.display = 'inline-flex';
   } else {
     btnEdit.style.display='none';
     btnFin.style.display='none';
     btnDel.style.display = isAdmin ? 'inline-flex' : 'none';
     btnAdd.style.display='inline-flex';
+    if(btnDup) btnDup.style.display = 'inline-flex';
   }
   $('previewOv').classList.add('show');
 }
@@ -1573,6 +1712,56 @@ $('previewDelete').onclick=async ()=>{
   await remove(ref(db,'questoes/'+currentQid));
   $('previewOv').classList.remove('show');
   currentQid=null;
+  // Modo pânico (silencioso) — registra exclusão e bloqueia se exceder limite diário
+  registrarExclusaoEAvaliar();
+};
+
+/* Duplicar questão: cria uma nova questão a partir da atual.
+   O usuário poderá editar APENAS o enunciado; demais metadados (referência,
+   tema, BNCC, dificuldade etc.) permanecem iguais à original.
+   A nova questão fica marcada como `modificada:true` e exibe a tag
+   "Modificada" em vermelho no preview. */
+$('previewDuplicate').onclick=async ()=>{
+  if(!currentQid) return;
+  const orig = questoes.find(x=>x.id===currentQid); if(!orig) return;
+  if(!currentUser){ alert('Aguarde autenticação.'); return }
+  if(!confirm('Duplicar esta questão? Você poderá editar apenas o enunciado da nova versão.')) return;
+  try{
+    // Gera código único para a duplicata (não compartilha o código da original)
+    let novoCodigo = null;
+    const temaBase = (orig.temas && orig.temas[0]) || orig.tema || '';
+    if(temaBase){
+      try{ novoCodigo = await reservarCodigo(gerarPrefixo(temaBase)); }
+      catch(_){ novoCodigo = null }
+    }
+    const novaRef = push(ref(db,'questoes'));
+    const payload = {
+      tipo: orig.tipo || 'manual',
+      textoManual: orig.textoManual || '',
+      imgQuestao: orig.imgQuestao || null,
+      tema: orig.tema || '',
+      temas: orig.temas ? orig.temas.slice() : [],
+      bncc:  orig.bncc  ? orig.bncc.slice()  : [],
+      ia: orig.ia || null,
+      dificuldade: orig.dificuldade || null,
+      visibilidade: orig.visibilidade || 'publico',
+      referencia: orig.referencia || null,
+      comentario: orig.comentario || '',
+      respostaTexto: orig.respostaTexto || null,
+      respostaImg: orig.respostaImg || null,
+      codigo: novoCodigo,
+      modificada: true,
+      originalId: currentQid,
+      criadoPor: currentUser.uid,
+      criadoPorNome: currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : 'Usuário'),
+      criadoEm: Date.now()
+    };
+    await set(novaRef, payload);
+    const newId = novaRef.key;
+    $('previewOv').classList.remove('show');
+    // Abre o editor de enunciado direto na nova questão
+    setTimeout(()=>{ openManualPopup(null, {qid: newId}) }, 80);
+  }catch(e){ console.error(e); alert('Erro ao duplicar: '+e.message) }
 };
 
 /* ===== Manual question popup + math keyboard ===== */
@@ -1613,6 +1802,16 @@ $('manualAdd').onclick=async ()=>{
   if(editingQid){
     const q=questoes.find(x=>x.id===editingQid);
     if(q){
+      // Limite silencioso de 30 dias: não permite editar questões antigas
+      // (admin é exceção). Falha em silêncio para não revelar a regra.
+      const isAdmin = currentUser && currentUser.email===ADMIN_EMAIL;
+      const THIRTY_DAYS = 30*24*60*60*1000;
+      const editExpirado = !isAdmin && q.criadoEm && (Date.now() - q.criadoEm) > THIRTY_DAYS;
+      if(editExpirado){
+        $('manualOv').classList.remove('show');
+        editingQid=null;
+        return;
+      }
       if(!t){
         await remove(ref(db,'questoes/'+editingQid));
       } else {
@@ -1658,7 +1857,10 @@ $('manualAdd').onclick=async ()=>{
 };
 
 /* ===== Finalizar cadastro de questão manual ===== */
-let finTemasSel=[], finBnccSel=[], finStars=0, finAcItems=[], finAcIdx=-1;
+let finTemasSel=[], finBnccSel=[], finAcItems=[], finAcIdx=-1;
+let finIa=null;       // 'sim' | 'nao'
+let finDif=null;      // 'facil' | 'medio' | 'upd' | 'dificil'
+let finVis='publico'; // 'publico' | 'privado'
 
 let finRespImg=null; // dataUrl atual da imagem de resposta em edição
 
@@ -1667,18 +1869,49 @@ function openFinalizarPopup(qid){
   const q=questoes.find(x=>x.id===qid);
   finTemasSel = (q && q.temas) ? q.temas.slice() : [];
   finBnccSel = (q && q.bncc) ? q.bncc.slice() : [];
-  finStars = (q && q.estrelas) || 0;
+  finIa  = (q && q.ia) || null;
+  finDif = (q && q.dificuldade) || null;
+  finVis = (q && q.visibilidade) || 'publico';
   $('finInpTema').value='';
   $('finInpBnccAdd').value='';
   $('finInpCom').value = (q && q.comentario) || '';
   $('finInpResp').value = (q && q.respostaTexto) || '';
+  $('finInpRef').value  = (q && q.referencia) || '';
   finRespImg = (q && q.respostaImg) || null;
   renderFinRespImg();
   renderFinTemaChips();
   renderFinBnccChips();
-  renderFinStars();
+  renderOptGroups();
   $('finalizarOv').classList.add('show');
 }
+
+function renderOptGroups(){
+  function paint(grpId, val){
+    const g=$(grpId); if(!g) return;
+    g.querySelectorAll('.opt-btn').forEach(b=>b.classList.toggle('on', b.dataset.v===val));
+  }
+  paint('finIaGrp', finIa);
+  paint('finDifGrp', finDif);
+  paint('finVisGrp', finVis);
+}
+
+// Wire opt-btn groups (delegação)
+function wireOptGroups(){
+  const groups=[
+    {id:'finIaGrp',  set:v=>finIa=v},
+    {id:'finDifGrp', set:v=>finDif=v},
+    {id:'finVisGrp', set:v=>finVis=v},
+  ];
+  groups.forEach(g=>{
+    const el=$(g.id); if(!el) return;
+    el.addEventListener('click',e=>{
+      const b=e.target.closest('.opt-btn'); if(!b) return;
+      g.set(b.dataset.v);
+      renderOptGroups();
+    });
+  });
+}
+wireOptGroups();
 
 function renderFinRespImg(){
   const prev=$('finRespImgPreview');
@@ -1816,27 +2049,62 @@ $('finBtnRespImgRem').onclick=()=>{ finRespImg=null; renderFinRespImg() };
   inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); add() }});
 })();
 
-function renderFinStars(){
-  Array.from($('finStars').children).forEach((s,i)=>s.classList.toggle('on',i<finStars));
+/* ===== Geração de código único de questão =====
+   Pega as iniciais (letras maiúsculas) das palavras do primeiro tema
+   selecionado e anexa um número sequencial de 4 dígitos por prefixo. */
+function gerarPrefixo(tema){
+  if(!tema) return 'QQ';
+  const palavras=(tema||'').normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .split(/\s+/).filter(p=>p.length>0 && !/^(de|da|do|das|dos|e|com|ou|em|a|o|na|no)$/i.test(p));
+  let pre='';
+  for(const p of palavras){
+    const c=p.charAt(0);
+    if(/[A-Za-z]/.test(c)) pre += c.toUpperCase();
+    if(pre.length>=3) break;
+  }
+  if(pre.length<2 && palavras[0]){
+    pre = palavras[0].slice(0,2).toUpperCase();
+  }
+  if(!pre) pre='QQ';
+  return pre;
 }
-$('finStars').addEventListener('click',e=>{
-  const v=parseInt(e.target.dataset.v); if(!v) return;
-  finStars=(finStars===v)?0:v;
-  renderFinStars();
-});
+
+/* Reserva atomicamente o próximo número sequencial para um prefixo.
+   Usa transações em 'questoes_counters/<prefixo>' (criar a regra no
+   Firebase se ainda não existir; a operação write é coberta pelo nó
+   raíz já que o usuário tem auth — manter mesmo path sem rules adicionais
+   funciona em desenvolvimento e pode ser endurecido depois). */
+async function reservarCodigo(prefixo){
+  const node = ref(db, 'questoes_counters/'+prefixo);
+  const result = await runTransaction(node, cur => (typeof cur === 'number' ? cur : 0) + 1);
+  const n = result.snapshot.val() || 1;
+  return prefixo + String(n).padStart(4,'0');
+}
 
 $('finSave').onclick=async ()=>{
   if(!finalizingQid){ closeFinalizarPopup(); return }
   if(!finTemasSel.length){ alert('Selecione ao menos um tema.'); return }
   const com=$('finInpCom').value.trim();
   const respT=$('finInpResp').value.trim();
+  const ref0=$('finInpRef').value.trim();
   try{
     $('finSave').disabled=true;
+    const q = questoes.find(x=>x.id===finalizingQid);
+    let codigo = (q && q.codigo) || null;
+    if(!codigo){
+      const pref = gerarPrefixo(finTemasSel[0]);
+      try{ codigo = await reservarCodigo(pref); }
+      catch(e){ console.warn('Falha ao reservar código, usando fallback:', e); codigo = pref + String(Date.now()).slice(-4) }
+    }
     await update(ref(db,'questoes/'+finalizingQid),{
+      codigo,
       tema: finTemasSel.join(', '),
       temas: finTemasSel,
       bncc: finBnccSel,
-      estrelas: finStars,
+      ia: finIa || null,
+      dificuldade: finDif || null,
+      visibilidade: finVis || 'publico',
+      referencia: ref0 || null,
       comentario: com,
       respostaTexto: respT || null,
       respostaImg: finRespImg || null,
@@ -3111,6 +3379,7 @@ function renderHdrList(){
         <div class="tpl-actions">
           <button class="primary tpl-use" data-id="${id}">${active?'Em uso':'Usar'}</button>
           <button class="tpl-edit" data-id="${id}">Editar</button>
+          <button class="tpl-rename" data-id="${id}">Renomear</button>
           <button class="tpl-dup" data-id="${id}">Duplicar</button>
           <button class="tpl-del pf-danger" data-id="${id}">Excluir</button>
         </div>
@@ -3130,6 +3399,17 @@ function renderHdrList(){
     $('hdrListOv').classList.remove('show');
   });
   grid.querySelectorAll('.tpl-edit').forEach(b=>b.onclick=()=>openHeaderEditor(b.dataset.id));
+  grid.querySelectorAll('.tpl-rename').forEach(b=>b.onclick=async ()=>{
+    const id=b.dataset.id;
+    const tpl=headerTemplates[id]; if(!tpl) return;
+    const novoNome = prompt('Novo nome do cabeçalho (ex: "Matemática Fundamental III", "Pedagogia"):', tpl.nome||'');
+    if(novoNome===null) return;
+    const nome = novoNome.trim().slice(0,80);
+    if(!nome) return;
+    try{
+      await update(ref(db,'cabecalhos/'+currentUser.uid+'/'+id), {nome});
+    }catch(e){ alert('Erro ao renomear: '+e.message) }
+  });
   grid.querySelectorAll('.tpl-dup').forEach(b=>b.onclick=async ()=>{
     if(Object.keys(headerTemplates).length>=MAX_HEADERS){ alert('Limite de '+MAX_HEADERS+' cabeçalhos atingido.'); return }
     const src = headerTemplates[b.dataset.id];
@@ -3171,6 +3451,7 @@ function openHeaderEditor(id){
   $('hdrAltura').value = editingHdrTpl.altura;
   $('hdrAlturaVal').textContent = editingHdrTpl.altura+' px';
   $('hdrFundo').value = editingHdrTpl.fundo || 'nenhum';
+  $('hdrBrancoCab').checked = !!editingHdrTpl.fundoBrancoCabecalho;
   $('hdrBW').value = (editingHdrTpl.borda && editingHdrTpl.borda.largura) || 0;
   $('hdrBR').value = (editingHdrTpl.borda && editingHdrTpl.borda.radius) || 0;
   $('hdrBS').value = (editingHdrTpl.borda && editingHdrTpl.borda.estilo) || 'solid';
@@ -3225,6 +3506,7 @@ $('hdrAltura').addEventListener('input',e=>{
   redrawEditor();
 });
 $('hdrFundo').onchange=e=>{ if(!editingHdrTpl)return; editingHdrTpl.fundo=e.target.value; redrawEditor() };
+$('hdrBrancoCab').onchange=e=>{ if(!editingHdrTpl)return; editingHdrTpl.fundoBrancoCabecalho=!!e.target.checked; redrawEditor() };
 function updBorda(){
   if(!editingHdrTpl)return;
   editingHdrTpl.borda = {
@@ -3356,9 +3638,20 @@ function renderTemplateCanvas(container, tpl, opts){
   // No modo editor (editable) mostramos o preview do fundo; na prova (tpl-rendered), o fundo vem da página — mantém o canvas transparente
   const isPreviewOnly = opts && opts.editable;
   if(isPreviewOnly){
-    if(tpl.fundo==='linhas') container.classList.add('bg-linhas');
-    else if(tpl.fundo==='quadriculado') container.classList.add('bg-quadriculado');
-    else if(tpl.fundo==='pontilhado') container.classList.add('bg-pontilhado');
+    // Se o usuário marcou "manter cabeçalho com fundo branco", o preview do
+    // editor já mostra branco — independente do tpl.fundo escolhido.
+    if(tpl.fundoBrancoCabecalho){
+      container.style.background = '#ffffff';
+    } else {
+      container.style.background = '';
+      if(tpl.fundo==='linhas') container.classList.add('bg-linhas');
+      else if(tpl.fundo==='quadriculado') container.classList.add('bg-quadriculado');
+      else if(tpl.fundo==='pontilhado') container.classList.add('bg-pontilhado');
+    }
+  } else {
+    // Render real (na prova): se o usuário marcou para manter o cabeçalho
+    // branco, força o fundo do header a sobrescrever o fundo da página.
+    container.style.background = tpl.fundoBrancoCabecalho ? '#ffffff' : '';
   }
   container.style.height = (tpl.altura||HDR_DEFAULT_ALTURA)+'px';
   const b = tpl.borda || {};
@@ -3777,6 +4070,13 @@ function renderPropPanel(){
       <input type="color" data-prop="fundo" value="${el.fundo==='transparent'?'#ffffff':(el.fundo||'#ffffff')}">
       <button class="add-btn" id="hdrElNoFill" style="margin-top:6px">Sem preenchimento</button>`;
   }
+  // Botões de camada (mover para frente / atrás)
+  html += `
+    <label style="margin-top:14px">Camadas</label>
+    <div class="row">
+      <button class="add-btn" id="hdrLayerUp" type="button">↑ Trazer p/ frente</button>
+      <button class="add-btn" id="hdrLayerDown" type="button">↓ Enviar p/ trás</button>
+    </div>`;
   html += `<button class="add-btn pf-danger" id="hdrElRemove" style="margin-top:10px;color:#ff453a">Remover elemento</button>`;
   body.innerHTML = html;
 
@@ -3797,6 +4097,8 @@ function renderPropPanel(){
   const rem=$('hdrElRemImg'); if(rem) rem.onclick=()=>{ el.src=''; redrawEditor() };
   const noFill=$('hdrElNoFill'); if(noFill) noFill.onclick=()=>{ el.fundo='transparent'; redrawEditor() };
   const remEl=$('hdrElRemove'); if(remEl) remEl.onclick=()=>removeElement(el.id);
+  const lUp=$('hdrLayerUp'); if(lUp) lUp.onclick=()=>bringForward(el.id);
+  const lDn=$('hdrLayerDown'); if(lDn) lDn.onclick=()=>sendBackward(el.id);
 }
 
 const _waitAuth = setInterval(()=>{
