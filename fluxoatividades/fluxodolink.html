@@ -203,6 +203,8 @@ body{background-color:var(--bg);background-image:linear-gradient(rgba(10,132,255
   <div class="row"><span>Último erro:</span><span class="v err" id="dErr">—</span></div>
   <button id="dForceSync" style="margin-top:8px;width:100%;padding:6px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:inherit">↻ Sincronizar agora</button>
   <a id="dFirebaseLink" href="#" target="_blank" style="display:block;margin-top:6px;text-align:center;padding:5px;background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:.65rem;text-decoration:none;font-weight:600">🔥 Abrir no Firebase Console</a>
+  <button id="dDiagPaths" style="margin-top:6px;width:100%;padding:5px;background:var(--purple);color:#fff;border:none;border-radius:6px;font-size:.65rem;font-weight:700;cursor:pointer;font-family:inherit">🔍 Diagnosticar caminhos (REST)</button>
+  <div id="dDiagPathsResult" style="margin-top:6px;font-size:.62rem;color:var(--text2);max-height:120px;overflow-y:auto"></div>
 </div>
 
 <!-- MODAL: GERAR LINK -->
@@ -261,13 +263,17 @@ body{background-color:var(--bg);background-image:linear-gradient(rgba(10,132,255
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import{getAuth,onAuthStateChanged,setPersistence,browserLocalPersistence}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import{getDatabase,ref,set,get,update,remove,push,onValue}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig={apiKey:"AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",authDomain:"profbase-5f9b0.firebaseapp.com",databaseURL:"https://profbase-5f9b0-default-rtdb.firebaseio.com",projectId:"profbase-5f9b0",storageBucket:"profbase-5f9b0.firebasestorage.app",messagingSenderId:"826412057766",appId:"1:826412057766:web:729e6e24ce7587417fe067"};
 const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getDatabase(app);
+
+// ── PERSISTÊNCIA DE AUTH ──
+// Garante que a sessão Firebase sobreviva fechamento de aba/browser
+try { await setPersistence(auth, browserLocalPersistence); } catch(e) { console.warn('[AUTH] setPersistence falhou:', e); }
 
 const ADM_EMAIL='gilbertofernandessc@gmail.com';
 const $=id=>document.getElementById(id);
@@ -281,19 +287,50 @@ let selectedConnectFlowId=null;
 // até o Firebase sincronizar (e não acumular cache stale).
 const _pendingIds = new Set();
 
-/* Cache local dos links (chaveado por uid) — usado só para mostrar
-   instantaneamente os links já criados enquanto o Firebase carrega.
-   O Firebase continua sendo a fonte da verdade. */
+/* ── CACHE LOCAL ROBUSTO ──────────────────────────────────────────
+   DOIS NÍVEIS de cache:
+   1) Cache por UID: `fluxo_links_cache_{uid}` — rápido, associado ao usuário atual
+   2) Cache UNIVERSAL: `fluxo_links_cache_ALL` — persiste mesmo se o UID mudar
+   Quando o UID muda entre sessões, o cache universal é usado para
+   restaurar os dados e regravá-los no Firebase sob o novo UID.
+*/
+const UNIVERSAL_CACHE_KEY = 'fluxo_links_cache_ALL';
+
 function cacheKey(){ return currentUser ? 'fluxo_links_cache_'+currentUser.uid : null }
+
 function loadLocalCache(){
-  const k=cacheKey(); if(!k) return [];
-  try{ return JSON.parse(localStorage.getItem(k)||'[]') }catch(_){ return [] }
+  const k=cacheKey();
+  let items = [];
+  // 1) Tenta cache por UID
+  if(k){
+    try{ items = JSON.parse(localStorage.getItem(k)||'[]') }catch(_){ items = [] }
+  }
+  // 2) Se cache por UID está vazio, tenta cache universal
+  if(items.length === 0){
+    try{
+      const universal = JSON.parse(localStorage.getItem(UNIVERSAL_CACHE_KEY)||'{}');
+      if(universal.links && universal.links.length > 0){
+        items = universal.links;
+        console.log('[DIAG] 🔄 Cache universal restaurado:', items.length, 'item(s) (UID anterior:', (universal.uid||'?').slice(0,10)+'…)');
+      }
+    }catch(_){}
+  }
+  return items;
 }
+
 function saveLocalCache(){
-  const k=cacheKey(); if(!k) return;
+  const k=cacheKey();
+  const data = myLinks || [];
+  // Salva em AMBOS os caches
   try{
-    localStorage.setItem(k, JSON.stringify(myLinks||[]));
-    console.log('[DIAG] 💾 Cache salvo:', myLinks.length, 'item(s) na chave', k);
+    if(k) localStorage.setItem(k, JSON.stringify(data));
+    // Cache universal: sempre atualizado com os dados mais recentes
+    localStorage.setItem(UNIVERSAL_CACHE_KEY, JSON.stringify({
+      links: data,
+      uid: currentUser ? currentUser.uid : null,
+      timestamp: Date.now()
+    }));
+    console.log('[DIAG] 💾 Cache salvo:', data.length, 'item(s)');
   }catch(e){
     console.error('[DIAG] ❌ Falha ao salvar cache:', e);
     diag('err','localStorage cheio? '+(e.message||''));
@@ -389,17 +426,62 @@ onAuthStateChanged(auth,async user=>{
     if(warn) warn.style.display='flex';
     console.warn('[DIAG] ⚠️ Modo anônimo/incognito detectado');
   }
-  // Verifica se o UID mudou desde a última visita (causa comum de "sumiço")
+  // ── MIGRAÇÃO DE UID ──────────────────────────────────────────
+  // Se o UID mudou desde a última visita, migra o cache do UID antigo
+  // para o novo UID e regrava os dados no Firebase.
   try{
     const lastUid = localStorage.getItem('fluxo_last_uid');
     if(lastUid && lastUid!==user.uid){
-      console.warn('[DIAG] UID MUDOU! Anterior:',lastUid,'Atual:',user.uid);
-      diag('err','UID mudou desde última visita! Anterior: '+lastUid.slice(0,10)+'…');
+      console.warn('[DIAG] ⚠️ UID MUDOU! Anterior:',lastUid,'Atual:',user.uid);
+      diag('err','UID mudou! Migrando dados…');
+      // Tenta recuperar cache do UID anterior
+      let oldCache = [];
+      try{ oldCache = JSON.parse(localStorage.getItem('fluxo_links_cache_'+lastUid)||'[]') }catch(_){}
+      // Tenta também o cache universal
+      let universalCache = [];
+      try{
+        const uc = JSON.parse(localStorage.getItem(UNIVERSAL_CACHE_KEY)||'{}');
+        if(uc.links && uc.links.length > 0) universalCache = uc.links;
+      }catch(_){}
+      // Une as duas fontes (sem duplicatas)
+      const toMigrate = [...oldCache];
+      const migratedIds = new Set(toMigrate.map(l=>l.id));
+      for(const lk of universalCache){
+        if(!migratedIds.has(lk.id)){ toMigrate.push(lk); migratedIds.add(lk.id) }
+      }
+      if(toMigrate.length > 0){
+        console.log('[DIAG] 🔄 Migrando', toMigrate.length, 'link(s) do UID anterior para o novo UID');
+        let migrated = 0;
+        for(const lk of toMigrate){
+          try{
+            const dados = {
+              escola: lk.escola||'',
+              serie:  lk.serie||'',
+              turma:  lk.turma||'',
+              atividadeId: lk.atividadeId||'',
+              criadoPor: user.uid,
+              criadoEm:  lk.criadoEm || new Date().toISOString()
+            };
+            await set(ref(db,'usuarios/'+user.uid+'/turmas_fluxo/'+lk.id), dados);
+            try{ await set(ref(db,'turmas_fluxo/'+lk.id), dados) }catch(_){}
+            migrated++;
+          }catch(e){ console.error('[migrate] erro:', lk.id, e) }
+        }
+        console.log('[DIAG] ✅ Migrados', migrated, 'de', toMigrate.length, 'links');
+        diag('err','UID mudou: '+migrated+'/'+toMigrate.length+' links migrados');
+        // Pré-carrega os links migrados para exibição imediata
+        myLinks = toMigrate;
+        saveLocalCache();
+        renderLinks();
+      }
     }
     localStorage.setItem('fluxo_last_uid', user.uid);
-  }catch(_){}
+  }catch(e){ console.error('[migrate] falha geral:', e) }
+
   // Mostra imediatamente do cache local
-  myLinks = loadLocalCache();
+  if(myLinks.length === 0){
+    myLinks = loadLocalCache();
+  }
   diag('cache', myLinks.length+' link(s)');
   renderLinks();
   subscribeData();
