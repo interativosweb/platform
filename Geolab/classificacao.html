@@ -1041,10 +1041,11 @@
             { question: "Faça uma nova figura e aplique as 3 transformações geométricas.", type: "practical" }
         ];
 
-        // Load questions from Firebase
+        // Load questions from Firebase (per-turma when turmaId is set)
         async function loadQuestionsFromFirebase() {
             try {
-                const snap = await get(ref(db, 'geolab_perguntas'));
+                const path = GEOLAB_TURMA_ID ? ('turmas/' + GEOLAB_TURMA_ID + '/perguntas') : 'geolab_perguntas';
+                const snap = await get(ref(db, path));
                 if (snap.exists()) {
                     let fbQuestions = snap.val();
                     if (!Array.isArray(fbQuestions)) fbQuestions = Object.values(fbQuestions);
@@ -1486,12 +1487,18 @@
             const senha = document.getElementById('inputSenhaGerenciar').value;
             let senhaCorreta = '9141'; // fallback
             try {
-                const snap = await get(ref(db, 'geolab_config/senhas/gerenciar'));
-                if (snap.exists()) senhaCorreta = String(snap.val());
+                if (GEOLAB_TURMA_ID) {
+                    const snap = await get(ref(db, 'turmas/' + GEOLAB_TURMA_ID + '/senha'));
+                    if (snap.exists()) senhaCorreta = String(snap.val());
+                } else {
+                    const snap = await get(ref(db, 'geolab_config/senhas/gerenciar'));
+                    if (snap.exists()) senhaCorreta = String(snap.val());
+                }
             } catch (e) { }
             if (senha === senhaCorreta) {
                 fecharModalGerenciar();
-                window.open('gerenciar_perguntas.html', '_blank');
+                const url = 'gerenciar_perguntas.html' + (GEOLAB_TURMA_ID ? ('?turmaId=' + encodeURIComponent(GEOLAB_TURMA_ID)) : '');
+                window.open(url, '_blank');
             } else {
                 alert('Senha incorreta!');
             }
