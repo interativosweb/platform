@@ -338,6 +338,26 @@
             box-shadow: none;
         }
 
+        /* ===== INVALID FIELD HIGHLIGHT ===== */
+        .form-group.invalid input,
+        .form-group.invalid select {
+            border-color: var(--error);
+            background: #fff5f5;
+            box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.12);
+        }
+
+        .form-group.invalid label {
+            color: var(--error);
+        }
+
+        .radio-row.invalid {
+            padding: 6px;
+            margin: -6px;
+            border-radius: 50px;
+            border: 1px dashed var(--error);
+            background: #fff5f5;
+        }
+
         /* ===== ALERTS ===== */
         .alert {
             padding: 12px 16px;
@@ -914,39 +934,72 @@
         inputEscola.addEventListener('focus', renderAutocomplete);
         inputEscola.addEventListener('blur', () => setTimeout(() => autoList.classList.remove('show'), 200));
 
+        // Clear invalid highlight as soon as the user starts fixing a field
+        document.querySelectorAll('#formTurma input, #formTurma select').forEach(el => {
+            const evt = el.tagName === 'SELECT' ? 'change' : 'input';
+            el.addEventListener(evt, () => {
+                const g = el.closest('.form-group');
+                if (g) g.classList.remove('invalid');
+            });
+        });
+        document.querySelectorAll('input[name="tipoEscola"]').forEach(r => {
+            r.addEventListener('change', () => {
+                document.querySelectorAll('#formTurma .radio-row.invalid').forEach(el => el.classList.remove('invalid'));
+            });
+        });
+
+        function clearFieldErrors() {
+            document.querySelectorAll('#formTurma .form-group.invalid').forEach(el => el.classList.remove('invalid'));
+            document.querySelectorAll('#formTurma .radio-row.invalid').forEach(el => el.classList.remove('invalid'));
+        }
+
+        function markFieldInvalid(input) {
+            if (!input) return;
+            const group = input.closest('.form-group');
+            if (group) group.classList.add('invalid');
+        }
+
         $('formTurma').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = $('btnGerar');
             const alertBox = $('formAlert');
             alertBox.innerHTML = '';
+            clearFieldErrors();
+
+            const form = new FormData(e.target);
+            const tipoEscola = form.get('tipoEscola');
+            const ano = form.get('ano');
+            let turma = form.get('turma');
+            const turmaOutro = $('inputTurmaOutro').value.trim();
+            const nomeEscola = inputEscola.value.trim();
+            const senha = $('inputSenha').value.trim();
+
+            const missing = [];
+            if (!tipoEscola) {
+                missing.push('Tipo de escola');
+                document.querySelector('#formTurma .radio-row').classList.add('invalid');
+            }
+            if (!ano) { missing.push('Ano / Série'); markFieldInvalid($('selectAno')); }
+            if (!turma) { missing.push('Turma'); markFieldInvalid($('selectTurma')); }
+            else if (turma === 'outro' && !turmaOutro) { missing.push('Nome da turma'); markFieldInvalid($('inputTurmaOutro')); }
+            if (!nomeEscola) { missing.push('Nome da escola'); markFieldInvalid(inputEscola); }
+            if (!senha) { missing.push('Senha da turma'); markFieldInvalid($('inputSenha')); }
+            else if (senha.length < 4) { missing.push('Senha (mínimo 4 caracteres)'); markFieldInvalid($('inputSenha')); }
+
+            if (missing.length > 0) {
+                alertBox.innerHTML = '<div class="alert alert-error">Preencha: ' + esc(missing.join(', ')) + '.</div>';
+                const firstInvalid = document.querySelector('#formTurma .form-group.invalid, #formTurma .radio-row.invalid');
+                if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+
+            if (turma === 'outro') turma = turmaOutro;
+
             btn.disabled = true;
             btn.textContent = 'Gerando...';
 
             try {
-                const form = new FormData(e.target);
-                const tipoEscola = form.get('tipoEscola');
-                const ano = form.get('ano');
-                let turma = form.get('turma');
-                if (turma === 'outro') {
-                    turma = $('inputTurmaOutro').value.trim();
-                    if (!turma) throw new Error('Digite o nome da turma.');
-                }
-                const nomeEscola = inputEscola.value.trim();
-                const senha = $('inputSenha').value.trim();
-                if (!tipoEscola || !ano || !turma || !nomeEscola || !senha) throw new Error('Preencha todos os campos.');
-                if (senha.length < 4) throw new Error('A senha deve ter pelo menos 4 caracteres.');
-
                 const turmaId = generateTurmaId();
-                const dados = {
-                    id: turmaId,
-                    professorUid: currentUser.uid,
-                    professorNome: currentUserData.nome || currentUser.email,
-                    professorEmail: currentUser.email,
-                    tipoEscola, ano, turma, nomeEscola,
-                    senha,
-                    dataCriacao: new Date().toISOString(),
-                    timestamp: Date.now()
-                };
 
                 // Default questions for a new turma — order is fixed (no shuffle)
                 const defaultQuestions = [
@@ -981,12 +1034,23 @@
                     }
                 ];
 
+                const dados = {
+                    id: turmaId,
+                    professorUid: currentUser.uid,
+                    professorNome: currentUserData.nome || currentUser.email,
+                    professorEmail: currentUser.email,
+                    tipoEscola, ano, turma, nomeEscola,
+                    senha,
+                    perguntas: defaultQuestions,
+                    dataCriacao: new Date().toISOString(),
+                    timestamp: Date.now()
+                };
+
                 // Write to both: user's own node (for listing — user can always write here)
                 // and global turmas/ (so students opening the link can read it)
                 const updates = {};
                 updates['usuarios/' + currentUser.uid + '/turmas/' + turmaId] = dados;
                 updates['turmas/' + turmaId] = dados;
-                updates['turmas/' + turmaId + '/perguntas'] = defaultQuestions;
                 await update(ref(db), updates);
 
                 const url = buildTurmaUrl(turmaId);
