@@ -479,7 +479,7 @@
     <div class="container">
         <header>
             <div class="titulo-container">
-                <a href="classificacao.html" class="btn-voltar">
+                <a href="classificacao.html" id="linkVoltarClassificacao" class="btn-voltar">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path d="M15 18l-6-6 6-6" />
                     </svg>
@@ -520,11 +520,25 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Default questions (same as the original hardcoded ones)
+        // Read turmaId from URL — questions are now isolated per-turma when present
+        const GEOLAB_TURMA_ID = (function () {
+            try {
+                const p = new URLSearchParams(window.location.search);
+                const t = p.get('turmaId');
+                return (t && /^[a-zA-Z0-9_\-]+$/.test(t)) ? t : null;
+            } catch (e) { return null; }
+        })();
+        const PERGUNTAS_PATH = GEOLAB_TURMA_ID ? ('turmas/' + GEOLAB_TURMA_ID + '/perguntas') : 'geolab_perguntas';
+
+        // Default questions used when a turma has no perguntas yet
         const defaultQuestions = [
-            { question: "O que é uma transformação geométrica?", type: "text" },
-            { question: "O que é uma translação?", type: "text" },
-            { question: "O que é uma simetria?", type: "text" },
+            {
+                question: "Quando uma figura apenas muda de lugar, sem girar ou mudar de tamanho, qual transformação ocorreu?",
+                type: "choice",
+                options: ["Translação", "Rotação", "Simetria", "Ampliação"],
+                correct: 0,
+                animacao: 2
+            },
             {
                 question: "A figura ao lado foi obtida por meio de dois movimentos. Quais foram esses movimentos?",
                 type: "choice",
@@ -532,16 +546,13 @@
                 correct: 1,
                 animacao: 1
             },
+            { question: "O que é uma transformação geométrica?", type: "text" },
+            { question: "O que é uma translação?", type: "text" },
+            { question: "O que é uma simetria?", type: "text" },
             {
                 question: "Se girarmos um quadrado em torno de um ponto, qual transformação geométrica está ocorrendo?",
                 type: "choice",
                 options: ["Rotação", "Giro", "Translação", "Simetria"],
-                correct: 0
-            },
-            {
-                question: "Quando uma figura apenas muda de lugar, sem girar ou mudar de tamanho, qual transformação ocorreu?",
-                type: "choice",
-                options: ["Translação", "Rotação", "Simetria", "Ampliação"],
                 correct: 0
             },
             {
@@ -557,7 +568,7 @@
         // Load questions from Firebase
         async function loadQuestions() {
             try {
-                const snap = await get(ref(db, 'geolab_perguntas'));
+                const snap = await get(ref(db, PERGUNTAS_PATH));
                 if (snap.exists()) {
                     questions = snap.val();
                     // Ensure it's an array
@@ -565,7 +576,7 @@
                 } else {
                     // Initialize with defaults
                     questions = JSON.parse(JSON.stringify(defaultQuestions));
-                    await set(ref(db, 'geolab_perguntas'), questions);
+                    await set(ref(db, PERGUNTAS_PATH), questions);
                 }
             } catch (e) {
                 console.warn('Error loading questions:', e);
@@ -758,7 +769,7 @@
             }
 
             try {
-                await set(ref(db, 'geolab_perguntas'), questions);
+                await set(ref(db, PERGUNTAS_PATH), questions);
                 showToast('Perguntas salvas com sucesso!');
             } catch (e) {
                 console.error('Save error:', e);
@@ -773,6 +784,12 @@
             toast.textContent = msg;
             container.appendChild(toast);
             setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
+        }
+
+        // Preserve turmaId in the back link
+        if (GEOLAB_TURMA_ID) {
+            const back = document.getElementById('linkVoltarClassificacao');
+            if (back) back.href = 'classificacao.html?turmaId=' + encodeURIComponent(GEOLAB_TURMA_ID);
         }
 
         // Init
