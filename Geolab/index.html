@@ -4845,8 +4845,13 @@
       let senhaCorreta = '4241';
       try {
         if (geolabDb) {
-          const snap = await geolabDb.ref('geolab_config/senhas/professor').once('value');
-          if (snap.exists()) senhaCorreta = String(snap.val());
+          if (GEOLAB_TURMA_ID) {
+            const snap = await geolabDb.ref('turmas/' + GEOLAB_TURMA_ID + '/senha').once('value');
+            if (snap.exists()) senhaCorreta = String(snap.val());
+          } else {
+            const snap = await geolabDb.ref('geolab_config/senhas/professor').once('value');
+            if (snap.exists()) senhaCorreta = String(snap.val());
+          }
         }
       } catch (e) { }
       if (senha === senhaCorreta) {
@@ -4883,8 +4888,13 @@
       let senhaCorreta = '4241';
       try {
         if (geolabDb) {
-          const snap = await geolabDb.ref('geolab_config/senhas/professor').once('value');
-          if (snap.exists()) senhaCorreta = String(snap.val());
+          if (GEOLAB_TURMA_ID) {
+            const snap = await geolabDb.ref('turmas/' + GEOLAB_TURMA_ID + '/senha').once('value');
+            if (snap.exists()) senhaCorreta = String(snap.val());
+          } else {
+            const snap = await geolabDb.ref('geolab_config/senhas/professor').once('value');
+            if (snap.exists()) senhaCorreta = String(snap.val());
+          }
         }
       } catch (e) { }
       if (senha === senhaCorreta) {
@@ -5195,9 +5205,6 @@
       currentPractical = 0;
       selectedAnswers = {};
 
-      // Randomize questions each time
-      shuffleQuestions();
-
       buildQuizUI();
 
       // Make floating-layers compact so it doesn't overlap quiz panel
@@ -5423,7 +5430,52 @@
         const titulo = (t.nomeEscola || '') + ' — ' + (t.ano || '') + 'º ' + (t.turma || '');
         const sub = 'Professor(a): ' + (t.professorNome || '—');
         mostrarBannerTurma(titulo, sub, false);
+        preselectAnoTurma(t);
       });
+    }
+
+    // Pre-select and lock the ano/turma chips based on the turma data from Firebase
+    function preselectAnoTurma(turmaInfo) {
+      if (!turmaInfo) return;
+      const anoRaw = (turmaInfo.ano || '').toString();
+      // gerador stores "6"; chips use "6°"
+      const anoVal = /^\d+$/.test(anoRaw) ? anoRaw + '°' : anoRaw;
+      const turmaVal = (turmaInfo.turma || '').toString();
+
+      popupState.ano = anoVal;
+      popupState.turma = turmaVal;
+
+      function applyToGroup(groupId, tipo, valor, displayText) {
+        const grupo = document.getElementById(groupId);
+        if (!grupo) return;
+        let found = false;
+        grupo.querySelectorAll('.popup-chip').forEach(c => {
+          if (c.dataset.valor === valor) {
+            c.classList.add('selected');
+            found = true;
+          } else {
+            c.classList.remove('selected');
+          }
+          c.style.pointerEvents = 'none';
+          c.style.opacity = (c.classList.contains('selected') ? '1' : '0.45');
+        });
+        if (!found && valor) {
+          const newChip = document.createElement('button');
+          newChip.type = 'button';
+          newChip.className = 'popup-chip selected';
+          newChip.textContent = displayText;
+          newChip.dataset.tipo = tipo;
+          newChip.dataset.valor = valor;
+          newChip.style.pointerEvents = 'none';
+          // Hide the other chips since the value didn't match any
+          grupo.querySelectorAll('.popup-chip').forEach(c => { c.style.display = 'none'; });
+          grupo.appendChild(newChip);
+        }
+      }
+
+      const anoDisplay = /^\d+°?$/.test(anoVal) ? anoVal.replace('°', '') + 'º Ano' : anoVal;
+      applyToGroup('grupoAno', 'ano', anoVal, anoDisplay);
+      applyToGroup('grupoTurma', 'turma', turmaVal, 'Turma ' + turmaVal);
     }
 
     function mostrarBannerTurma(titulo, sub, erro) {
@@ -5471,10 +5523,11 @@
       });
     }
 
-    // Load questions from Firebase
+    // Load questions from Firebase (per-turma when turmaId is set, otherwise global)
     function loadQuestionsFromFirebase() {
       if (!geolabDb) return;
-      geolabDb.ref('geolab_perguntas').once('value', (snap) => {
+      const path = GEOLAB_TURMA_ID ? ('turmas/' + GEOLAB_TURMA_ID + '/perguntas') : 'geolab_perguntas';
+      geolabDb.ref(path).once('value', (snap) => {
         if (snap.exists()) {
           let fbQuestions = snap.val();
           if (!Array.isArray(fbQuestions)) fbQuestions = Object.values(fbQuestions);
