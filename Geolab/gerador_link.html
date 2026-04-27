@@ -544,6 +544,60 @@
             word-break: break-all;
         }
 
+        .history-senha {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff8e1;
+            border: 1px solid #ffe28a;
+            border-radius: 10px;
+            padding: 8px 12px;
+        }
+
+        .history-senha .senha-label {
+            font-size: 0.66rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: #a35a00;
+            white-space: nowrap;
+        }
+
+        .history-senha .senha-value {
+            flex: 1;
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: 1px;
+            word-break: break-all;
+        }
+
+        .history-senha .senha-value.hidden {
+            letter-spacing: 4px;
+            color: var(--text-light);
+        }
+
+        .history-senha .btn-toggle-senha,
+        .history-senha .btn-copy-senha {
+            border: 1px solid #ffd17a;
+            background: #fff;
+            color: #a35a00;
+            font-family: inherit;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .history-senha .btn-toggle-senha:hover,
+        .history-senha .btn-copy-senha:hover {
+            background: #ffe28a;
+        }
+
         .history-date {
             font-size: 0.72rem;
             color: var(--text-light);
@@ -1109,6 +1163,19 @@
             cont.innerHTML = '<div class="history-list">' + minhasTurmas.map(t => {
                 const url = buildTurmaUrl(t.id);
                 const badge = t.tipoEscola === 'publica' ? 'publica' : 'privada';
+                const senha = t.senha || '';
+                const senhaMasked = senha ? '•'.repeat(Math.max(senha.length, 4)) : '—';
+                const senhaBlock = senha ? `
+                        <div class="history-senha">
+                            <span class="senha-label">Senha</span>
+                            <span class="senha-value hidden" data-senha="${esc(senha)}">${esc(senhaMasked)}</span>
+                            <button type="button" class="btn-toggle-senha" title="Mostrar/ocultar senha">Mostrar</button>
+                            <button type="button" class="btn-copy-senha" data-senha="${esc(senha)}" title="Copiar senha">Copiar</button>
+                        </div>` : `
+                        <div class="history-senha">
+                            <span class="senha-label">Senha</span>
+                            <span class="senha-value">— (turma criada antes desta funcionalidade)</span>
+                        </div>`;
                 return `
                     <div class="history-item" data-id="${esc(t.id)}">
                         <div class="history-head">
@@ -1120,6 +1187,7 @@
                         </div>
                         <div class="history-date">Criada em ${esc(formatDate(t.dataCriacao))}</div>
                         <div class="history-url">${esc(url)}</div>
+                        ${senhaBlock}
                         <div class="history-actions">
                             <button type="button" class="act-copy" data-url="${esc(url)}">Copiar</button>
                             <a href="${esc(url)}" target="_blank">Abrir</a>
@@ -1130,6 +1198,24 @@
                 `;
             }).join('') + '</div>';
 
+            cont.querySelectorAll('.btn-toggle-senha').forEach(b => {
+                b.addEventListener('click', () => {
+                    const valEl = b.parentElement.querySelector('.senha-value');
+                    const real = valEl.dataset.senha || '';
+                    if (valEl.classList.contains('hidden')) {
+                        valEl.classList.remove('hidden');
+                        valEl.textContent = real;
+                        b.textContent = 'Ocultar';
+                    } else {
+                        valEl.classList.add('hidden');
+                        valEl.textContent = '•'.repeat(Math.max(real.length, 4));
+                        b.textContent = 'Mostrar';
+                    }
+                });
+            });
+            cont.querySelectorAll('.btn-copy-senha').forEach(b => {
+                b.addEventListener('click', () => copiarParaClipboard(b.dataset.senha, b));
+            });
             cont.querySelectorAll('.act-copy').forEach(b => {
                 b.addEventListener('click', () => copiarParaClipboard(b.dataset.url, b));
             });
