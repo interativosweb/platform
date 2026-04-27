@@ -2148,26 +2148,12 @@
             autocomplete="off" />
         </div>
 
-        <div class="popup-field">
-          <label>Qual é o seu ano?</label>
-          <div class="popup-select-group" id="grupoAno">
-            <button type="button" class="popup-chip" data-tipo="ano" data-valor="6°">6º Ano</button>
-            <button type="button" class="popup-chip" data-tipo="ano" data-valor="7°">7º Ano</button>
-            <button type="button" class="popup-chip" data-tipo="ano" data-valor="8°">8º Ano</button>
-            <button type="button" class="popup-chip" data-tipo="ano" data-valor="9°">9º Ano</button>
-          </div>
+        <div class="popup-field" id="turmaInfoBox" style="display:none;background:var(--off-white);border:2px solid var(--light-gray);border-radius:14px;padding:12px 14px;">
+          <label style="font-size:0.7rem;color:var(--medium-gray);margin-bottom:4px;">Sua turma</label>
+          <div id="turmaInfoText" style="font-weight:800;color:var(--text);font-size:0.95rem;"></div>
         </div>
 
-        <div class="popup-field">
-          <label>Qual é a sua turma?</label>
-          <div class="popup-select-group" id="grupoTurma">
-            <button type="button" class="popup-chip" data-tipo="turma" data-valor="A">A</button>
-            <button type="button" class="popup-chip" data-tipo="turma" data-valor="B">B</button>
-            <button type="button" class="popup-chip" data-tipo="turma" data-valor="C">C</button>
-          </div>
-        </div>
-
-        <div class="popup-error" id="popupError">Preencha todos os campos para continuar.</div>
+        <div class="popup-error" id="popupError">Digite seu nome para continuar.</div>
 
         <div class="popup-actions">
           <button type="button" class="btn-popup-enter" id="btnEntrar">COMEÇAR</button>
@@ -2576,7 +2562,7 @@
     <div class="quiz-progress-bar">
       <div class="quiz-progress-fill" id="quizProgressFill"></div>
     </div>
-    <div class="quiz-progress-text" id="quizProgressText">0 de 10 concluídas</div>
+    <div class="quiz-progress-text" id="quizProgressText"></div>
     <div id="quizQuestionsContainer"></div>
     <div class="quiz-complete-msg" id="quizCompleteMsg">
       <span class="complete-icon">🏆</span>
@@ -4734,12 +4720,19 @@
       const nome = document.getElementById('inputNome').value.trim();
       const erro = document.getElementById('popupError');
 
-      if (!nome || !popupState.ano || !popupState.turma) {
+      if (!nome) {
         erro.style.display = 'block';
+        erro.textContent = 'Digite seu nome para continuar.';
         const box = document.getElementById('popupBox');
         box.style.animation = 'none';
         box.offsetHeight;
         box.style.animation = 'shake 0.4s ease';
+        return;
+      }
+
+      if (!popupState.ano || !popupState.turma) {
+        erro.style.display = 'block';
+        erro.textContent = 'Aguarde os dados da turma carregarem...';
         return;
       }
 
@@ -4997,23 +4990,14 @@
         if (e.key === 'Enter') verificarSenhaProfessor();
       });
 
-      // Restore session
+      // Restore session (just the name; ano/turma come from the turma data via preselectAnoTurma)
       const saved = localStorage.getItem('geolab_aluno');
       if (saved) {
         try {
           const id = JSON.parse(saved);
-          document.getElementById('inputNome').value = id.nome;
-          popupState.ano = id.ano;
-          popupState.turma = id.turma;
-          ['ano', 'turma'].forEach(tipo => {
-            const val = id[tipo];
-            const grupo = document.getElementById('grupo' + tipo.charAt(0).toUpperCase() + tipo.slice(1));
-            if (grupo) {
-              grupo.querySelectorAll('.popup-chip').forEach(c => {
-                if (c.dataset.valor === val) c.classList.add('selected');
-              });
-            }
-          });
+          document.getElementById('inputNome').value = id.nome || '';
+          if (!popupState.ano) popupState.ano = id.ano || '';
+          if (!popupState.turma) popupState.turma = id.turma || '';
         } catch (e) { }
       }
     });
@@ -5434,48 +5418,24 @@
       });
     }
 
-    // Pre-select and lock the ano/turma chips based on the turma data from Firebase
+    // Set ano/turma from the turma data and show them as a read-only info box
     function preselectAnoTurma(turmaInfo) {
       if (!turmaInfo) return;
       const anoRaw = (turmaInfo.ano || '').toString();
-      // gerador stores "6"; chips use "6°"
+      // gerador stores "6"; we display "6°"
       const anoVal = /^\d+$/.test(anoRaw) ? anoRaw + '°' : anoRaw;
       const turmaVal = (turmaInfo.turma || '').toString();
 
       popupState.ano = anoVal;
       popupState.turma = turmaVal;
 
-      function applyToGroup(groupId, tipo, valor, displayText) {
-        const grupo = document.getElementById(groupId);
-        if (!grupo) return;
-        let found = false;
-        grupo.querySelectorAll('.popup-chip').forEach(c => {
-          if (c.dataset.valor === valor) {
-            c.classList.add('selected');
-            found = true;
-          } else {
-            c.classList.remove('selected');
-          }
-          c.style.pointerEvents = 'none';
-          c.style.opacity = (c.classList.contains('selected') ? '1' : '0.45');
-        });
-        if (!found && valor) {
-          const newChip = document.createElement('button');
-          newChip.type = 'button';
-          newChip.className = 'popup-chip selected';
-          newChip.textContent = displayText;
-          newChip.dataset.tipo = tipo;
-          newChip.dataset.valor = valor;
-          newChip.style.pointerEvents = 'none';
-          // Hide the other chips since the value didn't match any
-          grupo.querySelectorAll('.popup-chip').forEach(c => { c.style.display = 'none'; });
-          grupo.appendChild(newChip);
-        }
+      const infoBox = document.getElementById('turmaInfoBox');
+      const infoText = document.getElementById('turmaInfoText');
+      if (infoBox && infoText) {
+        const anoDisplay = /^\d+°?$/.test(anoVal) ? anoVal.replace('°', '') + 'º ano' : anoVal;
+        infoText.textContent = anoDisplay + ' · Turma ' + turmaVal;
+        infoBox.style.display = 'block';
       }
-
-      const anoDisplay = /^\d+°?$/.test(anoVal) ? anoVal.replace('°', '') + 'º Ano' : anoVal;
-      applyToGroup('grupoAno', 'ano', anoVal, anoDisplay);
-      applyToGroup('grupoTurma', 'turma', turmaVal, 'Turma ' + turmaVal);
     }
 
     function mostrarBannerTurma(titulo, sub, erro) {
@@ -5535,6 +5495,8 @@
           quizQuestions.length = 0;
           fbQuestions.forEach(q => quizQuestions.push(q));
         }
+        // Update progress text now that we know the real total
+        try { updateQuizProgress(); } catch (e) {}
       });
     }
 
