@@ -757,6 +757,11 @@
                             </div>
                             <div class="hint">Suas escolas anteriores aparecerão como sugestões.</div>
                         </div>
+                        <div class="form-group full">
+                            <label>Senha da turma</label>
+                            <input type="text" name="senha" id="inputSenha" placeholder="Defina uma senha para esta turma" required minlength="4" maxlength="40" autocomplete="off">
+                            <div class="hint">Esta senha será usada para acessar a Área do Professor e para alterar as perguntas desta turma. Mínimo 4 caracteres.</div>
+                        </div>
                     </div>
 
                     <button type="submit" class="btn-primary" id="btnGerar">Gerar link da turma</button>
@@ -927,7 +932,9 @@
                     if (!turma) throw new Error('Digite o nome da turma.');
                 }
                 const nomeEscola = inputEscola.value.trim();
-                if (!tipoEscola || !ano || !turma || !nomeEscola) throw new Error('Preencha todos os campos.');
+                const senha = $('inputSenha').value.trim();
+                if (!tipoEscola || !ano || !turma || !nomeEscola || !senha) throw new Error('Preencha todos os campos.');
+                if (senha.length < 4) throw new Error('A senha deve ter pelo menos 4 caracteres.');
 
                 const turmaId = generateTurmaId();
                 const dados = {
@@ -936,15 +943,50 @@
                     professorNome: currentUserData.nome || currentUser.email,
                     professorEmail: currentUser.email,
                     tipoEscola, ano, turma, nomeEscola,
+                    senha,
                     dataCriacao: new Date().toISOString(),
                     timestamp: Date.now()
                 };
+
+                // Default questions for a new turma — order is fixed (no shuffle)
+                const defaultQuestions = [
+                    {
+                        question: "Quando uma figura apenas muda de lugar, sem girar ou mudar de tamanho, qual transformação ocorreu?",
+                        type: "choice",
+                        options: ["Translação", "Rotação", "Simetria", "Ampliação"],
+                        correct: 0,
+                        animacao: 2
+                    },
+                    {
+                        question: "A figura ao lado foi obtida por meio de dois movimentos. Quais foram esses movimentos?",
+                        type: "choice",
+                        options: ["Translação e rotação", "Reflexão e rotação", "Translação e reflexão", "Rotação e ampliação"],
+                        correct: 1,
+                        animacao: 1
+                    },
+                    { question: "O que é uma transformação geométrica?", type: "text" },
+                    { question: "O que é uma translação?", type: "text" },
+                    { question: "O que é uma simetria?", type: "text" },
+                    {
+                        question: "Se girarmos um quadrado em torno de um ponto, qual transformação geométrica está ocorrendo?",
+                        type: "choice",
+                        options: ["Rotação", "Giro", "Translação", "Simetria"],
+                        correct: 0
+                    },
+                    {
+                        question: "Quando uma figura é refletida como se estivesse em um espelho, qual transformação geométrica acontece?",
+                        type: "choice",
+                        options: ["Translação", "Simetria", "Rotação", "Redução"],
+                        correct: 1
+                    }
+                ];
 
                 // Write to both: user's own node (for listing — user can always write here)
                 // and global turmas/ (so students opening the link can read it)
                 const updates = {};
                 updates['usuarios/' + currentUser.uid + '/turmas/' + turmaId] = dados;
                 updates['turmas/' + turmaId] = dados;
+                updates['turmas/' + turmaId + '/perguntas'] = defaultQuestions;
                 await update(ref(db), updates);
 
                 const url = buildTurmaUrl(turmaId);
