@@ -879,7 +879,7 @@
                 </div>
             </div>
 
-            <button class="btn-filtro-trigger" onclick="abrirModalGerenciar()" style="min-width:auto;">
+            <button class="btn-filtro-trigger" onclick="abrirGerenciarPerguntas()" style="min-width:auto;">
                 <span>Gerenciar Perguntas</span>
             </button>
 
@@ -953,8 +953,8 @@
     <!-- Modal: Reset -->
     <div id="modalReset" class="modal-overlay">
         <div class="modal-box-admin">
-            <div class="modal-titulo" style="margin-bottom:4px;">Limpar Dados</div>
-            <div class="modal-desc">Selecione o período para apagar.</div>
+            <div class="modal-titulo" style="margin-bottom:4px;">Limpar Dados desta Turma</div>
+            <div class="modal-desc">Selecione o período para apagar. <b>A ação afeta apenas esta turma.</b></div>
             <button class="btn-reset-opcao" onclick="prepararReset('hoje')">Limpar registros de <b>Hoje</b></button>
             <button class="btn-reset-opcao" onclick="prepararReset('mes')">Limpar registros do <b>Mês</b></button>
             <button class="btn-reset-opcao" style="color:var(--red);border-color:var(--red);" onclick="prepararReset('tudo')">🗑️ Resetar
@@ -964,25 +964,12 @@
         </div>
     </div>
 
-    <!-- Modal: Senha para Gerenciar Perguntas -->
-    <div id="modalGerenciar" class="modal-overlay">
-        <div class="modal-box-admin">
-            <div class="modal-titulo" style="margin-bottom:4px;">Gerenciar Perguntas</div>
-            <div class="modal-desc">Digite a senha para acessar.</div>
-            <input type="password" id="inputSenhaGerenciar" class="input-senha" placeholder="Senha">
-            <div class="botoes-confirmacao">
-                <button class="btn-conf-nao" onclick="fecharModalGerenciar()">Cancelar</button>
-                <button class="btn-conf-sim" style="background:var(--green);box-shadow:0 4px 0 var(--green-shadow);" onclick="verificarSenhaGerenciar()">Acessar</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Modal: Senha para confirmar reset -->
     <div id="modalSenhaAction" class="modal-overlay">
         <div class="modal-box-admin">
             <div class="modal-titulo" style="margin-bottom:4px;">Confirmar</div>
-            <div class="modal-desc" id="descSenhaAction">Digite a senha para confirmar.</div>
-            <input type="password" id="inputSenhaAction" class="input-senha" placeholder="Senha do Professor">
+            <div class="modal-desc" id="descSenhaAction">Digite a senha desta turma para confirmar.</div>
+            <input type="password" id="inputSenhaAction" class="input-senha" placeholder="Senha da turma">
             <div class="botoes-confirmacao">
                 <button class="btn-conf-nao" onclick="fecharModalSenhaAction()">Cancelar</button>
                 <button class="btn-conf-sim" onclick="executarResetConfirmado()">Confirmar</button>
@@ -1055,6 +1042,8 @@
             } catch (e) {
                 console.warn('Error loading questions from Firebase:', e);
             }
+            // Re-render so the total reflects the actual question count
+            try { if (typeof renderizarLista === 'function') renderizarLista(); } catch (e) { }
         }
         loadQuestionsFromFirebase();
 
@@ -1398,7 +1387,9 @@
             tipoResetPendente = tipo;
             fecharModalReset();
             document.getElementById('inputSenhaAction').value = '';
-            document.getElementById('descSenhaAction').innerText = `Confirma apagar: ${tipo.toUpperCase()}?`;
+            const labelMap = { hoje: 'os registros de HOJE', mes: 'os registros do MÊS', tudo: 'TODOS os registros' };
+            document.getElementById('descSenhaAction').innerText =
+                `Apagar ${labelMap[tipo] || tipo} desta turma. Digite a senha da turma para confirmar.`;
             toggleModal('modalSenhaAction', true);
         };
 
@@ -1408,8 +1399,13 @@
             const senha = document.getElementById('inputSenhaAction').value;
             let senhaCorreta = '4241'; // fallback
             try {
-                const snap = await get(ref(db, 'geolab_config/senhas/professor'));
-                if (snap.exists()) senhaCorreta = String(snap.val());
+                if (GEOLAB_TURMA_ID) {
+                    const snap = await get(ref(db, 'turmas/' + GEOLAB_TURMA_ID + '/senha'));
+                    if (snap.exists()) senhaCorreta = String(snap.val());
+                } else {
+                    const snap = await get(ref(db, 'geolab_config/senhas/professor'));
+                    if (snap.exists()) senhaCorreta = String(snap.val());
+                }
             } catch (e) { }
             if (senha !== senhaCorreta) {
                 alert('Senha incorreta!');
@@ -1475,39 +1471,11 @@
             setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
         }
 
-        /* --- Gerenciar Perguntas Modal --- */
-        window.abrirModalGerenciar = () => {
-            document.getElementById('inputSenhaGerenciar').value = '';
-            toggleModal('modalGerenciar', true);
-            setTimeout(() => document.getElementById('inputSenhaGerenciar').focus(), 100);
+        /* --- Gerenciar Perguntas: abre direto, sem nova senha (já está autenticado nesta turma) --- */
+        window.abrirGerenciarPerguntas = () => {
+            const url = 'gerenciar_perguntas.html' + (GEOLAB_TURMA_ID ? ('?turmaId=' + encodeURIComponent(GEOLAB_TURMA_ID)) : '');
+            window.open(url, '_blank');
         };
-        window.fecharModalGerenciar = () => toggleModal('modalGerenciar', false);
-
-        window.verificarSenhaGerenciar = async () => {
-            const senha = document.getElementById('inputSenhaGerenciar').value;
-            let senhaCorreta = '9141'; // fallback
-            try {
-                if (GEOLAB_TURMA_ID) {
-                    const snap = await get(ref(db, 'turmas/' + GEOLAB_TURMA_ID + '/senha'));
-                    if (snap.exists()) senhaCorreta = String(snap.val());
-                } else {
-                    const snap = await get(ref(db, 'geolab_config/senhas/gerenciar'));
-                    if (snap.exists()) senhaCorreta = String(snap.val());
-                }
-            } catch (e) { }
-            if (senha === senhaCorreta) {
-                fecharModalGerenciar();
-                const url = 'gerenciar_perguntas.html' + (GEOLAB_TURMA_ID ? ('?turmaId=' + encodeURIComponent(GEOLAB_TURMA_ID)) : '');
-                window.open(url, '_blank');
-            } else {
-                alert('Senha incorreta!');
-            }
-        };
-
-        // Enter key on gerenciar password
-        document.getElementById('inputSenhaGerenciar')?.addEventListener('keydown', e => {
-            if (e.key === 'Enter') verificarSenhaGerenciar();
-        });
 
         /* --- Liberar Atividade --- */
         window.abrirModalLiberar = () => toggleModal('modalLiberar', true);
