@@ -1016,7 +1016,7 @@
             { question: "Quando uma figura é refletida como se estivesse em um espelho, qual transformação geométrica acontece?", type: "choice", options: ["Translação", "Simetria", "Rotação", "Redução"] },
             { question: "Crie duas figuras diferentes e aplique uma translação em cada uma.", type: "practical" },
             { question: "Faça duas figuras e faça uma rotação em cada uma.", type: "practical" },
-            { question: "Construa 3 figuras e faça uma simetria em cada uma.", type: "practical" },
+            { question: "Construa 1 figura e faça uma simetria nela.", type: "practical" },
             { question: "Faça uma nova figura e aplique as 3 transformações geométricas.", type: "practical" }
         ];
 
@@ -1024,7 +1024,7 @@
         const practicalQuestions = [
             { question: "Crie duas figuras diferentes e aplique uma translação em cada uma.", type: "practical" },
             { question: "Faça duas figuras e faça uma rotação em cada uma.", type: "practical" },
-            { question: "Construa 3 figuras e faça uma simetria em cada uma.", type: "practical" },
+            { question: "Construa 1 figura e faça uma simetria nela.", type: "practical" },
             { question: "Faça uma nova figura e aplique as 3 transformações geométricas.", type: "practical" }
         ];
 
@@ -1397,17 +1397,14 @@
 
         window.executarResetConfirmado = async () => {
             const senha = document.getElementById('inputSenhaAction').value;
-            let senhaCorreta = '4241'; // fallback
+            let senhaCorreta = null;
             try {
                 if (GEOLAB_TURMA_ID) {
                     const snap = await get(ref(db, 'turmas/' + GEOLAB_TURMA_ID + '/senha'));
                     if (snap.exists()) senhaCorreta = String(snap.val());
-                } else {
-                    const snap = await get(ref(db, 'geolab_config/senhas/professor'));
-                    if (snap.exists()) senhaCorreta = String(snap.val());
                 }
             } catch (e) { }
-            if (senha !== senhaCorreta) {
+            if (!senhaCorreta || senha !== senhaCorreta) {
                 alert('Senha incorreta!');
                 return;
             }
