@@ -3350,6 +3350,61 @@
       return { edgeIndex: bestEdge, localInsertPoint: bestPt };
     }
 
+    // Generic hit-test for click-to-select: returns true if (sx, sy) screen point
+    // (or its world equivalent mw) is on/inside the given shape.
+    function hitTestShape(s, sx, sy, mw) {
+      if (!s || !s.isClosed) return false;
+      const transformed = getTransformedPoints(s);
+      if (s.type === SHAPE_TYPES.CIRCLE) {
+        const cx = s.points[0].x + s.tx;
+        const cy = s.points[0].y + s.ty;
+        const r = s.radius * s.scale;
+        return Math.hypot(mw.x - cx, mw.y - cy) <= r;
+      }
+      if (transformed.length >= 3) {
+        let inside = false;
+        for (let i = 0, j = transformed.length - 1; i < transformed.length; j = i++) {
+          const xi = transformed[i].x, yi = transformed[i].y;
+          const xj = transformed[j].x, yj = transformed[j].y;
+          const intersect = ((yi > mw.y) !== (yj > mw.y)) &&
+            (mw.x < (xj - xi) * (mw.y - yi) / (yj - yi) + xi);
+          if (intersect) inside = !inside;
+        }
+        if (inside) return true;
+        for (let i = 0; i < transformed.length; i++) {
+          const ps = worldToScreen(transformed[i].x, transformed[i].y);
+          if (Math.hypot(sx - ps.x, sy - ps.y) < 10) return true;
+        }
+        return false;
+      }
+      if (s.isSymPoint) {
+        const pp = worldToScreen(s.points[0].x + (s.tx || 0), s.points[0].y + (s.ty || 0));
+        return Math.hypot(sx - pp.x, sy - pp.y) < (s.pointRadius || 7) * 2;
+      }
+      if (s.type === SHAPE_TYPES.LINE || s.isSymAxis) {
+        const p1 = transformed[0], p2 = transformed[1];
+        if (!p1 || !p2) return false;
+        const ldx = p2.x - p1.x, ldy = p2.y - p1.y;
+        const llen = Math.hypot(ldx, ldy) || 1;
+        const distToLine = Math.abs((mw.y - p1.y) * ldx - (mw.x - p1.x) * ldy) / llen;
+        return (distToLine * view.scale) < 10;
+      }
+      for (const p of transformed) {
+        const ps = worldToScreen(p.x, p.y);
+        if (Math.hypot(sx - ps.x, sy - ps.y) < 16) return true;
+      }
+      return false;
+    }
+
+    // Walk shapes top-to-bottom and return index of first one hit, or -1.
+    function findShapeAtPoint(sx, sy, mw, skipIdx) {
+      for (let i = shapes.length - 1; i >= 0; i--) {
+        if (i === skipIdx) continue;
+        if (hitTestShape(shapes[i], sx, sy, mw)) return i;
+      }
+      return -1;
+    }
+
     canvas.addEventListener('mousedown', (e) => {
       const rect = canvas.getBoundingClientRect();
       const sx = e.clientX - rect.left;
@@ -3461,6 +3516,14 @@
           mode = 'DRAGGING_SHAPE';
           dragStartWorld = { ...mouseWorld };
         } else {
+          // Active shape not hit — try to click-select another shape on the canvas
+          const otherIdx = findShapeAtPoint(sx, sy, mouseWorld, activeIndex);
+          if (otherIdx !== -1) {
+            selectLayer(otherIdx);
+            mode = 'DRAGGING_SHAPE';
+            dragStartWorld = { ...mouseWorld };
+            return;
+          }
           // Nothing hit — auto-pan (mãozinha behavior)
           isPanning = true;
           panStart = { x: sx, y: sy };
@@ -3470,8 +3533,15 @@
         }
       }
 
-      // If IDLE with no active shape, auto-pan on empty space
+      // If IDLE with no active shape, try click-to-select first, then pan
       if (mode === 'IDLE' && activeIndex === -1 && e.button === 0) {
+        const hitIdx = findShapeAtPoint(sx, sy, mouseWorld, -1);
+        if (hitIdx !== -1) {
+          selectLayer(hitIdx);
+          mode = 'DRAGGING_SHAPE';
+          dragStartWorld = { ...mouseWorld };
+          return;
+        }
         isPanning = true;
         panStart = { x: sx, y: sy };
         panStartOffset = { x: view.offsetX, y: view.offsetY };
@@ -4835,21 +4905,16 @@
 
     async function verificarSenhaClassificacao() {
       const senha = document.getElementById('inputSenhaClassificacao').value;
-      let senhaCorreta = '4241';
+      let senhaCorreta = null;
       try {
-        if (geolabDb) {
-          if (GEOLAB_TURMA_ID) {
-            const snap = await geolabDb.ref('turmas/' + GEOLAB_TURMA_ID + '/senha').once('value');
-            if (snap.exists()) senhaCorreta = String(snap.val());
-          } else {
-            const snap = await geolabDb.ref('geolab_config/senhas/professor').once('value');
-            if (snap.exists()) senhaCorreta = String(snap.val());
-          }
+        if (geolabDb && GEOLAB_TURMA_ID) {
+          const snap = await geolabDb.ref('turmas/' + GEOLAB_TURMA_ID + '/senha').once('value');
+          if (snap.exists()) senhaCorreta = String(snap.val());
         }
       } catch (e) { }
-      if (senha === senhaCorreta) {
+      if (senhaCorreta && senha === senhaCorreta) {
         fecharClassificacaoModal();
-        window.open('classificacao.html' + (GEOLAB_TURMA_ID ? ('?turmaId=' + encodeURIComponent(GEOLAB_TURMA_ID)) : ''), '_blank');
+        window.open('classificacao.html?turmaId=' + encodeURIComponent(GEOLAB_TURMA_ID), '_blank');
       } else {
         document.getElementById('classificacaoError').style.display = 'block';
         document.getElementById('inputSenhaClassificacao').style.borderColor = 'var(--red)';
@@ -4878,21 +4943,16 @@
 
     async function verificarSenhaProfessor() {
       const senha = document.getElementById('inputSenhaProfessor').value;
-      let senhaCorreta = '4241';
+      let senhaCorreta = null;
       try {
-        if (geolabDb) {
-          if (GEOLAB_TURMA_ID) {
-            const snap = await geolabDb.ref('turmas/' + GEOLAB_TURMA_ID + '/senha').once('value');
-            if (snap.exists()) senhaCorreta = String(snap.val());
-          } else {
-            const snap = await geolabDb.ref('geolab_config/senhas/professor').once('value');
-            if (snap.exists()) senhaCorreta = String(snap.val());
-          }
+        if (geolabDb && GEOLAB_TURMA_ID) {
+          const snap = await geolabDb.ref('turmas/' + GEOLAB_TURMA_ID + '/senha').once('value');
+          if (snap.exists()) senhaCorreta = String(snap.val());
         }
       } catch (e) { }
-      if (senha === senhaCorreta) {
+      if (senhaCorreta && senha === senhaCorreta) {
         fecharAreaProfessor();
-        window.open('classificacao.html' + (GEOLAB_TURMA_ID ? ('?turmaId=' + encodeURIComponent(GEOLAB_TURMA_ID)) : ''), '_blank');
+        window.open('classificacao.html?turmaId=' + encodeURIComponent(GEOLAB_TURMA_ID), '_blank');
       } else {
         const erro = document.getElementById('professorError');
         erro.style.display = 'block';
@@ -4924,10 +4984,8 @@
     const TUTORIAL_TOTAL = 3;
 
     function iniciarTutorial() {
-      // Check if tutorial was already seen this session
-      if (localStorage.getItem('geolab_tutorial_done')) {
-        return;
-      }
+      // Always show tutorial for new students entering via entrarGeolab.
+      // Returning students (entrarComCodigo) skip this path entirely.
       tutorialStep = 0;
       const overlay = document.getElementById('tutorialOverlay');
       overlay.classList.add('visible');
@@ -5072,12 +5130,12 @@
         errorMsg: "Você precisa ter pelo menos 2 figuras com rotação aplicada."
       },
       {
-        task: "Construa 3 figuras e faça uma simetria em cada uma.",
+        task: "Construa 1 figura e faça uma simetria nela.",
         verify: function () {
           const valid = shapes.filter(s => !s.isSymAxis && s.isClosed && (s.symmetryLineId || s.symmetryPointId));
-          return valid.length >= 3;
+          return valid.length >= 1;
         },
-        errorMsg: "Você precisa ter pelo menos 3 figuras com simetria aplicada (use uma reta ou ponto de simetria)."
+        errorMsg: "Você precisa ter pelo menos 1 figura com simetria aplicada (use uma reta ou ponto de simetria)."
       },
       {
         task: "Faça uma nova figura e aplique as 3 transformações geométricas.",
@@ -5809,7 +5867,6 @@
           <textarea id="justificativa${pIdx}" placeholder="Ex: não entendi o enunciado, não sabia como aplicar a transformação..." style="width:100%;min-height:80px;padding:10px 12px;border:2px solid #f5c97a;border-radius:10px;background:#fff;font-family:var(--font);font-size:0.88rem;font-weight:600;color:var(--dark-gray);outline:none;resize:vertical;"></textarea>
           <div style="display:flex;gap:8px;">
             <button type="button" onclick="confirmarJustificativa(${pIdx})" style="flex:1;padding:10px 14px;border:none;border-radius:10px;background:#f59e0b;color:#fff;font-family:var(--font);font-size:0.84rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:0.4px;">Enviar justificativa</button>
-            <button type="button" onclick="cancelarJustificativa(${pIdx})" style="padding:10px 14px;border:2px solid #f5c97a;border-radius:10px;background:#fff;color:#a35a00;font-family:var(--font);font-size:0.82rem;font-weight:700;cursor:pointer;">Voltar</button>
           </div>
         </div>
       `;
