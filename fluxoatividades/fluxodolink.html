@@ -263,8 +263,9 @@ body{background-color:var(--bg);background-image:linear-gradient(rgba(10,132,255
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import{getAuth,onAuthStateChanged,signInAnonymously}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import{getDatabase,ref,set,get,update,remove,push,onValue}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import AlquiLabAuth from "../auth-guest.js";
 
 const firebaseConfig={apiKey:"AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",authDomain:"profbase-5f9b0.firebaseapp.com",databaseURL:"https://profbase-5f9b0-default-rtdb.firebaseio.com",projectId:"profbase-5f9b0",storageBucket:"profbase-5f9b0.firebasestorage.app",messagingSenderId:"826412057766",appId:"1:826412057766:web:729e6e24ce7587417fe067"};
 const app=initializeApp(firebaseConfig);
@@ -379,16 +380,33 @@ async function detectIncognito(){
   });
 }
 
+AlquiLabAuth.init(auth, { loginPath: '../login.html' });
+const GUEST_LINK_TTL_MS = 60 * 60 * 1000; // 1 hora
+let isGuestMode = false;
+
 /* ── AUTH ── */
 onAuthStateChanged(auth,async user=>{
   if(!user){
-    $('authWarn').style.display='block';
-    $('mainContent').style.display='none';
+    try { await signInAnonymously(auth); } catch (e) {
+      console.warn('Falha ao iniciar modo de teste:', e);
+      $('authWarn').style.display='block';
+      $('mainContent').style.display='none';
+    }
     return;
   }
+  isGuestMode = user.isAnonymous === true;
   $('authWarn').style.display='none';
   $('mainContent').style.display='block';
   currentUser=user;
+  if (isGuestMode) {
+    AlquiLabAuth.showTestModeBanner({
+      msg: 'Você está usando o Fluxo de Atividades em <u>modo de teste</u>. Apenas 1 atividade é permitida e o link expira em 1 hora.'
+    });
+    AlquiLabAuth.showTestModeIntro('fluxo-link',
+      'Fluxo de Atividades — modo de teste',
+      'Você pode criar <b>apenas 1 atividade</b> e gerar 1 link que expira em <b>1 hora</b>. Ao criar uma nova atividade, a anterior será apagada automaticamente. Crie uma conta para acesso ilimitado.'
+    );
+  }
   // UID completo clicável (pra copiar e comparar entre sessões)
   const uidEl = $('dUid');
   if(uidEl){
@@ -1000,8 +1018,23 @@ window.gerarLink=async function(){
     criadoPor:currentUser.uid,
     criadoEm:new Date().toISOString()
   };
+  if (isGuestMode) {
+    dados.guest = true;
+    dados.expiresAt = Date.now() + GUEST_LINK_TTL_MS;
+  }
 
   try{
+    // Modo teste: só pode existir 1 link por vez. Apaga os anteriores.
+    if (isGuestMode) {
+      try {
+        for (const lk of (myLinks || [])) {
+          await remove(ref(db,'usuarios/'+currentUser.uid+'/turmas_fluxo/'+lk.id));
+          try { await remove(ref(db,'turmas_fluxo/'+lk.id)); } catch(_) {}
+        }
+        myLinks = [];
+        saveLocalCache();
+      } catch(e){ console.warn('Falha ao limpar links anteriores:', e); }
+    }
     console.log('[DIAG] Tentando salvar em usuarios/'+currentUser.uid+'/turmas_fluxo/'+turmaId);
     // Escritas individuais para garantir que o índice do usuário SEMPRE seja
     // gravado, mesmo se a regra do nó público falhar por algum motivo.
