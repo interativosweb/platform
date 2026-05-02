@@ -370,6 +370,11 @@ async function init(){
     const snap=await db.ref('turmas_fluxo/'+turmaId).once('value');
     if(!snap.exists()){$('loadingMsg').textContent='Turma não encontrada.';return}
     const turma=snap.val();
+    // Modo teste: link expira em 1h após criação
+    if(turma.guest && turma.expiresAt && Date.now() > turma.expiresAt){
+      $('loadingMsg').textContent='Este link foi criado em modo de teste e já expirou (1 hora). Peça ao professor um novo link.';
+      return;
+    }
     turmaInfo=turma;atividadeId=turma.atividadeId;flowOwnerId=turma.criadoPor;
     if(!atividadeId){$('loadingMsg').textContent='Nenhuma atividade conectada.';return}
     alunoSerie=((turma.serie||'')+' '+(turma.turma||'')).trim();
