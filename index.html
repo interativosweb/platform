@@ -858,6 +858,7 @@
                 title: "GeoLab",
                 desc: "Construções dinâmicas de geometria, gráficos e álgebra.",
                 url: "Geolab/gerador_link.html",
+                guestUrl: "Geolab/index.html?guest=1",
                 tag: "Geometria", category: "geometria"
             },
             {
@@ -882,6 +883,7 @@
                 title: "Frações",
                 desc: "Adição e subtração com exercícios introdutórios e complementares.",
                 url: "adicaoesubtracaodefracoes/gerador_link.html",
+                guestUrl: "adicaoesubtracaodefracoes/index.html?guest=1",
                 tag: "Frações", category: "fracoes"
             },
             {
@@ -912,6 +914,8 @@
 
         // ===== ESTADO =====
         let activeCategory = 'todos';
+        // Visitante por padrão; vira false quando o login real é detectado
+        window.__alquilabIsGuest = true;
         const grid = document.getElementById('cardsGrid');
         const searchInput = document.getElementById('searchInput');
         const visibleCount = document.getElementById('visibleCount');
@@ -955,7 +959,9 @@
                 const accent = ACCENTS[i % ACCENTS.length];
                 card.className = 'card acc-' + accent + (r.wip ? ' wip' : '');
                 card.style.animationDelay = (i * stagger) + 's';
-                card.href = r.url;
+                // Visitantes vão para a versão "ferramenta" (guestUrl) quando existir;
+                // logados sempre vão para a URL principal (gerador de link, etc.)
+                card.href = (window.__alquilabIsGuest && r.guestUrl) ? r.guestUrl : r.url;
 
                 if (r.wip) {
                     card.addEventListener('click', e => {
@@ -1059,10 +1065,14 @@
                 btnLogin.style.display = 'inline-block';
                 profArea.style.display = 'none';
                 currentUser = null;
+                window.__alquilabIsGuest = true;
+                render();
                 return;
             }
 
             currentUser = user;
+            window.__alquilabIsGuest = false;
+            render();
             let nome = user.displayName || (user.email ? user.email.split('@')[0] : 'Usuário');
             let tipo = 'professor';
             try {
