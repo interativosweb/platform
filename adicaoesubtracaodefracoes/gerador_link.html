@@ -268,8 +268,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, set, get, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import AlquiLabAuth from "../auth-guest.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",
@@ -317,42 +318,63 @@
             return base + '/ranking.html?turmaId=' + turmaId;
         }
 
+        AlquiLabAuth.init(auth, { loginPath: '../login.html' });
+
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
-                $('authLoading').classList.add('hidden');
-                $('authWarning').style.display = 'block';
-                $('mainContent').style.display = 'none';
+                try { await signInAnonymously(auth); } catch (e) {
+                    console.warn('Falha ao iniciar modo de teste:', e);
+                    $('authLoading').classList.add('hidden');
+                    $('authWarning').style.display = 'block';
+                    $('mainContent').style.display = 'none';
+                }
                 return;
             }
             currentUser = user;
-            try {
-                const snap = await get(ref(db, 'usuarios/' + user.uid));
-                currentUserData = snap.exists() ? snap.val() : { nome: user.displayName || user.email, email: user.email, tipo: 'aluno' };
-            } catch (e) {
-                currentUserData = { nome: user.displayName || user.email, email: user.email, tipo: 'aluno' };
-            }
-
             const ADM_EMAIL = 'gilbertofernandessc@gmail.com';
-            if (user.email === ADM_EMAIL) {
-                currentUserData.tipo = 'professor';
-                if (!currentUserData.nome) currentUserData.nome = 'Gilberto Fernandes';
+            const isGuest = user.isAnonymous === true;
+
+            if (isGuest) {
+                currentUserData = { nome: 'Visitante', email: '', tipo: 'professor' };
+            } else {
+                try {
+                    const snap = await get(ref(db, 'usuarios/' + user.uid));
+                    currentUserData = snap.exists() ? snap.val() : { nome: user.displayName || user.email, email: user.email, tipo: 'aluno' };
+                } catch (e) {
+                    currentUserData = { nome: user.displayName || user.email, email: user.email, tipo: 'aluno' };
+                }
+                if (user.email === ADM_EMAIL) {
+                    currentUserData.tipo = 'professor';
+                    if (!currentUserData.nome) currentUserData.nome = 'Gilberto Fernandes';
+                }
+                if (currentUserData.tipo !== 'professor') {
+                    $('authLoading').classList.add('hidden');
+                    $('authWarning').style.display = 'block';
+                    $('authWarningMsg').textContent = 'Somente professores podem criar turmas de Frações.';
+                    $('authWarning').querySelector('a').textContent = 'Voltar à plataforma';
+                    $('authWarning').querySelector('a').setAttribute('href', '../index.html');
+                    $('mainContent').style.display = 'none';
+                    return;
+                }
             }
 
-            if (currentUserData.tipo !== 'professor') {
-                $('authLoading').classList.add('hidden');
-                $('authWarning').style.display = 'block';
-                $('authWarningMsg').textContent = 'Somente professores podem criar turmas de Frações.';
-                $('authWarning').querySelector('a').textContent = 'Voltar à plataforma';
-                $('authWarning').querySelector('a').setAttribute('href', '../Plataforma.html');
-                $('mainContent').style.display = 'none';
-                return;
-            }
-
-            $('profArea').style.display = 'flex';
             $('mainContent').style.display = 'block';
-            $('profName').textContent = currentUserData.nome || user.email;
-            $('profRole').textContent = 'Professor(a)';
             $('authLoading').classList.add('hidden');
+
+            if (isGuest) {
+                $('profArea').style.display = 'none';
+                AlquiLabAuth.showTestModeBanner({
+                    msg: 'Você está usando Frações em <u>modo de teste</u>. A classificação e a liberação da atividade ficam disponíveis apenas para usuários cadastrados.'
+                });
+                AlquiLabAuth.showTestModeIntro('fracoes',
+                    'Frações — modo de teste',
+                    'Você pode criar turmas, mas a <b>classificação</b> e a <b>liberação da atividade</b> só ficam disponíveis para usuários cadastrados.'
+                );
+            } else {
+                $('profArea').style.display = 'flex';
+                $('profName').textContent = currentUserData.nome || user.email;
+                $('profRole').textContent = 'Professor(a)';
+            }
 
             await carregarTurmas();
         });
