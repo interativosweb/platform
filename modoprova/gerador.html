@@ -218,8 +218,9 @@ small{color:var(--text2);font-size:.7rem;font-weight:400;text-transform:none;let
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import{getAuth,onAuthStateChanged,signInAnonymously}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import{getDatabase,ref,set,get,remove}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import AlquiLabAuth from "../auth-guest.js";
 
 const fbConf={apiKey:"AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",authDomain:"profbase-5f9b0.firebaseapp.com",databaseURL:"https://profbase-5f9b0-default-rtdb.firebaseio.com",projectId:"profbase-5f9b0",storageBucket:"profbase-5f9b0.firebasestorage.app",messagingSenderId:"826412057766",appId:"1:826412057766:web:729e6e24ce7587417fe067"};
 const app=initializeApp(fbConf),auth=getAuth(app),db=getDatabase(app);
@@ -227,9 +228,25 @@ const app=initializeApp(fbConf),auth=getAuth(app),db=getDatabase(app);
 const $=id=>document.getElementById(id);
 let user=null;
 
-onAuthStateChanged(auth,u=>{
-  if(!u){$('authWarn').style.display='flex';return}
-  user=u;loadLista();
+AlquiLabAuth.init(auth, { loginPath: '../login.html' });
+let isGuestMode = false;
+
+onAuthStateChanged(auth,async u=>{
+  if(!u){
+    try { await signInAnonymously(auth); } catch (e) {
+      console.warn('Falha ao iniciar modo de teste:', e);
+      $('authWarn').style.display='flex';
+    }
+    return;
+  }
+  user=u;
+  isGuestMode = u.isAnonymous === true;
+  if (isGuestMode) {
+    AlquiLabAuth.showTestModeBanner({
+      msg: 'Você está usando o Modo Prova em <u>modo de teste</u>. Para gerar links próprios, faça login.'
+    });
+  }
+  loadLista();
 });
 
 function newId(){return 'pv_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
@@ -240,6 +257,7 @@ function buildLink(uid,id){
 
 $('btnGerar').onclick=async()=>{
   if(!user){alert('Faça login.');return}
+  if (isGuestMode) { AlquiLabAuth.requireLogin('Gerar links de prova está disponível apenas para usuários cadastrados.'); return; }
   const nome=$('nome').value.trim();
   const url=$('url').value.trim();
   const senha=$('senha').value.trim();
