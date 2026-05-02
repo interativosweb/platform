@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AlquiLab — Acesso</title>
+    <meta name="description" content="Login para a plataforma AlquiLab - Laboratório de Matemática." />
+    <style>
+        :root {
+            --bg-page: #f5f5f7;
+            --card-bg: #ffffff;
+            --text-main: #1d1d1f;
+            --text-light: #86868b;
+            --accent: #0071e3;
+            --accent-hover: #0077ED;
+            --accent-dark: #005bb5;
+            --success: #34c759;
+            --error: #ff3b30;
+            --radius: 16px;
+            --radius-lg: 20px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.10);
+            --border-light: #e5e5ea;
+            --bg-secondary: #f2f2f7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-page);
+            color: var(--text-main);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            display: flex;
+        }
+
+        /* ===== SPLIT SCREEN ===== */
+        .split-left {
+            flex: 1;
+            background: linear-gradient(135deg, #0071e3 0%, #005bb5 50%, #003d82 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+        }
+
+        .split-left::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, transparent 70%);
+            top: -100px;
+            right: -100px;
+            border-radius: 50%;
+        }
+
+        .split-left::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.04) 0%, transparent 70%);
+            bottom: -80px;
+            left: -80px;
+            border-radius: 50%;
+        }
+
+        .brand-content {
+            text-align: center;
+            z-index: 2;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .brand-logo {
+            width: 90px;
+            height: 90px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin: 0 auto 28px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        .brand-title {
+            font-size: 3rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+        }
+
+        .brand-title span {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .brand-subtitle {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .brand-desc {
+            margin-top: 40px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            font-weight: 500;
+            max-width: 280px;
+            line-height: 1.6;
+        }
+
+        /* ===== RIGHT SIDE (FORM) ===== */
+        .split-right {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            min-height: 100vh;
+            background: var(--bg-page);
+            overflow-y: auto;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 420px;
+            animation: fadeInUp 0.6s ease 0.2s both;
+        }
+
+        .form-header {
+            margin-bottom: 36px;
+        }
+
+        .form-header h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .form-header p {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        /* ===== FORM FIELDS ===== */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 18px;
+            background: var(--card-bg);
+            border: 1.5px solid var(--border-light);
+            border-radius: 14px;
+            color: var(--text-main);
+            font-size: 1rem;
+            font-family: inherit;
+            font-weight: 500;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-input::placeholder {
+            color: #c7c7cc;
+            font-weight: 400;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+        }
+
+        .form-input.error {
+            border-color: var(--error);
+            box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.1);
+        }
+
+        /* Select dropdown styling */
+        .form-select {
+            width: 100%;
+            padding: 14px 18px;
+            background: var(--card-bg);
+            border: 1.5px solid var(--border-light);
+            border-radius: 14px;
+            color: var(--text-main);
+            font-size: 1rem;
+            font-family: inherit;
+            font-weight: 500;
+            outline: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2386868b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+        }
+
+        .form-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+        }
+
+        /* Radio group styling */
+        .radio-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .radio-option {
+            flex: 1;
+            position: relative;
+        }
+
+        .radio-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .radio-option label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 18px;
+            background: var(--card-bg);
+            border: 1.5px solid var(--border-light);
+            border-radius: 14px;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .radio-option label:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .radio-option input[type="radio"]:checked+label {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+            box-shadow: 0 4px 14px rgba(0, 113, 227, 0.25);
+        }
+
+        /* Animated hidden fields (sign-up only) */
+        .field-signup {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            margin-bottom: 0;
+            transition: max-height 0.4s ease, opacity 0.3s ease, margin-bottom 0.3s ease;
+        }
+
+        .field-signup.visible {
+            max-height: 300px;
+            opacity: 1;
+            margin-bottom: 18px;
+        }
+
+        /* Password reset link */
+        .forgot-password {
+            text-align: right;
+            margin-top: -10px;
+            margin-bottom: 18px;
+        }
+
+        .forgot-password a {
+            font-size: 0.85rem;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .forgot-password a:hover {
+            opacity: 0.7;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-family: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 113, 227, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-primary .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2.5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin: 0 auto;
+        }
+
+        .btn-primary.loading .btn-text {
+            display: none;
+        }
+
+        .btn-primary.loading .spinner {
+            display: block;
+        }
+
+        /* ===== TOGGLE MODE ===== */
+        .toggle-mode {
+            text-align: center;
+            margin-top: 28px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .toggle-mode a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .toggle-mode a:hover {
+            opacity: 0.7;
+        }
+
+        /* ===== ERROR MESSAGE ===== */
+        .msg-feedback {
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .msg-feedback.show {
+            display: flex;
+        }
+
+        .msg-feedback.error {
+            background: #fff2f0;
+            color: var(--error);
+            border: 1px solid rgba(255, 59, 48, 0.15);
+        }
+
+        .msg-feedback.success {
+            background: #f0faf3;
+            color: var(--success);
+            border: 1px solid rgba(52, 199, 89, 0.15);
+        }
+
+        /* ===== PASSWORD RESET MODAL ===== */
+        .reset-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 5000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .reset-overlay.show {
+            display: flex;
+        }
+
+        .reset-box {
+            background: white;
+            padding: 36px;
+            border-radius: 24px;
+            width: 400px;
+            max-width: 90vw;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .reset-box .reset-close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            background: var(--bg-secondary);
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .reset-box .reset-close:hover {
+            background: #e5e5ea;
+            color: var(--text-main);
+        }
+
+        .reset-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .reset-sub {
+            font-size: 0.88rem;
+            color: var(--text-light);
+            margin-bottom: 22px;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        .reset-input {
+            width: 100%;
+            padding: 14px 18px;
+            background: var(--bg-secondary);
+            border: 1.5px solid var(--border-light);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            font-family: inherit;
+            font-weight: 500;
+            outline: none;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .reset-input:focus {
+            border-color: var(--accent);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+        }
+
+        .reset-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.25s ease;
+            margin-top: 4px;
+        }
+
+        .reset-btn:hover {
+            background: #005bb5;
+            transform: translateY(-1px);
+        }
+
+        .reset-msg {
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .reset-msg.show {
+            display: block;
+        }
+
+        .reset-msg.error {
+            color: var(--error);
+        }
+
+        .reset-msg.success {
+            color: var(--success);
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ===== DECORATIVE SHAPES ===== */
+        .floating-shapes {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 15%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 50px;
+            height: 50px;
+            top: 70%;
+            right: 15%;
+            animation-delay: -5s;
+        }
+
+        .shape:nth-child(3) {
+            width: 120px;
+            height: 120px;
+            bottom: 10%;
+            left: 30%;
+            animation-delay: -10s;
+        }
+
+        .shape:nth-child(4) {
+            width: 35px;
+            height: 35px;
+            top: 40%;
+            right: 25%;
+            animation-delay: -15s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            25% {
+                transform: translate(15px, -20px) rotate(90deg);
+            }
+
+            50% {
+                transform: translate(-10px, 15px) rotate(180deg);
+            }
+
+            75% {
+                transform: translate(20px, 10px) rotate(270deg);
+            }
+        }
+
+        /* ===== FOOTER ===== */
+        .form-footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.78rem;
+            color: #c7c7cc;
+            font-weight: 500;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+            }
+
+            .split-left {
+                min-height: 35vh;
+                padding: 40px 20px;
+            }
+
+            .brand-logo {
+                width: 64px;
+                height: 64px;
+                font-size: 2rem;
+                border-radius: 18px;
+                margin-bottom: 16px;
+            }
+
+            .brand-title {
+                font-size: 2rem;
+            }
+
+            .brand-desc {
+                display: none;
+            }
+
+            .split-right {
+                min-height: auto;
+                padding: 32px 24px 48px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .split-left {
+                min-height: 28vh;
+            }
+
+            .form-header h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- LEFT SIDE — BRANDING -->
+    <div class="split-left">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+        <div class="brand-content">
+            <div class="brand-logo">π</div>
+            <div class="brand-title">Alqui<span>Lab</span></div>
+            <div class="brand-subtitle">Laboratório de Matemática</div>
+            <p class="brand-desc">Plataforma educacional centralizada para professores. Acesse recursos, ferramentas e
+                materiais de matemática.</p>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDE — FORM -->
+    <div class="split-right">
+        <div class="form-container">
+            <div class="form-header">
+                <h2 id="formTitle">Acesse a plataforma</h2>
+                <p id="formSubtitle">Entre com sua conta para continuar</p>
+            </div>
+
+            <div class="msg-feedback" id="msgFeedback">
+                <span id="msgIcon"></span>
+                <span id="msgText"></span>
+            </div>
+
+            <form id="authForm" autocomplete="off">
+                <!-- Nome (sign-up only) -->
+                <div class="form-group field-signup" id="fieldNome">
+                    <label class="form-label" for="inputNome">Nome (máx. 15 caracteres)</label>
+                    <input type="text" class="form-input" id="inputNome" placeholder="Ex: João" autocomplete="name"
+                        maxlength="15" />
+                </div>
+
+                <!-- Tipo: Aluno ou Professor (sign-up only) -->
+                <div class="form-group field-signup" id="fieldTipo">
+                    <label class="form-label">Você é aluno ou professor?</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="tipoAluno" name="tipo" value="aluno" />
+                            <label for="tipoAluno">Aluno</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="tipoProfessor" name="tipo" value="professor" />
+                            <label for="tipoProfessor">Professor</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estado (sign-up only) -->
+                <div class="form-group field-signup" id="fieldEstado">
+                    <label class="form-label" for="inputEstado">Qual estado você mora?</label>
+                    <select class="form-select" id="inputEstado">
+                        <option value="">Selecione o estado</option>
+                    </select>
+                </div>
+
+                <!-- Cidade (sign-up only) -->
+                <div class="form-group field-signup" id="fieldCidade">
+                    <label class="form-label" for="inputCidade">Qual cidade você mora?</label>
+                    <select class="form-select" id="inputCidade" disabled>
+                        <option value="">Selecione o estado primeiro</option>
+                    </select>
+                </div>
+
+                <!-- WhatsApp (sign-up only) -->
+                <div class="form-group field-signup" id="fieldWhatsapp">
+                    <label class="form-label" for="inputWhatsapp">WhatsApp (obrigatório)</label>
+                    <input type="tel" class="form-input" id="inputWhatsapp" placeholder="(99) 99999-9999"
+                        maxlength="15" />
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label class="form-label" for="inputEmail">E-mail</label>
+                    <input type="email" class="form-input" id="inputEmail" placeholder="seuemail@email.com"
+                        autocomplete="email" required />
+                </div>
+
+                <!-- Senha -->
+                <div class="form-group">
+                    <label class="form-label" for="inputSenha">Senha</label>
+                    <input type="password" class="form-input" id="inputSenha" placeholder="Mínimo 6 caracteres"
+                        autocomplete="current-password" required />
+                </div>
+
+                <!-- Esqueceu a senha (login only) -->
+                <div class="forgot-password" id="forgotPassword">
+                    <a onclick="openResetModal()">Esqueceu a senha?</a>
+                </div>
+
+                <button type="submit" class="btn-primary" id="btnSubmit">
+                    <span class="btn-text">Entrar</span>
+                    <div class="spinner"></div>
+                </button>
+            </form>
+
+            <div class="toggle-mode">
+                <span id="toggleText">Não tem conta?</span>
+                <a id="toggleLink" onclick="toggleMode()">Criar conta</a>
+            </div>
+
+            <div class="form-footer">
+                AlquiLab © 2026 — Plataforma Educacional de Matemática - Desenvolvida por Gilberto Fernandes
+            </div>
+        </div>
+    </div>
+
+    <!-- PASSWORD RESET MODAL -->
+    <div class="reset-overlay" id="resetOverlay">
+        <div class="reset-box">
+            <button class="reset-close" id="resetClose">✕</button>
+            <div class="reset-title">Redefinir Senha</div>
+            <div class="reset-sub">Digite seu e-mail e enviaremos um link para redefinir sua senha.</div>
+            <input type="email" class="reset-input" id="resetEmail" placeholder="Seu e-mail cadastrado" />
+            <button class="reset-btn" id="resetBtn">Enviar Link</button>
+            <div class="reset-msg" id="resetMsg"></div>
+        </div>
+    </div>
+
+    <!-- FIREBASE SDK (ESM via CDN) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import {
+            getAuth,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            onAuthStateChanged,
+            updateProfile,
+            sendPasswordResetEmail
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import {
+            getDatabase,
+            ref,
+            set,
+            push,
+            get
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",
+            authDomain: "profbase-5f9b0.firebaseapp.com",
+            databaseURL: "https://profbase-5f9b0-default-rtdb.firebaseio.com",
+            projectId: "profbase-5f9b0",
+            storageBucket: "profbase-5f9b0.firebasestorage.app",
+            messagingSenderId: "826412057766",
+            appId: "1:826412057766:web:729e6e24ce7587417fe067"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // ===== BRAZILIAN STATES (IBGE API) =====
+        const ESTADOS = [
+            { nome: "Acre", id: 12 }, { nome: "Alagoas", id: 27 },
+            { nome: "Amapá", id: 16 }, { nome: "Amazonas", id: 13 },
+            { nome: "Bahia", id: 29 }, { nome: "Ceará", id: 23 },
+            { nome: "Distrito Federal", id: 53 }, { nome: "Espírito Santo", id: 32 },
+            { nome: "Goiás", id: 52 }, { nome: "Maranhão", id: 21 },
+            { nome: "Mato Grosso", id: 51 }, { nome: "Mato Grosso do Sul", id: 50 },
+            { nome: "Minas Gerais", id: 31 }, { nome: "Pará", id: 15 },
+            { nome: "Paraíba", id: 25 }, { nome: "Paraná", id: 41 },
+            { nome: "Pernambuco", id: 26 }, { nome: "Piauí", id: 22 },
+            { nome: "Rio de Janeiro", id: 33 }, { nome: "Rio Grande do Norte", id: 24 },
+            { nome: "Rio Grande do Sul", id: 43 }, { nome: "Rondônia", id: 11 },
+            { nome: "Roraima", id: 14 }, { nome: "Santa Catarina", id: 42 },
+            { nome: "São Paulo", id: 35 }, { nome: "Sergipe", id: 28 },
+            { nome: "Tocantins", id: 17 }
+        ];
+
+        // Populate states dropdown
+        const inputEstado = document.getElementById('inputEstado');
+        const inputCidade = document.getElementById('inputCidade');
+        const inputWhatsapp = document.getElementById('inputWhatsapp');
+
+        // WhatsApp mask: (99) 99999-9999
+        inputWhatsapp.addEventListener('input', () => {
+            let v = inputWhatsapp.value.replace(/\D/g, '').substring(0, 11);
+            if (v.length > 7) v = '(' + v.substring(0, 2) + ') ' + v.substring(2, 7) + '-' + v.substring(7);
+            else if (v.length > 2) v = '(' + v.substring(0, 2) + ') ' + v.substring(2);
+            else if (v.length > 0) v = '(' + v;
+            inputWhatsapp.value = v;
+        });
+
+        ESTADOS.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(e => {
+            const opt = document.createElement('option');
+            opt.value = e.nome;
+            opt.dataset.ibgeId = e.id;
+            opt.textContent = e.nome;
+            inputEstado.appendChild(opt);
+        });
+
+        // On state change, fetch ALL cities from IBGE API
+        inputEstado.addEventListener('change', async () => {
+            const selectedOpt = inputEstado.options[inputEstado.selectedIndex];
+            const ibgeId = selectedOpt?.dataset?.ibgeId;
+            inputCidade.innerHTML = '';
+
+            if (!inputEstado.value || !ibgeId) {
+                inputCidade.disabled = true;
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'Selecione o estado primeiro';
+                inputCidade.appendChild(opt);
+                return;
+            }
+
+            inputCidade.disabled = true;
+            const loadOpt = document.createElement('option');
+            loadOpt.value = '';
+            loadOpt.textContent = 'Carregando cidades...';
+            inputCidade.appendChild(loadOpt);
+
+            try {
+                const resp = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados/' + ibgeId + '/municipios?orderBy=nome');
+                const cidades = await resp.json();
+                inputCidade.innerHTML = '';
+                const defaultOpt = document.createElement('option');
+                defaultOpt.value = '';
+                defaultOpt.textContent = 'Selecione a cidade';
+                inputCidade.appendChild(defaultOpt);
+                cidades.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.nome;
+                    opt.textContent = c.nome;
+                    inputCidade.appendChild(opt);
+                });
+                inputCidade.disabled = false;
+            } catch (err) {
+                console.error('Erro ao carregar cidades:', err);
+                inputCidade.innerHTML = '';
+                const errOpt = document.createElement('option');
+                errOpt.value = '';
+                errOpt.textContent = 'Erro ao carregar. Tente novamente.';
+                inputCidade.appendChild(errOpt);
+            }
+        });
+
+        // ===== STATE =====
+        let isSignUp = false;
+        let isProcessingAuth = false; // Flag to prevent redirect during signup/login
+
+        // DOM
+        const form = document.getElementById('authForm');
+        const fieldNome = document.getElementById('fieldNome');
+        const fieldTipo = document.getElementById('fieldTipo');
+        const fieldEstado = document.getElementById('fieldEstado');
+        const fieldCidade = document.getElementById('fieldCidade');
+        const inputNome = document.getElementById('inputNome');
+        const inputEmail = document.getElementById('inputEmail');
+        const inputSenha = document.getElementById('inputSenha');
+        const btnSubmit = document.getElementById('btnSubmit');
+        const formTitle = document.getElementById('formTitle');
+        const formSubtitle = document.getElementById('formSubtitle');
+        const toggleText = document.getElementById('toggleText');
+        const toggleLink = document.getElementById('toggleLink');
+        const msgFeedback = document.getElementById('msgFeedback');
+        const msgIcon = document.getElementById('msgIcon');
+        const msgText = document.getElementById('msgText');
+        const forgotPassword = document.getElementById('forgotPassword');
+
+        // Redirect target after login: ?next=URL or default to index.html
+        function getRedirectTarget() {
+            try {
+                const p = new URLSearchParams(window.location.search);
+                const next = p.get('next');
+                // Only allow same-origin relative paths
+                if (next && /^[\w./?=&_-]+$/.test(next) && !next.startsWith('//')) {
+                    return next;
+                }
+            } catch (_) { }
+            return 'index.html';
+        }
+
+        // If already logged in (and not anonymous), redirect to platform
+        onAuthStateChanged(auth, (user) => {
+            if (user && !user.isAnonymous && !isProcessingAuth) {
+                window.location.href = getRedirectTarget();
+            }
+        });
+
+        // ===== FORMAT NAME =====
+        function formatarNome(nome) {
+            // Trim and limit to 15 characters
+            nome = nome.trim().substring(0, 15);
+            if (!nome) return '';
+            // First letter uppercase, rest lowercase
+            return nome.charAt(0).toUpperCase() + nome.slice(1).toLowerCase();
+        }
+
+        // ===== TOGGLE LOGIN / SIGNUP =====
+        window.toggleMode = function () {
+            isSignUp = !isSignUp;
+            hideFeedback();
+
+            const signupFields = document.querySelectorAll('.field-signup');
+
+            if (isSignUp) {
+                formTitle.textContent = 'Criar sua conta';
+                formSubtitle.textContent = 'Preencha os dados para começar';
+                btnSubmit.querySelector('.btn-text').textContent = 'Criar Conta';
+                toggleText.textContent = 'Já tem uma conta?';
+                toggleLink.textContent = 'Fazer login';
+                signupFields.forEach(f => f.classList.add('visible'));
+                inputNome.required = true;
+                forgotPassword.style.display = 'none';
+            } else {
+                formTitle.textContent = 'Acesse a plataforma';
+                formSubtitle.textContent = 'Entre com sua conta para continuar';
+                btnSubmit.querySelector('.btn-text').textContent = 'Entrar';
+                toggleText.textContent = 'Não tem conta?';
+                toggleLink.textContent = 'Criar conta';
+                signupFields.forEach(f => f.classList.remove('visible'));
+                inputNome.required = false;
+                forgotPassword.style.display = 'block';
+            }
+        };
+
+        // ===== FEEDBACK =====
+        function showFeedback(message, type = 'error') {
+            msgIcon.textContent = type === 'error' ? '!' : '';
+            msgText.textContent = message;
+            msgFeedback.className = 'msg-feedback show ' + type;
+        }
+
+        function hideFeedback() {
+            msgFeedback.className = 'msg-feedback';
+        }
+
+        // ===== ERROR TRANSLATION =====
+        function traduzirErro(code) {
+            const erros = {
+                'auth/email-already-in-use': 'Este e-mail já está cadastrado. Faça login.',
+                'auth/invalid-email': 'E-mail inválido. Verifique o formato.',
+                'auth/weak-password': 'Senha fraca. Use pelo menos 6 caracteres.',
+                'auth/user-not-found': 'Nenhuma conta encontrada com esse e-mail.',
+                'auth/wrong-password': 'Senha incorreta. Tente novamente.',
+                'auth/invalid-credential': 'E-mail ou senha incorretos.',
+                'auth/too-many-requests': 'Muitas tentativas. Aguarde e tente depois.',
+                'auth/network-request-failed': 'Erro de conexão. Verifique sua internet.',
+            };
+            return erros[code] || 'Ocorreu um erro. Tente novamente.';
+        }
+
+        // ===== FORM SUBMIT =====
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideFeedback();
+
+            const email = inputEmail.value.trim();
+            const senha = inputSenha.value;
+            const nomeRaw = inputNome.value.trim();
+
+            if (isSignUp) {
+                // Validate all sign-up fields
+                if (!nomeRaw) {
+                    showFeedback('Preencha seu nome.');
+                    return;
+                }
+
+                const tipoSelecionado = document.querySelector('input[name="tipo"]:checked');
+                if (!tipoSelecionado) {
+                    showFeedback('Selecione se você é Aluno ou Professor.');
+                    return;
+                }
+
+                const estado = inputEstado.value;
+                if (!estado) {
+                    showFeedback('Selecione seu estado.');
+                    return;
+                }
+
+                const cidade = inputCidade.value;
+                if (!cidade) {
+                    showFeedback('Selecione sua cidade.');
+                    return;
+                }
+
+                const whatsapp = inputWhatsapp.value.trim();
+                const whatsappDigits = whatsapp.replace(/\D/g, '');
+                if (!whatsapp || whatsappDigits.length < 10) {
+                    showFeedback('Preencha seu WhatsApp corretamente.');
+                    return;
+                }
+
+                // Format name
+                const nomeFormatado = formatarNome(nomeRaw);
+
+                // Loading state
+                btnSubmit.classList.add('loading');
+                btnSubmit.disabled = true;
+                isProcessingAuth = true;
+
+                try {
+                    // === CREATE ACCOUNT ===
+                    const cred = await createUserWithEmailAndPassword(auth, email, senha);
+                    const user = cred.user;
+
+                    // Update display name
+                    await updateProfile(user, { displayName: nomeFormatado });
+
+                    // Save profile in Realtime DB
+                    await set(ref(db, 'usuarios/' + user.uid), {
+                        nome: nomeFormatado,
+                        email: email,
+                        tipo: tipoSelecionado.value,
+                        estado: estado,
+                        cidade: cidade,
+                        whatsapp: whatsapp,
+                        dataCriacao: new Date().toISOString(),
+                        ultimoLogin: new Date().toISOString()
+                    });
+
+                    // Log this login
+                    await registrarLogin(user, nomeFormatado);
+
+                    // Redirect
+                    window.location.href = getRedirectTarget();
+
+                } catch (err) {
+                    console.error('Erro no cadastro:', err);
+                    isProcessingAuth = false;
+                    if (err.code === 'PERMISSION_DENIED' || (err.message && err.message.includes('PERMISSION_DENIED'))) {
+                        showFeedback('Conta criada, mas erro ao salvar perfil. Verifique as regras do Firebase Realtime Database.');
+                    } else {
+                        showFeedback(traduzirErro(err.code));
+                    }
+                    btnSubmit.classList.remove('loading');
+                    btnSubmit.disabled = false;
+                }
+
+            } else {
+                // === LOGIN ===
+                btnSubmit.classList.add('loading');
+                btnSubmit.disabled = true;
+                isProcessingAuth = true;
+
+                try {
+                    const cred = await signInWithEmailAndPassword(auth, email, senha);
+                    const user = cred.user;
+
+                    // Monta nome base
+                    let nomeLogin = user.displayName || email.split('@')[0] || 'Usuário';
+
+                    // Verifica/cria perfil no Realtime Database
+                    try {
+                        const snap = await get(ref(db, 'usuarios/' + user.uid));
+                        if (snap.exists()) {
+                            const perfil = snap.val();
+                            if (perfil.nome) nomeLogin = perfil.nome;
+                            // Atualiza último login
+                            await set(ref(db, 'usuarios/' + user.uid + '/ultimoLogin'), new Date().toISOString());
+                        } else {
+                            // Perfil não existe — cria agora
+                            await set(ref(db, 'usuarios/' + user.uid), {
+                                nome: nomeLogin,
+                                email: user.email,
+                                tipo: 'professor',
+                                estado: '',
+                                cidade: '',
+                                dataCriacao: new Date().toISOString(),
+                                ultimoLogin: new Date().toISOString()
+                            });
+                        }
+                    } catch (dbErr) {
+                        console.error('Erro ao acessar Realtime Database:', dbErr.code, dbErr.message);
+                        // Não bloqueia o login, mas avisa no console
+                    }
+
+                    // Log this login
+                    await registrarLogin(user, nomeLogin);
+
+                    // Redirect
+                    window.location.href = getRedirectTarget();
+
+                } catch (err) {
+                    console.error('Erro no login:', err);
+                    isProcessingAuth = false;
+                    showFeedback(traduzirErro(err.code));
+                    btnSubmit.classList.remove('loading');
+                    btnSubmit.disabled = false;
+                }
+            }
+        });
+
+        // ===== LOGIN LOGGING =====
+        async function registrarLogin(user, nome) {
+            const loginRef = push(ref(db, 'logins/' + user.uid));
+            const loginKey = loginRef.key;
+            await set(loginRef, {
+                email: user.email,
+                nome: nome || user.displayName || '',
+                entrada: new Date().toISOString(),
+                saida: '',
+                timestampEntrada: Date.now(),
+                timestampSaida: 0
+            });
+            // Save the login key so we can update logout time later
+            sessionStorage.setItem('alquilab_login_key', loginKey);
+            sessionStorage.setItem('alquilab_login_uid', user.uid);
+        }
+
+        // ===== PASSWORD RESET =====
+        const resetOverlay = document.getElementById('resetOverlay');
+        const resetClose = document.getElementById('resetClose');
+        const resetBtn = document.getElementById('resetBtn');
+        const resetEmail = document.getElementById('resetEmail');
+        const resetMsg = document.getElementById('resetMsg');
+
+        window.openResetModal = function () {
+            resetOverlay.classList.add('show');
+            resetEmail.value = inputEmail.value || '';
+            resetMsg.className = 'reset-msg';
+            resetMsg.textContent = '';
+        };
+
+        resetClose.addEventListener('click', () => {
+            resetOverlay.classList.remove('show');
+        });
+
+        resetOverlay.addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                resetOverlay.classList.remove('show');
+            }
+        });
+
+        resetBtn.addEventListener('click', async () => {
+            const email = resetEmail.value.trim();
+            if (!email) {
+                resetMsg.textContent = 'Digite um e-mail válido.';
+                resetMsg.className = 'reset-msg show error';
+                return;
+            }
+
+            resetBtn.disabled = true;
+            resetBtn.textContent = 'Enviando...';
+
+            try {
+                await sendPasswordResetEmail(auth, email);
+                resetMsg.textContent = 'Link de redefinição enviado! Verifique seu e-mail.';
+                resetMsg.className = 'reset-msg show success';
+                setTimeout(() => {
+                    resetOverlay.classList.remove('show');
+                }, 3000);
+            } catch (err) {
+                console.error(err);
+                if (err.code === 'auth/user-not-found') {
+                    resetMsg.textContent = 'Nenhuma conta encontrada com esse e-mail.';
+                } else if (err.code === 'auth/invalid-email') {
+                    resetMsg.textContent = 'E-mail inválido. Verifique o formato.';
+                } else {
+                    resetMsg.textContent = 'Erro ao enviar. Tente novamente.';
+                }
+                resetMsg.className = 'reset-msg show error';
+            } finally {
+                resetBtn.disabled = false;
+                resetBtn.textContent = 'Enviar Link';
+            }
+        });
+
+        // Allow Enter key in reset modal
+        resetEmail.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') resetBtn.click();
+        });
+    </script>
+
+</body>
+
+</html>
