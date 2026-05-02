@@ -1204,9 +1204,10 @@ math-field::part(menu-toggle){display:none !important}
 
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {getAuth,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {getAuth,onAuthStateChanged,signInAnonymously} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {getDatabase,ref,onValue,push,set,update,remove,get,runTransaction} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import {TEMAS,BNCC_CODES,fuzzySearchTemas,bnccSugeridos} from "./dados.js";
+import AlquiLabAuth from "../auth-guest.js";
 
 const firebaseConfig={apiKey:"AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",authDomain:"profbase-5f9b0.firebaseapp.com",databaseURL:"https://profbase-5f9b0-default-rtdb.firebaseio.com",projectId:"profbase-5f9b0",storageBucket:"profbase-5f9b0.firebasestorage.app",messagingSenderId:"826412057766",appId:"1:826412057766:web:729e6e24ce7587417fe067"};
 const ADMIN_EMAIL='gilbertofernandessc@gmail.com';
@@ -1227,22 +1228,46 @@ let finalizingQid=null;
 let headerData={escola:'',professor:'',aluno:'',serie:'',data:'',logo:''};
 let relayoutTimer=null;
 
+AlquiLabAuth.init(auth, { loginPath: '../login.html' });
 let currentUser=null;
+let isGuestMode=false;
+function guestBlock(motivo){
+  AlquiLabAuth.requireLogin(motivo || 'Esta ação está disponível apenas para usuários cadastrados. Crie uma conta gratuita para liberar este recurso.');
+}
+window.guestBlock = guestBlock;
 onAuthStateChanged(auth,async user=>{
-  if(!user){ window.location.href='../index.html'; return }
+  if(!user){
+    try { await signInAnonymously(auth); } catch (e) {
+      console.warn('Falha ao iniciar modo de teste:', e);
+      window.location.href='../index.html';
+    }
+    return;
+  }
   currentUser=user;
+  isGuestMode = user.isAnonymous === true;
   if(user.email===ADMIN_EMAIL) $('linkAdmin').style.display='inline-flex';
-  const nome = user.displayName || (user.email ? user.email.split('@')[0] : '');
+  const nome = isGuestMode ? 'Visitante' : (user.displayName || (user.email ? user.email.split('@')[0] : ''));
   if(nome) $('brandUser').textContent = nome;
   $('authLoader').style.display='none';
-  // Verifica bloqueio (modo pânico) silenciosamente
-  try{
-    const snap = await get(ref(db,'usuarios/'+user.uid+'/blocked'));
-    if(snap && snap.exists() && snap.val()===true){
-      mostrarBloqueio();
-      return;
-    }
-  }catch(_){}
+  if (isGuestMode) {
+    AlquiLabAuth.showTestModeBanner({
+      msg: 'Você está navegando o Banco de Questões em <u>modo de teste</u>. Você pode ver as questões mas não pode criar nem salvar nada.'
+    });
+    AlquiLabAuth.showTestModeIntro('repositorio',
+      'Banco de Questões — modo de teste',
+      'No modo de teste você pode visualizar as questões e montar um cabeçalho, mas <b>não pode criar questões, salvar provas ou inserir questões na prova</b>. Crie uma conta gratuita para acesso completo.'
+    );
+  }
+  // Verifica bloqueio (modo pânico) silenciosamente — só para usuários logados
+  if (!isGuestMode) {
+    try{
+      const snap = await get(ref(db,'usuarios/'+user.uid+'/blocked'));
+      if(snap && snap.exists() && snap.val()===true){
+        mostrarBloqueio();
+        return;
+      }
+    }catch(_){}
+  }
   renderSidebar();
 });
 
@@ -1703,12 +1728,14 @@ $('previewClose').onclick=()=>$('previewOv').classList.remove('show');
 $('previewCancel').onclick=()=>$('previewOv').classList.remove('show');
 $('previewAdd').onclick=()=>{
   if(!currentQid) return;
+  if (isGuestMode) { $('previewOv').classList.remove('show'); guestBlock('Inserir questões na prova está disponível apenas para usuários cadastrados.'); return; }
   blocks.push({bid:newId(),type:'banco',qid:currentQid,altura:null});
   $('previewOv').classList.remove('show');
   renderDoc();
 };
 $('previewEdit').onclick=()=>{
   if(!currentQid) return;
+  if (isGuestMode) { $('previewOv').classList.remove('show'); guestBlock('Editar questões está disponível apenas para usuários cadastrados.'); return; }
   const q=questoes.find(x=>x.id===currentQid); if(!q) return;
   $('previewOv').classList.remove('show');
   openManualPopup(null, {qid: currentQid});
@@ -1777,7 +1804,10 @@ $('previewDuplicate').onclick=async ()=>{
 };
 
 /* ===== Manual question popup + math keyboard ===== */
-$('btnManual').onclick=()=>openManualPopup(null);
+$('btnManual').onclick=()=>{
+  if (isGuestMode) { guestBlock('A criação de questões está disponível apenas para usuários cadastrados.'); return; }
+  openManualPopup(null);
+};
 $('manualClose').onclick=()=>$('manualOv').classList.remove('show');
 $('manualCancel').onclick=()=>$('manualOv').classList.remove('show');
 
@@ -3099,10 +3129,16 @@ function escAttr(s){return esc(s).replace(/"/g,'&quot;')}
 let currentProvaId=null;
 let currentProvaNome='';
 
-$('btnSalvarProva').onclick=()=>openSalvarProva();
+$('btnSalvarProva').onclick=()=>{
+  if (isGuestMode) { guestBlock('Salvar provas está disponível apenas para usuários cadastrados.'); return; }
+  openSalvarProva();
+};
 $('salvarProvaClose').onclick=()=>$('salvarProvaOv').classList.remove('show');
 $('salvarProvaCancel').onclick=()=>$('salvarProvaOv').classList.remove('show');
-$('btnMinhasProvas').onclick=()=>openMinhasProvas();
+$('btnMinhasProvas').onclick=()=>{
+  if (isGuestMode) { guestBlock('Suas provas salvas estão disponíveis apenas para usuários cadastrados.'); return; }
+  openMinhasProvas();
+};
 $('provasListClose').onclick=()=>$('provasListOv').classList.remove('show');
 $('provasListCancel').onclick=()=>$('provasListOv').classList.remove('show');
 
@@ -3116,6 +3152,7 @@ function openSalvarProva(){
 
 $('salvarProvaOk').onclick=async ()=>{
   if(!currentUser) return;
+  if (isGuestMode) { $('salvarProvaOv').classList.remove('show'); guestBlock('Salvar provas está disponível apenas para usuários cadastrados.'); return; }
   const nome=$('salvarProvaNome').value.trim();
   if(!nome){ alert('Informe um nome para a prova.'); return }
   const dados={
@@ -3561,6 +3598,7 @@ $('hdrEdDelete').onclick=async ()=>{
 
 $('hdrEditorSave').onclick=async ()=>{
   if(!editingHdrTpl || !currentUser) return;
+  if (isGuestMode) { guestBlock('Salvar cabeçalhos personalizados está disponível apenas para usuários cadastrados. Você pode continuar usando o cabeçalho atual sem salvá-lo.'); return; }
   editingHdrTpl.nome = $('hdrName').value.trim() || 'Sem nome';
   const isAdmin = currentUser.email===ADMIN_EMAIL;
   const wantsPadrao = isAdmin && $('hdrIsPadrao') && $('hdrIsPadrao').checked;
