@@ -388,8 +388,9 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 <!-- SCRIPTS -->
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import{getAuth,onAuthStateChanged,signInAnonymously}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import{getDatabase,ref,set,get,update,remove,push}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import AlquiLabAuth from "../auth-guest.js";
 
 const fbConf={apiKey:"AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",authDomain:"profbase-5f9b0.firebaseapp.com",databaseURL:"https://profbase-5f9b0-default-rtdb.firebaseio.com",projectId:"profbase-5f9b0",storageBucket:"profbase-5f9b0.firebasestorage.app",messagingSenderId:"826412057766",appId:"1:826412057766:web:729e6e24ce7587417fe067"};
 const app=initializeApp(fbConf),auth=getAuth(app),db=getDatabase(app);
@@ -556,10 +557,29 @@ function clientToCanvas(cx,cy){
 }
 
 /* ══════════════ AUTH ══════════════ */
-onAuthStateChanged(auth,u=>{
-  if(!u){$('authWarn').style.display='flex';return}
+AlquiLabAuth.init(auth, { loginPath: '../login.html' });
+let isGuestMode = false;
+
+onAuthStateChanged(auth,async u=>{
+  if(!u){
+    try { await signInAnonymously(auth); } catch (e) {
+      console.warn('Falha ao iniciar modo de teste:', e);
+      $('authWarn').style.display='flex';
+    }
+    return;
+  }
+  isGuestMode = u.isAnonymous === true;
   $('authWarn').style.display='none';
   user=u;
+  if (isGuestMode) {
+    AlquiLabAuth.showTestModeBanner({
+      msg: 'Você está usando o Editor de Fluxo em <u>modo de teste</u>. Apenas 1 atividade é permitida; criar outra apaga a anterior.'
+    });
+    AlquiLabAuth.showTestModeIntro('fluxo-editor',
+      'Editor de Fluxo — modo de teste',
+      'Você pode criar <b>apenas 1 atividade</b> neste modo. Ao criar uma nova, a anterior será apagada automaticamente. Crie uma conta gratuita para acesso ilimitado.'
+    );
+  }
   loadLists();
   const urlId=new URLSearchParams(location.search).get('id');
   if(urlId) loadFlow(urlId); else initNewFlowInMemory();
@@ -662,6 +682,20 @@ function _doSave(){
     $('saveBadge').textContent='Salvando...';$('saveBadge').className='save-badge pending';
     try{
       if(!flowId){
+        // Modo teste: apenas 1 fluxo permitido — apaga os anteriores antes
+        if (isGuestMode) {
+          try {
+            const snap = await get(ref(db,'fluxos/'+user.uid));
+            if (snap.exists()) {
+              const dels = {};
+              snap.forEach(c => {
+                dels['fluxos/'+user.uid+'/'+c.key] = null;
+                dels['usuarios/'+user.uid+'/meus_fluxos/'+c.key] = null;
+              });
+              await update(ref(db), dels);
+            }
+          } catch(e){ console.warn('Limpeza de fluxos guest falhou:', e); }
+        }
         // Primeira gravação: usa push() do próprio Firebase para gerar o ID
         const newRef = push(ref(db,'fluxos/'+user.uid));
         flowId = newRef.key;
