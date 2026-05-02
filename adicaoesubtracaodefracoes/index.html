@@ -1064,7 +1064,44 @@
             });
         }
 
+        // ===== MODO VISITANTE (acesso direto pela plataforma sem login) =====
+        const FRACOES_GUEST_MODE = (function () {
+            try {
+                const p = new URLSearchParams(window.location.search);
+                return p.get('guest') === '1';
+            } catch (e) { return false; }
+        })();
+
+        function aplicarModoVisitanteFracoes() {
+            if (!FRACOES_GUEST_MODE) return false;
+            // Pula a tela de identificação e usa um perfil padrão local (sem Firebase)
+            try {
+                localStorage.setItem('alunoNome', 'Visitante');
+                localStorage.setItem('alunoSerie', '— modo de teste');
+            } catch (_) { }
+            // Esconde botões "Área do Professor" para visitante
+            document.querySelectorAll('.btn-area-prof-login, .btn-prof-discreto-rodape').forEach(b => { b.style.display = 'none'; });
+            // Banner de modo teste
+            if (!document.getElementById('alFracoesGuestBanner')) {
+                const banner = document.createElement('div');
+                banner.id = 'alFracoesGuestBanner';
+                banner.style.cssText = 'position:sticky;top:0;z-index:9999;background:linear-gradient(90deg,#FFB800,#FF6B00);color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:.82rem;font-weight:700;padding:10px 18px;text-align:center;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;box-shadow:0 4px 14px rgba(255,107,0,.25)';
+                banner.innerHTML = 'Você está usando Frações em <u>modo de teste</u>. A classificação e a liberação da atividade ficam disponíveis apenas para usuários cadastrados. ' +
+                    '<a href="../login.html?next=' + encodeURIComponent('adicaoesubtracaodefracoes/gerador_link.html') + '" style="background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.35);padding:5px 14px;border-radius:50px;font-weight:700;font-size:.76rem;text-decoration:none;">Criar conta gratuita</a>';
+                document.body.insertBefore(banner, document.body.firstChild);
+            }
+            return true;
+        }
+
         window.checkLogin = function() {
+            // Visitante: pula a identificação e abre direto
+            if (FRACOES_GUEST_MODE) {
+                aplicarModoVisitanteFracoes();
+                aplicarDadosUsuario('Visitante', '— modo de teste');
+                document.getElementById('modalLogin').classList.remove('visivel');
+                mostrarApp();
+                return;
+            }
             const nomeSalvo = localStorage.getItem('alunoNome');
             const serieSalva = localStorage.getItem('alunoSerie');
             if (nomeSalvo && serieSalva) {
