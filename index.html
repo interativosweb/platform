@@ -4,25 +4,113 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AlquiLab — Acesso</title>
-    <meta name="description" content="Login para a plataforma AlquiLab - Laboratório de Matemática." />
+    <title>AlquiLab — Plataforma de Matemática</title>
+    <meta name="description"
+        content="Plataforma educacional AlquiLab. Acesse ferramentas, atividades e jogos organizados por tema." />
     <style>
         :root {
-            --bg-page: #f5f5f7;
-            --card-bg: #ffffff;
-            --text-main: #1d1d1f;
-            --text-light: #86868b;
-            --accent: #0071e3;
-            --accent-hover: #0077ED;
-            --accent-dark: #005bb5;
-            --success: #34c759;
-            --error: #ff3b30;
-            --radius: 16px;
-            --radius-lg: 20px;
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.10);
-            --border-light: #e5e5ea;
-            --bg-secondary: #f2f2f7;
+
+            /* ---------- 1. CORES BASE ---------- */
+            --bg-page:        #FFFFFF;
+            --bg-panel:       #F2F2F2;
+            --bg-panel-hover: #E6E6E6;
+            --card-bg:        #FFFFFF;
+            --card-border:    #F2F2F2;
+
+            --color-black:    #00010D;
+            --color-white:    #FFFFFF;
+
+            --text-main:      #00010D;
+            --text-strong:    #4a5169;
+            --text-muted:     #8b91a8;
+            --text-soft:      #b6bccf;
+
+            /* ---------- 2. CORES DOS CARDS ---------- */
+            --c1: #0067FF;
+            --c2: #FF006B;
+            --c3: #FFB800;
+            --c4: #00C16E;
+            --c5: #9D00FF;
+            --c6: #FF6B00;
+            --c7: #00B8D9;
+            --c8: #FF3D00;
+            --c9: #6B00FF;
+
+            --c1-soft: #E0EEFF;
+            --c2-soft: #FFE0EE;
+            --c3-soft: #FFF1CC;
+            --c4-soft: #D6F5E5;
+            --c5-soft: #F1D9FF;
+            --c6-soft: #FFE2CC;
+            --c7-soft: #D1F1F7;
+            --c8-soft: #FFD9CC;
+            --c9-soft: #E3D1FF;
+
+            /* ---------- 3. SEARCH ---------- */
+            --search-bg:        #00b300;
+            --search-bg-focus:  #00b300;
+            --search-text:      #FFFFFF;
+            --search-placeholder: rgba(255,255,255,.85);
+            --search-btn-bg:        #00010D;
+            --search-btn-bg-hover:  #009900;
+            --search-btn-color:     #FFFFFF;
+            --search-shadow:        0 14px 40px rgba(0,179,0,.28);
+            --search-shadow-focus:  0 18px 50px rgba(0,179,0,.42);
+
+            /* ---------- 4. NAVEGAÇÃO TOPO ---------- */
+            --nav-link-color:        var(--text-muted);
+            --nav-link-hover-color:  var(--text-main);
+            --nav-link-hover-bg:     var(--bg-panel);
+            --nav-active-bg:         var(--text-main);
+            --nav-active-color:      var(--color-white);
+
+            /* ---------- 5. CHIPS DE CATEGORIA ---------- */
+            --chip-bg:           var(--bg-panel);
+            --chip-color:        var(--text-muted);
+            --chip-hover-bg:     var(--bg-panel-hover);
+            --chip-hover-color:  var(--text-main);
+            --chip-active-bg:    var(--text-main);
+            --chip-active-color: var(--color-white);
+
+            /* ---------- 6. CARDS ---------- */
+            --card-radius:        22px;
+            --card-padding:       24px 24px 22px;
+            --card-min-height:    200px;
+            --card-shadow:        0 8px 30px rgba(35,50,100,.06);
+            --card-shadow-hover:  0 14px 40px rgba(35,50,100,.10);
+            --card-tag-radius:    50px;
+            --card-arrow-size:    34px;
+            --card-arrow-bg:      var(--bg-panel);
+
+            /* ---------- 7. ANIMAÇÕES ---------- */
+            --dur-fast:    0.18s;
+            --dur:         0.28s;
+            --dur-spring:  0.45s;
+
+            --ease:        cubic-bezier(.4, 0, .2, 1);
+            --ease-spring: cubic-bezier(.16, 1, .3, 1);
+            --ease-bounce: cubic-bezier(.68, -.55, .27, 1.55);
+
+            --t-fast:   var(--dur-fast)   var(--ease);
+            --t:        var(--dur)        var(--ease);
+            --t-spring: var(--dur-spring) var(--ease-spring);
+
+            /* ---------- 8. HOVER ---------- */
+            --hover-lift:       -6px;
+            --hover-scale:      1;
+            --hover-arrow-rot:  -45deg;
+            --hover-icon-scale: 1.05;
+            --hover-chip-lift:  -1px;
+
+            /* ---------- 9. ENTRADA DOS CARDS ---------- */
+            --enter-distance:  14px;
+            --enter-stagger:   0.05s;
+            --enter-duration:  0.5s;
+
+            /* ---------- 10. RAIOS GERAIS ---------- */
+            --radius-sm: 14px;
+            --radius:    22px;
+            --radius-lg: 32px;
         }
 
         * {
@@ -31,821 +119,917 @@
             box-sizing: border-box;
         }
 
+        html, body {
+            height: 100%;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg-page);
             color: var(--text-main);
-            min-height: 100vh;
             -webkit-font-smoothing: antialiased;
-            display: flex;
-        }
-
-        /* ===== SPLIT SCREEN ===== */
-        .split-left {
-            flex: 1;
-            background: linear-gradient(135deg, #0071e3 0%, #005bb5 50%, #003d82 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
             min-height: 100vh;
-        }
-
-        .split-left::before {
-            content: '';
-            position: absolute;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, transparent 70%);
-            top: -100px;
-            right: -100px;
-            border-radius: 50%;
-        }
-
-        .split-left::after {
-            content: '';
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.04) 0%, transparent 70%);
-            bottom: -80px;
-            left: -80px;
-            border-radius: 50%;
-        }
-
-        .brand-content {
-            text-align: center;
-            z-index: 2;
-            animation: fadeInUp 0.8s ease;
-        }
-
-        .brand-logo {
-            width: 90px;
-            height: 90px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 2.8rem;
-            font-weight: 700;
-            margin: 0 auto 28px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-        }
-
-        .brand-title {
-            font-size: 3rem;
-            font-weight: 800;
-            color: white;
-            letter-spacing: -1px;
-            margin-bottom: 8px;
-        }
-
-        .brand-title span {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .brand-subtitle {
-            font-size: 1rem;
-            color: rgba(255, 255, 255, 0.6);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .brand-desc {
-            margin-top: 40px;
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 0.85rem;
-            font-weight: 500;
-            max-width: 280px;
-            line-height: 1.6;
-        }
-
-        /* ===== RIGHT SIDE (FORM) ===== */
-        .split-right {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            min-height: 100vh;
-            background: var(--bg-page);
-            overflow-y: auto;
-        }
-
-        .form-container {
-            width: 100%;
-            max-width: 420px;
-            animation: fadeInUp 0.6s ease 0.2s both;
-        }
-
-        .form-header {
-            margin-bottom: 36px;
-        }
-
-        .form-header h2 {
-            font-size: 1.8rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            color: var(--text-main);
-            margin-bottom: 8px;
-        }
-
-        .form-header p {
-            font-size: 0.95rem;
-            color: var(--text-light);
-            font-weight: 500;
-        }
-
-        /* ===== FORM FIELDS ===== */
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-light);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 14px 18px;
-            background: var(--card-bg);
-            border: 1.5px solid var(--border-light);
-            border-radius: 14px;
-            color: var(--text-main);
-            font-size: 1rem;
-            font-family: inherit;
-            font-weight: 500;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .form-input::placeholder {
-            color: #c7c7cc;
-            font-weight: 400;
-        }
-
-        .form-input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
-        }
-
-        .form-input.error {
-            border-color: var(--error);
-            box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.1);
-        }
-
-        /* Select dropdown styling */
-        .form-select {
-            width: 100%;
-            padding: 14px 18px;
-            background: var(--card-bg);
-            border: 1.5px solid var(--border-light);
-            border-radius: 14px;
-            color: var(--text-main);
-            font-size: 1rem;
-            font-family: inherit;
-            font-weight: 500;
-            outline: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            appearance: none;
-            -webkit-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2386868b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 16px center;
-        }
-
-        .form-select:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
-        }
-
-        /* Radio group styling */
-        .radio-group {
-            display: flex;
-            gap: 12px;
-        }
-
-        .radio-option {
-            flex: 1;
-            position: relative;
-        }
-
-        .radio-option input[type="radio"] {
-            position: absolute;
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .radio-option label {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 14px 18px;
-            background: var(--card-bg);
-            border: 1.5px solid var(--border-light);
-            border-radius: 14px;
-            color: var(--text-light);
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            user-select: none;
-        }
-
-        .radio-option label:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-
-        .radio-option input[type="radio"]:checked+label {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: white;
-            box-shadow: 0 4px 14px rgba(0, 113, 227, 0.25);
-        }
-
-        /* Animated hidden fields (sign-up only) */
-        .field-signup {
-            max-height: 0;
-            overflow: hidden;
-            opacity: 0;
-            margin-bottom: 0;
-            transition: max-height 0.4s ease, opacity 0.3s ease, margin-bottom 0.3s ease;
-        }
-
-        .field-signup.visible {
-            max-height: 300px;
-            opacity: 1;
-            margin-bottom: 18px;
-        }
-
-        /* Password reset link */
-        .forgot-password {
-            text-align: right;
-            margin-top: -10px;
-            margin-bottom: 18px;
-        }
-
-        .forgot-password a {
-            font-size: 0.85rem;
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .forgot-password a:hover {
-            opacity: 0.7;
-        }
-
-        /* ===== BUTTONS ===== */
-        .btn-primary {
-            width: 100%;
-            padding: 16px;
-            background: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 14px;
-            font-size: 1rem;
-            font-family: inherit;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 8px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 113, 227, 0.3);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .btn-primary .spinner {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 2.5px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-            margin: 0 auto;
-        }
-
-        .btn-primary.loading .btn-text {
-            display: none;
-        }
-
-        .btn-primary.loading .spinner {
-            display: block;
-        }
-
-        /* ===== TOGGLE MODE ===== */
-        .toggle-mode {
-            text-align: center;
-            margin-top: 28px;
-            font-size: 0.9rem;
-            color: var(--text-light);
-            font-weight: 500;
-        }
-
-        .toggle-mode a {
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 700;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .toggle-mode a:hover {
-            opacity: 0.7;
-        }
-
-        /* ===== ERROR MESSAGE ===== */
-        .msg-feedback {
-            padding: 14px 18px;
-            border-radius: 12px;
-            font-size: 0.88rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            display: none;
-            align-items: center;
-            gap: 10px;
-            animation: fadeInUp 0.3s ease;
-        }
-
-        .msg-feedback.show {
-            display: flex;
-        }
-
-        .msg-feedback.error {
-            background: #fff2f0;
-            color: var(--error);
-            border: 1px solid rgba(255, 59, 48, 0.15);
-        }
-
-        .msg-feedback.success {
-            background: #f0faf3;
-            color: var(--success);
-            border: 1px solid rgba(52, 199, 89, 0.15);
-        }
-
-        /* ===== PASSWORD RESET MODAL ===== */
-        .reset-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            z-index: 5000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            animation: fadeInUp 0.3s ease;
-        }
-
-        .reset-overlay.show {
-            display: flex;
-        }
-
-        .reset-box {
-            background: white;
-            padding: 36px;
-            border-radius: 24px;
-            width: 400px;
-            max-width: 90vw;
-            text-align: center;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-            animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-        }
-
-        @keyframes popIn {
-            from {
-                transform: scale(0.95);
-                opacity: 0;
-            }
-
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        .reset-box .reset-close {
-            position: absolute;
-            top: 14px;
-            right: 14px;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: none;
-            background: var(--bg-secondary);
-            color: var(--text-light);
-            cursor: pointer;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .reset-box .reset-close:hover {
-            background: #e5e5ea;
-            color: var(--text-main);
-        }
-
-        .reset-title {
-            font-size: 1.3rem;
-            font-weight: 800;
-            margin-bottom: 6px;
-        }
-
-        .reset-sub {
-            font-size: 0.88rem;
-            color: var(--text-light);
-            margin-bottom: 22px;
-            font-weight: 500;
             line-height: 1.5;
         }
 
-        .reset-input {
-            width: 100%;
-            padding: 14px 18px;
-            background: var(--bg-secondary);
-            border: 1.5px solid var(--border-light);
-            border-radius: 12px;
-            color: var(--text-main);
-            font-size: 0.95rem;
-            font-family: inherit;
-            font-weight: 500;
-            outline: none;
-            margin-bottom: 12px;
-            transition: all 0.3s ease;
+        .page {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 32px 28px 60px;
         }
 
-        .reset-input:focus {
-            border-color: var(--accent);
-            background: white;
-            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+        /* ===== TOP NAV ===== */
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px 28px;
+            gap: 16px;
         }
 
-        .reset-btn {
-            width: 100%;
-            padding: 14px;
-            background: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 0.95rem;
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             font-weight: 700;
-            cursor: pointer;
-            font-family: inherit;
-            transition: all 0.25s ease;
-            margin-top: 4px;
+            font-size: 1.05rem;
+            color: var(--text-main);
+            letter-spacing: -0.2px;
         }
 
-        .reset-btn:hover {
-            background: #005bb5;
-            transform: translateY(-1px);
+        .brand-mark {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--c1), #3a8cff);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.95rem;
+            box-shadow: 0 6px 16px rgba(0, 103, 255, 0.35);
         }
 
-        .reset-msg {
-            font-size: 0.82rem;
-            font-weight: 600;
-            margin-top: 12px;
-            display: none;
+        .nav-links {
+            display: flex;
+            gap: 8px;
         }
 
-        .reset-msg.show {
-            display: block;
-        }
-
-        .reset-msg.error {
-            color: var(--error);
-        }
-
-        .reset-msg.success {
-            color: var(--success);
-        }
-
-        /* ===== ANIMATIONS ===== */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* ===== DECORATIVE SHAPES ===== */
-        .floating-shapes {
-            position: absolute;
-            inset: 0;
-            z-index: 1;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        .shape {
-            position: absolute;
-            border: 1.5px solid rgba(255, 255, 255, 0.08);
-            border-radius: 50%;
-            animation: float 20s infinite ease-in-out;
-        }
-
-        .shape:nth-child(1) {
-            width: 80px;
-            height: 80px;
-            top: 15%;
-            left: 10%;
-            animation-delay: 0s;
-        }
-
-        .shape:nth-child(2) {
-            width: 50px;
-            height: 50px;
-            top: 70%;
-            right: 15%;
-            animation-delay: -5s;
-        }
-
-        .shape:nth-child(3) {
-            width: 120px;
-            height: 120px;
-            bottom: 10%;
-            left: 30%;
-            animation-delay: -10s;
-        }
-
-        .shape:nth-child(4) {
-            width: 35px;
-            height: 35px;
-            top: 40%;
-            right: 25%;
-            animation-delay: -15s;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translate(0, 0) rotate(0deg);
-            }
-
-            25% {
-                transform: translate(15px, -20px) rotate(90deg);
-            }
-
-            50% {
-                transform: translate(-10px, 15px) rotate(180deg);
-            }
-
-            75% {
-                transform: translate(20px, 10px) rotate(270deg);
-            }
-        }
-
-        /* ===== FOOTER ===== */
-        .form-footer {
-            text-align: center;
-            margin-top: 40px;
-            font-size: 0.78rem;
-            color: #c7c7cc;
+        .nav-link {
+            position: relative;
+            background: transparent;
+            border: none;
+            color: var(--nav-link-color);
+            font-size: 0.95rem;
             font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            padding: 10px 22px;
+            border-radius: 50px;
+            transition: color var(--t), background var(--t), transform var(--t-fast);
+        }
+
+        .nav-link:hover {
+            color: var(--nav-link-hover-color);
+            background: var(--nav-link-hover-bg);
+        }
+
+        .nav-link:active {
+            transform: scale(0.97);
+        }
+
+        .nav-link.active {
+            color: var(--nav-active-color);
+            background: var(--nav-active-bg);
+        }
+
+        .nav-cta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-login {
+            border: none;
+            background: var(--text-main);
+            color: #fff;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.88rem;
+            padding: 10px 22px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform var(--t-fast), background var(--t), box-shadow var(--t);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-1px);
+            background: #2a3260;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+        }
+
+        .btn-login:active {
+            transform: scale(0.97);
+        }
+
+        .prof-area {
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .prof-info {
+            text-align: right;
+            line-height: 1.15;
+        }
+
+        .prof-name {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .prof-role {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-panel);
+            border: none;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform var(--t-fast), background var(--t);
+        }
+
+        .icon-btn:hover {
+            transform: translateY(-1px) scale(var(--hover-icon-scale));
+            background: var(--bg-panel-hover);
+        }
+
+        .icon-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* ===== HERO / SEARCH ===== */
+        .hero {
+            text-align: center;
+            margin: 8px auto 28px;
+            max-width: 720px;
+        }
+
+        .hero h2 {
+            font-size: 1.95rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.6px;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: 0.98rem;
+            margin-bottom: 26px;
+        }
+
+        .search-bar {
+            position: relative;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 20px 60px 20px 26px;
+            background: var(--search-bg);
+            color: var(--search-text);
+            border: none;
+            border-radius: 999px;
+            font-size: 1rem;
+            font-family: inherit;
+            font-weight: 600;
+            outline: none;
+            box-shadow: var(--search-shadow);
+            transition: transform var(--t), box-shadow var(--t), background var(--t);
+        }
+
+        .search-input::placeholder {
+            color: var(--search-placeholder);
+            font-weight: 500;
+        }
+
+        .search-input:focus {
+            background: var(--search-bg-focus);
+            transform: translateY(-1px);
+            box-shadow: var(--search-shadow-focus);
+        }
+
+        .search-go {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: var(--search-btn-bg);
+            color: var(--search-btn-color);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform var(--t-fast), background var(--t);
+        }
+
+        .search-go:hover {
+            background: var(--search-btn-bg-hover);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .search-go:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .search-go svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* ===== CHIPS ===== */
+        .chips {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 0 auto 32px;
+            max-width: 900px;
+        }
+
+        .chip {
+            padding: 8px 18px;
+            border-radius: 50px;
+            border: 1px solid transparent;
+            background: var(--chip-bg);
+            color: var(--chip-color);
+            font-family: inherit;
+            font-size: 0.84rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--t);
+        }
+
+        .chip:hover {
+            color: var(--chip-hover-color);
+            background: var(--chip-hover-bg);
+            transform: translateY(var(--hover-chip-lift));
+        }
+
+        .chip.active {
+            background: var(--chip-active-bg);
+            color: var(--chip-active-color);
+        }
+
+        /* ===== CARDS GRID ===== */
+        .grid-section {
+            margin-top: 6px;
+        }
+
+        .grid-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            padding: 0 4px;
+        }
+
+        .grid-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.3px;
+        }
+
+        .grid-meta {
+            font-size: 0.85rem;
+            color: #4a5169;
+            font-weight: 600;
+        }
+
+        .grid-meta b {
+            color: var(--text-main);
+            font-weight: 800;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+        }
+
+        /* ===== CARD ===== */
+        .card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: var(--card-bg);
+            border-radius: var(--card-radius);
+            padding: var(--card-padding);
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            min-height: var(--card-min-height);
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--card-border);
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(var(--enter-distance));
+            animation: cardIn var(--enter-duration) var(--ease-spring) forwards;
+            transition: transform var(--t), box-shadow var(--t), background var(--t), border-color var(--t);
+        }
+
+        .card:hover {
+            transform: translateY(var(--hover-lift)) scale(var(--hover-scale));
+            box-shadow: var(--card-shadow-hover);
+            background: var(--card-accent);
+            border-color: transparent;
+        }
+
+        .card:active {
+            transform: translateY(calc(var(--hover-lift) / 3)) scale(var(--hover-scale));
+        }
+
+        .card-title, .card-desc, .card-cta, .card-tag, .card-arrow, .card-foot {
+            transition: color var(--t), background var(--t), border-color var(--t);
+        }
+        .card:hover .card-title { color: #fff; }
+        .card:hover .card-desc  { color: rgba(255, 255, 255, .88); }
+        .card:hover .card-tag {
+            background: rgba(255, 255, 255, .18);
+            color: #fff;
+        }
+        .card:hover .card-cta   { color: #fff; }
+        .card:hover .card-foot  { border-top-color: rgba(255, 255, 255, .22); }
+        .card:hover .card-arrow {
+            background: #fff;
+            color: var(--card-accent);
+        }
+
+        .card-tag {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--card-accent);
+            background: var(--card-tag-bg);
+            padding: 4px 10px;
+            border-radius: var(--card-tag-radius);
+            margin-bottom: 10px;
+            width: fit-content;
+        }
+
+        .card-title {
+            font-size: 1.08rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.3px;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .card-desc {
+            font-size: 0.88rem;
+            color: #4a5169;
+            line-height: 1.5;
+            font-weight: 500;
+            flex: 1;
+            margin-bottom: 18px;
+        }
+
+        .card-foot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 14px;
+            border-top: 1px solid rgba(27, 34, 64, 0.06);
+        }
+
+        .card-cta {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--card-accent);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: gap var(--t-spring);
+        }
+
+        .card:hover .card-cta {
+            gap: 10px;
+        }
+
+        .card-cta svg {
+            width: 14px;
+            height: 14px;
+            transition: transform var(--t-spring);
+        }
+
+        .card:hover .card-cta svg {
+            transform: translateX(2px);
+        }
+
+        .card-arrow {
+            width: var(--card-arrow-size);
+            height: var(--card-arrow-size);
+            border-radius: 50%;
+            background: var(--card-arrow-bg);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background var(--t), color var(--t), transform var(--t-spring);
+        }
+
+        .card:hover .card-arrow {
+            transform: rotate(var(--hover-arrow-rot));
+        }
+
+        .card-arrow svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .acc-1 { --card-accent: var(--c1); --card-tag-bg: #e0eeff; }
+        .acc-2 { --card-accent: var(--c2); --card-tag-bg: #ffe0ee; }
+        .acc-3 { --card-accent: var(--c3); --card-tag-bg: #fff1cc; }
+        .acc-4 { --card-accent: var(--c4); --card-tag-bg: #d6f5e5; }
+        .acc-5 { --card-accent: var(--c5); --card-tag-bg: #f1d9ff; }
+        .acc-6 { --card-accent: var(--c6); --card-tag-bg: #ffe2cc; }
+        .acc-7 { --card-accent: var(--c7); --card-tag-bg: #d1f1f7; }
+        .acc-8 { --card-accent: var(--c8); --card-tag-bg: #ffd9cc; }
+        .acc-9 { --card-accent: var(--c9); --card-tag-bg: #e3d1ff; }
+
+        .card.wip .card-tag::after {
+            content: " · em breve";
+            font-weight: 600;
+            opacity: 0.7;
+        }
+
+        .empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty h3 {
+            color: var(--text-main);
+            font-size: 1.05rem;
+            margin-bottom: 6px;
+        }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(var(--enter-distance)); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .footer {
+            text-align: center;
+            color: var(--text-soft);
+            font-size: 0.78rem;
+            font-weight: 500;
+            padding-top: 40px;
+        }
+
+        /* ===== MODAL (em construção / modo teste) ===== */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 26, 50, 0.45);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 32px 30px;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
+            animation: popIn 0.32s var(--ease-spring);
+        }
+
+        .modal-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            background: var(--c3);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            box-shadow: 0 12px 28px rgba(255, 184, 0, 0.45);
+        }
+
+        .modal-icon.lock {
+            background: var(--c1);
+            box-shadow: 0 12px 28px rgba(0, 103, 255, 0.45);
+        }
+
+        .modal-icon svg {
+            width: 26px;
+            height: 26px;
+        }
+
+        .modal h3 {
+            font-size: 1.18rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .modal p {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            margin-bottom: 22px;
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .modal-btn {
+            background: var(--text-main);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform var(--t-fast), background var(--t);
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-1px);
+            background: #2a3260;
+        }
+
+        .modal-btn.secondary {
+            background: var(--bg-panel);
+            color: var(--text-main);
+        }
+
+        .modal-btn.secondary:hover {
+            background: var(--bg-panel-hover);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.92); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         /* ===== RESPONSIVE ===== */
-        @media (max-width: 900px) {
-            body {
-                flex-direction: column;
-            }
-
-            .split-left {
-                min-height: 35vh;
-                padding: 40px 20px;
-            }
-
-            .brand-logo {
-                width: 64px;
-                height: 64px;
-                font-size: 2rem;
-                border-radius: 18px;
-                margin-bottom: 16px;
-            }
-
-            .brand-title {
-                font-size: 2rem;
-            }
-
-            .brand-desc {
-                display: none;
-            }
-
-            .split-right {
-                min-height: auto;
-                padding: 32px 24px 48px;
+        @media (max-width: 980px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
-        @media (max-width: 480px) {
-            .split-left {
-                min-height: 28vh;
+        @media (max-width: 720px) {
+            .page {
+                padding: 20px 16px 40px;
             }
-
-            .form-header h2 {
+            .nav {
+                padding: 4px 4px 20px;
+            }
+            .nav-links {
+                display: none;
+            }
+            .hero h2 {
                 font-size: 1.5rem;
+            }
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .card {
+                min-height: auto;
+            }
+            .prof-info {
+                display: none;
             }
         }
     </style>
 </head>
 
 <body>
+    <div class="page">
 
-    <!-- LEFT SIDE — BRANDING -->
-    <div class="split-left">
-        <div class="floating-shapes">
-            <div class="shape"></div>
-            <div class="shape"></div>
-            <div class="shape"></div>
-            <div class="shape"></div>
-        </div>
-        <div class="brand-content">
-            <div class="brand-logo">π</div>
-            <div class="brand-title">Alqui<span>Lab</span></div>
-            <div class="brand-subtitle">Laboratório de Matemática</div>
-            <p class="brand-desc">Plataforma educacional centralizada para professores. Acesse recursos, ferramentas e
-                materiais de matemática.</p>
-        </div>
-    </div>
-
-    <!-- RIGHT SIDE — FORM -->
-    <div class="split-right">
-        <div class="form-container">
-            <div class="form-header">
-                <h2 id="formTitle">Acesse a plataforma</h2>
-                <p id="formSubtitle">Entre com sua conta para continuar</p>
+        <!-- TOP NAV -->
+        <nav class="nav">
+            <div class="brand">
+                <div class="brand-mark">π</div>
+                <span>AlquiLab</span>
             </div>
-
-            <div class="msg-feedback" id="msgFeedback">
-                <span id="msgIcon"></span>
-                <span id="msgText"></span>
+            <div class="nav-links">
+                <button class="nav-link active" data-nav="todos">Início</button>
+                <button class="nav-link" data-nav="escola">Escola</button>
+                <button class="nav-link" data-nav="pais">Pais</button>
+                <button class="nav-link" data-nav="professores">Professores</button>
             </div>
-
-            <form id="authForm" autocomplete="off">
-                <!-- Nome (sign-up only) -->
-                <div class="form-group field-signup" id="fieldNome">
-                    <label class="form-label" for="inputNome">Nome (máx. 15 caracteres)</label>
-                    <input type="text" class="form-input" id="inputNome" placeholder="Ex: João" autocomplete="name"
-                        maxlength="15" />
-                </div>
-
-                <!-- Tipo: Aluno ou Professor (sign-up only) -->
-                <div class="form-group field-signup" id="fieldTipo">
-                    <label class="form-label">Você é aluno ou professor?</label>
-                    <div class="radio-group">
-                        <div class="radio-option">
-                            <input type="radio" id="tipoAluno" name="tipo" value="aluno" />
-                            <label for="tipoAluno">Aluno</label>
-                        </div>
-                        <div class="radio-option">
-                            <input type="radio" id="tipoProfessor" name="tipo" value="professor" />
-                            <label for="tipoProfessor">Professor</label>
-                        </div>
+            <div class="nav-cta">
+                <button class="btn-login" id="btnLogin">Entrar</button>
+                <div class="prof-area" id="profArea">
+                    <div class="prof-info">
+                        <div class="prof-name" id="profName">—</div>
+                        <div class="prof-role" id="profRole">Professor(a)</div>
                     </div>
+                    <button class="icon-btn" id="btnLogout" title="Sair">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                    </button>
                 </div>
+            </div>
+        </nav>
 
-                <!-- Estado (sign-up only) -->
-                <div class="form-group field-signup" id="fieldEstado">
-                    <label class="form-label" for="inputEstado">Qual estado você mora?</label>
-                    <select class="form-select" id="inputEstado">
-                        <option value="">Selecione o estado</option>
-                    </select>
-                </div>
+        <!-- HERO -->
+        <section class="hero">
+            <h2>Tudo que você precisa para ensinar e aprender.</h2>
+            <p>Ferramentas, atividades e jogos organizados por tema, em um só lugar.</p>
 
-                <!-- Cidade (sign-up only) -->
-                <div class="form-group field-signup" id="fieldCidade">
-                    <label class="form-label" for="inputCidade">Qual cidade você mora?</label>
-                    <select class="form-select" id="inputCidade" disabled>
-                        <option value="">Selecione o estado primeiro</option>
-                    </select>
-                </div>
-
-                <!-- WhatsApp (sign-up only) -->
-                <div class="form-group field-signup" id="fieldWhatsapp">
-                    <label class="form-label" for="inputWhatsapp">WhatsApp (obrigatório)</label>
-                    <input type="tel" class="form-input" id="inputWhatsapp" placeholder="(99) 99999-9999"
-                        maxlength="15" />
-                </div>
-
-                <!-- Email -->
-                <div class="form-group">
-                    <label class="form-label" for="inputEmail">E-mail</label>
-                    <input type="email" class="form-input" id="inputEmail" placeholder="seuemail@email.com"
-                        autocomplete="email" required />
-                </div>
-
-                <!-- Senha -->
-                <div class="form-group">
-                    <label class="form-label" for="inputSenha">Senha</label>
-                    <input type="password" class="form-input" id="inputSenha" placeholder="Mínimo 6 caracteres"
-                        autocomplete="current-password" required />
-                </div>
-
-                <!-- Esqueceu a senha (login only) -->
-                <div class="forgot-password" id="forgotPassword">
-                    <a onclick="openResetModal()">Esqueceu a senha?</a>
-                </div>
-
-                <button type="submit" class="btn-primary" id="btnSubmit">
-                    <span class="btn-text">Entrar</span>
-                    <div class="spinner"></div>
+            <div class="search-bar">
+                <input type="text" id="searchInput" class="search-input"
+                    placeholder="Pesquise: frações, geometria, jogos..." autocomplete="off" />
+                <button class="search-go" title="Pesquisar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                    </svg>
                 </button>
-            </form>
-
-            <div class="toggle-mode">
-                <span id="toggleText">Não tem conta?</span>
-                <a id="toggleLink" onclick="toggleMode()">Criar conta</a>
             </div>
+        </section>
 
-            <div class="form-footer">
-                AlquiLab © 2026 — Plataforma Educacional de Matemática - Desenvolvida por Gilberto Fernandes
+        <!-- CHIPS -->
+        <div class="chips" id="chipsBar">
+            <button class="chip active" data-cat="todos">Todos</button>
+            <button class="chip" data-cat="geometria">Geometria</button>
+            <button class="chip" data-cat="fracoes">Frações</button>
+            <button class="chip" data-cat="atividades">Atividades</button>
+            <button class="chip" data-cat="jogos">Jogos</button>
+        </div>
+
+        <!-- CARDS GRID -->
+        <section class="grid-section">
+            <div class="grid-head">
+                <div class="grid-title">Recursos disponíveis</div>
+                <div class="grid-meta"><b id="visibleCount">0</b> de <span id="totalCount">0</span></div>
+            </div>
+            <div class="grid" id="cardsGrid"></div>
+        </section>
+
+        <footer class="footer">
+            AlquiLab © 2026 — Plataforma Educacional de Matemática · Desenvolvida por Gilberto Fernandes
+        </footer>
+    </div>
+
+    <!-- WIP MODAL -->
+    <div class="modal" id="wipModal">
+        <div class="modal-box">
+            <div class="modal-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                </svg>
+            </div>
+            <h3>Em construção</h3>
+            <p id="wipMsg">Esta área está sendo preparada e estará disponível em breve.</p>
+            <div class="modal-actions">
+                <button class="modal-btn" id="wipClose">Entendi</button>
             </div>
         </div>
     </div>
 
-    <!-- PASSWORD RESET MODAL -->
-    <div class="reset-overlay" id="resetOverlay">
-        <div class="reset-box">
-            <button class="reset-close" id="resetClose">✕</button>
-            <div class="reset-title">Redefinir Senha</div>
-            <div class="reset-sub">Digite seu e-mail e enviaremos um link para redefinir sua senha.</div>
-            <input type="email" class="reset-input" id="resetEmail" placeholder="Seu e-mail cadastrado" />
-            <button class="reset-btn" id="resetBtn">Enviar Link</button>
-            <div class="reset-msg" id="resetMsg"></div>
-        </div>
-    </div>
+    <script>
+        // ===== RECURSOS =====
+        const ACCENTS = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
-    <!-- FIREBASE SDK (ESM via CDN) -->
+        const RESOURCES = [
+            {
+                title: "GeoLab",
+                desc: "Construções dinâmicas de geometria, gráficos e álgebra.",
+                url: "Geolab/gerador_link.html",
+                tag: "Geometria", category: "geometria"
+            },
+            {
+                title: "Fluxo de Atividades",
+                desc: "Monte percursos personalizados de questões para seus alunos.",
+                url: "fluxoatividades/fluxodolink.html",
+                tag: "Atividades", category: "atividades"
+            },
+            {
+                title: "Atividades & Provas",
+                desc: "Banco e montador de listas, provas e questões.",
+                url: "repositorio/index.html",
+                tag: "Atividades", category: "atividades"
+            },
+            {
+                title: "Modo Prova",
+                desc: "Tela cheia bloqueada com senha — ideal para avaliações.",
+                url: "modoprova/gerador.html",
+                tag: "Atividades", category: "atividades"
+            },
+            {
+                title: "Frações",
+                desc: "Adição e subtração com exercícios introdutórios e complementares.",
+                url: "adicaoesubtracaodefracoes/gerador_link.html",
+                tag: "Frações", category: "fracoes"
+            },
+            {
+                title: "Jogos",
+                desc: "Coleção de jogos interativos para tornar o aprendizado divertido.",
+                url: "#", wip: true,
+                tag: "Jogos", category: "jogos"
+            },
+            {
+                title: "Teorema de Pitágoras",
+                desc: "Atividades para praticar a aplicação em triângulos retângulos.",
+                url: "#", wip: true,
+                tag: "Geometria", category: "geometria"
+            },
+            {
+                title: "Experiências Pibid",
+                desc: "Espaço para alunos compartilharem relatos e experiências.",
+                url: "#", wip: true,
+                tag: "Atividades", category: "atividades"
+            },
+            {
+                title: "Materiais",
+                desc: "Apostilas, slides e recursos complementares para download.",
+                url: "#", wip: true,
+                tag: "Materiais", category: "atividades"
+            }
+        ];
+
+        // ===== ESTADO =====
+        let activeCategory = 'todos';
+        const grid = document.getElementById('cardsGrid');
+        const searchInput = document.getElementById('searchInput');
+        const visibleCount = document.getElementById('visibleCount');
+        const totalCount = document.getElementById('totalCount');
+
+        totalCount.textContent = RESOURCES.length;
+
+        function normalize(s) {
+            return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+        }
+
+        function render() {
+            const q = normalize(searchInput.value.trim());
+            let list = RESOURCES;
+
+            if (activeCategory !== 'todos') {
+                list = list.filter(r => r.category === activeCategory);
+            }
+            if (q) {
+                list = list.filter(r => {
+                    const hay = normalize([r.title, r.desc, r.tag, r.category].join(' '));
+                    return q.split(/\s+/).every(w => hay.includes(w));
+                });
+            }
+
+            visibleCount.textContent = list.length;
+            grid.innerHTML = '';
+
+            if (list.length === 0) {
+                grid.innerHTML = '<div class="empty"><h3>Nenhum recurso encontrado</h3><p>Tente outro termo ou categoria.</p></div>';
+                return;
+            }
+
+            const stagger = parseFloat(
+                getComputedStyle(document.documentElement)
+                    .getPropertyValue('--enter-stagger')
+            ) || 0.05;
+
+            list.forEach((r, i) => {
+                const card = document.createElement('a');
+                const accent = ACCENTS[i % ACCENTS.length];
+                card.className = 'card acc-' + accent + (r.wip ? ' wip' : '');
+                card.style.animationDelay = (i * stagger) + 's';
+                card.href = r.url;
+
+                if (r.wip) {
+                    card.addEventListener('click', e => {
+                        e.preventDefault();
+                        showWip(r.title);
+                    });
+                }
+
+                card.innerHTML =
+                    '<span class="card-tag">' + r.tag + '</span>' +
+                    '<div class="card-title">' + r.title + '</div>' +
+                    '<div class="card-desc">' + r.desc + '</div>' +
+                    '<div class="card-foot">' +
+                        '<span class="card-cta">Acessar' +
+                            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>' +
+                        '</span>' +
+                        '<div class="card-arrow">' +
+                            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>' +
+                        '</div>' +
+                    '</div>';
+
+                grid.appendChild(card);
+            });
+        }
+
+        // ===== EVENTS =====
+        document.getElementById('chipsBar').addEventListener('click', e => {
+            const chip = e.target.closest('.chip');
+            if (!chip) return;
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            activeCategory = chip.dataset.cat;
+            render();
+        });
+
+        document.querySelectorAll('.nav-link').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        let debounce;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(debounce);
+            debounce = setTimeout(render, 180);
+        });
+
+        // ===== WIP MODAL =====
+        const wipModal = document.getElementById('wipModal');
+        const wipMsg = document.getElementById('wipMsg');
+        function showWip(title) {
+            wipMsg.textContent = title + ' está sendo preparado e estará disponível em breve.';
+            wipModal.classList.add('show');
+        }
+        document.getElementById('wipClose').addEventListener('click', () => wipModal.classList.remove('show'));
+        wipModal.addEventListener('click', e => { if (e.target === wipModal) wipModal.classList.remove('show'); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') wipModal.classList.remove('show'); });
+
+        // ===== INIT =====
+        render();
+
+        // ===== LOGIN BUTTON =====
+        document.getElementById('btnLogin').addEventListener('click', () => {
+            window.location.href = 'login.html';
+        });
+    </script>
+
+    <!-- FIREBASE AUTH (mostra perfil se já logado, sem exigir login) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import {
-            getAuth,
-            createUserWithEmailAndPassword,
-            signInWithEmailAndPassword,
-            onAuthStateChanged,
-            updateProfile,
-            sendPasswordResetEmail
-        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import {
-            getDatabase,
-            ref,
-            set,
-            push,
-            get
-        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, get, set, update, push, onValue, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",
             authDomain: "profbase-5f9b0.firebaseapp.com",
@@ -860,405 +1044,118 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // ===== BRAZILIAN STATES (IBGE API) =====
-        const ESTADOS = [
-            { nome: "Acre", id: 12 }, { nome: "Alagoas", id: 27 },
-            { nome: "Amapá", id: 16 }, { nome: "Amazonas", id: 13 },
-            { nome: "Bahia", id: 29 }, { nome: "Ceará", id: 23 },
-            { nome: "Distrito Federal", id: 53 }, { nome: "Espírito Santo", id: 32 },
-            { nome: "Goiás", id: 52 }, { nome: "Maranhão", id: 21 },
-            { nome: "Mato Grosso", id: 51 }, { nome: "Mato Grosso do Sul", id: 50 },
-            { nome: "Minas Gerais", id: 31 }, { nome: "Pará", id: 15 },
-            { nome: "Paraíba", id: 25 }, { nome: "Paraná", id: 41 },
-            { nome: "Pernambuco", id: 26 }, { nome: "Piauí", id: 22 },
-            { nome: "Rio de Janeiro", id: 33 }, { nome: "Rio Grande do Norte", id: 24 },
-            { nome: "Rio Grande do Sul", id: 43 }, { nome: "Rondônia", id: 11 },
-            { nome: "Roraima", id: 14 }, { nome: "Santa Catarina", id: 42 },
-            { nome: "São Paulo", id: 35 }, { nome: "Sergipe", id: 28 },
-            { nome: "Tocantins", id: 17 }
-        ];
+        const btnLogin = document.getElementById('btnLogin');
+        const profArea = document.getElementById('profArea');
+        const profName = document.getElementById('profName');
+        const profRole = document.getElementById('profRole');
+        const btnLogout = document.getElementById('btnLogout');
 
-        // Populate states dropdown
-        const inputEstado = document.getElementById('inputEstado');
-        const inputCidade = document.getElementById('inputCidade');
-        const inputWhatsapp = document.getElementById('inputWhatsapp');
+        let currentUser = null;
+        let currentUserName = '';
 
-        // WhatsApp mask: (99) 99999-9999
-        inputWhatsapp.addEventListener('input', () => {
-            let v = inputWhatsapp.value.replace(/\D/g, '').substring(0, 11);
-            if (v.length > 7) v = '(' + v.substring(0, 2) + ') ' + v.substring(2, 7) + '-' + v.substring(7);
-            else if (v.length > 2) v = '(' + v.substring(0, 2) + ') ' + v.substring(2);
-            else if (v.length > 0) v = '(' + v;
-            inputWhatsapp.value = v;
-        });
-
-        ESTADOS.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(e => {
-            const opt = document.createElement('option');
-            opt.value = e.nome;
-            opt.dataset.ibgeId = e.id;
-            opt.textContent = e.nome;
-            inputEstado.appendChild(opt);
-        });
-
-        // On state change, fetch ALL cities from IBGE API
-        inputEstado.addEventListener('change', async () => {
-            const selectedOpt = inputEstado.options[inputEstado.selectedIndex];
-            const ibgeId = selectedOpt?.dataset?.ibgeId;
-            inputCidade.innerHTML = '';
-
-            if (!inputEstado.value || !ibgeId) {
-                inputCidade.disabled = true;
-                const opt = document.createElement('option');
-                opt.value = '';
-                opt.textContent = 'Selecione o estado primeiro';
-                inputCidade.appendChild(opt);
+        onAuthStateChanged(auth, async (user) => {
+            // Guests (no user OR anonymous user) see "Entrar" button
+            if (!user || user.isAnonymous) {
+                btnLogin.style.display = 'inline-block';
+                profArea.style.display = 'none';
+                currentUser = null;
                 return;
             }
 
-            inputCidade.disabled = true;
-            const loadOpt = document.createElement('option');
-            loadOpt.value = '';
-            loadOpt.textContent = 'Carregando cidades...';
-            inputCidade.appendChild(loadOpt);
-
+            currentUser = user;
+            let nome = user.displayName || (user.email ? user.email.split('@')[0] : 'Usuário');
+            let tipo = 'professor';
             try {
-                const resp = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados/' + ibgeId + '/municipios?orderBy=nome');
-                const cidades = await resp.json();
-                inputCidade.innerHTML = '';
-                const defaultOpt = document.createElement('option');
-                defaultOpt.value = '';
-                defaultOpt.textContent = 'Selecione a cidade';
-                inputCidade.appendChild(defaultOpt);
-                cidades.forEach(c => {
-                    const opt = document.createElement('option');
-                    opt.value = c.nome;
-                    opt.textContent = c.nome;
-                    inputCidade.appendChild(opt);
-                });
-                inputCidade.disabled = false;
-            } catch (err) {
-                console.error('Erro ao carregar cidades:', err);
-                inputCidade.innerHTML = '';
-                const errOpt = document.createElement('option');
-                errOpt.value = '';
-                errOpt.textContent = 'Erro ao carregar. Tente novamente.';
-                inputCidade.appendChild(errOpt);
-            }
+                const snap = await get(ref(db, 'usuarios/' + user.uid));
+                if (snap.exists()) {
+                    const perfil = snap.val();
+                    if (perfil.nome) nome = perfil.nome;
+                    if (perfil.tipo) tipo = perfil.tipo;
+                }
+            } catch (e) { }
+
+            currentUserName = nome;
+            profName.textContent = nome;
+            profRole.textContent = tipo === 'aluno' ? 'Aluno' : 'Professor(a)';
+            btnLogin.style.display = 'none';
+            profArea.style.display = 'flex';
+
+            // Track presence so admin can see who is online
+            startPresence(user, nome, user.email, tipo);
         });
 
-        // ===== STATE =====
-        let isSignUp = false;
-        let isProcessingAuth = false; // Flag to prevent redirect during signup/login
-
-        // DOM
-        const form = document.getElementById('authForm');
-        const fieldNome = document.getElementById('fieldNome');
-        const fieldTipo = document.getElementById('fieldTipo');
-        const fieldEstado = document.getElementById('fieldEstado');
-        const fieldCidade = document.getElementById('fieldCidade');
-        const inputNome = document.getElementById('inputNome');
-        const inputEmail = document.getElementById('inputEmail');
-        const inputSenha = document.getElementById('inputSenha');
-        const btnSubmit = document.getElementById('btnSubmit');
-        const formTitle = document.getElementById('formTitle');
-        const formSubtitle = document.getElementById('formSubtitle');
-        const toggleText = document.getElementById('toggleText');
-        const toggleLink = document.getElementById('toggleLink');
-        const msgFeedback = document.getElementById('msgFeedback');
-        const msgIcon = document.getElementById('msgIcon');
-        const msgText = document.getElementById('msgText');
-        const forgotPassword = document.getElementById('forgotPassword');
-
-        // If already logged in, redirect (but NOT during active signup/login)
-        onAuthStateChanged(auth, (user) => {
-            if (user && !isProcessingAuth) {
-                window.location.href = 'Plataforma.html';
+        btnLogout.addEventListener('click', async () => {
+            await registrarSaida();
+            if (currentUser) {
+                try { await remove(ref(db, 'presenca/' + currentUser.uid)); } catch (e) { }
             }
+            try { await signOut(auth); } catch (e) { }
+            window.location.reload();
         });
 
-        // ===== FORMAT NAME =====
-        function formatarNome(nome) {
-            // Trim and limit to 15 characters
-            nome = nome.trim().substring(0, 15);
-            if (!nome) return '';
-            // First letter uppercase, rest lowercase
-            return nome.charAt(0).toUpperCase() + nome.slice(1).toLowerCase();
-        }
-
-        // ===== TOGGLE LOGIN / SIGNUP =====
-        window.toggleMode = function () {
-            isSignUp = !isSignUp;
-            hideFeedback();
-
-            const signupFields = document.querySelectorAll('.field-signup');
-
-            if (isSignUp) {
-                formTitle.textContent = 'Criar sua conta';
-                formSubtitle.textContent = 'Preencha os dados para começar';
-                btnSubmit.querySelector('.btn-text').textContent = 'Criar Conta';
-                toggleText.textContent = 'Já tem uma conta?';
-                toggleLink.textContent = 'Fazer login';
-                signupFields.forEach(f => f.classList.add('visible'));
-                inputNome.required = true;
-                forgotPassword.style.display = 'none';
-            } else {
-                formTitle.textContent = 'Acesse a plataforma';
-                formSubtitle.textContent = 'Entre com sua conta para continuar';
-                btnSubmit.querySelector('.btn-text').textContent = 'Entrar';
-                toggleText.textContent = 'Não tem conta?';
-                toggleLink.textContent = 'Criar conta';
-                signupFields.forEach(f => f.classList.remove('visible'));
-                inputNome.required = false;
-                forgotPassword.style.display = 'block';
-            }
-        };
-
-        // ===== FEEDBACK =====
-        function showFeedback(message, type = 'error') {
-            msgIcon.textContent = type === 'error' ? '!' : '';
-            msgText.textContent = message;
-            msgFeedback.className = 'msg-feedback show ' + type;
-        }
-
-        function hideFeedback() {
-            msgFeedback.className = 'msg-feedback';
-        }
-
-        // ===== ERROR TRANSLATION =====
-        function traduzirErro(code) {
-            const erros = {
-                'auth/email-already-in-use': 'Este e-mail já está cadastrado. Faça login.',
-                'auth/invalid-email': 'E-mail inválido. Verifique o formato.',
-                'auth/weak-password': 'Senha fraca. Use pelo menos 6 caracteres.',
-                'auth/user-not-found': 'Nenhuma conta encontrada com esse e-mail.',
-                'auth/wrong-password': 'Senha incorreta. Tente novamente.',
-                'auth/invalid-credential': 'E-mail ou senha incorretos.',
-                'auth/too-many-requests': 'Muitas tentativas. Aguarde e tente depois.',
-                'auth/network-request-failed': 'Erro de conexão. Verifique sua internet.',
-            };
-            return erros[code] || 'Ocorreu um erro. Tente novamente.';
-        }
-
-        // ===== FORM SUBMIT =====
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            hideFeedback();
-
-            const email = inputEmail.value.trim();
-            const senha = inputSenha.value;
-            const nomeRaw = inputNome.value.trim();
-
-            if (isSignUp) {
-                // Validate all sign-up fields
-                if (!nomeRaw) {
-                    showFeedback('Preencha seu nome.');
-                    return;
-                }
-
-                const tipoSelecionado = document.querySelector('input[name="tipo"]:checked');
-                if (!tipoSelecionado) {
-                    showFeedback('Selecione se você é Aluno ou Professor.');
-                    return;
-                }
-
-                const estado = inputEstado.value;
-                if (!estado) {
-                    showFeedback('Selecione seu estado.');
-                    return;
-                }
-
-                const cidade = inputCidade.value;
-                if (!cidade) {
-                    showFeedback('Selecione sua cidade.');
-                    return;
-                }
-
-                const whatsapp = inputWhatsapp.value.trim();
-                const whatsappDigits = whatsapp.replace(/\D/g, '');
-                if (!whatsapp || whatsappDigits.length < 10) {
-                    showFeedback('Preencha seu WhatsApp corretamente.');
-                    return;
-                }
-
-                // Format name
-                const nomeFormatado = formatarNome(nomeRaw);
-
-                // Loading state
-                btnSubmit.classList.add('loading');
-                btnSubmit.disabled = true;
-                isProcessingAuth = true;
-
+        async function registrarSaida() {
+            const loginKey = sessionStorage.getItem('alquilab_login_key');
+            const loginUid = sessionStorage.getItem('alquilab_login_uid');
+            if (loginKey && loginUid) {
                 try {
-                    // === CREATE ACCOUNT ===
-                    const cred = await createUserWithEmailAndPassword(auth, email, senha);
-                    const user = cred.user;
-
-                    // Update display name
-                    await updateProfile(user, { displayName: nomeFormatado });
-
-                    // Save profile in Realtime DB
-                    await set(ref(db, 'usuarios/' + user.uid), {
-                        nome: nomeFormatado,
-                        email: email,
-                        tipo: tipoSelecionado.value,
-                        estado: estado,
-                        cidade: cidade,
-                        whatsapp: whatsapp,
-                        dataCriacao: new Date().toISOString(),
-                        ultimoLogin: new Date().toISOString()
+                    await update(ref(db, 'logins/' + loginUid + '/' + loginKey), {
+                        saida: new Date().toISOString(),
+                        timestampSaida: Date.now()
                     });
-
-                    // Log this login
-                    await registrarLogin(user, nomeFormatado);
-
-                    // Redirect
-                    window.location.href = 'Plataforma.html';
-
-                } catch (err) {
-                    console.error('Erro no cadastro:', err);
-                    isProcessingAuth = false;
-                    if (err.code === 'PERMISSION_DENIED' || (err.message && err.message.includes('PERMISSION_DENIED'))) {
-                        showFeedback('Conta criada, mas erro ao salvar perfil. Verifique as regras do Firebase Realtime Database.');
-                    } else {
-                        showFeedback(traduzirErro(err.code));
-                    }
-                    btnSubmit.classList.remove('loading');
-                    btnSubmit.disabled = false;
-                }
-
-            } else {
-                // === LOGIN ===
-                btnSubmit.classList.add('loading');
-                btnSubmit.disabled = true;
-                isProcessingAuth = true;
-
-                try {
-                    const cred = await signInWithEmailAndPassword(auth, email, senha);
-                    const user = cred.user;
-
-                    // Monta nome base
-                    let nomeLogin = user.displayName || email.split('@')[0] || 'Usuário';
-
-                    // Verifica/cria perfil no Realtime Database
-                    try {
-                        const snap = await get(ref(db, 'usuarios/' + user.uid));
-                        if (snap.exists()) {
-                            const perfil = snap.val();
-                            if (perfil.nome) nomeLogin = perfil.nome;
-                            // Atualiza último login
-                            await set(ref(db, 'usuarios/' + user.uid + '/ultimoLogin'), new Date().toISOString());
-                        } else {
-                            // Perfil não existe — cria agora
-                            await set(ref(db, 'usuarios/' + user.uid), {
-                                nome: nomeLogin,
-                                email: user.email,
-                                tipo: 'professor',
-                                estado: '',
-                                cidade: '',
-                                dataCriacao: new Date().toISOString(),
-                                ultimoLogin: new Date().toISOString()
-                            });
-                        }
-                    } catch (dbErr) {
-                        console.error('Erro ao acessar Realtime Database:', dbErr.code, dbErr.message);
-                        // Não bloqueia o login, mas avisa no console
-                    }
-
-                    // Log this login
-                    await registrarLogin(user, nomeLogin);
-
-                    // Redirect
-                    window.location.href = 'Plataforma.html';
-
-                } catch (err) {
-                    console.error('Erro no login:', err);
-                    isProcessingAuth = false;
-                    showFeedback(traduzirErro(err.code));
-                    btnSubmit.classList.remove('loading');
-                    btnSubmit.disabled = false;
-                }
+                } catch (e) { }
+                sessionStorage.removeItem('alquilab_login_key');
+                sessionStorage.removeItem('alquilab_login_uid');
             }
-        });
-
-        // ===== LOGIN LOGGING =====
-        async function registrarLogin(user, nome) {
-            const loginRef = push(ref(db, 'logins/' + user.uid));
-            const loginKey = loginRef.key;
-            await set(loginRef, {
-                email: user.email,
-                nome: nome || user.displayName || '',
-                entrada: new Date().toISOString(),
-                saida: '',
-                timestampEntrada: Date.now(),
-                timestampSaida: 0
-            });
-            // Save the login key so we can update logout time later
-            sessionStorage.setItem('alquilab_login_key', loginKey);
-            sessionStorage.setItem('alquilab_login_uid', user.uid);
         }
 
-        // ===== PASSWORD RESET =====
-        const resetOverlay = document.getElementById('resetOverlay');
-        const resetClose = document.getElementById('resetClose');
-        const resetBtn = document.getElementById('resetBtn');
-        const resetEmail = document.getElementById('resetEmail');
-        const resetMsg = document.getElementById('resetMsg');
+        async function startPresence(user, nome, email, tipo) {
+            const presRef = ref(db, 'presenca/' + user.uid);
+            let estado = '', cidade = '', whatsapp = '';
+            try {
+                const snap = await get(ref(db, 'usuarios/' + user.uid));
+                if (snap.exists()) {
+                    const p = snap.val();
+                    estado = p.estado || '';
+                    cidade = p.cidade || '';
+                    whatsapp = p.whatsapp || '';
+                }
+            } catch (e) { }
 
-        window.openResetModal = function () {
-            resetOverlay.classList.add('show');
-            resetEmail.value = inputEmail.value || '';
-            resetMsg.className = 'reset-msg';
-            resetMsg.textContent = '';
-        };
-
-        resetClose.addEventListener('click', () => {
-            resetOverlay.classList.remove('show');
-        });
-
-        resetOverlay.addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) {
-                resetOverlay.classList.remove('show');
-            }
-        });
-
-        resetBtn.addEventListener('click', async () => {
-            const email = resetEmail.value.trim();
-            if (!email) {
-                resetMsg.textContent = 'Digite um e-mail válido.';
-                resetMsg.className = 'reset-msg show error';
-                return;
-            }
-
-            resetBtn.disabled = true;
-            resetBtn.textContent = 'Enviando...';
+            const presData = {
+                nome, email, tipo, estado, cidade, whatsapp,
+                online: true,
+                ultimoAcesso: new Date().toISOString()
+            };
 
             try {
-                await sendPasswordResetEmail(auth, email);
-                resetMsg.textContent = 'Link de redefinição enviado! Verifique seu e-mail.';
-                resetMsg.className = 'reset-msg show success';
-                setTimeout(() => {
-                    resetOverlay.classList.remove('show');
-                }, 3000);
-            } catch (err) {
-                console.error(err);
-                if (err.code === 'auth/user-not-found') {
-                    resetMsg.textContent = 'Nenhuma conta encontrada com esse e-mail.';
-                } else if (err.code === 'auth/invalid-email') {
-                    resetMsg.textContent = 'E-mail inválido. Verifique o formato.';
-                } else {
-                    resetMsg.textContent = 'Erro ao enviar. Tente novamente.';
-                }
-                resetMsg.className = 'reset-msg show error';
-            } finally {
-                resetBtn.disabled = false;
-                resetBtn.textContent = 'Enviar Link';
-            }
-        });
+                await set(presRef, presData);
+                onDisconnect(presRef).remove();
+            } catch (e) { }
 
-        // Allow Enter key in reset modal
-        resetEmail.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') resetBtn.click();
-        });
+            setInterval(async () => {
+                try {
+                    await set(presRef, { ...presData, ultimoAcesso: new Date().toISOString() });
+                } catch (e) { }
+            }, 60000);
+
+            window.addEventListener('beforeunload', () => {
+                try {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('DELETE', 'https://profbase-5f9b0-default-rtdb.firebaseio.com/presenca/' + user.uid + '.json', false);
+                    xhr.send();
+                } catch (e) { }
+                const loginKey = sessionStorage.getItem('alquilab_login_key');
+                const loginUid = sessionStorage.getItem('alquilab_login_uid');
+                if (loginKey && loginUid) {
+                    try {
+                        const xhr2 = new XMLHttpRequest();
+                        xhr2.open('PATCH', 'https://profbase-5f9b0-default-rtdb.firebaseio.com/logins/' + loginUid + '/' + loginKey + '.json', false);
+                        xhr2.setRequestHeader('Content-Type', 'application/json');
+                        xhr2.send(JSON.stringify({ saida: new Date().toISOString(), timestampSaida: Date.now() }));
+                    } catch (e) { }
+                }
+            });
+        }
     </script>
 
 </body>
