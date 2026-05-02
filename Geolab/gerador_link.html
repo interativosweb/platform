@@ -859,8 +859,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, set, get, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import AlquiLabAuth from "../auth-guest.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",
@@ -903,42 +904,67 @@
             return base + '/index.html?turmaId=' + turmaId;
         }
 
+        AlquiLabAuth.init(auth, { loginPath: '../login.html' });
+
         onAuthStateChanged(auth, async (user) => {
+            // Sem usuário → faz login anônimo automaticamente (modo de teste)
             if (!user) {
-                $('authLoading').classList.add('hidden');
-                $('authWarning').style.display = 'block';
-                $('mainContent').style.display = 'none';
+                try { await signInAnonymously(auth); } catch (e) {
+                    console.warn('Falha ao iniciar modo de teste:', e);
+                    $('authLoading').classList.add('hidden');
+                    $('authWarning').style.display = 'block';
+                    $('mainContent').style.display = 'none';
+                }
                 return;
             }
+
             currentUser = user;
-            try {
-                const snap = await get(ref(db, 'usuarios/' + user.uid));
-                currentUserData = snap.exists() ? snap.val() : { nome: user.displayName || user.email, email: user.email, tipo: 'aluno' };
-            } catch (e) {
-                currentUserData = { nome: user.displayName || user.email, email: user.email, tipo: 'aluno' };
-            }
-
             const ADM_EMAIL = 'gilbertofernandessc@gmail.com';
-            if (user.email === ADM_EMAIL) {
-                currentUserData.tipo = 'professor';
-                if (!currentUserData.nome) currentUserData.nome = 'Gilberto Fernandes';
+            const isGuest = user.isAnonymous === true;
+
+            if (isGuest) {
+                currentUserData = { nome: 'Visitante', email: '', tipo: 'professor' };
+            } else {
+                try {
+                    const snap = await get(ref(db, 'usuarios/' + user.uid));
+                    currentUserData = snap.exists() ? snap.val() : { nome: user.displayName || user.email, email: user.email, tipo: 'aluno' };
+                } catch (e) {
+                    currentUserData = { nome: user.displayName || user.email, email: user.email, tipo: 'aluno' };
+                }
+                if (user.email === ADM_EMAIL) {
+                    currentUserData.tipo = 'professor';
+                    if (!currentUserData.nome) currentUserData.nome = 'Gilberto Fernandes';
+                }
+                // Usuários logados que não sejam professor → bloqueia (regra original)
+                if (currentUserData.tipo !== 'professor') {
+                    $('authLoading').classList.add('hidden');
+                    $('authWarning').style.display = 'block';
+                    $('authWarningMsg').textContent = 'Somente professores podem criar turmas no GeoLab.';
+                    $('authWarning').querySelector('a').textContent = 'Voltar à plataforma';
+                    $('authWarning').querySelector('a').setAttribute('href', '../index.html');
+                    $('mainContent').style.display = 'none';
+                    return;
+                }
             }
 
-            if (currentUserData.tipo !== 'professor') {
-                $('authLoading').classList.add('hidden');
-                $('authWarning').style.display = 'block';
-                $('authWarningMsg').textContent = 'Somente professores podem criar turmas no GeoLab.';
-                $('authWarning').querySelector('a').textContent = 'Voltar à plataforma';
-                $('authWarning').querySelector('a').setAttribute('href', '../Plataforma.html');
-                $('mainContent').style.display = 'none';
-                return;
-            }
-
-            $('profArea').style.display = 'flex';
             $('mainContent').style.display = 'block';
-            $('profName').textContent = currentUserData.nome || user.email;
-            $('profRole').textContent = 'Professor(a)';
             $('authLoading').classList.add('hidden');
+
+            if (isGuest) {
+                // Modo teste: banner + popup explicativo + esconde área de perfil/logout
+                $('profArea').style.display = 'none';
+                AlquiLabAuth.showTestModeBanner({
+                    msg: 'Você está usando o GeoLab em <u>modo de teste</u>. A classificação e a liberação da atividade ficam disponíveis apenas para usuários cadastrados.'
+                });
+                AlquiLabAuth.showTestModeIntro('geolab',
+                    'GeoLab — modo de teste',
+                    'Este é um modo de teste. Você pode criar e gerar links de turmas, mas a <b>classificação</b> e a <b>liberação da atividade</b> só ficam disponíveis para usuários cadastrados. Faça login para ter acesso total.'
+                );
+            } else {
+                $('profArea').style.display = 'flex';
+                $('profName').textContent = currentUserData.nome || user.email;
+                $('profRole').textContent = 'Professor(a)';
+            }
 
             await carregarTurmas();
         });
@@ -1121,6 +1147,15 @@
                     </div>
                 `;
                 $('btnCopiarNovo').addEventListener('click', () => copiarParaClipboard(url, $('btnCopiarNovo')));
+                if (AlquiLabAuth.isGuest()) {
+                    const btnOpen = linkBox.querySelector('.btn-open');
+                    if (btnOpen) {
+                        btnOpen.addEventListener('click', e => {
+                            e.preventDefault();
+                            AlquiLabAuth.requireLogin('A liberação da atividade fica disponível apenas para usuários cadastrados. Crie uma conta gratuita para liberar este recurso.');
+                        });
+                    }
+                }
 
                 e.target.reset();
                 $('turmaOutroWrap').classList.remove('show');
@@ -1176,6 +1211,8 @@
                             <span class="senha-label">Senha</span>
                             <span class="senha-value">— (turma criada antes desta funcionalidade)</span>
                         </div>`;
+                const guestNow = AlquiLabAuth.isGuest();
+                const lockBadge = guestNow ? ' (bloqueado)' : '';
                 return `
                     <div class="history-item" data-id="${esc(t.id)}">
                         <div class="history-head">
@@ -1190,8 +1227,8 @@
                         ${senhaBlock}
                         <div class="history-actions">
                             <button type="button" class="act-copy" data-url="${esc(url)}">Copiar</button>
-                            <a href="${esc(url)}" target="_blank">Abrir</a>
-                            <a href="classificacao.html?turmaId=${esc(t.id)}" target="_blank">Classificação</a>
+                            <a href="${esc(url)}" target="_blank" class="act-open" data-url="${esc(url)}">Abrir${lockBadge}</a>
+                            <a href="classificacao.html?turmaId=${esc(t.id)}" target="_blank" class="act-class" data-id="${esc(t.id)}">Classificação${lockBadge}</a>
                             <button type="button" class="act-del" data-id="${esc(t.id)}">Excluir</button>
                         </div>
                     </div>
@@ -1219,6 +1256,21 @@
             cont.querySelectorAll('.act-copy').forEach(b => {
                 b.addEventListener('click', () => copiarParaClipboard(b.dataset.url, b));
             });
+            // Modo teste: bloqueia abrir a atividade e a classificação
+            if (AlquiLabAuth.isGuest()) {
+                cont.querySelectorAll('.act-class').forEach(a => {
+                    a.addEventListener('click', e => {
+                        e.preventDefault();
+                        AlquiLabAuth.requireLogin('A página de classificação fica disponível apenas para usuários cadastrados. Crie uma conta gratuita para liberar este recurso.');
+                    });
+                });
+                cont.querySelectorAll('.act-open').forEach(a => {
+                    a.addEventListener('click', e => {
+                        e.preventDefault();
+                        AlquiLabAuth.requireLogin('A liberação da atividade fica disponível apenas para usuários cadastrados. Crie uma conta gratuita para liberar este recurso.');
+                    });
+                });
+            }
             cont.querySelectorAll('.act-del').forEach(b => {
                 b.addEventListener('click', async () => {
                     if (!confirm('Excluir esta turma? O link deixará de funcionar, mas os dados de respostas permanecerão no banco.')) return;
