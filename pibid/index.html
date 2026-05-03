@@ -817,15 +817,14 @@ body{
         <div class="pubs-scroll" id="pubsScroll"></div>
     </section>
 
-    <!-- COL 3: FEED 24h -->
+    <!-- COL 3: STORYS -->
     <aside class="col-feed">
         <div class="feed-head">
-            <h3><span class="live-dot"></span>Feed 24h</h3>
-            <p>Posts rápidos que somem em 24 horas.</p>
+            <h3><span class="live-dot"></span>Storys</h3>
         </div>
         <button class="btn-feed-new" id="btnNewFeed">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Postar no feed
+            Postar story
         </button>
         <div class="feed-list" id="feedList"></div>
     </aside>
@@ -1290,56 +1289,56 @@ function fileToDataUrl(file) {
 /* ===== AUTH ===== */
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
-        // Acesso fechado -> envia direto pro login (sem virar anônimo)
-        window.location.href = '../login.html?next=' + encodeURIComponent('/pibid/index.html');
-        return;
-    }
-    if (user.isAnonymous) {
-        $('accessGate').classList.add('show');
+        try { await signInAnonymously(auth); } catch(e){}
         return;
     }
 
-    // Resolve papel do usuário
-    let papel = (user.email === ADM_EMAIL) ? 'super_admin' : null;
+    // Resolve papel (se houver)
+    let papel = (!user.isAnonymous && user.email === ADM_EMAIL) ? 'super_admin' : null;
     let perfil = {};
-    try {
-        const snap = await get(ref(db, 'usuarios/' + user.uid));
-        if (snap.exists()) {
-            perfil = snap.val();
-            if (!papel && perfil.papel && ADM_ROLES.includes(perfil.papel)) papel = perfil.papel;
-        }
-    } catch(e){}
-
-    if (!papel) {
-        // Não autorizado: gate
-        $('accessGate').classList.add('show');
-        return;
+    if (!user.isAnonymous) {
+        try {
+            const snap = await get(ref(db, 'usuarios/' + user.uid));
+            if (snap.exists()) {
+                perfil = snap.val();
+                if (!papel && perfil.papel && ADM_ROLES.includes(perfil.papel)) papel = perfil.papel;
+            }
+        } catch(e){}
     }
 
     currentUser = user;
-    isGuest = false;
-    isAdmin = (papel === 'super_admin' || papel === 'admin_geral' || papel === 'moderador');
+    isGuest = !!user.isAnonymous;
+    isAdmin = !isGuest && (papel === 'super_admin' || papel === 'admin_geral' || papel === 'moderador');
     currentUserPapel = papel;
 
-    let nome = perfil.nome || user.displayName || (user.email ? user.email.split('@')[0] : 'Usuário');
-    let tipo = perfil.tipo || 'aluno';
-    currentUserName = nome;
-    currentUserRole = tipo;
-    currentUserFoto = perfil.foto || '';
-    currentUserDesc = perfil.descricao || '';
+    if (isGuest) {
+        $('btnLogin').style.display = 'inline-block';
+        $('userChip').style.display = 'none';
+        $('btnAdmin').classList.remove('show');
+        currentUserName = 'Visitante';
+        currentUserRole = 'visitante';
+        currentUserFoto = '';
+        currentUserDesc = '';
+    } else {
+        let nome = perfil.nome || user.displayName || (user.email ? user.email.split('@')[0] : 'Usuário');
+        let tipo = perfil.tipo || 'aluno';
+        currentUserName = nome;
+        currentUserRole = tipo;
+        currentUserFoto = perfil.foto || '';
+        currentUserDesc = perfil.descricao || '';
 
-    $('btnLogin').style.display = 'none';
-    $('userChip').style.display = 'flex';
-    $('userName').textContent = nome;
-    $('userRole').textContent = ROLE_LABELS[papel] || (tipo === 'aluno' ? 'Aluno' : (tipo === 'professor' ? 'Professor(a)' : tipo));
-    paintAvatarEl($('userAvatar'), nome, currentUserFoto);
-    if (isAdmin) $('btnAdmin').classList.add('show');
+        $('btnLogin').style.display = 'none';
+        $('userChip').style.display = 'flex';
+        $('userName').textContent = nome;
+        $('userRole').textContent = papel ? (ROLE_LABELS[papel] || tipo) : (tipo === 'aluno' ? 'Aluno' : (tipo === 'professor' ? 'Professor(a)' : tipo));
+        paintAvatarEl($('userAvatar'), nome, currentUserFoto);
+        if (isAdmin) $('btnAdmin').classList.add('show');
 
-    // cache local do próprio perfil
-    profileCache.set(user.uid, {
-        nome, foto: currentUserFoto, descricao: currentUserDesc, papel,
-        email: user.email || ''
-    });
+        profileCache.set(user.uid, {
+            nome, foto: currentUserFoto, descricao: currentUserDesc, papel,
+            email: user.email || ''
+        });
+    }
 
     initEixos();
 });
@@ -1816,8 +1815,8 @@ function openComposer(mode) {
         $('composerTitle').textContent = 'Nova publicação';
         $('composerSub').textContent = `No eixo: ${eixo ? eixo.nome : ''}`;
     } else {
-        $('composerTitle').textContent = 'Postar no feed (24h)';
-        $('composerSub').textContent = 'Esse post some sozinho em 24 horas.';
+        $('composerTitle').textContent = 'Novo story';
+        $('composerSub').textContent = 'Esse story some sozinho em 24 horas.';
     }
     $('composerModal').classList.add('show');
     setTimeout(() => editor.focus(), 100);
