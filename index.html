@@ -610,6 +610,27 @@
             font-size: 0.78rem;
             font-weight: 500;
             padding-top: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .footer #adminGear {
+            display: none;
+            color: var(--text-soft);
+            text-decoration: none;
+            font-size: 1rem;
+            opacity: 0.45;
+            transition: opacity .2s, color .2s;
+            padding: 2px 6px;
+        }
+        .footer #adminGear:hover {
+            opacity: 1;
+            color: var(--text-main);
+        }
+        .footer #adminGear.visible {
+            display: inline-block;
         }
 
         /* ===== MODAL (em construção / modo teste) ===== */
@@ -723,6 +744,205 @@
             to { opacity: 1; transform: scale(1); }
         }
 
+        /* ===== CHAT ===== */
+        .chat-fab {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            background: var(--c1);
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(0, 103, 255, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 800;
+            transition: transform var(--t-fast), box-shadow var(--t);
+        }
+        .chat-fab:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 103, 255, 0.45);
+        }
+        .chat-fab svg {
+            width: 24px;
+            height: 24px;
+        }
+        .chat-fab-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 50%;
+            background: var(--c2);
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #fff;
+        }
+
+        .chat-panel {
+            position: fixed;
+            right: 24px;
+            bottom: 92px;
+            width: 360px;
+            max-width: calc(100vw - 32px);
+            height: 480px;
+            max-height: calc(100vh - 120px);
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+            border: 1px solid var(--card-border);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 900;
+            animation: popIn 0.25s var(--ease-spring);
+        }
+        .chat-panel.show {
+            display: flex;
+        }
+        .chat-head {
+            padding: 14px 18px;
+            background: linear-gradient(135deg, var(--c1), #3a8cff);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .chat-head-title {
+            font-size: 0.96rem;
+            font-weight: 700;
+        }
+        .chat-head-sub {
+            font-size: 0.72rem;
+            opacity: 0.85;
+            font-weight: 500;
+        }
+        .chat-close {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .2s;
+        }
+        .chat-close:hover {
+            background: rgba(255, 255, 255, 0.28);
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: var(--bg-panel);
+        }
+        .chat-empty {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.84rem;
+            padding: 30px 20px;
+        }
+        .chat-msg {
+            max-width: 78%;
+            padding: 9px 13px;
+            border-radius: 14px;
+            font-size: 0.88rem;
+            line-height: 1.45;
+            word-wrap: break-word;
+        }
+        .chat-msg.me {
+            align-self: flex-end;
+            background: var(--c1);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-msg.them {
+            align-self: flex-start;
+            background: #fff;
+            color: var(--text-main);
+            border: 1px solid var(--card-border);
+            border-bottom-left-radius: 4px;
+        }
+        .chat-msg .when {
+            display: block;
+            font-size: 0.66rem;
+            margin-top: 3px;
+            opacity: 0.6;
+            font-weight: 500;
+        }
+        .chat-form {
+            padding: 12px;
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            gap: 8px;
+            background: #fff;
+        }
+        .chat-form input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid var(--card-border);
+            border-radius: 50px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            color: var(--text-main);
+            transition: border-color .2s;
+        }
+        .chat-form input:focus {
+            border-color: var(--c1);
+        }
+        .chat-form button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: var(--c1);
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .2s, transform .12s;
+        }
+        .chat-form button:hover {
+            background: #005bb5;
+            transform: scale(1.06);
+        }
+        .chat-form button svg {
+            width: 16px;
+            height: 16px;
+        }
+        @media (max-width: 480px) {
+            .chat-panel {
+                right: 12px;
+                left: 12px;
+                width: auto;
+                bottom: 84px;
+            }
+            .chat-fab {
+                right: 16px;
+                bottom: 16px;
+            }
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 980px) {
             .grid {
@@ -828,8 +1048,40 @@
         </section>
 
         <footer class="footer">
-            AlquiLab © 2026 — Plataforma Educacional de Matemática · Desenvolvida por Gilberto Fernandes
+            <span>E Agora Prof? © 2026 Plataforma Educacional de Matemática · Desenvolvida por Gilberto Fernandes</span>
+            <a id="adminGear" href="Administrador.html" title="Área administrativa" aria-label="Administrador">⚙</a>
         </footer>
+    </div>
+
+    <!-- CHAT FAB (bottom-right) — só aparece para usuários logados (não admin) -->
+    <button id="chatFab" class="chat-fab" title="Falar com o suporte" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span class="chat-fab-badge" id="chatFabBadge" style="display:none"></span>
+    </button>
+
+    <!-- CHAT PANEL -->
+    <div id="chatPanel" class="chat-panel">
+        <div class="chat-head">
+            <div>
+                <div class="chat-head-title">Falar com o suporte</div>
+                <div class="chat-head-sub">Resposta em até 24h</div>
+            </div>
+            <button class="chat-close" id="chatClose" aria-label="Fechar">✕</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-empty">Envie sua primeira mensagem.</div>
+        </div>
+        <form class="chat-form" id="chatForm">
+            <input type="text" id="chatInput" placeholder="Escreva sua mensagem..." autocomplete="off" maxlength="500" />
+            <button type="submit" id="chatSend" aria-label="Enviar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+            </button>
+        </form>
     </div>
 
     <!-- WIP MODAL -->
@@ -1050,11 +1302,13 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
+        const ADM_EMAIL = 'gilbertofernandessc@gmail.com';
         const btnLogin = document.getElementById('btnLogin');
         const profArea = document.getElementById('profArea');
         const profName = document.getElementById('profName');
         const profRole = document.getElementById('profRole');
         const btnLogout = document.getElementById('btnLogout');
+        const adminGear = document.getElementById('adminGear');
 
         let currentUser = null;
         let currentUserName = '';
@@ -1064,6 +1318,7 @@
             if (!user || user.isAnonymous) {
                 btnLogin.style.display = 'inline-block';
                 profArea.style.display = 'none';
+                if (adminGear) adminGear.classList.remove('visible');
                 currentUser = null;
                 window.__alquilabIsGuest = true;
                 render();
@@ -1072,7 +1327,13 @@
 
             currentUser = user;
             window.__alquilabIsGuest = false;
+            // Mostra a engrenagem só para o admin
+            if (adminGear) adminGear.classList.toggle('visible', user.email === ADM_EMAIL);
             render();
+            // Ativa chat para usuários comuns (não admin)
+            if (user.email !== ADM_EMAIL) {
+                initChat(user);
+            }
             let nome = user.displayName || (user.email ? user.email.split('@')[0] : 'Usuário');
             let tipo = 'professor';
             try {
@@ -1116,6 +1377,102 @@
                 sessionStorage.removeItem('alquilab_login_key');
                 sessionStorage.removeItem('alquilab_login_uid');
             }
+        }
+
+        // ===== CHAT =====
+        let chatInited = false;
+        function initChat(user) {
+            if (chatInited) return;
+            chatInited = true;
+
+            const fab = document.getElementById('chatFab');
+            const panel = document.getElementById('chatPanel');
+            const closeBtn = document.getElementById('chatClose');
+            const messages = document.getElementById('chatMessages');
+            const form = document.getElementById('chatForm');
+            const input = document.getElementById('chatInput');
+            const badge = document.getElementById('chatFabBadge');
+            if (!fab) return;
+
+            fab.style.display = 'flex';
+
+            const threadRef = ref(db, 'chats/' + user.uid);
+            const messagesRef = ref(db, 'chats/' + user.uid + '/messages');
+
+            // Garante que o perfil do thread (nome/email) está atualizado
+            try {
+                const nome = currentUserName || user.displayName || user.email.split('@')[0];
+                set(ref(db, 'chats/' + user.uid + '/nome'), nome).catch(() => {});
+                set(ref(db, 'chats/' + user.uid + '/email'), user.email || '').catch(() => {});
+                set(ref(db, 'chats/' + user.uid + '/atualizadoEm'), Date.now()).catch(() => {});
+            } catch (e) { }
+
+            let lastSeenAt = Number(localStorage.getItem('alquilab_chat_lastseen_' + user.uid) || 0);
+
+            function fmtTime(ts) {
+                if (!ts) return '';
+                const d = new Date(ts);
+                return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            }
+
+            function renderMessages(snap) {
+                const data = snap.val() || {};
+                const items = Object.entries(data)
+                    .map(([id, m]) => ({ id, ...m }))
+                    .sort((a, b) => (a.ts || 0) - (b.ts || 0));
+                if (items.length === 0) {
+                    messages.innerHTML = '<div class="chat-empty">Envie sua primeira mensagem.</div>';
+                    badge.style.display = 'none';
+                    return;
+                }
+                messages.innerHTML = items.map(m => {
+                    const cls = m.de === 'admin' ? 'them' : 'me';
+                    const text = (m.texto || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+                    return `<div class="chat-msg ${cls}">${text}<span class="when">${fmtTime(m.ts)}</span></div>`;
+                }).join('');
+                messages.scrollTop = messages.scrollHeight;
+
+                // Conta mensagens novas do admin (após lastSeen) — só quando painel está fechado
+                const unread = items.filter(m => m.de === 'admin' && (m.ts || 0) > lastSeenAt).length;
+                if (unread > 0 && !panel.classList.contains('show')) {
+                    badge.textContent = unread > 9 ? '9+' : String(unread);
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+
+            onValue(messagesRef, renderMessages);
+
+            fab.addEventListener('click', () => {
+                panel.classList.add('show');
+                lastSeenAt = Date.now();
+                localStorage.setItem('alquilab_chat_lastseen_' + user.uid, String(lastSeenAt));
+                badge.style.display = 'none';
+                setTimeout(() => input.focus(), 120);
+            });
+
+            closeBtn.addEventListener('click', () => {
+                panel.classList.remove('show');
+            });
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const text = input.value.trim();
+                if (!text) return;
+                const msgRef = push(messagesRef);
+                try {
+                    await set(msgRef, {
+                        texto: text,
+                        de: 'usuario',
+                        ts: Date.now()
+                    });
+                    await set(ref(db, 'chats/' + user.uid + '/atualizadoEm'), Date.now());
+                    input.value = '';
+                } catch (err) {
+                    console.error('Erro ao enviar mensagem:', err);
+                }
+            });
         }
 
         async function startPresence(user, nome, email, tipo) {
