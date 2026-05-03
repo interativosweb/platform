@@ -39,6 +39,20 @@ body{
   position:relative;z-index:50;
 }
 .topbar .brand{display:flex;align-items:center;gap:12px;min-width:0}
+.btn-voltar{
+  flex-shrink:0;display:inline-flex;align-items:center;gap:6px;
+  padding:8px 14px;border-radius:9px;
+  background:var(--bg3);border:1px solid var(--border);color:var(--text);
+  font-family:inherit;font-size:.82rem;font-weight:600;
+  text-decoration:none;cursor:pointer;transition:all .15s;
+}
+.btn-voltar:hover{border-color:var(--accent);color:var(--accent);background:rgba(10,132,255,.06)}
+.brand-user-chip.guest{
+  background:rgba(255,69,58,.12);
+  border-color:rgba(255,69,58,.45);
+  color:#ff453a;
+  font-weight:700;
+}
 .brand-icon{
   width:38px;height:38px;border-radius:10px;flex-shrink:0;
   background:linear-gradient(135deg,var(--accent) 0%,#5ac8fa 100%);
@@ -799,6 +813,7 @@ math-field::part(menu-toggle){display:none !important}
 
 <div class="topbar">
   <div class="brand">
+    <a href="../index.html" class="btn-voltar" title="Voltar para a plataforma">← Voltar</a>
     <div class="brand-icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -815,7 +830,6 @@ math-field::part(menu-toggle){display:none !important}
   <div class="top-actions">
     <button id="btnManual">+ Questão manual</button>
     <a href="admin.html" class="admin" id="linkAdmin" style="display:none" title="Área administrativa">⚙ Cadastrar</a>
-    <a href="../Plataforma.html" title="Voltar à plataforma">← Plataforma</a>
     <button class="primary" id="btnPrint">Imprimir</button>
   </div>
 </div>
@@ -1250,11 +1264,13 @@ onAuthStateChanged(auth,async user=>{
   if(nome) $('brandUser').textContent = nome;
   $('authLoader').style.display='none';
   if (isGuestMode) {
+    const chip = $('brandUser');
+    if (chip) chip.classList.add('guest');
     AlquiLabAuth.showTestModeBanner({
-      msg: 'Você está navegando o Banco de Questões em <u>modo de teste</u>. Você pode ver as questões mas não pode criar nem salvar nada.'
+      msg: 'Você está no modo de teste. Crie uma conta para ter acesso ILIMITADO.'
     });
     AlquiLabAuth.showTestModeIntro('repositorio',
-      'Banco de Questões — modo de teste',
+      'Banco de Questões · modo de teste',
       'No modo de teste você pode visualizar as questões e montar um cabeçalho, mas <b>não pode criar questões, salvar provas ou inserir questões na prova</b>. Crie uma conta gratuita para acesso completo.'
     );
   }
