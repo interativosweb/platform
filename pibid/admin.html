@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Moderação · Experiências PIBID</title>
+<style>
+:root{
+    --bg-page:#FFFFFF;
+    --bg-panel:#F2F2F2;
+    --bg-panel-hover:#E6E6E6;
+    --card-bg:#FFFFFF;
+    --card-border:#F2F2F2;
+    --text-main:#00010D;
+    --text-strong:#4a5169;
+    --text-muted:#8b91a8;
+    --c1:#0067FF; --c1-soft:#E0EEFF;
+    --c2:#FF006B; --c2-soft:#FFE0EE;
+    --c3:#FFB800; --c3-soft:#FFF1CC;
+    --c4:#00C16E; --c4-soft:#D6F5E5;
+    --c8:#FF3D00;
+    --radius:22px;
+    --radius-sm:14px;
+    --t:.28s cubic-bezier(.4,0,.2,1);
+    --t-fast:.18s cubic-bezier(.4,0,.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg-page);color:var(--text-main);
+    -webkit-font-smoothing:antialiased;line-height:1.5;
+}
+.top{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 28px;border-bottom:1px solid var(--card-border);
+    background:#fff;height:64px;
+}
+.brand{display:flex;align-items:center;gap:12px;font-weight:700;font-size:1rem}
+.brand-mark{
+    width:34px;height:34px;border-radius:10px;
+    background:linear-gradient(135deg,#9a6900,#FFB800);
+    color:#fff;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:.95rem;
+    box-shadow:0 6px 16px rgba(255,184,0,.35);
+}
+.brand-sub{font-size:.74rem;color:var(--text-muted);font-weight:600}
+.btn-back{
+    text-decoration:none;background:var(--bg-panel);color:var(--text-main);
+    padding:8px 16px;border-radius:50px;
+    font-weight:700;font-size:.84rem;
+    display:inline-flex;align-items:center;gap:6px;
+    transition:background var(--t),transform var(--t-fast);
+}
+.btn-back:hover{background:var(--bg-panel-hover);transform:translateY(-1px)}
+.btn-back svg{width:14px;height:14px}
+
+.page{
+    max-width:1180px;margin:0 auto;padding:30px 28px 60px;
+}
+.tabs{
+    display:flex;gap:6px;background:var(--bg-panel);
+    padding:6px;border-radius:50px;width:fit-content;
+    margin-bottom:24px;
+}
+.tab{
+    padding:9px 18px;border-radius:50px;
+    background:transparent;border:none;cursor:pointer;
+    font-family:inherit;font-weight:700;font-size:.86rem;color:var(--text-muted);
+    display:inline-flex;align-items:center;gap:8px;
+    transition:background var(--t),color var(--t);
+}
+.tab:hover{color:var(--text-main)}
+.tab.active{background:#fff;color:var(--text-main);box-shadow:0 4px 12px rgba(0,0,0,.06)}
+.tab-badge{
+    background:var(--c8);color:#fff;
+    font-size:.68rem;font-weight:800;
+    padding:1px 7px;border-radius:50px;min-width:18px;text-align:center;
+}
+.tab-badge.zero{background:#d8dde8;color:var(--text-muted)}
+
+.section{display:none}
+.section.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+.empty{
+    text-align:center;padding:80px 20px;color:var(--text-muted);
+}
+.empty h3{color:var(--text-main);font-size:1.05rem;margin-bottom:6px}
+
+/* Cards genéricos */
+.mod-card{
+    background:var(--card-bg);border:1px solid var(--card-border);
+    border-radius:var(--radius);padding:20px 22px;margin-bottom:16px;
+    box-shadow:0 8px 30px rgba(35,50,100,.06);
+}
+.mod-head{
+    display:flex;align-items:center;gap:12px;margin-bottom:12px;
+    flex-wrap:wrap;
+}
+.mod-tag{
+    padding:3px 10px;border-radius:50px;
+    font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;
+}
+.mod-tag.warn{background:#fff7e0;color:#9a6900}
+.mod-tag.danger{background:#ffe5e5;color:var(--c8)}
+.mod-tag.info{background:var(--c1-soft);color:var(--c1)}
+.mod-tag.ok{background:var(--c4-soft);color:var(--c4)}
+.mod-when{font-size:.78rem;color:var(--text-muted);font-weight:600}
+
+.who-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:.86rem}
+.who-row .av{
+    width:32px;height:32px;border-radius:50%;
+    background:linear-gradient(135deg,var(--c1),#3a8cff);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:.78rem;
+}
+.who-row .av.report{background:linear-gradient(135deg,var(--c8),#ff6b3d)}
+.who-row .name{font-weight:700;color:var(--text-main)}
+.who-row .label{font-size:.74rem;color:var(--text-muted);font-weight:600}
+
+.preview{
+    background:var(--bg-panel);border-radius:var(--radius-sm);
+    padding:14px 16px;font-size:.92rem;color:var(--text-main);
+    white-space:pre-wrap;word-wrap:break-word;line-height:1.5;
+    margin-bottom:12px;
+}
+.preview img,.preview video{
+    max-width:100%;border-radius:10px;margin-top:8px;display:block;
+}
+.preview .pdf-pill{
+    display:inline-flex;align-items:center;gap:8px;
+    background:#fff;padding:8px 12px;border-radius:50px;
+    text-decoration:none;color:var(--text-main);font-size:.82rem;font-weight:700;
+    margin-top:8px;
+}
+.preview .pdf-pill .b{
+    width:22px;height:22px;border-radius:6px;background:var(--c8);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;
+}
+
+.flag-row{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    background:#fff7e0;border:1px solid #ffe7a3;
+    padding:8px 12px;border-radius:12px;
+    font-size:.82rem;color:#9a6900;font-weight:600;margin-bottom:12px;
+}
+
+.actions{
+    display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;
+}
+.btn{
+    padding:9px 16px;border-radius:50px;border:none;cursor:pointer;
+    font-family:inherit;font-weight:700;font-size:.84rem;
+    display:inline-flex;align-items:center;gap:6px;
+    transition:transform var(--t-fast),background var(--t);
+}
+.btn svg{width:14px;height:14px}
+.btn:hover{transform:translateY(-1px)}
+.btn-approve{background:var(--c4);color:#fff}
+.btn-approve:hover{background:#02ad62}
+.btn-reject{background:var(--c8);color:#fff}
+.btn-reject:hover{background:#d83400}
+.btn-neutral{background:var(--bg-panel);color:var(--text-main)}
+.btn-neutral:hover{background:var(--bg-panel-hover)}
+.btn-warn{background:#9a6900;color:#fff}
+.btn-warn:hover{background:#7a5300}
+.btn-primary{background:var(--text-main);color:#fff}
+.btn-primary:hover{background:#2a3260}
+
+/* Eixos */
+.eixos-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;
+}
+.eixo-mod{
+    background:#fff;border:1px solid var(--card-border);
+    border-radius:var(--radius);padding:18px 20px;
+    box-shadow:0 6px 20px rgba(35,50,100,.05);
+    display:flex;flex-direction:column;gap:8px;
+}
+.eixo-mod .top-row{display:flex;align-items:center;gap:10px}
+.eixo-mod .dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.eixo-mod .nome{font-weight:800;color:var(--text-main);font-size:.96rem;flex:1}
+.eixo-mod .desc{font-size:.82rem;color:var(--text-muted);line-height:1.45}
+.eixo-mod .row-actions{display:flex;gap:6px;margin-top:6px}
+.icon-btn-sm{
+    width:30px;height:30px;border-radius:50%;
+    background:var(--bg-panel);border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--text-strong);transition:background var(--t);
+}
+.icon-btn-sm:hover{background:var(--bg-panel-hover);color:var(--text-main)}
+.icon-btn-sm.danger:hover{background:#ffe5e5;color:var(--c8)}
+.icon-btn-sm svg{width:14px;height:14px}
+
+.add-eixo{
+    background:var(--text-main);color:#fff;
+    border:none;padding:11px 22px;border-radius:50px;
+    font-family:inherit;font-weight:700;font-size:.86rem;cursor:pointer;
+    display:inline-flex;align-items:center;gap:8px;margin-bottom:18px;
+    transition:transform var(--t-fast),background var(--t);
+}
+.add-eixo:hover{transform:translateY(-1px);background:#2a3260}
+.add-eixo svg{width:14px;height:14px}
+
+/* Modal */
+.modal{position:fixed;inset:0;background:rgba(20,26,50,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:9000;padding:20px}
+.modal.show{display:flex;animation:fadeIn .25s ease}
+.modal-box{background:#fff;border-radius:var(--radius);max-width:460px;width:100%;padding:26px 26px 22px;box-shadow:0 30px 80px rgba(0,0,0,.22)}
+.modal-box h3{font-size:1.1rem;font-weight:800;color:var(--text-main);margin-bottom:16px}
+.modal-box label{display:block;font-size:.82rem;font-weight:700;color:var(--text-main);margin-top:10px;margin-bottom:6px}
+.modal-box input,.modal-box textarea{
+    width:100%;padding:10px 14px;border-radius:12px;
+    border:1px solid var(--bg-panel);background:var(--bg-panel);
+    font-family:inherit;font-size:.92rem;color:var(--text-main);
+    outline:none;transition:border-color var(--t),background var(--t);
+}
+.modal-box input:focus,.modal-box textarea:focus{border-color:var(--c1);background:#fff}
+.modal-box textarea{resize:vertical;min-height:70px}
+.color-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.color-swatch{
+    width:30px;height:30px;border-radius:50%;cursor:pointer;
+    border:3px solid transparent;
+    transition:transform var(--t-fast);
+}
+.color-swatch:hover{transform:scale(1.08)}
+.color-swatch.sel{border-color:var(--text-main)}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+
+.gate{
+    position:fixed;inset:0;background:rgba(20,26,50,.5);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    display:none;align-items:center;justify-content:center;
+    z-index:9999;padding:20px;
+}
+.gate.show{display:flex}
+.gate-box{
+    background:#fff;border-radius:var(--radius);
+    padding:32px;max-width:420px;text-align:center;
+    box-shadow:0 30px 80px rgba(0,0,0,.2);
+}
+.gate-icon{
+    width:56px;height:56px;border-radius:18px;
+    background:var(--c8);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 16px;
+    box-shadow:0 12px 28px rgba(255,61,0,.45);
+}
+.gate-icon svg{width:26px;height:26px}
+
+.toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    background:var(--text-main);color:#fff;padding:12px 22px;border-radius:50px;
+    font-size:.86rem;font-weight:600;
+    box-shadow:0 12px 32px rgba(0,0,0,.25);z-index:9999;display:none;
+}
+.toast.show{display:block}
+.toast.success{background:var(--c4)}.toast.error{background:var(--c8)}.toast.warn{background:#9a6900}
+
+@media (max-width:760px){
+    .eixos-grid{grid-template-columns:1fr}
+    .tabs{width:100%;overflow-x:auto;flex-wrap:nowrap}
+    .tab{flex-shrink:0}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+    <div class="brand">
+        <div class="brand-mark">M</div>
+        <div>
+            Moderação PIBID
+            <div class="brand-sub">Pendentes · Denúncias · Eixos temáticos</div>
+        </div>
+    </div>
+    <a href="index.html" class="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Voltar ao feed
+    </a>
+</header>
+
+<main class="page">
+    <div class="tabs">
+        <button class="tab active" data-tab="pending">
+            Pendentes
+            <span class="tab-badge zero" id="badgePend">0</span>
+        </button>
+        <button class="tab" data-tab="reports">
+            Denúncias
+            <span class="tab-badge zero" id="badgeRep">0</span>
+        </button>
+        <button class="tab" data-tab="eixos">
+            Eixos temáticos
+        </button>
+    </div>
+
+    <section class="section active" id="sectionPending">
+        <div id="pendingList"></div>
+    </section>
+
+    <section class="section" id="sectionReports">
+        <div id="reportsList"></div>
+    </section>
+
+    <section class="section" id="sectionEixos">
+        <button class="add-eixo" id="btnAddEixo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Novo eixo
+        </button>
+        <div class="eixos-grid" id="eixosGrid"></div>
+    </section>
+</main>
+
+<!-- Modal eixo -->
+<div class="modal" id="eixoModal">
+    <div class="modal-box">
+        <h3 id="eixoModalTitle">Novo eixo</h3>
+        <label>Nome</label>
+        <input type="text" id="eixoNome" placeholder="Ex: Materiais Manipulativos" maxlength="60" />
+        <label>Descrição (opcional)</label>
+        <textarea id="eixoDesc" placeholder="Explique brevemente este eixo..." maxlength="200"></textarea>
+        <label>Cor</label>
+        <div class="color-row" id="colorRow"></div>
+        <div class="modal-foot">
+            <button class="btn btn-neutral" id="eixoCancel">Cancelar</button>
+            <button class="btn btn-primary" id="eixoSave">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Gate de admin -->
+<div class="gate" id="adminGate">
+    <div class="gate-box">
+        <div class="gate-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h3 style="font-size:1.18rem;font-weight:800;margin-bottom:8px">Acesso restrito</h3>
+        <p style="color:var(--text-muted);font-size:.92rem;margin-bottom:18px">Apenas o administrador pode acessar a moderação.</p>
+        <a class="btn btn-primary" href="../login.html?next=%2Fpibid%2Fadmin.html">Entrar como admin</a>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getDatabase, ref, get, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",
+    authDomain: "profbase-5f9b0.firebaseapp.com",
+    databaseURL: "https://profbase-5f9b0-default-rtdb.firebaseio.com",
+    projectId: "profbase-5f9b0",
+    storageBucket: "profbase-5f9b0.firebasestorage.app",
+    messagingSenderId: "826412057766",
+    appId: "1:826412057766:web:729e6e24ce7587417fe067"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const ADM_EMAIL = 'gilbertofernandessc@gmail.com';
+
+const $ = (id) => document.getElementById(id);
+const escapeHtml = (s) => String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const initials = (n) => (n||'?').trim().split(/\s+/).slice(0,2).map(p=>p[0]||'').join('').toUpperCase() || '?';
+const fmtBytes = (b) => b<1024 ? b+' B' : b<1048576 ? (b/1024).toFixed(1)+' KB' : (b/1048576).toFixed(1)+' MB';
+const fmtTime = (ts) => {
+    if (!ts) return '';
+    const d = new Date(ts);
+    return d.toLocaleString('pt-BR', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+};
+let toastTimer = null;
+function toast(msg, kind='') {
+    const t = $('toast'); t.className = 'toast show ' + kind; t.textContent = msg;
+    clearTimeout(toastTimer); toastTimer = setTimeout(()=> t.classList.remove('show'), 3000);
+}
+
+const COLORS = ['#0067FF','#FF006B','#FFB800','#00C16E','#9D00FF','#FF6B00','#00B8D9','#FF3D00','#6B00FF'];
+
+let eixos = [];
+let editingEixoId = null;
+let selColor = COLORS[0];
+
+onAuthStateChanged(auth, (user) => {
+    if (!user || user.email !== ADM_EMAIL) {
+        $('adminGate').classList.add('show');
+        return;
+    }
+    $('adminGate').classList.remove('show');
+    initAll();
+});
+
+function initAll() {
+    listenPending();
+    listenReports();
+    listenEixos();
+}
+
+/* ===== TABS ===== */
+document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        $('section' + t.dataset.tab.charAt(0).toUpperCase() + t.dataset.tab.slice(1)).classList.add('active');
+    });
+});
+
+/* ===== PENDENTES ===== */
+function listenPending() {
+    onValue(ref(db, 'pibid_pendentes'), (snap) => {
+        const data = snap.val() || {};
+        const list = Object.keys(data).map(k => ({ id:k, ...data[k] }))
+            .sort((a,b) => (b.ts||0)-(a.ts||0));
+        const badge = $('badgePend');
+        badge.textContent = list.length;
+        badge.classList.toggle('zero', list.length === 0);
+        renderPending(list);
+    });
+}
+
+function renderPending(list) {
+    const wrap = $('pendingList');
+    if (!list.length) {
+        wrap.innerHTML = '<div class="empty"><h3>Nada pendente</h3><p>Sem publicações aguardando moderação no momento.</p></div>';
+        return;
+    }
+    wrap.innerHTML = '';
+    list.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'mod-card';
+        const tipoLabel = p.tipo === 'feed' ? 'Feed 24h' : (p.tipo === 'comentario' ? 'Comentário' : 'Publicação');
+        const eixo = eixos.find(e => e.id === p.eixo);
+        let body = '';
+        if (p.tipo === 'comentario') {
+            body = `<div class="preview">${escapeHtml(p.texto || '')}</div>`;
+        } else {
+            body = `<div class="preview">${p.html || escapeHtml(p.texto || '')}${renderAttachmentsPreview(p)}</div>`;
+        }
+        card.innerHTML = `
+            <div class="mod-head">
+                <span class="mod-tag warn">Pendente</span>
+                <span class="mod-tag info">${escapeHtml(tipoLabel)}</span>
+                ${eixo ? `<span class="mod-tag" style="background:${eixo.cor}22;color:${eixo.cor}">${escapeHtml(eixo.nome)}</span>` : ''}
+                <span class="mod-when" style="margin-left:auto">${fmtTime(p.ts)}</span>
+            </div>
+            <div class="who-row">
+                <div class="av">${initials(p.autorNome)}</div>
+                <div>
+                    <div class="name">${escapeHtml(p.autorNome || 'Usuário')}</div>
+                    <div class="label">UID: ${escapeHtml(p.autorUid || '—')}</div>
+                </div>
+            </div>
+            ${p.palavroes && p.palavroes.length ? `
+            <div class="flag-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Palavras detectadas: <b>${p.palavroes.map(escapeHtml).join(', ')}</b>
+            </div>` : ''}
+            ${body}
+            <div class="actions">
+                <button class="btn btn-approve" data-act="approve">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    Aprovar
+                </button>
+                <button class="btn btn-reject" data-act="reject">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    Rejeitar
+                </button>
+                <button class="btn btn-warn" data-act="warn">Avisar usuário</button>
+            </div>
+        `;
+        card.querySelector('[data-act="approve"]').addEventListener('click', () => approvePending(p));
+        card.querySelector('[data-act="reject"]').addEventListener('click', () => rejectPending(p));
+        card.querySelector('[data-act="warn"]').addEventListener('click', () => warnUser(p));
+        wrap.appendChild(card);
+    });
+}
+
+function renderAttachmentsPreview(p) {
+    const a = p.attachments || [];
+    if (!a.length) return '';
+    let html = '';
+    a.forEach(at => {
+        if (at.kind === 'img')   html += `<img src="${at.data}" />`;
+        if (at.kind === 'video') html += `<video src="${at.data}" controls preload="metadata"></video>`;
+        if (at.kind === 'pdf')   html += `<a class="pdf-pill" href="${at.data}" target="_blank"><span class="b">PDF</span>${escapeHtml(at.name||'arquivo.pdf')} · ${fmtBytes(at.size||0)}</a>`;
+    });
+    return html;
+}
+
+async function approvePending(p) {
+    try {
+        const payload = {
+            html: p.html || '',
+            texto: p.texto || '',
+            attachments: p.attachments || [],
+            autorUid: p.autorUid,
+            autorNome: p.autorNome,
+            autorRole: p.autorRole || 'aluno',
+            ts: p.ts,
+            status: 'aprovado',
+            moderado: { por: 'admin', em: Date.now() }
+        };
+        if (p.tipo === 'feed') {
+            payload.expiresAt = p.expiresAt || (Date.now() + 24*3600*1000);
+            const r = push(ref(db, 'pibid_feed'));
+            await set(r, payload);
+        } else if (p.tipo === 'comentario') {
+            const r = push(ref(db, `pibid_publicacoes/${p.eixo}/${p.pubId}/comentarios`));
+            await set(r, {
+                texto: p.texto, autorUid: p.autorUid, autorNome: p.autorNome,
+                autorRole: p.autorRole || 'aluno', ts: p.ts
+            });
+        } else {
+            const r = push(ref(db, `pibid_publicacoes/${p.eixo}`));
+            await set(r, payload);
+        }
+        await remove(ref(db, 'pibid_pendentes/' + p.id));
+        toast('Aprovado e publicado.', 'success');
+    } catch(e) { console.error(e); toast('Erro ao aprovar.', 'error'); }
+}
+async function rejectPending(p) {
+    if (!confirm('Rejeitar e excluir esta pendência?')) return;
+    try {
+        await remove(ref(db, 'pibid_pendentes/' + p.id));
+        toast('Pendência rejeitada.', 'warn');
+    } catch(e) { toast('Erro ao rejeitar.', 'error'); }
+}
+async function warnUser(p) {
+    const msg = prompt('Mensagem de aviso para o usuário:', 'Sua publicação foi removida por conter linguagem inadequada. Por favor, mantenha a comunicação respeitosa.');
+    if (!msg) return;
+    try {
+        await push(ref(db, 'pibid_avisos/' + p.autorUid), {
+            mensagem: msg,
+            referente: { tipo:p.tipo, snippet: (p.texto||'').slice(0,140) },
+            ts: Date.now(),
+            lido: false
+        });
+        toast('Aviso enviado ao usuário.', 'success');
+    } catch(e) { toast('Erro ao enviar aviso.', 'error'); }
+}
+
+/* ===== DENÚNCIAS ===== */
+function listenReports() {
+    onValue(ref(db, 'pibid_denuncias'), (snap) => {
+        const data = snap.val() || {};
+        const list = Object.keys(data).map(k => ({ id:k, ...data[k] }))
+            .filter(d => d.status !== 'fechada')
+            .sort((a,b)=> (b.ts||0)-(a.ts||0));
+        const badge = $('badgeRep');
+        badge.textContent = list.length;
+        badge.classList.toggle('zero', list.length === 0);
+        renderReports(list);
+    });
+}
+
+const MOTIVOS = {
+    'palavroes': 'Palavrões/ofensa',
+    'conteudo_indevido': 'Conteúdo indevido',
+    'spam': 'Spam',
+    'assedio': 'Assédio',
+    'fora_topico': 'Fora do tema',
+    'outro': 'Outro'
+};
+
+function renderReports(list) {
+    const wrap = $('reportsList');
+    if (!list.length) {
+        wrap.innerHTML = '<div class="empty"><h3>Sem denúncias abertas</h3><p>Boa! Nada precisa de atenção agora.</p></div>';
+        return;
+    }
+    wrap.innerHTML = '';
+    list.forEach(d => {
+        const card = document.createElement('div');
+        card.className = 'mod-card';
+        card.innerHTML = `
+            <div class="mod-head">
+                <span class="mod-tag danger">Denúncia</span>
+                <span class="mod-tag info">${escapeHtml(MOTIVOS[d.motivo] || d.motivo || 'Outro')}</span>
+                <span class="mod-tag" style="background:${d.tipo==='feed'?'#d6f5e5':'#e0eeff'};color:${d.tipo==='feed'?'#00C16E':'#0067FF'}">
+                    ${d.tipo === 'feed' ? 'Feed 24h' : 'Publicação'}
+                </span>
+                <span class="mod-when" style="margin-left:auto">${fmtTime(d.ts)}</span>
+            </div>
+
+            <div class="who-row">
+                <div class="av report">${initials(d.denuncianteNome)}</div>
+                <div><div class="name">${escapeHtml(d.denuncianteNome || 'Usuário')}</div><div class="label">denunciou — UID: ${escapeHtml(d.denuncianteUid||'—')}</div></div>
+            </div>
+            <div class="who-row">
+                <div class="av">${initials(d.denunciadoNome)}</div>
+                <div><div class="name">${escapeHtml(d.denunciadoNome || 'Usuário')}</div><div class="label">autor da publicação — UID: ${escapeHtml(d.denunciadoUid||'—')}</div></div>
+            </div>
+
+            ${d.mensagem ? `<div class="preview"><b>Detalhes:</b><br>${escapeHtml(d.mensagem)}</div>` : ''}
+            ${d.snippet ? `<div class="preview" style="background:#fff7e0"><b>Trecho da publicação:</b><br>${escapeHtml(d.snippet)}${d.snippet.length>=160?'…':''}</div>` : ''}
+
+            <div class="actions">
+                <button class="btn btn-reject" data-act="del">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                    Excluir publicação
+                </button>
+                <button class="btn btn-warn" data-act="warn">Avisar autor</button>
+                <button class="btn btn-neutral" data-act="dismiss">Arquivar denúncia</button>
+            </div>
+        `;
+        card.querySelector('[data-act="del"]').addEventListener('click', () => deleteReportedPost(d));
+        card.querySelector('[data-act="warn"]').addEventListener('click', () => warnReportedUser(d));
+        card.querySelector('[data-act="dismiss"]').addEventListener('click', () => dismissReport(d));
+        wrap.appendChild(card);
+    });
+}
+
+async function deleteReportedPost(d) {
+    if (!confirm('Excluir a publicação denunciada e fechar a denúncia?')) return;
+    try {
+        if (d.tipo === 'feed') {
+            await remove(ref(db, 'pibid_feed/' + d.postId));
+        } else {
+            await remove(ref(db, `pibid_publicacoes/${d.eixo}/${d.postId}`));
+        }
+        await update(ref(db, 'pibid_denuncias/' + d.id), {
+            status: 'fechada', acao: 'excluida', fechadaEm: Date.now()
+        });
+        toast('Publicação excluída e denúncia fechada.', 'success');
+    } catch(e) { console.error(e); toast('Erro ao excluir.', 'error'); }
+}
+async function warnReportedUser(d) {
+    const msg = prompt('Mensagem de aviso para o autor:', 'Recebemos uma denúncia sobre sua publicação. Por favor, revise as diretrizes da comunidade PIBID.');
+    if (!msg) return;
+    try {
+        await push(ref(db, 'pibid_avisos/' + d.denunciadoUid), {
+            mensagem: msg,
+            referente: { tipo:d.tipo, snippet: d.snippet || '', motivo: d.motivo },
+            ts: Date.now(),
+            lido: false
+        });
+        toast('Aviso enviado ao autor.', 'success');
+    } catch(e) { toast('Erro ao enviar aviso.', 'error'); }
+}
+async function dismissReport(d) {
+    try {
+        await update(ref(db, 'pibid_denuncias/' + d.id), {
+            status: 'fechada', acao: 'arquivada', fechadaEm: Date.now()
+        });
+        toast('Denúncia arquivada.', 'warn');
+    } catch(e) { toast('Erro ao arquivar.', 'error'); }
+}
+
+/* ===== EIXOS ===== */
+function listenEixos() {
+    onValue(ref(db, 'pibid_eixos'), (snap) => {
+        const v = snap.val() || {};
+        eixos = Object.keys(v).map(k => ({ id:k, ...v[k] })).sort((a,b)=>(a.ordem||0)-(b.ordem||0));
+        renderEixos();
+    });
+}
+function renderEixos() {
+    const wrap = $('eixosGrid');
+    if (!eixos.length) {
+        wrap.innerHTML = '<div class="empty"><h3>Nenhum eixo cadastrado</h3><p>Clique em "Novo eixo" para começar.</p></div>';
+        return;
+    }
+    wrap.innerHTML = '';
+    eixos.forEach(e => {
+        const c = document.createElement('div');
+        c.className = 'eixo-mod';
+        c.innerHTML = `
+            <div class="top-row">
+                <span class="dot" style="background:${e.cor}"></span>
+                <span class="nome">${escapeHtml(e.nome)}</span>
+            </div>
+            ${e.desc ? `<div class="desc">${escapeHtml(e.desc)}</div>` : ''}
+            <div class="row-actions">
+                <button class="icon-btn-sm" data-act="edit" title="Editar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                </button>
+                <button class="icon-btn-sm danger" data-act="del" title="Excluir">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                </button>
+            </div>
+        `;
+        c.querySelector('[data-act="edit"]').addEventListener('click', () => openEixoModal(e));
+        c.querySelector('[data-act="del"]').addEventListener('click', () => deleteEixo(e));
+        wrap.appendChild(c);
+    });
+}
+
+$('btnAddEixo').addEventListener('click', () => openEixoModal(null));
+
+function openEixoModal(eixo) {
+    editingEixoId = eixo ? eixo.id : null;
+    $('eixoModalTitle').textContent = eixo ? 'Editar eixo' : 'Novo eixo';
+    $('eixoNome').value = eixo ? eixo.nome : '';
+    $('eixoDesc').value = eixo ? (eixo.desc || '') : '';
+    selColor = eixo ? eixo.cor : COLORS[0];
+    renderColors();
+    $('eixoModal').classList.add('show');
+    setTimeout(() => $('eixoNome').focus(), 80);
+}
+function renderColors() {
+    const r = $('colorRow');
+    r.innerHTML = '';
+    COLORS.forEach(c => {
+        const s = document.createElement('span');
+        s.className = 'color-swatch' + (c === selColor ? ' sel' : '');
+        s.style.background = c;
+        s.addEventListener('click', () => { selColor = c; renderColors(); });
+        r.appendChild(s);
+    });
+}
+$('eixoCancel').addEventListener('click', () => $('eixoModal').classList.remove('show'));
+$('eixoSave').addEventListener('click', async () => {
+    const nome = $('eixoNome').value.trim();
+    const desc = $('eixoDesc').value.trim();
+    if (!nome) { toast('Informe o nome do eixo.', 'warn'); return; }
+    try {
+        if (editingEixoId) {
+            await update(ref(db, 'pibid_eixos/' + editingEixoId), { nome, desc, cor: selColor });
+            toast('Eixo atualizado.', 'success');
+        } else {
+            const id = nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,30) || ('eixo_' + Date.now());
+            const ordem = (eixos[eixos.length-1]?.ordem || 0) + 1;
+            await set(ref(db, 'pibid_eixos/' + id), { nome, desc, cor: selColor, ordem });
+            toast('Eixo criado.', 'success');
+        }
+        $('eixoModal').classList.remove('show');
+    } catch(e) { console.error(e); toast('Erro ao salvar.', 'error'); }
+});
+
+async function deleteEixo(e) {
+    if (!confirm(`Excluir o eixo "${e.nome}"? As publicações deste eixo NÃO serão removidas, mas ficarão sem categoria visível.`)) return;
+    try {
+        await remove(ref(db, 'pibid_eixos/' + e.id));
+        toast('Eixo excluído.', 'warn');
+    } catch(err) { toast('Erro ao excluir.', 'error'); }
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') $('eixoModal').classList.remove('show');
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1917 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Experiências PIBID — AlquiLab</title>
+<meta name="description" content="Espaço para alunos PIBID compartilharem experiências, materiais e relatos por eixo temático." />
+
+<style>
+:root{
+    --bg-page:#FFFFFF;
+    --bg-panel:#F2F2F2;
+    --bg-panel-hover:#E6E6E6;
+    --card-bg:#FFFFFF;
+    --card-border:#F2F2F2;
+
+    --text-main:#00010D;
+    --text-strong:#4a5169;
+    --text-muted:#8b91a8;
+    --text-soft:#b6bccf;
+
+    --c1:#0067FF;  --c1-soft:#E0EEFF;
+    --c2:#FF006B;  --c2-soft:#FFE0EE;
+    --c3:#FFB800;  --c3-soft:#FFF1CC;
+    --c4:#00C16E;  --c4-soft:#D6F5E5;
+    --c5:#9D00FF;  --c5-soft:#F1D9FF;
+    --c6:#FF6B00;  --c6-soft:#FFE2CC;
+    --c7:#00B8D9;  --c7-soft:#D1F1F7;
+    --c8:#FF3D00;  --c8-soft:#FFD9CC;
+    --c9:#6B00FF;  --c9-soft:#E3D1FF;
+
+    --radius:22px;
+    --radius-sm:14px;
+    --radius-lg:32px;
+
+    --shadow-card:0 8px 30px rgba(35,50,100,.06);
+    --shadow-card-hover:0 14px 40px rgba(35,50,100,.10);
+
+    --t:.28s cubic-bezier(.4,0,.2,1);
+    --t-fast:.18s cubic-bezier(.4,0,.2,1);
+    --t-spring:.45s cubic-bezier(.16,1,.3,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg-page);
+    color:var(--text-main);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+    overflow:hidden;
+}
+
+/* ===== TOP NAV ===== */
+.top{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 28px;
+    border-bottom:1px solid var(--card-border);
+    background:#fff;
+    height:64px;
+}
+.brand{display:flex;align-items:center;gap:12px;font-weight:700;font-size:1rem;color:var(--text-main)}
+.brand-mark{
+    width:34px;height:34px;border-radius:10px;
+    background:linear-gradient(135deg,var(--c4),#34d186);
+    color:#fff;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:.95rem;
+    box-shadow:0 6px 16px rgba(0,193,110,.35);
+}
+.brand-sub{font-size:.74rem;color:var(--text-muted);font-weight:600;margin-left:4px}
+.top-actions{display:flex;align-items:center;gap:10px}
+.btn-back{
+    text-decoration:none;
+    background:var(--bg-panel);color:var(--text-main);
+    padding:8px 16px;border-radius:50px;
+    font-weight:700;font-size:.84rem;
+    display:inline-flex;align-items:center;gap:6px;
+    transition:background var(--t),transform var(--t-fast);
+}
+.btn-back:hover{background:var(--bg-panel-hover);transform:translateY(-1px)}
+.btn-back svg{width:14px;height:14px}
+.user-chip{
+    display:none;align-items:center;gap:10px;
+    background:var(--bg-panel);
+    padding:6px 14px 6px 6px;border-radius:50px;
+    font-size:.84rem;font-weight:700;color:var(--text-main);
+}
+.user-chip .avatar{
+    width:28px;height:28px;border-radius:50%;
+    background:linear-gradient(135deg,var(--c1),#3a8cff);
+    color:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:.78rem;font-weight:800;
+}
+.user-chip .role{color:var(--text-muted);font-weight:600;font-size:.74rem;margin-left:4px}
+.btn-login{
+    background:var(--text-main);color:#fff;
+    border:none;padding:9px 20px;border-radius:50px;
+    font-family:inherit;font-weight:700;font-size:.84rem;cursor:pointer;
+    transition:transform var(--t-fast),background var(--t);
+}
+.btn-login:hover{transform:translateY(-1px);background:#2a3260}
+.btn-admin{
+    text-decoration:none;
+    background:#fff7e0;color:#9a6900;border:1px solid #ffe7a3;
+    padding:8px 16px;border-radius:50px;
+    font-weight:700;font-size:.82rem;
+    display:none;align-items:center;gap:6px;
+    transition:background var(--t);
+}
+.btn-admin:hover{background:#fff0c2}
+.btn-admin.show{display:inline-flex}
+.btn-admin svg{width:14px;height:14px}
+
+/* ===== LAYOUT 3 COLUNAS ===== */
+.workspace{
+    display:grid;
+    grid-template-columns:280px 1fr 340px;
+    height:calc(100vh - 64px);
+    overflow:hidden;
+}
+
+/* ----- COLUNA 1: EIXOS TEMÁTICOS ----- */
+.col-eixos{
+    background:#fafafa;
+    border-right:1px solid var(--card-border);
+    display:flex;flex-direction:column;
+    overflow:hidden;
+}
+.col-head{
+    padding:18px 20px 10px;
+    display:flex;align-items:center;justify-content:space-between;
+}
+.col-head h3{
+    font-size:.72rem;font-weight:800;color:var(--text-muted);
+    text-transform:uppercase;letter-spacing:1.2px;
+}
+.col-head .count{
+    font-size:.72rem;color:var(--text-muted);font-weight:700;
+    background:var(--bg-panel);padding:3px 10px;border-radius:50px;
+}
+.eixos-list{
+    flex:1;overflow-y:auto;
+    padding:6px 12px 18px;
+    display:flex;flex-direction:column;gap:4px;
+}
+.eixos-list::-webkit-scrollbar{width:8px}
+.eixos-list::-webkit-scrollbar-thumb{background:#d8dde8;border-radius:8px}
+
+.eixo{
+    display:flex;align-items:center;gap:12px;
+    padding:11px 14px;
+    border-radius:14px;
+    cursor:pointer;
+    transition:background var(--t),transform var(--t-fast);
+    border:none;background:transparent;
+    text-align:left;width:100%;
+    font-family:inherit;
+}
+.eixo:hover{background:var(--bg-panel)}
+.eixo.active{background:var(--text-main);color:#fff}
+.eixo.active .eixo-dot{background:#fff !important}
+.eixo.active .eixo-meta{color:rgba(255,255,255,.7)}
+.eixo-dot{
+    width:10px;height:10px;border-radius:50%;
+    flex-shrink:0;
+}
+.eixo-info{flex:1;min-width:0}
+.eixo-name{
+    font-size:.9rem;font-weight:700;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.eixo-meta{
+    font-size:.72rem;color:var(--text-muted);font-weight:600;
+    margin-top:1px;
+}
+
+/* ----- COLUNA 2: PUBLICAÇÕES ----- */
+.col-pubs{
+    display:flex;flex-direction:column;
+    overflow:hidden;
+    background:#fff;
+}
+.pubs-head{
+    padding:20px 32px 14px;
+    border-bottom:1px solid var(--card-border);
+    display:flex;align-items:center;justify-content:space-between;
+    gap:14px;
+}
+.pubs-title h2{
+    font-size:1.4rem;font-weight:800;letter-spacing:-.5px;
+    color:var(--text-main);
+}
+.pubs-title p{
+    font-size:.85rem;color:var(--text-muted);font-weight:500;margin-top:2px;
+}
+.btn-new{
+    background:var(--text-main);color:#fff;
+    border:none;padding:11px 20px;border-radius:50px;
+    font-family:inherit;font-weight:700;font-size:.86rem;cursor:pointer;
+    display:inline-flex;align-items:center;gap:8px;
+    transition:transform var(--t-fast),background var(--t),box-shadow var(--t);
+    flex-shrink:0;
+}
+.btn-new:hover{transform:translateY(-1px);background:#2a3260;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.btn-new svg{width:14px;height:14px}
+
+.pubs-scroll{
+    flex:1;overflow-y:auto;
+    padding:24px 32px 40px;
+    display:flex;flex-direction:column;gap:18px;
+}
+.pubs-scroll::-webkit-scrollbar{width:10px}
+.pubs-scroll::-webkit-scrollbar-thumb{background:#d8dde8;border-radius:8px}
+
+/* ----- POST CARD ----- */
+.post{
+    background:var(--card-bg);
+    border:1px solid var(--card-border);
+    border-radius:var(--radius);
+    padding:20px 22px;
+    box-shadow:var(--shadow-card);
+    transition:box-shadow var(--t),transform var(--t);
+    animation:postIn .45s cubic-bezier(.16,1,.3,1) both;
+}
+.post:hover{box-shadow:var(--shadow-card-hover)}
+@keyframes postIn{
+    from{opacity:0;transform:translateY(8px)}
+    to{opacity:1;transform:translateY(0)}
+}
+.post-head{
+    display:flex;align-items:center;gap:12px;margin-bottom:14px;
+}
+.post-avatar{
+    width:42px;height:42px;border-radius:50%;
+    background:linear-gradient(135deg,var(--c1),#3a8cff);
+    color:#fff;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:.95rem;flex-shrink:0;
+}
+.post-meta{flex:1;min-width:0}
+.post-author{font-size:.92rem;font-weight:700;color:var(--text-main)}
+.post-when{font-size:.76rem;color:var(--text-muted);font-weight:500;margin-top:1px}
+.post-eixo{
+    font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+    padding:3px 10px;border-radius:50px;
+}
+.post-menu-btn{
+    background:transparent;border:none;cursor:pointer;
+    width:34px;height:34px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--text-muted);
+    transition:background var(--t);
+}
+.post-menu-btn:hover{background:var(--bg-panel);color:var(--text-main)}
+.post-menu-btn svg{width:16px;height:16px}
+
+.post-body{
+    font-size:.96rem;color:var(--text-main);line-height:1.55;
+    word-wrap:break-word;overflow-wrap:break-word;
+}
+.post-body p{margin-bottom:8px}
+.post-body p:last-child{margin-bottom:0}
+.post-body b,.post-body strong{font-weight:700}
+.post-body em,.post-body i{font-style:italic}
+.post-body u{text-decoration:underline}
+
+.post-attachments{
+    margin-top:14px;display:flex;flex-direction:column;gap:10px;
+}
+.post-attachments img,.post-attachments video{
+    max-width:100%;border-radius:var(--radius-sm);
+    background:var(--bg-panel);
+}
+.post-attachments video{max-height:420px}
+.post-attachments img{cursor:zoom-in;display:block}
+.attach-pdf{
+    display:flex;align-items:center;gap:12px;
+    padding:14px 16px;
+    background:var(--bg-panel);
+    border-radius:var(--radius-sm);
+    text-decoration:none;color:var(--text-main);
+    transition:background var(--t);
+}
+.attach-pdf:hover{background:var(--bg-panel-hover)}
+.attach-pdf .pdf-icon{
+    width:42px;height:42px;border-radius:10px;
+    background:#FF3D00;color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:.7rem;flex-shrink:0;
+}
+.attach-pdf .pdf-info{flex:1;min-width:0}
+.attach-pdf .pdf-name{
+    font-size:.88rem;font-weight:700;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.attach-pdf .pdf-size{font-size:.74rem;color:var(--text-muted);font-weight:600}
+.attach-pdf .pdf-arrow{color:var(--text-muted)}
+.attach-pdf .pdf-arrow svg{width:18px;height:18px}
+
+.post-actions{
+    margin-top:16px;padding-top:14px;
+    border-top:1px solid rgba(27,34,64,.06);
+    display:flex;align-items:center;gap:6px;
+}
+.act-btn{
+    background:transparent;border:none;cursor:pointer;
+    padding:7px 12px;border-radius:50px;
+    font-family:inherit;font-size:.82rem;font-weight:600;
+    color:var(--text-muted);
+    display:inline-flex;align-items:center;gap:6px;
+    transition:background var(--t),color var(--t);
+}
+.act-btn:hover{background:var(--bg-panel);color:var(--text-main)}
+.act-btn svg{width:16px;height:16px}
+.act-btn.liked{color:var(--c2)}
+.act-btn.liked svg{fill:var(--c2)}
+.act-btn.report{margin-left:auto;color:var(--text-soft)}
+.act-btn.report:hover{background:#ffe5e5;color:var(--c8)}
+
+/* ----- COMENTÁRIOS ----- */
+.comments{
+    margin-top:14px;padding-top:14px;
+    border-top:1px solid rgba(27,34,64,.06);
+    display:none;
+}
+.comments.open{display:block}
+.comment{
+    display:flex;gap:10px;margin-bottom:10px;
+}
+.comment-avatar{
+    width:32px;height:32px;border-radius:50%;
+    background:linear-gradient(135deg,var(--c5),#bf6bff);
+    color:#fff;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:.78rem;flex-shrink:0;
+}
+.comment-bubble{
+    flex:1;background:var(--bg-panel);
+    padding:9px 13px;border-radius:14px;
+    font-size:.86rem;color:var(--text-main);
+}
+.comment-author{font-weight:700;font-size:.78rem;color:var(--text-strong);margin-bottom:1px}
+.comment-form{
+    display:flex;gap:8px;align-items:center;margin-top:10px;
+}
+.comment-form input{
+    flex:1;background:var(--bg-panel);
+    border:1px solid transparent;
+    padding:9px 14px;border-radius:50px;
+    font-family:inherit;font-size:.86rem;
+    color:var(--text-main);outline:none;
+    transition:border-color var(--t),background var(--t);
+}
+.comment-form input:focus{background:#fff;border-color:var(--c1)}
+.comment-form button{
+    background:var(--text-main);color:#fff;
+    border:none;padding:9px 16px;border-radius:50px;
+    font-family:inherit;font-weight:700;font-size:.82rem;cursor:pointer;
+    transition:background var(--t);
+}
+.comment-form button:hover{background:#2a3260}
+.comment-form button:disabled{opacity:.4;cursor:not-allowed}
+
+/* ----- COLUNA 3: FEED 24h ----- */
+.col-feed{
+    background:#f7fbf6;
+    border-left:1px solid var(--card-border);
+    display:flex;flex-direction:column;
+    overflow:hidden;
+}
+.feed-head{
+    padding:18px 20px 12px;
+}
+.feed-head h3{
+    font-size:.95rem;font-weight:800;color:var(--text-main);
+    display:flex;align-items:center;gap:8px;
+}
+.live-dot{
+    width:8px;height:8px;border-radius:50%;background:var(--c4);
+    box-shadow:0 0 0 0 rgba(0,193,110,.6);
+    animation:pulse 1.6s infinite;
+}
+@keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(0,193,110,.55)}
+    70%{box-shadow:0 0 0 10px rgba(0,193,110,0)}
+    100%{box-shadow:0 0 0 0 rgba(0,193,110,0)}
+}
+.feed-head p{
+    font-size:.78rem;color:var(--text-muted);font-weight:500;margin-top:4px;
+}
+.btn-feed-new{
+    width:calc(100% - 40px);margin:6px 20px 14px;
+    background:var(--c4);color:#fff;
+    border:none;padding:11px 18px;border-radius:50px;
+    font-family:inherit;font-weight:700;font-size:.86rem;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    box-shadow:0 6px 18px rgba(0,193,110,.32);
+    transition:transform var(--t-fast),box-shadow var(--t),background var(--t);
+}
+.btn-feed-new:hover{transform:translateY(-1px);background:#02ad62;box-shadow:0 10px 24px rgba(0,193,110,.42)}
+.btn-feed-new svg{width:14px;height:14px}
+
+.feed-list{
+    flex:1;overflow-y:auto;
+    padding:0 20px 24px;
+    display:flex;flex-direction:column;gap:12px;
+}
+.feed-list::-webkit-scrollbar{width:8px}
+.feed-list::-webkit-scrollbar-thumb{background:#cfe5cf;border-radius:8px}
+
+.feed-card{
+    background:#fff;border:1px solid var(--card-border);
+    border-radius:18px;padding:14px 16px;
+    box-shadow:0 4px 14px rgba(35,80,40,.05);
+    animation:postIn .35s cubic-bezier(.16,1,.3,1) both;
+}
+.feed-card-head{
+    display:flex;align-items:center;gap:10px;margin-bottom:10px;
+}
+.feed-card-head .avatar{
+    width:32px;height:32px;border-radius:50%;
+    background:linear-gradient(135deg,var(--c4),#34d186);
+    color:#fff;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:.78rem;
+}
+.feed-card-head .who{flex:1;min-width:0}
+.feed-card-head .name{font-size:.84rem;font-weight:700;color:var(--text-main)}
+.feed-card-head .ttl{
+    font-size:.7rem;color:var(--c4);font-weight:700;
+    background:var(--c4-soft);padding:2px 8px;border-radius:50px;
+}
+.feed-card .body{
+    font-size:.86rem;color:var(--text-main);line-height:1.5;
+    word-wrap:break-word;overflow-wrap:break-word;
+}
+.feed-card img,.feed-card video{
+    width:100%;border-radius:12px;margin-top:8px;
+    background:var(--bg-panel);max-height:280px;object-fit:cover;
+}
+.feed-card .acts{
+    margin-top:10px;display:flex;align-items:center;gap:4px;
+}
+
+.feed-empty,.pubs-empty{
+    text-align:center;padding:40px 20px;color:var(--text-muted);
+    font-size:.85rem;
+}
+.feed-empty h4,.pubs-empty h4{
+    color:var(--text-main);margin-bottom:6px;font-size:.95rem;font-weight:700;
+}
+
+/* ===== MODAL BASE ===== */
+.modal{
+    position:fixed;inset:0;
+    background:rgba(20,26,50,.5);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    display:none;align-items:center;justify-content:center;
+    z-index:9000;padding:20px;
+    animation:fadeIn .25s ease;
+}
+.modal.show{display:flex}
+.modal-box{
+    background:#fff;border-radius:var(--radius);
+    width:100%;max-width:580px;
+    box-shadow:0 30px 80px rgba(0,0,0,.22);
+    animation:popIn .32s cubic-bezier(.16,1,.3,1);
+    max-height:88vh;display:flex;flex-direction:column;overflow:hidden;
+}
+.modal-box.compact{max-width:440px}
+.modal-head{
+    padding:20px 24px 14px;
+    border-bottom:1px solid var(--card-border);
+    display:flex;align-items:center;justify-content:space-between;
+}
+.modal-head h3{font-size:1.05rem;font-weight:800;color:var(--text-main)}
+.modal-head p{font-size:.8rem;color:var(--text-muted);margin-top:2px;font-weight:500}
+.modal-close{
+    background:var(--bg-panel);border:none;cursor:pointer;
+    width:34px;height:34px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--text-main);transition:background var(--t);
+}
+.modal-close:hover{background:var(--bg-panel-hover)}
+.modal-close svg{width:14px;height:14px}
+.modal-body{padding:18px 24px;overflow-y:auto;flex:1}
+.modal-foot{
+    padding:14px 24px;border-top:1px solid var(--card-border);
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:#fafafa;
+}
+.modal-foot .left{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.modal-foot .right{display:flex;align-items:center;gap:8px}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popIn{
+    from{opacity:0;transform:scale(.94)}
+    to{opacity:1;transform:scale(1)}
+}
+
+/* ===== COMPOSER ===== */
+.composer-toolbar{
+    display:flex;align-items:center;gap:4px;flex-wrap:wrap;
+    padding:8px;
+    background:var(--bg-panel);
+    border-radius:14px 14px 0 0;
+}
+.tool-btn{
+    background:transparent;border:none;cursor:pointer;
+    width:32px;height:32px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--text-strong);font-family:inherit;font-weight:700;font-size:.92rem;
+    transition:background var(--t-fast),color var(--t-fast);
+}
+.tool-btn:hover{background:#fff;color:var(--text-main)}
+.tool-btn.active{background:var(--text-main);color:#fff}
+.tool-btn svg{width:15px;height:15px}
+.tool-sep{width:1px;height:18px;background:#d8dde8;margin:0 4px}
+
+.composer-editor{
+    min-height:140px;max-height:280px;overflow-y:auto;
+    padding:14px 16px;
+    background:#fff;
+    border:1px solid var(--bg-panel);border-top:none;
+    border-radius:0 0 14px 14px;
+    font-family:inherit;font-size:.96rem;color:var(--text-main);
+    line-height:1.55;outline:none;
+    word-wrap:break-word;
+}
+.composer-editor:empty:before{
+    content:attr(data-placeholder);
+    color:var(--text-muted);
+    pointer-events:none;
+}
+.composer-editor:focus{border-color:var(--c1)}
+
+.composer-attachments{
+    margin-top:14px;display:flex;flex-direction:column;gap:8px;
+}
+.attach-preview{
+    display:flex;align-items:center;gap:10px;
+    background:var(--bg-panel);padding:8px 10px 8px 8px;
+    border-radius:12px;
+}
+.attach-preview .thumb{
+    width:48px;height:48px;border-radius:10px;
+    background:#fff;display:flex;align-items:center;justify-content:center;
+    overflow:hidden;flex-shrink:0;
+    color:var(--text-muted);font-weight:800;font-size:.7rem;
+}
+.attach-preview .thumb img,.attach-preview .thumb video{
+    width:100%;height:100%;object-fit:cover;
+}
+.attach-preview .meta{flex:1;min-width:0;font-size:.82rem}
+.attach-preview .meta .name{
+    font-weight:700;color:var(--text-main);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.attach-preview .meta .size{color:var(--text-muted);font-size:.74rem;font-weight:600}
+.attach-preview .rm{
+    background:transparent;border:none;cursor:pointer;
+    width:28px;height:28px;border-radius:50%;
+    color:var(--text-muted);
+    display:flex;align-items:center;justify-content:center;
+    transition:background var(--t),color var(--t);
+}
+.attach-preview .rm:hover{background:#ffe5e5;color:var(--c8)}
+.attach-preview .rm svg{width:14px;height:14px}
+
+.tool-btn.attach{font-size:.8rem;font-weight:700;color:var(--text-strong)}
+
+/* ===== EMOJI PICKER ===== */
+.emoji-pop{
+    position:absolute;
+    background:#fff;border-radius:14px;
+    box-shadow:0 16px 40px rgba(0,0,0,.18);
+    border:1px solid var(--card-border);
+    padding:8px;
+    width:288px;
+    z-index:9500;
+    display:none;
+}
+.emoji-pop.show{display:block;animation:popIn .18s ease}
+.emoji-cats{
+    display:flex;gap:2px;padding:2px 2px 6px;
+    border-bottom:1px solid var(--card-border);
+    margin-bottom:6px;
+}
+.emoji-cat{
+    flex:1;padding:5px;border-radius:8px;
+    background:transparent;border:none;cursor:pointer;
+    font-size:1rem;
+    transition:background var(--t-fast);
+}
+.emoji-cat:hover{background:var(--bg-panel)}
+.emoji-cat.active{background:var(--text-main)}
+.emoji-grid{
+    display:grid;grid-template-columns:repeat(8,1fr);gap:2px;
+    max-height:200px;overflow-y:auto;
+}
+.emoji-grid::-webkit-scrollbar{width:6px}
+.emoji-grid::-webkit-scrollbar-thumb{background:#d8dde8;border-radius:6px}
+.emoji-btn{
+    background:transparent;border:none;cursor:pointer;
+    padding:6px;border-radius:8px;font-size:1.15rem;
+    transition:background var(--t-fast);
+}
+.emoji-btn:hover{background:var(--bg-panel)}
+
+/* ===== MENU CONTEXT (post menu) ===== */
+.ctx-menu{
+    position:absolute;background:#fff;
+    border-radius:12px;border:1px solid var(--card-border);
+    box-shadow:0 16px 40px rgba(0,0,0,.16);
+    min-width:180px;padding:6px;
+    z-index:9500;display:none;
+}
+.ctx-menu.show{display:block;animation:popIn .15s ease}
+.ctx-item{
+    display:flex;align-items:center;gap:10px;
+    padding:9px 12px;border-radius:8px;
+    background:transparent;border:none;cursor:pointer;
+    font-family:inherit;font-size:.86rem;font-weight:600;color:var(--text-main);
+    width:100%;text-align:left;
+    transition:background var(--t-fast);
+}
+.ctx-item:hover{background:var(--bg-panel)}
+.ctx-item.danger{color:var(--c8)}
+.ctx-item.danger:hover{background:#ffe5e5}
+.ctx-item svg{width:14px;height:14px;color:var(--text-muted)}
+.ctx-item.danger svg{color:var(--c8)}
+
+/* ===== TOAST ===== */
+.toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    background:var(--text-main);color:#fff;
+    padding:12px 22px;border-radius:50px;
+    font-size:.86rem;font-weight:600;
+    box-shadow:0 12px 32px rgba(0,0,0,.25);
+    z-index:9999;
+    display:none;
+    animation:toastIn .3s cubic-bezier(.16,1,.3,1);
+}
+.toast.show{display:block}
+.toast.warn{background:#9a6900}
+.toast.error{background:var(--c8)}
+.toast.success{background:var(--c4)}
+@keyframes toastIn{
+    from{opacity:0;transform:translate(-50%,12px)}
+    to{opacity:1;transform:translate(-50%,0)}
+}
+
+/* ===== BTN PRIMARY/SECONDARY (modais) ===== */
+.btn-primary{
+    background:var(--text-main);color:#fff;border:none;
+    padding:10px 22px;border-radius:50px;
+    font-family:inherit;font-weight:700;font-size:.86rem;cursor:pointer;
+    display:inline-flex;align-items:center;gap:8px;
+    transition:transform var(--t-fast),background var(--t);
+}
+.btn-primary:hover{transform:translateY(-1px);background:#2a3260}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-secondary{
+    background:var(--bg-panel);color:var(--text-main);border:none;
+    padding:10px 22px;border-radius:50px;
+    font-family:inherit;font-weight:700;font-size:.86rem;cursor:pointer;
+    transition:background var(--t);
+}
+.btn-secondary:hover{background:var(--bg-panel-hover)}
+
+/* ===== LIGHTBOX (visualização imagem) ===== */
+.lightbox{
+    position:fixed;inset:0;background:rgba(0,0,0,.92);
+    display:none;align-items:center;justify-content:center;
+    z-index:9800;padding:30px;cursor:zoom-out;
+}
+.lightbox.show{display:flex}
+.lightbox img{max-width:100%;max-height:100%;border-radius:8px}
+.lightbox .close{
+    position:absolute;top:20px;right:24px;
+    width:40px;height:40px;border-radius:50%;
+    background:rgba(255,255,255,.15);color:#fff;
+    border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+}
+.lightbox .close svg{width:18px;height:18px}
+
+/* ===== LOGIN GATE ===== */
+.gate{
+    position:fixed;inset:0;background:rgba(20,26,50,.5);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    display:none;align-items:center;justify-content:center;
+    z-index:9999;padding:20px;
+}
+.gate.show{display:flex}
+.gate-box{
+    background:#fff;border-radius:var(--radius);
+    padding:32px 30px;max-width:420px;width:100%;
+    text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.2);
+}
+.gate-icon{
+    width:56px;height:56px;border-radius:18px;
+    background:var(--c1);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 16px;
+    box-shadow:0 12px 28px rgba(0,103,255,.45);
+}
+.gate-icon svg{width:26px;height:26px}
+.gate-box h3{font-size:1.18rem;font-weight:700;color:var(--text-main);margin-bottom:8px}
+.gate-box p{color:var(--text-muted);font-size:.92rem;margin-bottom:22px;line-height:1.5}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width:1100px){
+    .workspace{grid-template-columns:240px 1fr 300px}
+    .pubs-scroll{padding:20px 22px 30px}
+}
+@media (max-width:900px){
+    body{overflow:auto}
+    .workspace{
+        grid-template-columns:1fr;
+        height:auto;
+    }
+    .col-eixos,.col-feed{
+        border:none;border-bottom:1px solid var(--card-border);
+        max-height:none;
+    }
+    .eixos-list{flex-direction:row;gap:8px;padding:6px 16px 16px;overflow-x:auto;flex-wrap:nowrap}
+    .eixos-list::-webkit-scrollbar{height:6px;width:auto}
+    .eixo{flex-shrink:0;width:auto}
+    .pubs-head{padding:18px 22px 12px}
+    .pubs-title h2{font-size:1.2rem}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+    <div class="brand">
+        <div class="brand-mark">PB</div>
+        <div>
+            Experiências PIBID
+            <div class="brand-sub">AlquiLab · rede de compartilhamento</div>
+        </div>
+    </div>
+    <div class="top-actions">
+        <a href="../index.html" class="btn-back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            Voltar
+        </a>
+        <a href="admin.html" id="btnAdmin" class="btn-admin">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Admin
+        </a>
+        <button id="btnLogin" class="btn-login">Entrar</button>
+        <div id="userChip" class="user-chip">
+            <div class="avatar" id="userAvatar">U</div>
+            <div>
+                <div id="userName">Usuário</div>
+                <div class="role" id="userRole">Aluno</div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="workspace">
+
+    <!-- COL 1: EIXOS -->
+    <aside class="col-eixos">
+        <div class="col-head">
+            <h3>Eixos temáticos</h3>
+            <span class="count" id="eixosCount">0</span>
+        </div>
+        <div class="eixos-list" id="eixosList"></div>
+    </aside>
+
+    <!-- COL 2: PUBLICAÇÕES -->
+    <section class="col-pubs">
+        <div class="pubs-head">
+            <div class="pubs-title">
+                <h2 id="eixoTitle">Publicações</h2>
+                <p id="eixoDesc">Selecione um eixo para ver as publicações.</p>
+            </div>
+            <button class="btn-new" id="btnNewPub">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Nova publicação
+            </button>
+        </div>
+        <div class="pubs-scroll" id="pubsScroll"></div>
+    </section>
+
+    <!-- COL 3: FEED 24h -->
+    <aside class="col-feed">
+        <div class="feed-head">
+            <h3><span class="live-dot"></span>Feed 24h</h3>
+            <p>Posts rápidos que somem em 24 horas.</p>
+        </div>
+        <button class="btn-feed-new" id="btnNewFeed">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Postar no feed
+        </button>
+        <div class="feed-list" id="feedList"></div>
+    </aside>
+
+</main>
+
+<!-- ===== MODAL: NOVA PUBLICAÇÃO / FEED ===== -->
+<div class="modal" id="composerModal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <div>
+                <h3 id="composerTitle">Nova publicação</h3>
+                <p id="composerSub">Compartilhe sua experiência com o eixo selecionado.</p>
+            </div>
+            <button class="modal-close" data-close="composerModal" aria-label="Fechar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="composer-toolbar" id="composerToolbar">
+                <button class="tool-btn" data-cmd="bold" title="Negrito"><b>B</b></button>
+                <button class="tool-btn" data-cmd="italic" title="Itálico"><i>I</i></button>
+                <button class="tool-btn" data-cmd="underline" title="Sublinhado"><u>U</u></button>
+                <span class="tool-sep"></span>
+                <button class="tool-btn" data-cmd="insertUnorderedList" title="Lista">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.2"/><circle cx="3.5" cy="12" r="1.2"/><circle cx="3.5" cy="18" r="1.2"/></svg>
+                </button>
+                <button class="tool-btn" data-cmd="insertOrderedList" title="Lista numerada">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+                </button>
+                <span class="tool-sep"></span>
+                <button class="tool-btn" id="btnEmoji" title="Emoji">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                </button>
+                <span class="tool-sep"></span>
+                <button class="tool-btn attach" id="btnAttachImg" title="Imagem (max 800KB)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                </button>
+                <button class="tool-btn attach" id="btnAttachVideo" title="Vídeo (max 5MB)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                </button>
+                <button class="tool-btn attach" id="btnAttachPdf" title="PDF (max 1MB)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </button>
+            </div>
+            <div class="composer-editor" id="composerEditor" contenteditable="true" data-placeholder="Escreva aqui sua experiência..."></div>
+
+            <div class="composer-attachments" id="composerAttachments"></div>
+
+            <input type="file" id="fileImg" accept="image/*" hidden />
+            <input type="file" id="fileVideo" accept="video/*" hidden />
+            <input type="file" id="filePdf" accept="application/pdf" hidden />
+
+            <div class="emoji-pop" id="emojiPop">
+                <div class="emoji-cats" id="emojiCats"></div>
+                <div class="emoji-grid" id="emojiGrid"></div>
+            </div>
+        </div>
+        <div class="modal-foot">
+            <div class="left">
+                <span id="composerHint" style="font-size:.74rem;color:var(--text-muted);font-weight:600">
+                    Imagem ≤ 800KB · Vídeo ≤ 5MB · PDF ≤ 1MB
+                </span>
+            </div>
+            <div class="right">
+                <button class="btn-secondary" data-close="composerModal">Cancelar</button>
+                <button class="btn-primary" id="btnPublish">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    Publicar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL: DENÚNCIA ===== -->
+<div class="modal" id="reportModal">
+    <div class="modal-box compact">
+        <div class="modal-head">
+            <div>
+                <h3>Denunciar publicação</h3>
+                <p>Conte para a moderação o que você acha inadequado.</p>
+            </div>
+            <button class="modal-close" data-close="reportModal" aria-label="Fechar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <label style="font-size:.84rem;font-weight:700;color:var(--text-main);display:block;margin-bottom:8px">Motivo</label>
+            <select id="reportReason" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--bg-panel);background:var(--bg-panel);font-family:inherit;font-size:.92rem;color:var(--text-main);outline:none;margin-bottom:14px">
+                <option value="palavroes">Linguagem ofensiva / palavrões</option>
+                <option value="conteudo_indevido">Conteúdo indevido / pornográfico</option>
+                <option value="spam">Spam ou propaganda</option>
+                <option value="assedio">Assédio ou ataque pessoal</option>
+                <option value="fora_topico">Fora do tema do eixo</option>
+                <option value="outro">Outro</option>
+            </select>
+            <label style="font-size:.84rem;font-weight:700;color:var(--text-main);display:block;margin-bottom:8px">Detalhes (opcional)</label>
+            <textarea id="reportMsg" placeholder="Explique resumidamente o problema..." style="width:100%;min-height:90px;padding:12px 14px;border-radius:12px;border:1px solid var(--bg-panel);background:var(--bg-panel);font-family:inherit;font-size:.92rem;color:var(--text-main);outline:none;resize:vertical"></textarea>
+        </div>
+        <div class="modal-foot">
+            <div></div>
+            <div class="right">
+                <button class="btn-secondary" data-close="reportModal">Cancelar</button>
+                <button class="btn-primary" id="btnSendReport" style="background:var(--c8)">Enviar denúncia</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL: AVISO DE PALAVRÕES / NSFW ===== -->
+<div class="modal" id="warnModal">
+    <div class="modal-box compact">
+        <div class="modal-head">
+            <div>
+                <h3 id="warnTitle">Aviso de moderação</h3>
+                <p id="warnSub">Sua publicação ficará pendente de aprovação.</p>
+            </div>
+            <button class="modal-close" data-close="warnModal" aria-label="Fechar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-body" id="warnBody"></div>
+        <div class="modal-foot">
+            <div></div>
+            <div class="right">
+                <button class="btn-secondary" data-close="warnModal">Editar</button>
+                <button class="btn-primary" id="btnSendPending" style="background:#9a6900">Enviar mesmo assim</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== LIGHTBOX ===== -->
+<div class="lightbox" id="lightbox">
+    <button class="close" id="lightboxClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <img id="lightboxImg" src="" alt="" />
+</div>
+
+<!-- ===== GATE DE LOGIN (ações que exigem conta) ===== -->
+<div class="gate" id="loginGate">
+    <div class="gate-box">
+        <div class="gate-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h3>Faça login para participar</h3>
+        <p id="gateMsg">Para publicar, comentar ou curtir é preciso ter uma conta.</p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+            <a class="btn-primary" href="../login.html?next=%2Fpibid%2Findex.html">Criar conta / Entrar</a>
+            <button class="btn-secondary" id="gateClose">Continuar olhando</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast"></div>
+
+<!-- Bibliotecas para detecção de NSFW (carregadas sob demanda) -->
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getDatabase, ref, get, set, push, onValue, update, remove, query, orderByChild, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAAHGPjuRvE9VpHR469A5RbSEUzxl1zq2w",
+    authDomain: "profbase-5f9b0.firebaseapp.com",
+    databaseURL: "https://profbase-5f9b0-default-rtdb.firebaseio.com",
+    projectId: "profbase-5f9b0",
+    storageBucket: "profbase-5f9b0.firebasestorage.app",
+    messagingSenderId: "826412057766",
+    appId: "1:826412057766:web:729e6e24ce7587417fe067"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const ADM_EMAIL = 'gilbertofernandessc@gmail.com';
+
+/* ===== LIMITES E EIXOS PADRÃO ===== */
+const LIMITS = {
+    img:   800 * 1024,
+    video: 5   * 1024 * 1024,
+    pdf:   1   * 1024 * 1024
+};
+const EIXOS_PADRAO = [
+    { id: 'materiais',    nome: 'Materiais Manipulativos',  cor: '#0067FF', desc: 'Réguas, blocos, jogos físicos e recursos concretos.' },
+    { id: 'gamificacao',  nome: 'Gamificação',              cor: '#FF006B', desc: 'Dinâmicas, recompensas e jogos no ensino.' },
+    { id: 'tecnologias',  nome: 'Tecnologias Digitais',     cor: '#00C16E', desc: 'Apps, simuladores e ferramentas digitais.' },
+    { id: 'resolucao',    nome: 'Resolução de Problemas',   cor: '#FFB800', desc: 'Estratégias e situações desafiadoras.' },
+    { id: 'modelagem',    nome: 'Modelagem Matemática',     cor: '#9D00FF', desc: 'Investigações reais traduzidas em modelos.' },
+    { id: 'historia',     nome: 'História da Matemática',   cor: '#FF6B00', desc: 'Contexto histórico das ideias matemáticas.' },
+    { id: 'etnomatematica', nome: 'Etnomatemática',         cor: '#00B8D9', desc: 'Saberes culturais e práticas locais.' },
+    { id: 'investigacao', nome: 'Investigação Matemática',  cor: '#FF3D00', desc: 'Explorar, conjecturar e validar.' },
+    { id: 'jogos',        nome: 'Jogos',                    cor: '#6B00FF', desc: 'Jogos digitais e analógicos para sala.' }
+];
+
+/* ===== PALAVRÕES (lista enxuta — admin pode complementar) ===== */
+const PALAVROES = [
+    'porra','caralho','merda','bosta','fdp','filho da puta','vai se foder','vai tomar no cu','vsf','vtnc',
+    'puta','puto','foda-se','foder','cu','cuzao','cuzão','arrombado','arombado','desgracado','desgraçado',
+    'idiota','imbecil','retardado','retardada','mongol','mongoloide','viado','viadinho','bicha','traveco',
+    'corno','cornudo','vagabundo','vagabunda','pinto','pênis','penis','xota','xoxota','bunda','tetas','peitos',
+    'caceta','cacete','escroto','babaca','otario','otário','otaria','otária','jegue','burro','burra'
+];
+
+/* ===== EMOJIS (curated, sem pesar) ===== */
+const EMOJI_CATS = {
+    'Sorrisos': ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥸','🤩','🥳'],
+    'Reações':  ['🥹','😏','😒','🙄','😬','🤥','😶','😐','😑','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','😵','🤯','😱','😨','😰','😥','😓','🤗','🫡','🤔','🤭','🫢','🫣'],
+    'Mãos':     ['👍','👎','👏','🙌','🤝','👋','🤚','✋','🖐️','🖖','👌','🤌','🤏','✌️','🤞','🫰','🤟','🤘','🤙','👈','👉','👆','👇','☝️','✊','👊','🤛','🤜','💪','🙏','👐','🫶','🫵'],
+    'Coração':  ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','💌','💋'],
+    'Estudo':   ['📚','📖','✏️','🖊️','🖋️','📝','📒','📓','📔','📕','📗','📘','📙','📐','📏','🧮','🔢','💡','🔍','🔎','📊','📈','📉','🧠','🎓','🏫','📅','📆','🗓️','📌','📎','🖇️','✂️','📁','📂'],
+    'Símbolos': ['✅','❌','⭕','❗','❓','❕','❔','💯','✨','🎯','🔥','⭐','🌟','💫','🎉','🎊','🚀','💥','💢','💦','💧','🌈','☀️','🌤️','⛅','🌧️','⛈️','❄️','🌙','⏰']
+};
+
+/* ===== ESTADO ===== */
+let currentUser = null;
+let currentUserName = '';
+let currentUserRole = 'aluno';
+let isGuest = true;
+let isAdmin = false;
+let eixos = EIXOS_PADRAO.slice();
+let activeEixoId = null;
+let pubsUnsub = null;
+let feedUnsub = null;
+let pendingFile = null;
+let composerMode = 'pub'; // 'pub' ou 'feed'
+let reportTarget = null;
+let pendingPostData = null; // dados aguardando "enviar mesmo assim"
+
+/* ===== HELPERS ===== */
+const $ = (id) => document.getElementById(id);
+const escapeHtml = (s) => String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const initials = (n) => (n||'?').trim().split(/\s+/).slice(0,2).map(p=>p[0]||'').join('').toUpperCase() || '?';
+const fmtBytes = (b) => b<1024 ? b+' B' : b<1048576 ? (b/1024).toFixed(1)+' KB' : (b/1048576).toFixed(1)+' MB';
+const fmtTime = (ts) => {
+    if (!ts) return '';
+    const d = new Date(ts);
+    const diff = (Date.now() - ts) / 1000;
+    if (diff < 60) return 'agora';
+    if (diff < 3600) return `${Math.floor(diff/60)}m`;
+    if (diff < 86400) return `${Math.floor(diff/3600)}h`;
+    if (diff < 604800) return `${Math.floor(diff/86400)}d`;
+    return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'short' });
+};
+const fmtRemaining = (expiresAt) => {
+    const ms = expiresAt - Date.now();
+    if (ms <= 0) return 'expirou';
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    if (h >= 1) return `${h}h ${m}m`;
+    return `${m}m`;
+};
+
+let toastTimer = null;
+function toast(msg, kind='') {
+    const t = $('toast');
+    t.className = 'toast show ' + kind;
+    t.textContent = msg;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.classList.remove('show'); }, 3200);
+}
+
+/* ===== STRIP HTML PRA DETECTAR PALAVRÕES ===== */
+function stripHtml(html) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+}
+function detectPalavroes(text) {
+    if (!text) return [];
+    const norm = text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    const found = new Set();
+    for (const p of PALAVROES) {
+        const np = p.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        // borda de palavra simples (espaços ou pontuação)
+        const re = new RegExp('(^|[^a-z0-9])' + np.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^a-z0-9]|$)', 'i');
+        if (re.test(norm)) found.add(p);
+    }
+    return Array.from(found);
+}
+function sanitizeHtml(html) {
+    // permite só negrito/itálico/sublinhado/listas/parágrafos/quebras
+    const allowed = ['B','STRONG','I','EM','U','UL','OL','LI','P','BR','DIV'];
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    (function walk(node){
+        Array.from(node.childNodes).forEach(child => {
+            if (child.nodeType === 1) {
+                if (!allowed.includes(child.tagName)) {
+                    const text = document.createTextNode(child.textContent || '');
+                    node.replaceChild(text, child);
+                } else {
+                    while (child.attributes.length) child.removeAttribute(child.attributes[0].name);
+                    walk(child);
+                }
+            }
+        });
+    })(tmp);
+    return tmp.innerHTML;
+}
+
+/* ===== NSFW (carregamento sob demanda) ===== */
+let nsfwModel = null;
+let nsfwLoading = null;
+async function loadNsfwModel() {
+    if (nsfwModel) return nsfwModel;
+    if (nsfwLoading) return nsfwLoading;
+    nsfwLoading = (async () => {
+        try {
+            await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js');
+            await loadScript('https://cdn.jsdelivr.net/npm/nsfwjs@2.4.2/dist/nsfwjs.min.js');
+            nsfwModel = await window.nsfwjs.load();
+            return nsfwModel;
+        } catch (e) {
+            console.warn('Falha ao carregar NSFWJS:', e);
+            return null;
+        }
+    })();
+    return nsfwLoading;
+}
+function loadScript(src) {
+    return new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = src; s.async = true;
+        s.onload = res; s.onerror = rej;
+        document.head.appendChild(s);
+    });
+}
+async function checkImageNsfw(file) {
+    const model = await loadNsfwModel();
+    if (!model) return { safe: true, skipped: true };
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = async () => {
+            try {
+                const preds = await model.classify(img);
+                const map = {};
+                preds.forEach(p => { map[p.className] = p.probability; });
+                const porn  = map['Porn']    || 0;
+                const hentai= map['Hentai']  || 0;
+                const sexy  = map['Sexy']    || 0;
+                URL.revokeObjectURL(img.src);
+                if (porn > 0.6 || hentai > 0.6) {
+                    resolve({ safe: false, reason: 'pornografia', scores: map });
+                } else if (sexy > 0.75) {
+                    resolve({ safe: false, reason: 'conteudo_sexual', scores: map });
+                } else {
+                    resolve({ safe: true, scores: map });
+                }
+            } catch (e) {
+                console.warn('Erro NSFW classify:', e);
+                resolve({ safe: true, skipped: true });
+            }
+        };
+        img.onerror = () => resolve({ safe: true, skipped: true });
+        img.src = URL.createObjectURL(file);
+    });
+}
+
+/* ===== LEITURA DE ARQUIVO -> base64 (data URL) ===== */
+function fileToDataUrl(file) {
+    return new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result);
+        r.onerror = rej;
+        r.readAsDataURL(file);
+    });
+}
+
+/* ===== AUTH ===== */
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        try { await signInAnonymously(auth); } catch(e){}
+        return;
+    }
+    currentUser = user;
+    isGuest = !!user.isAnonymous;
+    isAdmin = !isGuest && user.email === ADM_EMAIL;
+
+    if (isGuest) {
+        $('btnLogin').style.display = 'inline-block';
+        $('userChip').style.display = 'none';
+        $('btnAdmin').classList.remove('show');
+        currentUserName = 'Visitante';
+        currentUserRole = 'visitante';
+    } else {
+        $('btnLogin').style.display = 'none';
+        $('userChip').style.display = 'flex';
+        let nome = user.displayName || (user.email ? user.email.split('@')[0] : 'Usuário');
+        let tipo = 'aluno';
+        try {
+            const snap = await get(ref(db, 'usuarios/' + user.uid));
+            if (snap.exists()) {
+                const p = snap.val();
+                if (p.nome) nome = p.nome;
+                if (p.tipo) tipo = p.tipo;
+            }
+        } catch(e){}
+        currentUserName = nome;
+        currentUserRole = tipo;
+        $('userName').textContent = nome;
+        $('userRole').textContent = tipo === 'aluno' ? 'Aluno' : (tipo === 'professor' ? 'Professor(a)' : tipo);
+        $('userAvatar').textContent = initials(nome);
+        if (isAdmin) $('btnAdmin').classList.add('show');
+    }
+
+    initEixos();
+});
+
+$('btnLogin').addEventListener('click', () => {
+    window.location.href = '../login.html?next=' + encodeURIComponent('/pibid/index.html');
+});
+
+/* ===== EIXOS ===== */
+async function initEixos() {
+    try {
+        const snap = await get(ref(db, 'pibid_eixos'));
+        if (snap.exists()) {
+            const v = snap.val();
+            const list = Object.keys(v).map(k => ({ id: k, ...v[k] })).sort((a,b)=> (a.ordem||0)-(b.ordem||0));
+            if (list.length) eixos = list;
+        } else if (isAdmin) {
+            // semeia
+            const obj = {};
+            EIXOS_PADRAO.forEach((e, i) => { obj[e.id] = { nome:e.nome, cor:e.cor, desc:e.desc, ordem:i }; });
+            try { await set(ref(db, 'pibid_eixos'), obj); } catch(e){}
+        }
+    } catch(e){}
+
+    renderEixos();
+    if (eixos.length && !activeEixoId) selectEixo(eixos[0].id);
+    listenFeed();
+}
+
+function renderEixos() {
+    const list = $('eixosList');
+    $('eixosCount').textContent = eixos.length;
+    list.innerHTML = '';
+    eixos.forEach(e => {
+        const btn = document.createElement('button');
+        btn.className = 'eixo' + (e.id === activeEixoId ? ' active' : '');
+        btn.dataset.id = e.id;
+        btn.innerHTML = `
+            <span class="eixo-dot" style="background:${e.cor || '#0067FF'}"></span>
+            <span class="eixo-info">
+                <span class="eixo-name">${escapeHtml(e.nome)}</span>
+                <span class="eixo-meta" data-meta="${e.id}">—</span>
+            </span>
+        `;
+        btn.addEventListener('click', () => selectEixo(e.id));
+        list.appendChild(btn);
+
+        // contador de publicações ao vivo (não-bloqueante)
+        try {
+            onValue(ref(db, 'pibid_publicacoes/' + e.id), (snap) => {
+                const n = snap.exists() ? Object.keys(snap.val()).length : 0;
+                const el = document.querySelector(`[data-meta="${e.id}"]`);
+                if (el) el.textContent = n + (n === 1 ? ' publicação' : ' publicações');
+            });
+        } catch(e){}
+    });
+}
+
+function selectEixo(id) {
+    activeEixoId = id;
+    document.querySelectorAll('.eixo').forEach(b => b.classList.toggle('active', b.dataset.id === id));
+    const eixo = eixos.find(e => e.id === id);
+    if (eixo) {
+        $('eixoTitle').textContent = eixo.nome;
+        $('eixoDesc').textContent = eixo.desc || 'Publicações deste eixo temático.';
+    }
+    listenPubs();
+}
+
+/* ===== PUBLICAÇÕES (permanentes) ===== */
+function listenPubs() {
+    if (pubsUnsub) { pubsUnsub(); pubsUnsub = null; }
+    if (!activeEixoId) return;
+    const path = 'pibid_publicacoes/' + activeEixoId;
+    const r = ref(db, path);
+    pubsUnsub = onValue(r, (snap) => {
+        const data = snap.val() || {};
+        const list = Object.keys(data).map(k => ({ id: k, ...data[k] }))
+            .filter(p => p.status !== 'pendente') // pendentes não aparecem no feed público
+            .sort((a,b) => (b.ts||0) - (a.ts||0));
+        renderPubs(list);
+    });
+}
+
+function renderPubs(list) {
+    const wrap = $('pubsScroll');
+    wrap.innerHTML = '';
+    if (!list.length) {
+        wrap.innerHTML = '<div class="pubs-empty"><h4>Nenhuma publicação ainda</h4><p>Seja o primeiro a compartilhar uma experiência neste eixo.</p></div>';
+        return;
+    }
+    list.forEach(p => wrap.appendChild(buildPostCard(p)));
+}
+
+function buildPostCard(p) {
+    const eixo = eixos.find(e => e.id === activeEixoId) || {};
+    const card = document.createElement('article');
+    card.className = 'post';
+    card.dataset.id = p.id;
+
+    const liked = !!(p.curtidas && currentUser && p.curtidas[currentUser.uid]);
+    const likeCount = p.curtidas ? Object.keys(p.curtidas).length : 0;
+    const commentCount = p.comentarios ? Object.keys(p.comentarios).length : 0;
+
+    card.innerHTML = `
+        <div class="post-head">
+            <div class="post-avatar">${initials(p.autorNome)}</div>
+            <div class="post-meta">
+                <div class="post-author">${escapeHtml(p.autorNome || 'Usuário')}</div>
+                <div class="post-when">${fmtTime(p.ts)} · ${escapeHtml(p.autorRole === 'professor' ? 'Professor(a)' : 'Aluno')}</div>
+            </div>
+            <span class="post-eixo" style="background:${eixo.cor}22;color:${eixo.cor}">${escapeHtml(eixo.nome || '')}</span>
+            ${(isAdmin || (currentUser && p.autorUid === currentUser.uid)) ? `
+            <button class="post-menu-btn" data-act="menu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+            </button>` : ''}
+        </div>
+        <div class="post-body">${p.html || escapeHtml(p.texto || '')}</div>
+        ${renderAttachments(p)}
+        <div class="post-actions">
+            <button class="act-btn ${liked?'liked':''}" data-act="like">
+                <svg viewBox="0 0 24 24" fill="${liked?'currentColor':'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                <span>${likeCount}</span>
+            </button>
+            <button class="act-btn" data-act="comment">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span>${commentCount}</span>
+            </button>
+            <button class="act-btn report" data-act="report" title="Denunciar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+            </button>
+        </div>
+        <div class="comments" data-comments-for="${p.id}"></div>
+    `;
+
+    // events
+    card.querySelectorAll('[data-act]').forEach(btn => {
+        btn.addEventListener('click', (ev) => {
+            const act = btn.dataset.act;
+            if (act === 'like')    handleLike(p);
+            if (act === 'comment') toggleComments(card, p);
+            if (act === 'report')  openReport({ kind:'pub', id:p.id, eixo:activeEixoId, autorUid:p.autorUid, autorNome:p.autorNome, snippet: stripHtml(p.html||'').slice(0,160) });
+            if (act === 'menu')    openPostMenu(btn, p);
+        });
+    });
+
+    // imagens clicáveis
+    card.querySelectorAll('.post-attachments img').forEach(img => {
+        img.addEventListener('click', () => openLightbox(img.src));
+    });
+
+    return card;
+}
+
+function renderAttachments(p) {
+    const a = p.attachments || [];
+    if (!a.length) return '';
+    let html = '<div class="post-attachments">';
+    a.forEach(at => {
+        if (at.kind === 'img') {
+            html += `<img src="${at.data}" alt="anexo" />`;
+        } else if (at.kind === 'video') {
+            html += `<video src="${at.data}" controls preload="metadata"></video>`;
+        } else if (at.kind === 'pdf') {
+            html += `
+                <a class="attach-pdf" href="${at.data}" target="_blank" download="${escapeHtml(at.name||'arquivo.pdf')}">
+                    <span class="pdf-icon">PDF</span>
+                    <span class="pdf-info">
+                        <span class="pdf-name">${escapeHtml(at.name||'arquivo.pdf')}</span>
+                        <span class="pdf-size">${fmtBytes(at.size||0)}</span>
+                    </span>
+                    <span class="pdf-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
+                </a>`;
+        }
+    });
+    html += '</div>';
+    return html;
+}
+
+/* ===== CURTIR ===== */
+async function handleLike(p) {
+    if (!requireAccount('curtir publicações')) return;
+    const path = `pibid_publicacoes/${activeEixoId}/${p.id}/curtidas/${currentUser.uid}`;
+    const liked = !!(p.curtidas && p.curtidas[currentUser.uid]);
+    try {
+        if (liked) await remove(ref(db, path));
+        else       await set(ref(db, path), { ts: Date.now(), nome: currentUserName });
+    } catch(e) { toast('Não foi possível curtir agora.', 'error'); }
+}
+
+/* ===== COMENTÁRIOS ===== */
+function toggleComments(card, p) {
+    const box = card.querySelector('.comments');
+    if (box.classList.contains('open')) {
+        box.classList.remove('open');
+        box.innerHTML = '';
+        return;
+    }
+    box.classList.add('open');
+    renderComments(box, p);
+}
+function renderComments(box, p) {
+    const cs = p.comentarios || {};
+    const arr = Object.keys(cs).map(k => ({ id:k, ...cs[k] })).sort((a,b)=>(a.ts||0)-(b.ts||0));
+    let html = '';
+    arr.forEach(c => {
+        html += `
+            <div class="comment">
+                <div class="comment-avatar">${initials(c.autorNome)}</div>
+                <div class="comment-bubble">
+                    <div class="comment-author">${escapeHtml(c.autorNome||'Usuário')} · <span style="color:var(--text-muted);font-weight:600">${fmtTime(c.ts)}</span></div>
+                    <div>${escapeHtml(c.texto||'')}</div>
+                </div>
+            </div>
+        `;
+    });
+    html += `
+        <form class="comment-form" data-pid="${p.id}">
+            <input type="text" placeholder="Escreva um comentário..." maxlength="500" required />
+            <button type="submit">Enviar</button>
+        </form>
+    `;
+    box.innerHTML = html;
+
+    box.querySelector('form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!requireAccount('comentar')) return;
+        const inp = e.target.querySelector('input');
+        const txt = (inp.value || '').trim();
+        if (!txt) return;
+        const pal = detectPalavroes(txt);
+        if (pal.length) {
+            toast('Comentário contém linguagem inadequada e foi enviado para moderação.', 'warn');
+            try {
+                await push(ref(db, 'pibid_pendentes'), {
+                    tipo: 'comentario',
+                    eixo: activeEixoId,
+                    pubId: p.id,
+                    texto: txt,
+                    motivo: 'palavroes',
+                    palavroes: pal,
+                    autorUid: currentUser.uid,
+                    autorNome: currentUserName,
+                    ts: Date.now()
+                });
+            } catch(e){}
+            inp.value = '';
+            return;
+        }
+        const cref = push(ref(db, `pibid_publicacoes/${activeEixoId}/${p.id}/comentarios`));
+        try {
+            await set(cref, {
+                texto: txt,
+                autorUid: currentUser.uid,
+                autorNome: currentUserName,
+                autorRole: currentUserRole,
+                ts: Date.now()
+            });
+            inp.value = '';
+        } catch(e) { toast('Não foi possível comentar.', 'error'); }
+    });
+}
+
+/* ===== POST MENU (dono ou admin) ===== */
+let openCtx = null;
+function openPostMenu(anchor, p) {
+    closeCtx();
+    const menu = document.createElement('div');
+    menu.className = 'ctx-menu show';
+    const isOwner = currentUser && p.autorUid === currentUser.uid;
+    let inner = '';
+    if (isOwner || isAdmin) {
+        inner += `<button class="ctx-item danger" data-mact="del">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            Excluir publicação
+        </button>`;
+    }
+    menu.innerHTML = inner;
+    document.body.appendChild(menu);
+    const r = anchor.getBoundingClientRect();
+    menu.style.top  = (r.bottom + 6 + window.scrollY) + 'px';
+    menu.style.left = (r.right - menu.offsetWidth + window.scrollX) + 'px';
+    openCtx = menu;
+    menu.querySelectorAll('[data-mact]').forEach(b => {
+        b.addEventListener('click', async () => {
+            const act = b.dataset.mact;
+            if (act === 'del') {
+                if (confirm('Excluir esta publicação?')) {
+                    try { await remove(ref(db, `pibid_publicacoes/${activeEixoId}/${p.id}`)); toast('Publicação excluída.', 'success'); }
+                    catch(e){ toast('Erro ao excluir.', 'error'); }
+                }
+            }
+            closeCtx();
+        });
+    });
+}
+function closeCtx() { if (openCtx) { openCtx.remove(); openCtx = null; } }
+document.addEventListener('click', (e) => {
+    if (openCtx && !openCtx.contains(e.target) && !e.target.closest('.post-menu-btn')) closeCtx();
+});
+
+/* ===== FEED 24h ===== */
+function listenFeed() {
+    if (feedUnsub) { feedUnsub(); feedUnsub = null; }
+    feedUnsub = onValue(ref(db, 'pibid_feed'), (snap) => {
+        const data = snap.val() || {};
+        const now = Date.now();
+        const list = Object.keys(data).map(k => ({ id:k, ...data[k] }))
+            .filter(p => p.status !== 'pendente' && (p.expiresAt || 0) > now)
+            .sort((a,b) => (b.ts||0)-(a.ts||0));
+
+        // limpa expirados (best-effort, qualquer user logado)
+        Object.keys(data).forEach(k => {
+            const it = data[k];
+            if (it && it.expiresAt && it.expiresAt < now) {
+                try { remove(ref(db, 'pibid_feed/' + k)); } catch(e){}
+            }
+        });
+
+        renderFeed(list);
+    });
+}
+
+function renderFeed(list) {
+    const wrap = $('feedList');
+    wrap.innerHTML = '';
+    if (!list.length) {
+        wrap.innerHTML = '<div class="feed-empty"><h4>Sem posts no feed</h4><p>Seja o primeiro a compartilhar algo rápido!</p></div>';
+        return;
+    }
+    list.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'feed-card';
+        const liked = !!(p.curtidas && currentUser && p.curtidas[currentUser.uid]);
+        const likeCount = p.curtidas ? Object.keys(p.curtidas).length : 0;
+        let media = '';
+        const at = (p.attachments && p.attachments[0]) || null;
+        if (at) {
+            if (at.kind === 'img')   media = `<img src="${at.data}" />`;
+            if (at.kind === 'video') media = `<video src="${at.data}" controls preload="metadata"></video>`;
+        }
+        card.innerHTML = `
+            <div class="feed-card-head">
+                <div class="avatar">${initials(p.autorNome)}</div>
+                <div class="who">
+                    <div class="name">${escapeHtml(p.autorNome||'Usuário')}</div>
+                </div>
+                <span class="ttl" data-expires="${p.expiresAt||0}">${fmtRemaining(p.expiresAt||0)}</span>
+            </div>
+            <div class="body">${p.html || escapeHtml(p.texto||'')}</div>
+            ${media}
+            <div class="acts">
+                <button class="act-btn ${liked?'liked':''}" data-fact="like">
+                    <svg viewBox="0 0 24 24" fill="${liked?'currentColor':'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    <span>${likeCount}</span>
+                </button>
+                <button class="act-btn report" data-fact="report" title="Denunciar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                </button>
+            </div>
+        `;
+        card.querySelectorAll('[data-fact]').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const act = btn.dataset.fact;
+                if (act === 'like') {
+                    if (!requireAccount('curtir')) return;
+                    const path = `pibid_feed/${p.id}/curtidas/${currentUser.uid}`;
+                    if (liked) { try { await remove(ref(db, path)); } catch(e){} }
+                    else       { try { await set(ref(db, path), { ts: Date.now(), nome: currentUserName }); } catch(e){} }
+                }
+                if (act === 'report') openReport({ kind:'feed', id:p.id, autorUid:p.autorUid, autorNome:p.autorNome, snippet: stripHtml(p.html||'').slice(0,160) });
+            });
+        });
+        card.querySelectorAll('img').forEach(img => img.addEventListener('click', () => openLightbox(img.src)));
+        wrap.appendChild(card);
+    });
+}
+
+/* ===== COMPOSER ===== */
+const editor = $('composerEditor');
+const attachWrap = $('composerAttachments');
+let composerFiles = []; // {kind, name, size, data, file}
+
+$('btnNewPub').addEventListener('click', () => openComposer('pub'));
+$('btnNewFeed').addEventListener('click', () => openComposer('feed'));
+
+function openComposer(mode) {
+    if (!requireAccount(mode === 'pub' ? 'publicar' : 'postar no feed')) return;
+    if (mode === 'pub' && !activeEixoId) { toast('Selecione um eixo temático antes.', 'warn'); return; }
+    composerMode = mode;
+    composerFiles = [];
+    attachWrap.innerHTML = '';
+    editor.innerHTML = '';
+    if (mode === 'pub') {
+        const eixo = eixos.find(e => e.id === activeEixoId);
+        $('composerTitle').textContent = 'Nova publicação';
+        $('composerSub').textContent = `No eixo: ${eixo ? eixo.nome : ''}`;
+    } else {
+        $('composerTitle').textContent = 'Postar no feed (24h)';
+        $('composerSub').textContent = 'Esse post some sozinho em 24 horas.';
+    }
+    $('composerModal').classList.add('show');
+    setTimeout(() => editor.focus(), 100);
+}
+
+document.querySelectorAll('[data-close]').forEach(b => {
+    b.addEventListener('click', () => $(b.dataset.close).classList.remove('show'));
+});
+document.querySelectorAll('.modal').forEach(m => {
+    m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('show'); });
+});
+
+/* Toolbar */
+$('composerToolbar').addEventListener('click', (e) => {
+    const b = e.target.closest('.tool-btn');
+    if (!b) return;
+    const cmd = b.dataset.cmd;
+    if (cmd) {
+        document.execCommand(cmd, false, null);
+        editor.focus();
+        updateToolbarState();
+    }
+});
+function updateToolbarState() {
+    document.querySelectorAll('.tool-btn[data-cmd]').forEach(b => {
+        try {
+            const a = document.queryCommandState(b.dataset.cmd);
+            b.classList.toggle('active', !!a);
+        } catch(e){}
+    });
+}
+editor.addEventListener('keyup', updateToolbarState);
+editor.addEventListener('mouseup', updateToolbarState);
+
+/* Anexos */
+$('btnAttachImg').addEventListener('click', () => $('fileImg').click());
+$('btnAttachVideo').addEventListener('click', () => $('fileVideo').click());
+$('btnAttachPdf').addEventListener('click', () => $('filePdf').click());
+
+$('fileImg').addEventListener('change', (e) => handleFile(e.target.files[0], 'img'));
+$('fileVideo').addEventListener('change', (e) => handleFile(e.target.files[0], 'video'));
+$('filePdf').addEventListener('change', (e) => handleFile(e.target.files[0], 'pdf'));
+
+async function handleFile(file, kind) {
+    if (!file) return;
+    const limit = LIMITS[kind];
+    if (file.size > limit) {
+        toast(`Arquivo muito grande. Limite: ${fmtBytes(limit)}.`, 'error');
+        return;
+    }
+    if (composerMode === 'feed' && composerFiles.length >= 1) {
+        toast('No feed só é permitido 1 anexo por post.', 'warn');
+        return;
+    }
+    // limpa input pra permitir re-selecionar o mesmo arquivo
+    if (kind === 'img')   $('fileImg').value = '';
+    if (kind === 'video') $('fileVideo').value = '';
+    if (kind === 'pdf')   $('filePdf').value = '';
+
+    if (kind === 'img') {
+        toast('Verificando imagem...', '');
+        const check = await checkImageNsfw(file);
+        if (!check.safe) {
+            toast('Imagem bloqueada: conteúdo impróprio detectado.', 'error');
+            return;
+        }
+    }
+
+    try {
+        const data = await fileToDataUrl(file);
+        composerFiles.push({ kind, name:file.name, size:file.size, data });
+        renderComposerAttachments();
+    } catch(e) { toast('Não foi possível ler o arquivo.', 'error'); }
+}
+
+function renderComposerAttachments() {
+    attachWrap.innerHTML = '';
+    composerFiles.forEach((f, i) => {
+        const div = document.createElement('div');
+        div.className = 'attach-preview';
+        let thumb = '';
+        if (f.kind === 'img')   thumb = `<img src="${f.data}" alt="" />`;
+        if (f.kind === 'video') thumb = `<video src="${f.data}"></video>`;
+        if (f.kind === 'pdf')   thumb = `PDF`;
+        div.innerHTML = `
+            <div class="thumb">${thumb}</div>
+            <div class="meta">
+                <div class="name">${escapeHtml(f.name)}</div>
+                <div class="size">${f.kind.toUpperCase()} · ${fmtBytes(f.size)}</div>
+            </div>
+            <button class="rm" title="Remover">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        `;
+        div.querySelector('.rm').addEventListener('click', () => {
+            composerFiles.splice(i, 1);
+            renderComposerAttachments();
+        });
+        attachWrap.appendChild(div);
+    });
+}
+
+/* ===== EMOJI PICKER ===== */
+const emojiPop = $('emojiPop');
+const emojiCats = $('emojiCats');
+const emojiGrid = $('emojiGrid');
+let emojiActiveCat = Object.keys(EMOJI_CATS)[0];
+function buildEmojiPicker() {
+    emojiCats.innerHTML = '';
+    Object.keys(EMOJI_CATS).forEach(cat => {
+        const b = document.createElement('button');
+        b.className = 'emoji-cat' + (cat === emojiActiveCat ? ' active' : '');
+        b.textContent = EMOJI_CATS[cat][0];
+        b.title = cat;
+        b.addEventListener('click', () => {
+            emojiActiveCat = cat;
+            buildEmojiPicker();
+        });
+        emojiCats.appendChild(b);
+    });
+    emojiGrid.innerHTML = '';
+    EMOJI_CATS[emojiActiveCat].forEach(emo => {
+        const b = document.createElement('button');
+        b.className = 'emoji-btn';
+        b.textContent = emo;
+        b.addEventListener('click', () => insertEmoji(emo));
+        emojiGrid.appendChild(b);
+    });
+}
+function insertEmoji(emoji) {
+    editor.focus();
+    let inserted = false;
+    try {
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount) {
+            const range = sel.getRangeAt(0);
+            // garante que a range está dentro do editor
+            if (editor.contains(range.startContainer)) {
+                range.deleteContents();
+                range.insertNode(document.createTextNode(emoji));
+                range.collapse(false);
+                sel.removeAllRanges(); sel.addRange(range);
+                inserted = true;
+            }
+        }
+    } catch(e){}
+    if (!inserted) editor.appendChild(document.createTextNode(emoji));
+}
+$('btnEmoji').addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (emojiPop.classList.contains('show')) {
+        emojiPop.classList.remove('show');
+        return;
+    }
+    const r = e.currentTarget.getBoundingClientRect();
+    const modalBody = e.currentTarget.closest('.modal-body');
+    const mr = modalBody.getBoundingClientRect();
+    emojiPop.style.top  = (r.bottom - mr.top + 6) + 'px';
+    emojiPop.style.left = Math.max(8, (r.left - mr.left)) + 'px';
+    buildEmojiPicker();
+    emojiPop.classList.add('show');
+});
+document.addEventListener('click', (e) => {
+    if (!emojiPop.contains(e.target) && e.target.id !== 'btnEmoji' && !e.target.closest('#btnEmoji')) {
+        emojiPop.classList.remove('show');
+    }
+});
+
+/* ===== PUBLICAR ===== */
+$('btnPublish').addEventListener('click', () => doPublish(false));
+$('btnSendPending').addEventListener('click', () => {
+    $('warnModal').classList.remove('show');
+    if (pendingPostData) doPublish(true);
+});
+
+async function doPublish(forcePending) {
+    const html = sanitizeHtml(editor.innerHTML.trim());
+    const text = stripHtml(html).trim();
+    if (!text && composerFiles.length === 0) {
+        toast('Escreva algo ou anexe um arquivo.', 'warn');
+        return;
+    }
+
+    const palavroes = detectPalavroes(text);
+    if (palavroes.length && !forcePending) {
+        pendingPostData = { html, text, files: composerFiles.slice(), palavroes };
+        $('warnTitle').textContent = 'Linguagem inadequada detectada';
+        $('warnSub').textContent = 'Sua publicação ficará pendente para o administrador aprovar.';
+        $('warnBody').innerHTML = `
+            <p style="color:var(--text-strong);font-size:.9rem;line-height:1.5">
+                Detectamos as seguintes palavras: <b>${palavroes.map(escapeHtml).join(', ')}</b>.
+            </p>
+            <p style="color:var(--text-muted);font-size:.85rem;margin-top:8px">
+                Você pode <b>editar</b> o texto e remover essas palavras, ou <b>enviar mesmo assim</b>: nesse caso, a publicação só aparecerá depois que a moderação aprovar.
+            </p>
+        `;
+        $('warnModal').classList.add('show');
+        return;
+    }
+
+    $('btnPublish').disabled = true;
+
+    const post = {
+        html, texto: text,
+        attachments: composerFiles.map(f => ({ kind:f.kind, name:f.name, size:f.size, data:f.data })),
+        autorUid: currentUser.uid,
+        autorNome: currentUserName,
+        autorRole: currentUserRole,
+        ts: Date.now(),
+        status: (palavroes.length ? 'pendente' : 'aprovado'),
+    };
+    if (palavroes.length) post.palavroes = palavroes;
+
+    try {
+        if (composerMode === 'pub') {
+            const path = (post.status === 'pendente') ? 'pibid_pendentes' : `pibid_publicacoes/${activeEixoId}`;
+            const r = push(ref(db, path));
+            const payload = (post.status === 'pendente')
+                ? { ...post, tipo:'publicacao', eixo: activeEixoId }
+                : post;
+            await set(r, payload);
+        } else {
+            const expires = Date.now() + 24*3600*1000;
+            const path = (post.status === 'pendente') ? 'pibid_pendentes' : 'pibid_feed';
+            const r = push(ref(db, path));
+            const payload = (post.status === 'pendente')
+                ? { ...post, tipo:'feed', expiresAt: expires }
+                : { ...post, expiresAt: expires };
+            await set(r, payload);
+        }
+        $('composerModal').classList.remove('show');
+        if (post.status === 'pendente') toast('Publicação enviada para análise da moderação.', 'warn');
+        else toast(composerMode === 'pub' ? 'Publicação enviada!' : 'Postado no feed!', 'success');
+        composerFiles = [];
+        editor.innerHTML = '';
+        attachWrap.innerHTML = '';
+        pendingPostData = null;
+    } catch(e) {
+        console.error(e);
+        toast('Erro ao publicar. Tente novamente.', 'error');
+    } finally {
+        $('btnPublish').disabled = false;
+    }
+}
+
+/* ===== DENÚNCIAS ===== */
+function openReport(target) {
+    if (!requireAccount('denunciar conteúdo')) return;
+    reportTarget = target;
+    $('reportReason').value = 'palavroes';
+    $('reportMsg').value = '';
+    $('reportModal').classList.add('show');
+}
+$('btnSendReport').addEventListener('click', async () => {
+    if (!reportTarget) return;
+    const motivo = $('reportReason').value;
+    const msg = $('reportMsg').value.trim().slice(0, 800);
+    try {
+        await push(ref(db, 'pibid_denuncias'), {
+            tipo: reportTarget.kind, // 'pub' ou 'feed'
+            postId: reportTarget.id,
+            eixo: reportTarget.eixo || null,
+            denunciadoUid: reportTarget.autorUid || null,
+            denunciadoNome: reportTarget.autorNome || null,
+            denuncianteUid: currentUser.uid,
+            denuncianteNome: currentUserName,
+            motivo, mensagem: msg,
+            snippet: reportTarget.snippet || '',
+            ts: Date.now(),
+            status: 'aberta'
+        });
+        $('reportModal').classList.remove('show');
+        toast('Denúncia enviada para a moderação.', 'success');
+    } catch(e) { toast('Erro ao enviar denúncia.', 'error'); }
+});
+
+/* ===== LOGIN GATE ===== */
+function requireAccount(motivo) {
+    if (currentUser && !isGuest) return true;
+    $('gateMsg').textContent = `Para ${motivo} é preciso ter uma conta.`;
+    $('loginGate').classList.add('show');
+    return false;
+}
+$('gateClose').addEventListener('click', () => $('loginGate').classList.remove('show'));
+
+/* ===== LIGHTBOX ===== */
+function openLightbox(src) {
+    $('lightboxImg').src = src;
+    $('lightbox').classList.add('show');
+}
+$('lightboxClose').addEventListener('click', () => $('lightbox').classList.remove('show'));
+$('lightbox').addEventListener('click', (e) => { if (e.target === $('lightbox')) $('lightbox').classList.remove('show'); });
+
+/* ===== ESC FECHA TUDO ===== */
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.modal.show').forEach(m => m.classList.remove('show'));
+        $('lightbox').classList.remove('show');
+        $('emojiPop').classList.remove('show');
+        closeCtx();
+    }
+});
+
+/* ===== ATUALIZA "expira em" do feed a cada minuto ===== */
+setInterval(() => {
+    document.querySelectorAll('.feed-card .ttl[data-expires]').forEach(el => {
+        const exp = Number(el.dataset.expires) || 0;
+        el.textContent = fmtRemaining(exp);
+    });
+}, 60000);
+
+</script>
+
+</body>
+</html>
