@@ -368,23 +368,54 @@ body{
 .comment-form{
     display:flex;gap:8px;align-items:center;margin-top:10px;
 }
-.comment-form input{
-    flex:1;background:var(--bg-panel);
-    border:1px solid transparent;
-    padding:9px 14px;border-radius:50px;
-    font-family:inherit;font-size:.86rem;
-    color:var(--text-main);outline:none;
+.comment-form .com-input-wrap{
+    flex:1;position:relative;display:flex;align-items:center;
+    background:var(--bg-panel);border:1px solid transparent;
+    border-radius:50px;
     transition:border-color var(--t),background var(--t);
 }
-.comment-form input:focus{background:#fff;border-color:var(--c1)}
-.comment-form button{
+.comment-form .com-input-wrap:focus-within{background:#fff;border-color:var(--c1)}
+.comment-form input{
+    flex:1;background:transparent;border:none;
+    padding:9px 8px 9px 14px;
+    font-family:inherit;font-size:.86rem;
+    color:var(--text-main);outline:none;
+}
+.comment-form .com-emoji-btn{
+    background:transparent;border:none;cursor:pointer;
+    padding:6px 10px;font-size:1rem;line-height:1;
+    color:var(--text-muted);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    transition:background var(--t),color var(--t);
+}
+.comment-form .com-emoji-btn:hover{background:rgba(0,0,0,.04);color:var(--text-main)}
+.comment-form button[type="submit"]{
     background:var(--text-main);color:#fff;
     border:none;padding:9px 16px;border-radius:50px;
     font-family:inherit;font-weight:700;font-size:.82rem;cursor:pointer;
     transition:background var(--t);
 }
-.comment-form button:hover{background:#2a3260}
-.comment-form button:disabled{opacity:.4;cursor:not-allowed}
+.comment-form button[type="submit"]:hover{background:#2a3260}
+.comment-form button[type="submit"]:disabled{opacity:.4;cursor:not-allowed}
+
+/* Banner de limite para anônimos */
+.guest-limit-banner{
+    background:linear-gradient(135deg,#fff7e0,#fff1cc);
+    border:1px solid #ffe7a3;
+    color:#9a6900;
+    padding:14px 18px;border-radius:var(--radius);
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    font-size:.86rem;font-weight:500;
+}
+.guest-limit-banner svg{flex-shrink:0}
+.guest-limit-banner b{color:#7a5300;font-weight:700}
+.guest-limit-banner a{
+    margin-left:auto;background:var(--text-main);color:#fff;
+    text-decoration:none;padding:8px 18px;border-radius:50px;
+    font-weight:700;font-size:.82rem;
+    transition:transform var(--t-fast);
+}
+.guest-limit-banner a:hover{transform:translateY(-1px)}
 
 /* ----- COLUNA 3: FEED 24h ----- */
 .col-feed{
@@ -598,13 +629,13 @@ body{
 
 /* ===== EMOJI PICKER ===== */
 .emoji-pop{
-    position:absolute;
+    position:fixed;
     background:#fff;border-radius:14px;
     box-shadow:0 16px 40px rgba(0,0,0,.18);
     border:1px solid var(--card-border);
     padding:8px;
     width:288px;
-    z-index:9500;
+    z-index:9700;
     display:none;
 }
 .emoji-pop.show{display:block;animation:popIn .18s ease}
@@ -1475,6 +1506,19 @@ function listenPubs() {
     });
 }
 
+const GUEST_VIEW_LIMIT = 5;
+function buildGuestBanner(totalOculto, contexto) {
+    const div = document.createElement('div');
+    div.className = 'guest-limit-banner';
+    const loginUrl = '../login.html?next=' + encodeURIComponent('/pibid/index.html');
+    div.innerHTML = `
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span>Você está vendo <b>${GUEST_VIEW_LIMIT}</b> ${contexto}. Há <b>+${totalOculto}</b> aguardando você. Crie uma conta gratuita para ver tudo e participar.</span>
+        <a href="${loginUrl}">Criar conta</a>
+    `;
+    return div;
+}
+
 function renderPubs(list) {
     const wrap = $('pubsScroll');
     wrap.innerHTML = '';
@@ -1482,7 +1526,14 @@ function renderPubs(list) {
         wrap.innerHTML = '<div class="pubs-empty"><h4>Nenhuma publicação ainda</h4><p>Seja o primeiro a compartilhar uma experiência neste eixo.</p></div>';
         return;
     }
-    list.forEach(p => wrap.appendChild(buildPostCard(p)));
+    let visible = list;
+    let oculto = 0;
+    if (isGuest && list.length > GUEST_VIEW_LIMIT) {
+        oculto = list.length - GUEST_VIEW_LIMIT;
+        visible = list.slice(0, GUEST_VIEW_LIMIT);
+    }
+    visible.forEach(p => wrap.appendChild(buildPostCard(p)));
+    if (oculto > 0) wrap.appendChild(buildGuestBanner(oculto, oculto === 1 ? 'publicação deste eixo' : 'publicações deste eixo'));
 }
 
 function buildPostCard(p) {
@@ -1548,6 +1599,12 @@ function buildPostCard(p) {
         loadUserProfile(p.autorUid).then(() => refreshAvatarsForUid(p.autorUid));
     }
 
+    // reabre comentários se já estavam abertos
+    if (openCommentsPubs.has(p.id)) {
+        const box = card.querySelector('.comments');
+        if (box) { box.classList.add('open'); renderComments(box, p); }
+    }
+
     return card;
 }
 
@@ -1588,17 +1645,48 @@ async function handleLike(p) {
 }
 
 /* ===== COMENTÁRIOS ===== */
+/* Mantém memória de quais cards estavam com comentários abertos
+   pra reabrir após re-renders disparados por likes/novos comentários. */
+const openCommentsPubs = new Set();
+const openCommentsFeed = new Set();
+
 function toggleComments(card, p) {
     const box = card.querySelector('.comments');
     if (box.classList.contains('open')) {
         box.classList.remove('open');
         box.innerHTML = '';
+        openCommentsPubs.delete(p.id);
         return;
     }
+    openCommentsPubs.add(p.id);
     box.classList.add('open');
     renderComments(box, p);
 }
+
+function toggleFeedComments(card, p) {
+    const box = card.querySelector('.comments');
+    if (box.classList.contains('open')) {
+        box.classList.remove('open');
+        box.innerHTML = '';
+        openCommentsFeed.delete(p.id);
+        return;
+    }
+    openCommentsFeed.add(p.id);
+    box.classList.add('open');
+    renderCommentsGeneric(box, p, {
+        commentsPath: `pibid_feed/${p.id}/comentarios`,
+        pendingMeta:  { tipo: 'comentario_story', storyId: p.id }
+    });
+}
 function renderComments(box, p) {
+    renderCommentsGeneric(box, p, {
+        commentsPath: `pibid_publicacoes/${activeEixoId}/${p.id}/comentarios`,
+        pendingMeta:  { tipo: 'comentario', eixo: activeEixoId, pubId: p.id }
+    });
+}
+
+/* Genérica: serve pra publicação E pra story */
+function renderCommentsGeneric(box, p, opts) {
     const cs = p.comentarios || {};
     const arr = Object.keys(cs).map(k => ({ id:k, ...cs[k] })).sort((a,b)=>(a.ts||0)-(b.ts||0));
     let html = '';
@@ -1615,7 +1703,12 @@ function renderComments(box, p) {
     });
     html += `
         <form class="comment-form" data-pid="${p.id}">
-            <input type="text" placeholder="Escreva um comentário..." maxlength="500" required />
+            <span class="com-input-wrap">
+                <input type="text" placeholder="Escreva um comentário..." maxlength="500" required />
+                <button type="button" class="com-emoji-btn" title="Emoji" aria-label="Inserir emoji">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                </button>
+            </span>
             <button type="submit">Enviar</button>
         </form>
     `;
@@ -1630,20 +1723,25 @@ function renderComments(box, p) {
         loadUserProfile(uid).then(() => refreshAvatarsForUid(uid));
     });
 
-    box.querySelector('form').addEventListener('submit', async (e) => {
+    const form = box.querySelector('form');
+    const input = form.querySelector('input');
+    const emojiBtn = form.querySelector('.com-emoji-btn');
+    emojiBtn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        openEmojiPickerAt(emojiBtn, (emo) => insertEmojiInInput(input, emo));
+    });
+
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!requireAccount('comentar')) return;
-        const inp = e.target.querySelector('input');
-        const txt = (inp.value || '').trim();
+        const txt = (input.value || '').trim();
         if (!txt) return;
         const pal = detectPalavroes(txt);
         if (pal.length) {
             toast('Comentário contém linguagem inadequada e foi enviado para moderação.', 'warn');
             try {
                 await push(ref(db, 'pibid_pendentes'), {
-                    tipo: 'comentario',
-                    eixo: activeEixoId,
-                    pubId: p.id,
+                    ...(opts.pendingMeta || { tipo: 'comentario' }),
                     texto: txt,
                     motivo: 'palavroes',
                     palavroes: pal,
@@ -1652,10 +1750,10 @@ function renderComments(box, p) {
                     ts: Date.now()
                 });
             } catch(e){}
-            inp.value = '';
+            input.value = '';
             return;
         }
-        const cref = push(ref(db, `pibid_publicacoes/${activeEixoId}/${p.id}/comentarios`));
+        const cref = push(ref(db, opts.commentsPath));
         try {
             await set(cref, {
                 texto: txt,
@@ -1664,7 +1762,7 @@ function renderComments(box, p) {
                 autorRole: currentUserRole,
                 ts: Date.now()
             });
-            inp.value = '';
+            input.value = '';
         } catch(e) { toast('Não foi possível comentar.', 'error'); }
     });
 }
@@ -1733,8 +1831,13 @@ function renderFeed(list) {
     const wrap = $('feedList');
     wrap.innerHTML = '';
     if (!list.length) {
-        wrap.innerHTML = '<div class="feed-empty"><h4>Sem posts no feed</h4><p>Seja o primeiro a compartilhar algo rápido!</p></div>';
+        wrap.innerHTML = '<div class="feed-empty"><h4>Sem stories agora</h4><p>Seja o primeiro a postar um story!</p></div>';
         return;
+    }
+    let oculto = 0;
+    if (isGuest && list.length > GUEST_VIEW_LIMIT) {
+        oculto = list.length - GUEST_VIEW_LIMIT;
+        list = list.slice(0, GUEST_VIEW_LIMIT);
     }
     list.forEach(p => {
         const card = document.createElement('div');
@@ -1762,10 +1865,15 @@ function renderFeed(list) {
                     <svg viewBox="0 0 24 24" fill="${liked?'currentColor':'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                     <span>${likeCount}</span>
                 </button>
+                <button class="act-btn" data-fact="comment">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>${p.comentarios ? Object.keys(p.comentarios).length : 0}</span>
+                </button>
                 <button class="act-btn report" data-fact="report" title="Denunciar">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
                 </button>
             </div>
+            <div class="comments" data-feed-comments-for="${p.id}"></div>
         `;
         card.querySelectorAll('[data-fact]').forEach(btn => {
             btn.addEventListener('click', async () => {
@@ -1776,6 +1884,7 @@ function renderFeed(list) {
                     if (liked) { try { await remove(ref(db, path)); } catch(e){} }
                     else       { try { await set(ref(db, path), { ts: Date.now(), nome: currentUserName }); } catch(e){} }
                 }
+                if (act === 'comment') toggleFeedComments(card, p);
                 if (act === 'report') openReport({ kind:'feed', id:p.id, autorUid:p.autorUid, autorNome:p.autorNome, snippet: stripHtml(p.html||'').slice(0,160) });
             });
         });
@@ -1791,8 +1900,20 @@ function renderFeed(list) {
             el.addEventListener('click', () => openViewProfile(uid, el.textContent));
             loadUserProfile(uid).then(() => refreshAvatarsForUid(uid));
         });
+        // reabre comentários se já estavam abertos
+        if (openCommentsFeed.has(p.id)) {
+            const box = card.querySelector('.comments');
+            if (box) {
+                box.classList.add('open');
+                renderCommentsGeneric(box, p, {
+                    commentsPath: `pibid_feed/${p.id}/comentarios`,
+                    pendingMeta:  { tipo: 'comentario_story', storyId: p.id }
+                });
+            }
+        }
         wrap.appendChild(card);
     });
+    if (oculto > 0) wrap.appendChild(buildGuestBanner(oculto, oculto === 1 ? 'story ativo' : 'stories ativos'));
 }
 
 /* ===== COMPOSER ===== */
@@ -1919,11 +2040,14 @@ function renderComposerAttachments() {
     });
 }
 
-/* ===== EMOJI PICKER ===== */
+/* ===== EMOJI PICKER (reutilizável) ===== */
 const emojiPop = $('emojiPop');
 const emojiCats = $('emojiCats');
 const emojiGrid = $('emojiGrid');
 let emojiActiveCat = Object.keys(EMOJI_CATS)[0];
+let emojiInsertCb = null;     // callback ativo (emoji => void)
+let emojiAnchorEl = null;     // botão que abriu (pra ignorar no outside-click)
+
 function buildEmojiPicker() {
     emojiCats.innerHTML = '';
     Object.keys(EMOJI_CATS).forEach(cat => {
@@ -1931,7 +2055,8 @@ function buildEmojiPicker() {
         b.className = 'emoji-cat' + (cat === emojiActiveCat ? ' active' : '');
         b.textContent = EMOJI_CATS[cat][0];
         b.title = cat;
-        b.addEventListener('click', () => {
+        b.addEventListener('click', (ev) => {
+            ev.stopPropagation();
             emojiActiveCat = cat;
             buildEmojiPicker();
         });
@@ -1942,18 +2067,22 @@ function buildEmojiPicker() {
         const b = document.createElement('button');
         b.className = 'emoji-btn';
         b.textContent = emo;
-        b.addEventListener('click', () => insertEmoji(emo));
+        b.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            if (emojiInsertCb) emojiInsertCb(emo);
+            else insertEmojiInEditor(emo);
+        });
         emojiGrid.appendChild(b);
     });
 }
-function insertEmoji(emoji) {
+
+function insertEmojiInEditor(emoji) {
     editor.focus();
     let inserted = false;
     try {
         const sel = window.getSelection();
         if (sel && sel.rangeCount) {
             const range = sel.getRangeAt(0);
-            // garante que a range está dentro do editor
             if (editor.contains(range.startContainer)) {
                 range.deleteContents();
                 range.insertNode(document.createTextNode(emoji));
@@ -1965,24 +2094,50 @@ function insertEmoji(emoji) {
     } catch(e){}
     if (!inserted) editor.appendChild(document.createTextNode(emoji));
 }
-$('btnEmoji').addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (emojiPop.classList.contains('show')) {
+
+function insertEmojiInInput(input, emoji) {
+    const start = input.selectionStart ?? input.value.length;
+    const end   = input.selectionEnd   ?? input.value.length;
+    input.value = input.value.slice(0, start) + emoji + input.value.slice(end);
+    const pos = start + emoji.length;
+    input.focus();
+    try { input.setSelectionRange(pos, pos); } catch(e){}
+}
+
+function openEmojiPickerAt(anchor, insertCb) {
+    if (emojiPop.classList.contains('show') && emojiAnchorEl === anchor) {
         emojiPop.classList.remove('show');
+        emojiInsertCb = null;
+        emojiAnchorEl = null;
         return;
     }
-    const r = e.currentTarget.getBoundingClientRect();
-    const modalBody = e.currentTarget.closest('.modal-body');
-    const mr = modalBody.getBoundingClientRect();
-    emojiPop.style.top  = (r.bottom - mr.top + 6) + 'px';
-    emojiPop.style.left = Math.max(8, (r.left - mr.left)) + 'px';
+    emojiInsertCb = insertCb;
+    emojiAnchorEl = anchor;
     buildEmojiPicker();
     emojiPop.classList.add('show');
+    // posiciona em viewport
+    const r = anchor.getBoundingClientRect();
+    const popW = emojiPop.offsetWidth || 288;
+    const popH = emojiPop.offsetHeight || 280;
+    let left = Math.max(8, Math.min(window.innerWidth - popW - 8, r.left));
+    let top  = r.bottom + 6;
+    if (top + popH > window.innerHeight - 8) top = Math.max(8, r.top - popH - 6);
+    emojiPop.style.left = left + 'px';
+    emojiPop.style.top  = top  + 'px';
+}
+
+$('btnEmoji').addEventListener('click', (e) => {
+    e.stopPropagation();
+    openEmojiPickerAt(e.currentTarget, insertEmojiInEditor);
 });
 document.addEventListener('click', (e) => {
-    if (!emojiPop.contains(e.target) && e.target.id !== 'btnEmoji' && !e.target.closest('#btnEmoji')) {
-        emojiPop.classList.remove('show');
-    }
+    if (!emojiPop.classList.contains('show')) return;
+    if (emojiPop.contains(e.target)) return;
+    if (emojiAnchorEl && (e.target === emojiAnchorEl || emojiAnchorEl.contains(e.target))) return;
+    if (e.target.closest('.com-emoji-btn')) return;
+    emojiPop.classList.remove('show');
+    emojiInsertCb = null;
+    emojiAnchorEl = null;
 });
 
 /* ===== PUBLICAR ===== */
