@@ -80,6 +80,27 @@ body{
   box-shadow:0 4px 14px rgba(10,132,255,.3);
 }
 .top-actions .primary:hover{background:#3a9bff;border-color:#3a9bff;color:#fff}
+.top-actions #btnManual{
+  border:1.5px solid var(--success);color:var(--success);
+  background:rgba(48,209,88,.08);font-weight:700;
+  box-shadow:0 0 0 0 rgba(48,209,88,.4);
+  position:relative;
+}
+.top-actions #btnManual:hover{
+  background:var(--success);border-color:var(--success);color:#fff;
+  box-shadow:0 6px 16px rgba(48,209,88,.35);
+}
+.top-actions #btnManual::before{
+  content:'';position:absolute;inset:-3px;border-radius:11px;
+  border:1.5px solid var(--success);opacity:.45;
+  animation:repoBtnPulse 2.4s ease-out infinite;pointer-events:none;
+}
+.top-actions #btnManual:hover::before{display:none}
+@keyframes repoBtnPulse{
+  0%{transform:scale(1);opacity:.5}
+  70%{transform:scale(1.06);opacity:0}
+  100%{transform:scale(1.06);opacity:0}
+}
 .top-actions .admin{color:var(--warning);border-color:rgba(255,159,10,.3)}
 .top-actions .admin:hover{color:var(--warning);border-color:var(--warning);background:rgba(255,159,10,.08)}
 
@@ -138,6 +159,135 @@ body{
 }
 .qitem-manual-thumb .katex{font-size:.78em}
 .sid-empty{padding:40px 12px;text-align:center;color:var(--text2);font-size:.86rem;line-height:1.55;grid-column:1/-1}
+
+/* ===== PASTAS ===== */
+.folders-section{
+  border-top:1px solid var(--border);
+  padding:10px 12px 8px;
+  display:flex;flex-direction:column;gap:6px;
+  max-height:36vh;overflow:hidden;
+}
+.folders-head{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:0 4px 4px;
+}
+.folders-head-title{
+  font-size:.68rem;font-weight:700;color:var(--text2);
+  letter-spacing:1.1px;text-transform:uppercase;display:flex;align-items:center;gap:6px;
+}
+.folders-head-title .fcount{
+  background:var(--bg3);color:var(--text2);font-weight:700;
+  padding:1px 7px;border-radius:50px;font-size:.66rem;letter-spacing:.4px;text-transform:none;
+}
+.folders-head .add-folder{
+  display:inline-flex;align-items:center;gap:5px;
+  background:var(--bg3);border:1px solid var(--border);border-radius:7px;
+  color:var(--text);font-size:.7rem;font-weight:700;letter-spacing:.3px;
+  padding:5px 10px;cursor:pointer;font-family:inherit;
+  transition:border-color .15s,color .15s,background .15s;
+}
+.folders-head .add-folder:hover{border-color:var(--success);color:var(--success);background:rgba(48,209,88,.08)}
+.folders-head .add-folder svg{width:11px;height:11px}
+
+.folders-list{
+  display:flex;flex-direction:column;gap:4px;
+  overflow-y:auto;padding:2px 0 6px;
+}
+.folder{
+  display:flex;align-items:center;gap:9px;
+  padding:8px 10px;border-radius:8px;cursor:pointer;
+  background:transparent;border:1px solid transparent;
+  transition:background .15s,border-color .15s,transform .12s;
+  user-select:none;
+}
+.folder:hover{background:var(--bg3)}
+.folder.active{background:rgba(10,132,255,.08);border-color:var(--accent)}
+.folder.dragover{
+  background:rgba(48,209,88,.14);border:1.5px dashed var(--success);
+  transform:scale(1.01);
+}
+.folder-color{
+  width:14px;height:14px;border-radius:5px;flex-shrink:0;
+  background:var(--accent);
+}
+.folder-name{
+  flex:1;min-width:0;font-size:.86rem;font-weight:600;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.folder-count{
+  font-size:.7rem;color:var(--text2);font-weight:600;
+  background:var(--bg3);padding:1px 8px;border-radius:50px;flex-shrink:0;
+}
+.folder-menu{
+  background:transparent;border:none;cursor:pointer;
+  padding:4px;border-radius:5px;color:var(--text2);
+  display:none;align-items:center;justify-content:center;
+  transition:background .15s,color .15s;
+}
+.folder:hover .folder-menu{display:inline-flex}
+.folder-menu:hover{background:rgba(255,255,255,.06);color:var(--text)}
+.folder-menu svg{width:12px;height:12px}
+
+.folder-all{
+  display:flex;align-items:center;gap:9px;
+  padding:7px 10px;border-radius:8px;cursor:pointer;
+  background:transparent;
+  font-size:.8rem;font-weight:700;color:var(--text2);
+}
+.folder-all:hover{background:var(--bg3);color:var(--text)}
+.folder-all.active{background:rgba(10,132,255,.08);color:var(--accent)}
+.folder-all svg{width:13px;height:13px}
+
+/* arrasta questão */
+.qitem.dragging{opacity:.45;cursor:grabbing}
+
+/* Popup Nova/editar pasta */
+.folder-popup-row{display:flex;flex-direction:column;gap:10px;margin:8px 0 4px}
+.folder-popup-row label{font-size:.78rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px}
+.folder-popup-row input{
+  width:100%;padding:10px 12px;background:var(--bg3);
+  border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-family:inherit;font-size:.92rem;outline:none;
+  transition:border-color .15s,box-shadow .15s;
+}
+.folder-popup-row input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(10,132,255,.18)}
+.folder-color-grid{display:flex;flex-wrap:wrap;gap:6px}
+.folder-color-swatch{
+  width:30px;height:30px;border-radius:8px;cursor:pointer;
+  border:2px solid transparent;transition:transform .12s;
+}
+.folder-color-swatch:hover{transform:scale(1.07)}
+.folder-color-swatch.sel{border-color:var(--text);box-shadow:0 0 0 3px rgba(255,255,255,.18)}
+
+/* Pré-visualização: seletor de pastas */
+.preview-folders{
+  margin-top:14px;padding:12px 14px;
+  background:rgba(255,255,255,.03);
+  border:1px solid var(--border);border-radius:10px;
+}
+.preview-folders-title{
+  font-size:.72rem;font-weight:700;color:var(--text2);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;
+}
+.preview-folders-grid{display:flex;flex-wrap:wrap;gap:6px}
+.preview-folder-chip{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:6px 12px;border-radius:50px;cursor:pointer;
+  background:var(--bg3);border:1px solid var(--border);color:var(--text);
+  font-family:inherit;font-size:.78rem;font-weight:600;
+  transition:transform .12s,border-color .15s;
+}
+.preview-folder-chip:hover{transform:translateY(-1px)}
+.preview-folder-chip .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.preview-folder-chip.active{
+  border-color:var(--success);background:rgba(48,209,88,.14);color:var(--success);
+}
+.preview-folder-chip.active::after{
+  content:'✓';margin-left:2px;font-weight:800;
+}
+.preview-folders-empty{
+  font-size:.76rem;color:var(--text2);font-style:italic;
+}
 .preview-pend-banner{
   display:flex;gap:10px;align-items:flex-start;
   background:rgba(255,159,10,.1);border:1px solid rgba(255,159,10,.3);color:var(--warning);
@@ -828,7 +978,7 @@ math-field::part(menu-toggle){display:none !important}
     </div>
   </div>
   <div class="top-actions">
-    <button id="btnManual">+ Questão manual</button>
+    <button id="btnManual" title="Criar uma nova questão">+ Adicionar questão</button>
     <a href="admin.html" class="admin" id="linkAdmin" style="display:none" title="Área administrativa">⚙ Cadastrar</a>
     <button class="primary" id="btnPrint">Imprimir</button>
   </div>
@@ -848,6 +998,23 @@ math-field::part(menu-toggle){display:none !important}
       <span id="countQ" style="margin-left:auto">0</span>
     </div>
     <div class="qlist" id="qlist"><div class="sid-empty">Carregando banco...</div></div>
+
+    <!-- PASTAS -->
+    <div class="folders-section" id="foldersSection" style="display:none">
+      <div class="folders-head">
+        <div class="folders-head-title">Minhas pastas <span class="fcount" id="foldersCount">0</span></div>
+        <button class="add-folder" id="btnAddFolder" title="Criar nova pasta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nova pasta
+        </button>
+      </div>
+      <div class="folders-list" id="foldersList">
+        <div class="folder-all active" data-folder-id="" title="Mostrar todas as questões">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Todas as questões
+        </div>
+      </div>
+    </div>
   </aside>
 
   <main class="docarea" id="docArea">
@@ -860,6 +1027,32 @@ math-field::part(menu-toggle){display:none !important}
     </div>
     <div id="docPages"></div>
   </main>
+</div>
+
+<!-- Popup criar/editar pasta -->
+<div class="ov" id="folderOv">
+  <div class="ov-box" style="max-width:440px">
+    <header><h3 id="folderOvTitle">Nova pasta</h3><button id="folderOvClose">✕</button></header>
+    <div class="body">
+      <div class="folder-popup-row">
+        <label>Nome da pasta</label>
+        <input type="text" id="folderOvName" maxlength="40" placeholder="Ex: Provas do 9º ano" />
+      </div>
+      <div class="folder-popup-row">
+        <label>Cor</label>
+        <div class="folder-color-grid" id="folderColorGrid"></div>
+      </div>
+    </div>
+    <footer class="preview-footer">
+      <div class="pf-left">
+        <button id="folderOvDelete" class="pf-danger" style="display:none">Excluir pasta</button>
+      </div>
+      <div class="pf-right">
+        <button id="folderOvCancel">Cancelar</button>
+        <button class="primary" id="folderOvSave">Salvar</button>
+      </div>
+    </footer>
+  </div>
 </div>
 
 <div class="ov" id="previewOv">
@@ -1394,11 +1587,25 @@ function renderSidebar(){
   let list=questoes;
   const myUidF = currentUser ? currentUser.uid : null;
   const isAdminF = currentUser && currentUser.email===ADMIN_EMAIL;
-  // Filtro: pendentes só visíveis para quem cadastrou
+  const agora = Date.now();
+  // Filtro: pendentes só visíveis para quem cadastrou.
+  // Pendentes anônimas: visíveis só pro próprio autor enquanto não expirarem (1h).
   if(currentUser){
-    list = list.filter(it=> it.status!=='pendente' || it.criadoPor===currentUser.uid);
+    list = list.filter(it=>{
+      if(it.status==='pendente') return it.criadoPor===currentUser.uid || isAdminF;
+      if(it.status==='pendente_anonimo'){
+        const venceu = it.expiraEm && agora > it.expiraEm;
+        if(venceu){
+          // Tenta limpar (best-effort, falha em silêncio se sem permissão)
+          try{ remove(ref(db,'questoes/'+it.id)); }catch(_){}
+          return false;
+        }
+        return it.criadoPor===currentUser.uid || isAdminF;
+      }
+      return true;
+    });
   } else {
-    list = list.filter(it=> it.status!=='pendente');
+    list = list.filter(it=> it.status!=='pendente' && it.status!=='pendente_anonimo');
   }
   // Filtro: questões privadas só visíveis para o próprio autor (admin sempre vê)
   list = list.filter(it=>{
@@ -1433,7 +1640,7 @@ function renderSidebar(){
     let msg;
     if(onlyMine) msg='Você ainda não cadastrou nenhuma questão.';
     else if(q) msg='Nenhuma questão encontrada.';
-    else msg='Banco vazio. Cadastre uma questão usando "+ Questão manual" no topo.';
+    else msg='Banco vazio. Cadastre uma questão usando "+ Adicionar questão" no topo.';
     el.innerHTML='<div class="sid-empty">'+msg+'</div>';
     return;
   }
@@ -1821,7 +2028,8 @@ $('previewDuplicate').onclick=async ()=>{
 
 /* ===== Manual question popup + math keyboard ===== */
 $('btnManual').onclick=()=>{
-  if (isGuestMode) { guestBlock('A criação de questões está disponível apenas para usuários cadastrados.'); return; }
+  // Anônimos podem criar — a questão fica pendente por 1h e não pode ser
+  // inserida na prova até o usuário se cadastrar / a moderação aprovar.
   openManualPopup(null);
 };
 $('manualClose').onclick=()=>$('manualOv').classList.remove('show');
@@ -1900,15 +2108,24 @@ $('manualAdd').onclick=async ()=>{
       return;
     }
     const novaRef=push(ref(db,'questoes'));
-    await set(novaRef,{
+    const ehAnonimo = !!currentUser.isAnonymous;
+    const agora = Date.now();
+    const payload = {
       tipo:'manual',
       textoManual:t,
-      status:'pendente',
+      status: ehAnonimo ? 'pendente_anonimo' : 'pendente',
       imgQuestao:null,
       criadoPor:currentUser.uid,
-      criadoPorNome: currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : 'Usuário'),
-      criadoEm:Date.now()
-    });
+      criadoPorNome: currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : 'Visitante'),
+      criadoEm:agora
+    };
+    if (ehAnonimo) {
+      payload.expiraEm = agora + 60*60*1000; // 1h
+    }
+    await set(novaRef, payload);
+    if (ehAnonimo) {
+      guestBlock('Sua questão foi criada e ficará pendente por <b>1 hora</b>. Para finalizar o cadastro, salvar permanentemente e adicionar em uma prova, crie uma conta gratuita.');
+    }
   }
   $('manualOv').classList.remove('show');
   renderDoc();
@@ -2127,16 +2344,24 @@ function gerarPrefixo(tema){
   return pre;
 }
 
+/* Inicial do usuário (1ª letra do nome, fallback do email; '?' se anônimo). */
+function inicialDoUsuario(){
+  if(!currentUser) return 'X';
+  if(currentUser.isAnonymous) return 'A';
+  const nome = currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : '');
+  const norm = (nome||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z]/g,'');
+  return (norm.charAt(0) || 'X').toUpperCase();
+}
+
 /* Reserva atomicamente o próximo número sequencial para um prefixo.
-   Usa transações em 'questoes_counters/<prefixo>' (criar a regra no
-   Firebase se ainda não existir; a operação write é coberta pelo nó
-   raíz já que o usuário tem auth — manter mesmo path sem rules adicionais
-   funciona em desenvolvimento e pode ser endurecido depois). */
+   Usa transações em 'questoes_counters/<prefixo>'.
+   Retorna no formato: <PREFIXO><4 dígitos><INICIAL DO USUÁRIO>
+   Ex: EA0001G — Expressões Algébricas, 1ª, criada por Gilberto. */
 async function reservarCodigo(prefixo){
   const node = ref(db, 'questoes_counters/'+prefixo);
   const result = await runTransaction(node, cur => (typeof cur === 'number' ? cur : 0) + 1);
   const n = result.snapshot.val() || 1;
-  return prefixo + String(n).padStart(4,'0');
+  return prefixo + String(n).padStart(4,'0') + inicialDoUsuario();
 }
 
 $('finSave').onclick=async ()=>{
@@ -3252,7 +3477,10 @@ function loadProva(id, p){
   renderDoc();
 }
 
-$('btnPrint').onclick=()=>$('printOv').classList.add('show');
+$('btnPrint').onclick=()=>{
+  if (isGuestMode) { guestBlock('A impressão de provas está disponível apenas para usuários cadastrados.'); return; }
+  $('printOv').classList.add('show');
+};
 $('printCancel').onclick=()=>$('printOv').classList.remove('show');
 $('printGo').onclick=()=>{
   const copies=Math.max(1,Math.min(60,parseInt($('cfgCopies').value)||1));
@@ -4271,6 +4499,296 @@ const _waitAuth = setInterval(()=>{
 },300);
 
 renderDoc();
+
+/* ============================================================
+   ===== PASTAS DO USUÁRIO (banco de questões) ===============
+   ============================================================
+   Estrutura no banco: usuarios/$uid/banco_pastas/$id = {
+     nome, cor, criadoEm, ordem, questoes: { qid: true, ... }
+   } */
+const FOLDER_COLORS = [
+  '#0a84ff','#30d158','#ff9f0a','#ff453a','#bf5af2',
+  '#5ac8fa','#ff375f','#ffd60a','#5e5ce6','#a2845e','#8e8e93'
+];
+let myFolders = [];        // [{id, nome, cor, ordem, questoes}]
+let activeFolderId = '';   // '' = todas
+let editingFolderId = null;
+let folderOvSelColor = FOLDER_COLORS[0];
+
+function renderFolderColorGrid(){
+  const grid = $('folderColorGrid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  FOLDER_COLORS.forEach(c=>{
+    const sw = document.createElement('span');
+    sw.className = 'folder-color-swatch' + (c===folderOvSelColor?' sel':'');
+    sw.style.background = c;
+    sw.onclick = ()=>{ folderOvSelColor = c; renderFolderColorGrid(); };
+    grid.appendChild(sw);
+  });
+}
+
+function openFolderPopup(folderId){
+  if(isGuestMode){ guestBlock('As pastas só ficam disponíveis para usuários cadastrados.'); return; }
+  editingFolderId = folderId || null;
+  if(folderId){
+    const f = myFolders.find(x=>x.id===folderId);
+    $('folderOvTitle').textContent = 'Editar pasta';
+    $('folderOvName').value = f ? (f.nome||'') : '';
+    folderOvSelColor = (f && f.cor) || FOLDER_COLORS[0];
+    $('folderOvDelete').style.display = 'inline-block';
+  } else {
+    $('folderOvTitle').textContent = 'Nova pasta';
+    $('folderOvName').value = '';
+    folderOvSelColor = FOLDER_COLORS[0];
+    $('folderOvDelete').style.display = 'none';
+  }
+  renderFolderColorGrid();
+  $('folderOv').classList.add('show');
+  setTimeout(()=> $('folderOvName').focus(), 60);
+}
+function closeFolderPopup(){ $('folderOv').classList.remove('show'); }
+
+$('folderOvClose').onclick = closeFolderPopup;
+$('folderOvCancel').onclick = closeFolderPopup;
+$('folderOvSave').onclick = async ()=>{
+  const nome = $('folderOvName').value.trim().slice(0,40);
+  if(!nome){ alert('Informe um nome para a pasta.'); return }
+  if(!currentUser){ alert('Aguarde autenticação.'); return }
+  try{
+    if(editingFolderId){
+      await update(ref(db,'usuarios/'+currentUser.uid+'/banco_pastas/'+editingFolderId), {
+        nome, cor: folderOvSelColor
+      });
+    } else {
+      const r = push(ref(db,'usuarios/'+currentUser.uid+'/banco_pastas'));
+      await set(r, {
+        nome, cor: folderOvSelColor,
+        ordem: (myFolders.length ? Math.max(...myFolders.map(f=>f.ordem||0))+1 : 1),
+        criadoEm: Date.now()
+      });
+    }
+    closeFolderPopup();
+  }catch(e){ console.error(e); alert('Erro ao salvar pasta: '+e.message) }
+};
+$('folderOvDelete').onclick = async ()=>{
+  if(!editingFolderId || !currentUser) return;
+  const f = myFolders.find(x=>x.id===editingFolderId);
+  if(!f) return;
+  if(!confirm(`Excluir a pasta "${f.nome}"? As questões em si não serão apagadas, apenas a pasta.`)) return;
+  try{
+    await remove(ref(db,'usuarios/'+currentUser.uid+'/banco_pastas/'+editingFolderId));
+    if(activeFolderId === editingFolderId){ activeFolderId=''; renderSidebar() }
+    closeFolderPopup();
+  }catch(e){ console.error(e); alert('Erro ao excluir: '+e.message) }
+};
+
+$('btnAddFolder').onclick = ()=> openFolderPopup(null);
+
+function subscribeFolders(){
+  if(!currentUser || isGuestMode){
+    myFolders = []; activeFolderId = '';
+    renderFolders(); renderSidebar();
+    $('foldersSection').style.display = 'none';
+    return;
+  }
+  $('foldersSection').style.display = 'flex';
+  onValue(ref(db,'usuarios/'+currentUser.uid+'/banco_pastas'), (snap)=>{
+    const v = snap.val() || {};
+    myFolders = Object.keys(v).map(k=>{
+      const it = v[k] || {};
+      return {
+        id: k,
+        nome: it.nome || 'Sem nome',
+        cor: it.cor || FOLDER_COLORS[0],
+        ordem: it.ordem || 0,
+        criadoEm: it.criadoEm || 0,
+        questoes: it.questoes || {}
+      };
+    }).sort((a,b)=> (a.ordem||0)-(b.ordem||0) || a.nome.localeCompare(b.nome));
+    if(activeFolderId && !myFolders.find(f=>f.id===activeFolderId)) activeFolderId='';
+    renderFolders();
+    renderSidebar();
+  });
+}
+
+function renderFolders(){
+  const list = $('foldersList');
+  if(!list) return;
+  $('foldersCount').textContent = myFolders.length;
+  // mantém o "Todas" no topo
+  const allBtn = list.querySelector('.folder-all');
+  list.innerHTML = '';
+  if(allBtn){
+    allBtn.classList.toggle('active', !activeFolderId);
+    allBtn.onclick = ()=>{ activeFolderId = ''; renderFolders(); renderSidebar(); };
+    list.appendChild(allBtn);
+  }
+  myFolders.forEach(f=>{
+    const count = Object.keys(f.questoes||{}).length;
+    const div = document.createElement('div');
+    div.className = 'folder' + (activeFolderId===f.id?' active':'');
+    div.dataset.folderId = f.id;
+    div.innerHTML = `
+      <span class="folder-color" style="background:${f.cor}"></span>
+      <span class="folder-name" title="${esc(f.nome)}">${esc(f.nome)}</span>
+      <span class="folder-count">${count}</span>
+      <button class="folder-menu" title="Editar pasta" data-edit="${f.id}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </button>
+    `;
+    div.onclick = (ev)=>{
+      if(ev.target.closest('[data-edit]')) return;
+      activeFolderId = (activeFolderId === f.id) ? '' : f.id;
+      renderFolders();
+      renderSidebar();
+    };
+    div.querySelector('[data-edit]').onclick = (ev)=>{ ev.stopPropagation(); openFolderPopup(f.id); };
+
+    // Drag & drop: receber questão
+    div.addEventListener('dragover', (e)=>{ e.preventDefault(); div.classList.add('dragover'); });
+    div.addEventListener('dragleave', ()=> div.classList.remove('dragover'));
+    div.addEventListener('drop', async (e)=>{
+      e.preventDefault();
+      div.classList.remove('dragover');
+      const qid = e.dataTransfer.getData('text/qid') || draggingQid;
+      if(!qid) return;
+      await addQuestionToFolder(qid, f.id);
+    });
+
+    list.appendChild(div);
+  });
+}
+
+async function addQuestionToFolder(qid, folderId){
+  if(!currentUser || isGuestMode){ guestBlock('As pastas só ficam disponíveis para usuários cadastrados.'); return; }
+  if(!qid || !folderId) return;
+  try{
+    await set(ref(db,'usuarios/'+currentUser.uid+'/banco_pastas/'+folderId+'/questoes/'+qid), true);
+  }catch(e){ console.error(e); alert('Erro ao adicionar à pasta: '+e.message) }
+}
+async function removeQuestionFromFolder(qid, folderId){
+  if(!currentUser || isGuestMode) return;
+  try{ await remove(ref(db,'usuarios/'+currentUser.uid+'/banco_pastas/'+folderId+'/questoes/'+qid)); }
+  catch(e){ console.error(e); }
+}
+
+/* ===== Drag & drop nas questões da sidebar ===== */
+let draggingQid = null;
+function attachDragHandlers(){
+  document.querySelectorAll('#qlist .qitem').forEach(it=>{
+    if(it.dataset.dragWired==='1') return;
+    it.dataset.dragWired = '1';
+    it.draggable = true;
+    it.addEventListener('dragstart', (e)=>{
+      draggingQid = it.dataset.id;
+      it.classList.add('dragging');
+      try{ e.dataTransfer.setData('text/qid', it.dataset.id); }catch(_){}
+      e.dataTransfer.effectAllowed = 'copy';
+    });
+    it.addEventListener('dragend', ()=>{
+      it.classList.remove('dragging');
+      draggingQid = null;
+    });
+  });
+}
+// Sobrepor renderSidebar pra: filtrar por pasta + plugar drag
+const __origRenderSidebar = renderSidebar;
+renderSidebar = function(){
+  __origRenderSidebar.apply(this, arguments);
+  if(activeFolderId){
+    const f = myFolders.find(x=>x.id===activeFolderId);
+    if(f){
+      const ids = f.questoes || {};
+      const el = $('qlist');
+      el.querySelectorAll('.qitem').forEach(it=>{
+        if(!ids[it.dataset.id]) it.style.display = 'none';
+      });
+      // recontar
+      const visiveis = el.querySelectorAll('.qitem:not([style*="display: none"])').length;
+      $('countQ').textContent = visiveis;
+      if(!visiveis){
+        // mostra mensagem da pasta vazia
+        if(!el.querySelector('.sid-empty')){
+          const d = document.createElement('div');
+          d.className = 'sid-empty';
+          d.textContent = `Pasta "${f.nome}" está vazia. Arraste questões para cá.`;
+          el.appendChild(d);
+        }
+      }
+    }
+  }
+  attachDragHandlers();
+};
+
+/* ===== Pré-visualização: chips de pastas =====
+   Observa quando o previewOv ganha .show e renderiza o painel
+   das pastas pra questão atual (currentQid é módulo-escopo). */
+(function setupPreviewFoldersObserver(){
+  const ov = $('previewOv');
+  if(!ov) return;
+  const mo = new MutationObserver(()=>{
+    if(ov.classList.contains('show')){
+      // espera o body ser preenchido pelo openPreview
+      setTimeout(()=> renderPreviewFolders(currentQid), 40);
+    } else {
+      const old = $('previewBody').querySelector('.preview-folders');
+      if(old) old.remove();
+    }
+  });
+  mo.observe(ov, { attributes:true, attributeFilter:['class'] });
+})();
+function renderPreviewFolders(qid){
+  if(!qid) return;
+  const body = $('previewBody');
+  if(!body) return;
+  // remove painel antigo se houver
+  const old = body.querySelector('.preview-folders');
+  if(old) old.remove();
+  if(isGuestMode || !currentUser){
+    return; // anônimos não veem (sem pastas)
+  }
+  const wrap = document.createElement('div');
+  wrap.className = 'preview-folders';
+  if(!myFolders.length){
+    wrap.innerHTML = `
+      <div class="preview-folders-title">Pastas</div>
+      <div class="preview-folders-empty">Você ainda não tem pastas. Crie uma na barra lateral para organizar suas questões.</div>
+    `;
+    body.appendChild(wrap);
+    return;
+  }
+  let html = `<div class="preview-folders-title">Adicionar a uma pasta</div><div class="preview-folders-grid">`;
+  myFolders.forEach(f=>{
+    const inFolder = !!(f.questoes && f.questoes[qid]);
+    html += `<button type="button" class="preview-folder-chip ${inFolder?'active':''}" data-fid="${f.id}">
+      <span class="dot" style="background:${f.cor}"></span>${esc(f.nome)}
+    </button>`;
+  });
+  html += `</div>`;
+  wrap.innerHTML = html;
+  body.appendChild(wrap);
+  wrap.querySelectorAll('.preview-folder-chip').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const fid = btn.dataset.fid;
+      const f = myFolders.find(x=>x.id===fid);
+      if(!f) return;
+      const inFolder = !!(f.questoes && f.questoes[qid]);
+      btn.disabled = true;
+      try{
+        if(inFolder) await removeQuestionFromFolder(qid, fid);
+        else         await addQuestionToFolder(qid, fid);
+        btn.classList.toggle('active');
+      } catch(_){}
+      btn.disabled = false;
+    };
+  });
+}
+
+// dispara quando a auth ficar pronta
+const _waitAuthFolders = setInterval(()=>{
+  if(currentUser){ clearInterval(_waitAuthFolders); subscribeFolders(); }
+},300);
 </script>
 </body>
 </html>
