@@ -67,8 +67,10 @@ import { signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/fir
     .al-btn.al-secondary:hover { background: #E6E6E6; }
 
     .al-test-banner {
-        position: sticky; top: 0; z-index: 9999;
-        background: linear-gradient(90deg, #FFB800, #FF6B00);
+        position: sticky; top: 0; left: 0; right: 0;
+        width: 100%;
+        z-index: 9999;
+        background: linear-gradient(90deg, #6B00FF, #9D00FF);
         color: #fff;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         font-size: .82rem; font-weight: 700;
@@ -76,20 +78,26 @@ import { signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/fir
         text-align: center;
         display: flex; align-items: center; justify-content: center;
         gap: 14px; flex-wrap: wrap;
-        box-shadow: 0 4px 14px rgba(255, 107, 0, .25);
+        box-shadow: 0 4px 14px rgba(107, 0, 255, .25);
+        box-sizing: border-box;
     }
     .al-test-banner a {
         color: #fff; text-decoration: underline; font-weight: 800;
     }
     .al-test-banner .al-banner-btn {
-        background: rgba(255,255,255,.18);
-        color: #fff; border: 1px solid rgba(255,255,255,.35);
+        background: rgba(255,255,255,.95);
+        color: #6B00FF;
+        border: 1px solid rgba(255,255,255,.95);
         padding: 5px 14px; border-radius: 50px;
-        font-family: inherit; font-weight: 700; font-size: .76rem;
+        font-family: inherit; font-weight: 800; font-size: .76rem;
         cursor: pointer; text-decoration: none;
-        transition: background .15s;
+        transition: background .15s, transform .12s, box-shadow .2s;
     }
-    .al-test-banner .al-banner-btn:hover { background: rgba(255,255,255,.32); }
+    .al-test-banner .al-banner-btn:hover {
+        background: #fff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(0,0,0,.15);
+    }
 
     @keyframes alFadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes alPopIn {
@@ -213,7 +221,7 @@ const AlquiLabAuth = {
         overlay.className = 'al-locked-overlay';
         overlay.innerHTML = `
             <div class="al-locked-box" role="dialog" aria-modal="true">
-                <div class="al-locked-icon" style="background:#FFB800;box-shadow:0 12px 28px rgba(255,184,0,.45)">${LOCK_ICON_SVG}</div>
+                <div class="al-locked-icon" style="background:#6B00FF;box-shadow:0 12px 28px rgba(107,0,255,.45)">${LOCK_ICON_SVG}</div>
                 <h3>${title || 'Modo de teste'}</h3>
                 <p>${body || 'Você está usando esta ferramenta no modo de teste. Algumas funções estão limitadas. Crie uma conta gratuita para ter acesso total.'}</p>
                 <div class="al-locked-actions">
