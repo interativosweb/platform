@@ -185,28 +185,6 @@ body{background-color:var(--bg);background-image:linear-gradient(rgba(10,132,255
 <!-- TOAST -->
 <div id="toast" class="toast"></div>
 
-<!-- PAINEL DE DIAGNÓSTICO -->
-<div id="diagPanel" class="diag-panel" style="display:none">
-  <div class="head">
-    <span class="ttl">🔧 Diagnóstico</span>
-    <button class="x" onclick="document.getElementById('diagPanel').style.display='none'">✕</button>
-  </div>
-  <div id="dIncognitoWarn" class="row" style="display:none;background:rgba(255,159,10,.12);padding:6px 8px;border-radius:6px;border:1px solid rgba(255,159,10,.4);margin-bottom:6px;flex-direction:column;gap:2px">
-    <span style="color:var(--warn);font-weight:700;font-size:.7rem">⚠️ Modo anônimo detectado</span>
-    <span style="font-size:.62rem;color:var(--text2);line-height:1.4">Dados só sobrevivem se persistirem no servidor. Use o mesmo login na próxima vez.</span>
-  </div>
-  <div class="row"><span>UID:</span><span class="v" id="dUid" style="cursor:pointer;text-decoration:underline" title="Clique para copiar UID completo">—</span></div>
-  <div class="row"><span>Cache local:</span><span class="v" id="dCache">—</span></div>
-  <div class="row"><span>Servidor:</span><span class="v" id="dServer">—</span></div>
-  <div class="row"><span>Último save:</span><span class="v" id="dSave">—</span></div>
-  <div class="row"><span>Auto-sync:</span><span class="v" id="dSync">—</span></div>
-  <div class="row"><span>Último erro:</span><span class="v err" id="dErr">—</span></div>
-  <button id="dForceSync" style="margin-top:8px;width:100%;padding:6px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:inherit">↻ Sincronizar agora</button>
-  <a id="dFirebaseLink" href="#" target="_blank" style="display:block;margin-top:6px;text-align:center;padding:5px;background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:.65rem;text-decoration:none;font-weight:600">🔥 Abrir no Firebase Console</a>
-  <button id="dDiagPaths" style="margin-top:6px;width:100%;padding:5px;background:var(--purple);color:#fff;border:none;border-radius:6px;font-size:.65rem;font-weight:700;cursor:pointer;font-family:inherit">🔍 Diagnosticar caminhos (REST)</button>
-  <div id="dDiagPathsResult" style="margin-top:6px;font-size:.62rem;color:var(--text2);max-height:120px;overflow-y:auto"></div>
-</div>
-
 <!-- MODAL: GERAR LINK -->
 <div id="gerarModal" class="modal-overlay">
   <div class="modal">
@@ -343,19 +321,8 @@ async function verifyLinkExistsViaRest(linkId){
    Se cache=N mas servidor=0 → write não está chegando ao Firebase.
    Se cache=0 mas você criou link → localStorage não está persistindo.
 */
-const DIAG = {uid:'—', cache:'—', server:'—', save:'—', sync:'—', err:'—'};
-function diag(field, value){
-  if(field) DIAG[field] = value;
-  const p=$('diagPanel'); if(!p) return;
-  p.style.display='block';
-  $('dUid').textContent    = DIAG.uid;
-  $('dCache').textContent  = DIAG.cache;
-  $('dServer').textContent = DIAG.server;
-  $('dSave').textContent   = DIAG.save;
-  if($('dSync')) $('dSync').textContent = DIAG.sync;
-  $('dErr').textContent    = DIAG.err;
-  console.log('[DIAG]', JSON.stringify(DIAG));
-}
+// Painel de diagnóstico foi removido — função vira no-op para manter compatibilidade
+function diag(){ /* no-op */ }
 
 function scrollToSection(id){document.getElementById(id).scrollIntoView({behavior:'smooth'})}
 window.scrollToSection=scrollToSection;
@@ -403,7 +370,7 @@ onAuthStateChanged(auth,async user=>{
       msg: 'Você está usando o Fluxo de Atividades em <u>modo de teste</u>. Apenas 1 atividade é permitida e o link expira em 1 hora.'
     });
     AlquiLabAuth.showTestModeIntro('fluxo-link',
-      'Fluxo de Atividades — modo de teste',
+      'Fluxo de Atividades · modo de teste',
       'Você pode criar <b>apenas 1 atividade</b> e gerar 1 link que expira em <b>1 hora</b>. Ao criar uma nova atividade, a anterior será apagada automaticamente. Crie uma conta para acesso ilimitado.'
     );
   }
