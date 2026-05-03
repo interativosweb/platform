@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Experiências PIBID — AlquiLab</title>
 <meta name="description" content="Espaço para alunos PIBID compartilharem experiências, materiais e relatos por eixo temático." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 :root{
@@ -43,67 +46,82 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
 body{
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-weight:400;
     background:var(--bg-page);
     color:var(--text-main);
     -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    text-rendering:optimizeLegibility;
+    font-feature-settings:"cv02","cv03","cv04","cv11";
     line-height:1.5;
     overflow:hidden;
+    letter-spacing:-0.01em;
 }
 
 /* ===== TOP NAV ===== */
 .top{
     display:flex;align-items:center;justify-content:space-between;
-    padding:14px 28px;
+    padding:12px 24px;
     border-bottom:1px solid var(--card-border);
     background:#fff;
-    height:64px;
+    height:60px;
+    gap:16px;
 }
-.brand{display:flex;align-items:center;gap:12px;font-weight:700;font-size:1rem;color:var(--text-main)}
+.top-left{display:flex;align-items:center;gap:14px;min-width:0}
+.brand{display:flex;align-items:center;gap:11px;font-weight:600;font-size:.98rem;color:var(--text-main);letter-spacing:-0.015em}
 .brand-mark{
-    width:34px;height:34px;border-radius:10px;
+    width:32px;height:32px;border-radius:9px;
     background:linear-gradient(135deg,var(--c4),#34d186);
     color:#fff;display:flex;align-items:center;justify-content:center;
-    font-weight:800;font-size:.95rem;
-    box-shadow:0 6px 16px rgba(0,193,110,.35);
+    font-weight:600;font-size:.82rem;letter-spacing:0;
+    box-shadow:0 4px 12px rgba(0,193,110,.25);
 }
-.brand-sub{font-size:.74rem;color:var(--text-muted);font-weight:600;margin-left:4px}
+.brand-sub{font-size:.72rem;color:var(--text-muted);font-weight:400;margin-top:1px;letter-spacing:0}
 .top-actions{display:flex;align-items:center;gap:10px}
 .btn-back{
     text-decoration:none;
-    background:var(--bg-panel);color:var(--text-main);
-    padding:8px 16px;border-radius:50px;
-    font-weight:700;font-size:.84rem;
+    background:transparent;color:var(--text-strong);
+    padding:7px 14px 7px 11px;border-radius:50px;
+    font-weight:500;font-size:.84rem;
     display:inline-flex;align-items:center;gap:6px;
-    transition:background var(--t),transform var(--t-fast);
+    transition:background var(--t),color var(--t),transform var(--t-fast);
+    border:1px solid var(--card-border);
 }
-.btn-back:hover{background:var(--bg-panel-hover);transform:translateY(-1px)}
+.btn-back:hover{background:var(--bg-panel);color:var(--text-main);transform:translateY(-1px)}
 .btn-back svg{width:14px;height:14px}
 .user-chip{
     display:none;align-items:center;gap:10px;
     background:var(--bg-panel);
-    padding:6px 14px 6px 6px;border-radius:50px;
-    font-size:.84rem;font-weight:700;color:var(--text-main);
+    padding:5px 14px 5px 5px;border-radius:50px;
+    font-size:.84rem;font-weight:500;color:var(--text-main);
+    cursor:pointer;border:none;font-family:inherit;
+    transition:background var(--t),transform var(--t-fast);
 }
+.user-chip:hover{background:var(--bg-panel-hover);transform:translateY(-1px)}
 .user-chip .avatar{
-    width:28px;height:28px;border-radius:50%;
+    width:30px;height:30px;border-radius:50%;
     background:linear-gradient(135deg,var(--c1),#3a8cff);
     color:#fff;display:flex;align-items:center;justify-content:center;
-    font-size:.78rem;font-weight:800;
+    font-size:.74rem;font-weight:600;
+    overflow:hidden;background-size:cover;background-position:center;
 }
-.user-chip .role{color:var(--text-muted);font-weight:600;font-size:.74rem;margin-left:4px}
+.user-chip .avatar img{width:100%;height:100%;object-fit:cover}
+.user-chip .name-block{display:flex;flex-direction:column;line-height:1.1;text-align:left}
+.user-chip .name-text{font-weight:600;color:var(--text-main)}
+.user-chip .role{color:var(--text-muted);font-weight:400;font-size:.7rem;margin-top:1px}
 .btn-login{
     background:var(--text-main);color:#fff;
-    border:none;padding:9px 20px;border-radius:50px;
-    font-family:inherit;font-weight:700;font-size:.84rem;cursor:pointer;
+    border:none;padding:8px 18px;border-radius:50px;
+    font-family:inherit;font-weight:500;font-size:.84rem;cursor:pointer;
     transition:transform var(--t-fast),background var(--t);
 }
 .btn-login:hover{transform:translateY(-1px);background:#2a3260}
 .btn-admin{
     text-decoration:none;
     background:#fff7e0;color:#9a6900;border:1px solid #ffe7a3;
-    padding:8px 16px;border-radius:50px;
-    font-weight:700;font-size:.82rem;
+    padding:7px 14px;border-radius:50px;
+    font-weight:500;font-size:.82rem;
     display:none;align-items:center;gap:6px;
     transition:background var(--t);
 }
@@ -121,58 +139,59 @@ body{
 
 /* ----- COLUNA 1: EIXOS TEMÁTICOS ----- */
 .col-eixos{
-    background:#fafafa;
+    background:#fcfcfc;
     border-right:1px solid var(--card-border);
     display:flex;flex-direction:column;
     overflow:hidden;
 }
 .col-head{
-    padding:18px 20px 10px;
+    padding:20px 22px 8px;
     display:flex;align-items:center;justify-content:space-between;
 }
 .col-head h3{
-    font-size:.72rem;font-weight:800;color:var(--text-muted);
-    text-transform:uppercase;letter-spacing:1.2px;
+    font-size:.7rem;font-weight:500;color:var(--text-muted);
+    text-transform:uppercase;letter-spacing:1.4px;
 }
 .col-head .count{
-    font-size:.72rem;color:var(--text-muted);font-weight:700;
-    background:var(--bg-panel);padding:3px 10px;border-radius:50px;
+    font-size:.7rem;color:var(--text-muted);font-weight:500;
+    background:transparent;padding:3px 0;
 }
 .eixos-list{
     flex:1;overflow-y:auto;
-    padding:6px 12px 18px;
-    display:flex;flex-direction:column;gap:4px;
+    padding:4px 10px 18px;
+    display:flex;flex-direction:column;gap:1px;
 }
-.eixos-list::-webkit-scrollbar{width:8px}
-.eixos-list::-webkit-scrollbar-thumb{background:#d8dde8;border-radius:8px}
+.eixos-list::-webkit-scrollbar{width:6px}
+.eixos-list::-webkit-scrollbar-thumb{background:#e3e7ee;border-radius:6px}
 
 .eixo{
-    display:flex;align-items:center;gap:12px;
-    padding:11px 14px;
-    border-radius:14px;
+    display:flex;align-items:center;gap:11px;
+    padding:9px 12px;
+    border-radius:10px;
     cursor:pointer;
-    transition:background var(--t),transform var(--t-fast);
+    transition:background var(--t-fast),color var(--t-fast);
     border:none;background:transparent;
     text-align:left;width:100%;
-    font-family:inherit;
+    font-family:inherit;color:var(--text-strong);
 }
-.eixo:hover{background:var(--bg-panel)}
-.eixo.active{background:var(--text-main);color:#fff}
-.eixo.active .eixo-dot{background:#fff !important}
-.eixo.active .eixo-meta{color:rgba(255,255,255,.7)}
+.eixo:hover{background:rgba(0,0,0,.035)}
+.eixo.active{background:rgba(0,0,0,.06);color:var(--text-main)}
+.eixo.active .eixo-name{font-weight:500}
 .eixo-dot{
-    width:10px;height:10px;border-radius:50%;
-    flex-shrink:0;
+    width:8px;height:8px;border-radius:50%;
+    flex-shrink:0;opacity:.85;
 }
-.eixo-info{flex:1;min-width:0}
+.eixo-info{flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .eixo-name{
-    font-size:.9rem;font-weight:700;
+    font-size:.875rem;font-weight:400;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    letter-spacing:-0.005em;
 }
 .eixo-meta{
-    font-size:.72rem;color:var(--text-muted);font-weight:600;
-    margin-top:1px;
+    font-size:.7rem;color:var(--text-muted);font-weight:400;
+    flex-shrink:0;
 }
+.eixo.active .eixo-meta{color:var(--text-strong)}
 
 /* ----- COLUNA 2: PUBLICAÇÕES ----- */
 .col-pubs{
@@ -181,22 +200,22 @@ body{
     background:#fff;
 }
 .pubs-head{
-    padding:20px 32px 14px;
+    padding:22px 32px 16px;
     border-bottom:1px solid var(--card-border);
     display:flex;align-items:center;justify-content:space-between;
     gap:14px;
 }
 .pubs-title h2{
-    font-size:1.4rem;font-weight:800;letter-spacing:-.5px;
+    font-size:1.35rem;font-weight:600;letter-spacing:-.4px;
     color:var(--text-main);
 }
 .pubs-title p{
-    font-size:.85rem;color:var(--text-muted);font-weight:500;margin-top:2px;
+    font-size:.84rem;color:var(--text-muted);font-weight:400;margin-top:3px;
 }
 .btn-new{
     background:var(--text-main);color:#fff;
-    border:none;padding:11px 20px;border-radius:50px;
-    font-family:inherit;font-weight:700;font-size:.86rem;cursor:pointer;
+    border:none;padding:10px 18px;border-radius:50px;
+    font-family:inherit;font-weight:500;font-size:.86rem;cursor:pointer;
     display:inline-flex;align-items:center;gap:8px;
     transition:transform var(--t-fast),background var(--t),box-shadow var(--t);
     flex-shrink:0;
@@ -234,13 +253,17 @@ body{
     width:42px;height:42px;border-radius:50%;
     background:linear-gradient(135deg,var(--c1),#3a8cff);
     color:#fff;display:flex;align-items:center;justify-content:center;
-    font-weight:800;font-size:.95rem;flex-shrink:0;
+    font-weight:600;font-size:.92rem;flex-shrink:0;
+    overflow:hidden;background-size:cover;background-position:center;
+    cursor:pointer;
 }
+.post-avatar img{width:100%;height:100%;object-fit:cover}
 .post-meta{flex:1;min-width:0}
-.post-author{font-size:.92rem;font-weight:700;color:var(--text-main)}
-.post-when{font-size:.76rem;color:var(--text-muted);font-weight:500;margin-top:1px}
+.post-author{font-size:.9rem;font-weight:600;color:var(--text-main);cursor:pointer}
+.post-author:hover{text-decoration:underline}
+.post-when{font-size:.74rem;color:var(--text-muted);font-weight:400;margin-top:1px}
 .post-eixo{
-    font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+    font-size:.68rem;font-weight:500;text-transform:uppercase;letter-spacing:.6px;
     padding:3px 10px;border-radius:50px;
 }
 .post-menu-btn{
@@ -330,14 +353,18 @@ body{
     width:32px;height:32px;border-radius:50%;
     background:linear-gradient(135deg,var(--c5),#bf6bff);
     color:#fff;display:flex;align-items:center;justify-content:center;
-    font-weight:800;font-size:.78rem;flex-shrink:0;
+    font-weight:600;font-size:.74rem;flex-shrink:0;
+    overflow:hidden;background-size:cover;background-position:center;
+    cursor:pointer;
 }
+.comment-avatar img{width:100%;height:100%;object-fit:cover}
 .comment-bubble{
     flex:1;background:var(--bg-panel);
     padding:9px 13px;border-radius:14px;
     font-size:.86rem;color:var(--text-main);
 }
-.comment-author{font-weight:700;font-size:.78rem;color:var(--text-strong);margin-bottom:1px}
+.comment-author{font-weight:600;font-size:.78rem;color:var(--text-strong);margin-bottom:1px;cursor:pointer}
+.comment-author:hover{text-decoration:underline}
 .comment-form{
     display:flex;gap:8px;align-items:center;margin-top:10px;
 }
@@ -367,11 +394,11 @@ body{
     overflow:hidden;
 }
 .feed-head{
-    padding:18px 20px 12px;
+    padding:20px 22px 10px;
 }
 .feed-head h3{
-    font-size:.95rem;font-weight:800;color:var(--text-main);
-    display:flex;align-items:center;gap:8px;
+    font-size:.92rem;font-weight:600;color:var(--text-main);
+    display:flex;align-items:center;gap:8px;letter-spacing:-0.01em;
 }
 .live-dot{
     width:8px;height:8px;border-radius:50%;background:var(--c4);
@@ -384,13 +411,13 @@ body{
     100%{box-shadow:0 0 0 0 rgba(0,193,110,0)}
 }
 .feed-head p{
-    font-size:.78rem;color:var(--text-muted);font-weight:500;margin-top:4px;
+    font-size:.78rem;color:var(--text-muted);font-weight:400;margin-top:4px;
 }
 .btn-feed-new{
-    width:calc(100% - 40px);margin:6px 20px 14px;
+    width:calc(100% - 44px);margin:6px 22px 14px;
     background:var(--c4);color:#fff;
-    border:none;padding:11px 18px;border-radius:50px;
-    font-family:inherit;font-weight:700;font-size:.86rem;cursor:pointer;
+    border:none;padding:10px 18px;border-radius:50px;
+    font-family:inherit;font-weight:500;font-size:.86rem;cursor:pointer;
     display:inline-flex;align-items:center;justify-content:center;gap:8px;
     box-shadow:0 6px 18px rgba(0,193,110,.32);
     transition:transform var(--t-fast),box-shadow var(--t),background var(--t);
@@ -419,12 +446,16 @@ body{
     width:32px;height:32px;border-radius:50%;
     background:linear-gradient(135deg,var(--c4),#34d186);
     color:#fff;display:flex;align-items:center;justify-content:center;
-    font-weight:800;font-size:.78rem;
+    font-weight:600;font-size:.74rem;
+    overflow:hidden;background-size:cover;background-position:center;
+    cursor:pointer;
 }
+.feed-card-head .avatar img{width:100%;height:100%;object-fit:cover}
 .feed-card-head .who{flex:1;min-width:0}
-.feed-card-head .name{font-size:.84rem;font-weight:700;color:var(--text-main)}
+.feed-card-head .name{font-size:.84rem;font-weight:600;color:var(--text-main);cursor:pointer}
+.feed-card-head .name:hover{text-decoration:underline}
 .feed-card-head .ttl{
-    font-size:.7rem;color:var(--c4);font-weight:700;
+    font-size:.68rem;color:var(--c4);font-weight:500;
     background:var(--c4-soft);padding:2px 8px;border-radius:50px;
 }
 .feed-card .body{
@@ -731,30 +762,32 @@ body{
 <body>
 
 <header class="top">
-    <div class="brand">
-        <div class="brand-mark">PB</div>
-        <div>
-            Experiências PIBID
-            <div class="brand-sub">AlquiLab · rede de compartilhamento</div>
+    <div class="top-left">
+        <a href="../index.html" class="btn-back" title="Voltar para a plataforma">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            Voltar
+        </a>
+        <div class="brand">
+            <div class="brand-mark">PB</div>
+            <div>
+                Experiências PIBID
+                <div class="brand-sub">AlquiLab · rede de compartilhamento</div>
+            </div>
         </div>
     </div>
     <div class="top-actions">
-        <a href="../index.html" class="btn-back">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-            Voltar
-        </a>
         <a href="admin.html" id="btnAdmin" class="btn-admin">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             Admin
         </a>
         <button id="btnLogin" class="btn-login">Entrar</button>
-        <div id="userChip" class="user-chip">
+        <button id="userChip" class="user-chip" title="Editar perfil">
             <div class="avatar" id="userAvatar">U</div>
-            <div>
-                <div id="userName">Usuário</div>
-                <div class="role" id="userRole">Aluno</div>
+            <div class="name-block">
+                <span class="name-text" id="userName">Usuário</span>
+                <span class="role" id="userRole">Aluno</span>
             </div>
-        </div>
+        </button>
     </div>
 </header>
 
@@ -926,6 +959,68 @@ body{
     </div>
 </div>
 
+<!-- ===== MODAL: PERFIL (próprio usuário) ===== -->
+<div class="modal" id="profileModal">
+    <div class="modal-box compact">
+        <div class="modal-head">
+            <div>
+                <h3>Meu perfil</h3>
+                <p>Personalize como aparece para os outros usuários.</p>
+            </div>
+            <button class="modal-close" data-close="profileModal" aria-label="Fechar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px">
+                <div id="profileAvatarPreview" style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--c1),#3a8cff);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:1.4rem;overflow:hidden;background-size:cover;background-position:center;flex-shrink:0">U</div>
+                <div style="flex:1">
+                    <button class="btn-secondary" id="btnPickPhoto" style="font-size:.84rem">Trocar foto</button>
+                    <button class="btn-secondary" id="btnRemovePhoto" style="font-size:.84rem;margin-left:6px;display:none">Remover</button>
+                    <p style="font-size:.72rem;color:var(--text-muted);font-weight:400;margin-top:8px">JPG ou PNG, máx 800KB.</p>
+                </div>
+            </div>
+            <input type="file" id="filePhoto" accept="image/*" hidden />
+            <label style="font-size:.84rem;font-weight:500;color:var(--text-main);display:block;margin-bottom:6px">Nome de exibição</label>
+            <input type="text" id="profileName" maxlength="60" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--bg-panel);background:var(--bg-panel);font-family:inherit;font-size:.92rem;color:var(--text-main);outline:none;margin-bottom:14px;font-weight:400" />
+            <label style="font-size:.84rem;font-weight:500;color:var(--text-main);display:block;margin-bottom:6px">Descrição (opcional)</label>
+            <textarea id="profileDesc" placeholder="Conte um pouco sobre você..." maxlength="280" style="width:100%;min-height:80px;padding:12px 14px;border-radius:12px;border:1px solid var(--bg-panel);background:var(--bg-panel);font-family:inherit;font-size:.92rem;color:var(--text-main);outline:none;resize:vertical;font-weight:400"></textarea>
+        </div>
+        <div class="modal-foot">
+            <div></div>
+            <div class="right">
+                <button class="btn-secondary" data-close="profileModal">Cancelar</button>
+                <button class="btn-primary" id="btnSaveProfile">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL: VER PERFIL DE OUTRO USUÁRIO ===== -->
+<div class="modal" id="viewProfileModal">
+    <div class="modal-box compact">
+        <div class="modal-head">
+            <div>
+                <h3>Perfil</h3>
+                <p id="vpRole"></p>
+            </div>
+            <button class="modal-close" data-close="viewProfileModal" aria-label="Fechar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px">
+                <div id="vpAvatar" style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--c1),#3a8cff);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:1.4rem;overflow:hidden;background-size:cover;background-position:center;flex-shrink:0">U</div>
+                <div>
+                    <div id="vpName" style="font-size:1.05rem;font-weight:600;color:var(--text-main)"></div>
+                    <div id="vpEmail" style="font-size:.78rem;color:var(--text-muted);font-weight:400;margin-top:2px"></div>
+                </div>
+            </div>
+            <div id="vpDesc" style="font-size:.92rem;color:var(--text-strong);line-height:1.5;background:var(--bg-panel);padding:12px 14px;border-radius:12px;font-weight:400"></div>
+        </div>
+    </div>
+</div>
+
 <!-- ===== LIGHTBOX ===== -->
 <div class="lightbox" id="lightbox">
     <button class="close" id="lightboxClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -943,6 +1038,21 @@ body{
         <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
             <a class="btn-primary" href="../login.html?next=%2Fpibid%2Findex.html">Criar conta / Entrar</a>
             <button class="btn-secondary" id="gateClose">Continuar olhando</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== GATE: ACESSO RESTRITO (não admin) ===== -->
+<div class="gate" id="accessGate">
+    <div class="gate-box">
+        <div class="gate-icon" style="background:#9a6900;box-shadow:0 12px 28px rgba(154,105,0,.45)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <h3>Acesso restrito</h3>
+        <p style="color:var(--text-muted);font-size:.92rem;margin-bottom:18px;line-height:1.5">As <b>Experiências PIBID</b> estão em fase fechada — apenas administradores podem acessar por enquanto. Em breve abriremos para todos.</p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+            <a class="btn-primary" href="../index.html">Voltar à plataforma</a>
+            <a class="btn-secondary" id="accessGateLogin" href="../login.html?next=%2Fpibid%2Findex.html">Entrar com outra conta</a>
         </div>
     </div>
 </div>
@@ -971,6 +1081,13 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 const ADM_EMAIL = 'gilbertofernandessc@gmail.com';
+const ADM_ROLES = ['super_admin', 'admin_geral', 'moderador', 'editor'];
+const ROLE_LABELS = {
+    super_admin: 'Super Admin',
+    admin_geral: 'Admin geral',
+    moderador:   'Moderador',
+    editor:      'Editor'
+};
 
 /* ===== LIMITES E EIXOS PADRÃO ===== */
 const LIMITS = {
@@ -1013,6 +1130,9 @@ const EMOJI_CATS = {
 let currentUser = null;
 let currentUserName = '';
 let currentUserRole = 'aluno';
+let currentUserPapel = null;
+let currentUserFoto = '';
+let currentUserDesc = '';
 let isGuest = true;
 let isAdmin = false;
 let eixos = EIXOS_PADRAO.slice();
@@ -1023,6 +1143,9 @@ let pendingFile = null;
 let composerMode = 'pub'; // 'pub' ou 'feed'
 let reportTarget = null;
 let pendingPostData = null; // dados aguardando "enviar mesmo assim"
+let pendingProfilePhoto = null; // base64 da nova foto (antes de salvar)
+let removePhotoOnSave = false;
+const profileCache = new Map(); // uid -> { nome, foto, descricao, papel, email }
 
 /* ===== HELPERS ===== */
 const $ = (id) => document.getElementById(id);
@@ -1167,39 +1290,56 @@ function fileToDataUrl(file) {
 /* ===== AUTH ===== */
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
-        try { await signInAnonymously(auth); } catch(e){}
+        // Acesso fechado -> envia direto pro login (sem virar anônimo)
+        window.location.href = '../login.html?next=' + encodeURIComponent('/pibid/index.html');
         return;
     }
-    currentUser = user;
-    isGuest = !!user.isAnonymous;
-    isAdmin = !isGuest && user.email === ADM_EMAIL;
-
-    if (isGuest) {
-        $('btnLogin').style.display = 'inline-block';
-        $('userChip').style.display = 'none';
-        $('btnAdmin').classList.remove('show');
-        currentUserName = 'Visitante';
-        currentUserRole = 'visitante';
-    } else {
-        $('btnLogin').style.display = 'none';
-        $('userChip').style.display = 'flex';
-        let nome = user.displayName || (user.email ? user.email.split('@')[0] : 'Usuário');
-        let tipo = 'aluno';
-        try {
-            const snap = await get(ref(db, 'usuarios/' + user.uid));
-            if (snap.exists()) {
-                const p = snap.val();
-                if (p.nome) nome = p.nome;
-                if (p.tipo) tipo = p.tipo;
-            }
-        } catch(e){}
-        currentUserName = nome;
-        currentUserRole = tipo;
-        $('userName').textContent = nome;
-        $('userRole').textContent = tipo === 'aluno' ? 'Aluno' : (tipo === 'professor' ? 'Professor(a)' : tipo);
-        $('userAvatar').textContent = initials(nome);
-        if (isAdmin) $('btnAdmin').classList.add('show');
+    if (user.isAnonymous) {
+        $('accessGate').classList.add('show');
+        return;
     }
+
+    // Resolve papel do usuário
+    let papel = (user.email === ADM_EMAIL) ? 'super_admin' : null;
+    let perfil = {};
+    try {
+        const snap = await get(ref(db, 'usuarios/' + user.uid));
+        if (snap.exists()) {
+            perfil = snap.val();
+            if (!papel && perfil.papel && ADM_ROLES.includes(perfil.papel)) papel = perfil.papel;
+        }
+    } catch(e){}
+
+    if (!papel) {
+        // Não autorizado: gate
+        $('accessGate').classList.add('show');
+        return;
+    }
+
+    currentUser = user;
+    isGuest = false;
+    isAdmin = (papel === 'super_admin' || papel === 'admin_geral' || papel === 'moderador');
+    currentUserPapel = papel;
+
+    let nome = perfil.nome || user.displayName || (user.email ? user.email.split('@')[0] : 'Usuário');
+    let tipo = perfil.tipo || 'aluno';
+    currentUserName = nome;
+    currentUserRole = tipo;
+    currentUserFoto = perfil.foto || '';
+    currentUserDesc = perfil.descricao || '';
+
+    $('btnLogin').style.display = 'none';
+    $('userChip').style.display = 'flex';
+    $('userName').textContent = nome;
+    $('userRole').textContent = ROLE_LABELS[papel] || (tipo === 'aluno' ? 'Aluno' : (tipo === 'professor' ? 'Professor(a)' : tipo));
+    paintAvatarEl($('userAvatar'), nome, currentUserFoto);
+    if (isAdmin) $('btnAdmin').classList.add('show');
+
+    // cache local do próprio perfil
+    profileCache.set(user.uid, {
+        nome, foto: currentUserFoto, descricao: currentUserDesc, papel,
+        email: user.email || ''
+    });
 
     initEixos();
 });
@@ -1207,6 +1347,58 @@ onAuthStateChanged(auth, async (user) => {
 $('btnLogin').addEventListener('click', () => {
     window.location.href = '../login.html?next=' + encodeURIComponent('/pibid/index.html');
 });
+
+/* ===== AVATAR HELPERS ===== */
+function paintAvatarEl(el, nome, foto) {
+    if (!el) return;
+    if (foto) {
+        el.style.backgroundImage = `url('${foto.replace(/'/g,"\\'")}')`;
+        el.textContent = '';
+    } else {
+        el.style.backgroundImage = '';
+        el.textContent = initials(nome);
+    }
+}
+function avatarHTML(nome, foto, extraClass='') {
+    if (foto) {
+        return `<img src="${escapeHtml(foto)}" alt="" />`;
+    }
+    return escapeHtml(initials(nome));
+}
+
+async function loadUserProfile(uid) {
+    if (!uid) return null;
+    if (profileCache.has(uid)) return profileCache.get(uid);
+    try {
+        const snap = await get(ref(db, 'usuarios/' + uid));
+        if (snap.exists()) {
+            const v = snap.val();
+            const p = {
+                nome: v.nome || 'Usuário',
+                foto: v.foto || '',
+                descricao: v.descricao || '',
+                papel: v.papel || null,
+                email: v.email || ''
+            };
+            profileCache.set(uid, p);
+            return p;
+        }
+    } catch(e){}
+    profileCache.set(uid, null);
+    return null;
+}
+
+/* Atualiza retroativamente os avatares já renderizados quando carrega o perfil */
+function refreshAvatarsForUid(uid) {
+    const p = profileCache.get(uid);
+    if (!p) return;
+    document.querySelectorAll(`[data-avatar-uid="${uid}"]`).forEach(el => {
+        paintAvatarEl(el, p.nome, p.foto);
+    });
+    document.querySelectorAll(`[data-name-uid="${uid}"]`).forEach(el => {
+        if (p.nome && el.textContent !== p.nome) el.textContent = p.nome;
+    });
+}
 
 /* ===== EIXOS ===== */
 async function initEixos() {
@@ -1306,9 +1498,9 @@ function buildPostCard(p) {
 
     card.innerHTML = `
         <div class="post-head">
-            <div class="post-avatar">${initials(p.autorNome)}</div>
+            <div class="post-avatar" data-avatar-uid="${escapeHtml(p.autorUid||'')}" data-act="profile">${avatarHTML(p.autorNome, '')}</div>
             <div class="post-meta">
-                <div class="post-author">${escapeHtml(p.autorNome || 'Usuário')}</div>
+                <div class="post-author" data-act="profile" data-name-uid="${escapeHtml(p.autorUid||'')}">${escapeHtml(p.autorNome || 'Usuário')}</div>
                 <div class="post-when">${fmtTime(p.ts)} · ${escapeHtml(p.autorRole === 'professor' ? 'Professor(a)' : 'Aluno')}</div>
             </div>
             <span class="post-eixo" style="background:${eixo.cor}22;color:${eixo.cor}">${escapeHtml(eixo.nome || '')}</span>
@@ -1343,6 +1535,7 @@ function buildPostCard(p) {
             if (act === 'comment') toggleComments(card, p);
             if (act === 'report')  openReport({ kind:'pub', id:p.id, eixo:activeEixoId, autorUid:p.autorUid, autorNome:p.autorNome, snippet: stripHtml(p.html||'').slice(0,160) });
             if (act === 'menu')    openPostMenu(btn, p);
+            if (act === 'profile') openViewProfile(p.autorUid, p.autorNome);
         });
     });
 
@@ -1350,6 +1543,11 @@ function buildPostCard(p) {
     card.querySelectorAll('.post-attachments img').forEach(img => {
         img.addEventListener('click', () => openLightbox(img.src));
     });
+
+    // carrega perfil em background pra atualizar avatar/nome
+    if (p.autorUid) {
+        loadUserProfile(p.autorUid).then(() => refreshAvatarsForUid(p.autorUid));
+    }
 
     return card;
 }
@@ -1408,9 +1606,9 @@ function renderComments(box, p) {
     arr.forEach(c => {
         html += `
             <div class="comment">
-                <div class="comment-avatar">${initials(c.autorNome)}</div>
+                <div class="comment-avatar" data-avatar-uid="${escapeHtml(c.autorUid||'')}" data-cprofile="${escapeHtml(c.autorUid||'')}">${avatarHTML(c.autorNome,'')}</div>
                 <div class="comment-bubble">
-                    <div class="comment-author">${escapeHtml(c.autorNome||'Usuário')} · <span style="color:var(--text-muted);font-weight:600">${fmtTime(c.ts)}</span></div>
+                    <div class="comment-author" data-name-uid="${escapeHtml(c.autorUid||'')}" data-cprofile="${escapeHtml(c.autorUid||'')}">${escapeHtml(c.autorNome||'Usuário')} · <span style="color:var(--text-muted);font-weight:400">${fmtTime(c.ts)}</span></div>
                     <div>${escapeHtml(c.texto||'')}</div>
                 </div>
             </div>
@@ -1423,6 +1621,15 @@ function renderComments(box, p) {
         </form>
     `;
     box.innerHTML = html;
+
+    // perfil clicável + carrega assíncrono
+    box.querySelectorAll('[data-cprofile]').forEach(el => {
+        const uid = el.dataset.cprofile;
+        if (!uid) return;
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', () => openViewProfile(uid, el.textContent));
+        loadUserProfile(uid).then(() => refreshAvatarsForUid(uid));
+    });
 
     box.querySelector('form').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -1543,9 +1750,9 @@ function renderFeed(list) {
         }
         card.innerHTML = `
             <div class="feed-card-head">
-                <div class="avatar">${initials(p.autorNome)}</div>
+                <div class="avatar" data-avatar-uid="${escapeHtml(p.autorUid||'')}" data-fprofile="${escapeHtml(p.autorUid||'')}">${avatarHTML(p.autorNome,'')}</div>
                 <div class="who">
-                    <div class="name">${escapeHtml(p.autorNome||'Usuário')}</div>
+                    <div class="name" data-name-uid="${escapeHtml(p.autorUid||'')}" data-fprofile="${escapeHtml(p.autorUid||'')}">${escapeHtml(p.autorNome||'Usuário')}</div>
                 </div>
                 <span class="ttl" data-expires="${p.expiresAt||0}">${fmtRemaining(p.expiresAt||0)}</span>
             </div>
@@ -1573,7 +1780,18 @@ function renderFeed(list) {
                 if (act === 'report') openReport({ kind:'feed', id:p.id, autorUid:p.autorUid, autorNome:p.autorNome, snippet: stripHtml(p.html||'').slice(0,160) });
             });
         });
-        card.querySelectorAll('img').forEach(img => img.addEventListener('click', () => openLightbox(img.src)));
+        card.querySelectorAll('.body img, video + .acts ~ img').forEach(img => img.addEventListener('click', () => openLightbox(img.src)));
+        // imagens de mídia (não de avatar) abrem lightbox
+        const mainImg = card.querySelector(':scope > img');
+        if (mainImg) mainImg.addEventListener('click', () => openLightbox(mainImg.src));
+        // perfil clicável + lazy load
+        card.querySelectorAll('[data-fprofile]').forEach(el => {
+            const uid = el.dataset.fprofile;
+            if (!uid) return;
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', () => openViewProfile(uid, el.textContent));
+            loadUserProfile(uid).then(() => refreshAvatarsForUid(uid));
+        });
         wrap.appendChild(card);
     });
 }
@@ -1884,6 +2102,106 @@ function requireAccount(motivo) {
     return false;
 }
 $('gateClose').addEventListener('click', () => $('loginGate').classList.remove('show'));
+
+/* ===== PERFIL DO USUÁRIO LOGADO ===== */
+$('userChip').addEventListener('click', () => openProfileModal());
+
+function openProfileModal() {
+    if (!currentUser || isGuest) return;
+    pendingProfilePhoto = null;
+    removePhotoOnSave = false;
+    $('profileName').value = currentUserName || '';
+    $('profileDesc').value = currentUserDesc || '';
+    paintAvatarEl($('profileAvatarPreview'), currentUserName, currentUserFoto);
+    $('btnRemovePhoto').style.display = currentUserFoto ? 'inline-block' : 'none';
+    $('profileModal').classList.add('show');
+}
+
+$('btnPickPhoto').addEventListener('click', () => $('filePhoto').click());
+$('btnRemovePhoto').addEventListener('click', () => {
+    pendingProfilePhoto = '';
+    removePhotoOnSave = true;
+    paintAvatarEl($('profileAvatarPreview'), $('profileName').value || currentUserName, '');
+    $('btnRemovePhoto').style.display = 'none';
+});
+
+$('filePhoto').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    if (file.size > 800 * 1024) {
+        toast('Foto muito grande. Máximo: 800KB.', 'error');
+        return;
+    }
+    if (!file.type.startsWith('image/')) {
+        toast('Selecione um arquivo de imagem.', 'error');
+        return;
+    }
+    toast('Verificando imagem...', '');
+    const check = await checkImageNsfw(file);
+    if (!check.safe) {
+        toast('Imagem rejeitada: conteúdo impróprio.', 'error');
+        return;
+    }
+    try {
+        const data = await fileToDataUrl(file);
+        pendingProfilePhoto = data;
+        removePhotoOnSave = false;
+        paintAvatarEl($('profileAvatarPreview'), $('profileName').value || currentUserName, data);
+        $('btnRemovePhoto').style.display = 'inline-block';
+    } catch(err) {
+        toast('Erro ao ler a imagem.', 'error');
+    }
+});
+
+$('btnSaveProfile').addEventListener('click', async () => {
+    const nome = $('profileName').value.trim().slice(0, 60) || currentUserName;
+    const desc = $('profileDesc').value.trim().slice(0, 280);
+    const updates = { nome, descricao: desc };
+    if (pendingProfilePhoto !== null) updates.foto = pendingProfilePhoto;
+    if (removePhotoOnSave) updates.foto = '';
+    try {
+        await update(ref(db, 'usuarios/' + currentUser.uid), updates);
+        currentUserName = nome;
+        currentUserDesc = desc;
+        if (pendingProfilePhoto !== null) currentUserFoto = pendingProfilePhoto;
+        if (removePhotoOnSave) currentUserFoto = '';
+        $('userName').textContent = nome;
+        paintAvatarEl($('userAvatar'), nome, currentUserFoto);
+        // atualiza cache local e re-pinta avatares já visíveis
+        profileCache.set(currentUser.uid, {
+            nome, foto: currentUserFoto, descricao: currentUserDesc,
+            papel: currentUserPapel, email: currentUser.email || ''
+        });
+        refreshAvatarsForUid(currentUser.uid);
+        $('profileModal').classList.remove('show');
+        toast('Perfil atualizado.', 'success');
+    } catch(e) {
+        console.error(e);
+        toast('Erro ao salvar o perfil.', 'error');
+    }
+});
+
+/* ===== VER PERFIL DE OUTRO USUÁRIO ===== */
+async function openViewProfile(uid, fallbackName) {
+    if (!uid) return;
+    $('vpName').textContent = fallbackName || 'Usuário';
+    $('vpEmail').textContent = '';
+    $('vpRole').textContent = '';
+    $('vpDesc').textContent = 'Carregando...';
+    paintAvatarEl($('vpAvatar'), fallbackName || '?', '');
+    $('viewProfileModal').classList.add('show');
+    const p = await loadUserProfile(uid);
+    if (!p) {
+        $('vpDesc').textContent = 'Perfil não encontrado.';
+        return;
+    }
+    $('vpName').textContent = p.nome || fallbackName || 'Usuário';
+    $('vpEmail').textContent = p.email || '';
+    $('vpRole').textContent = p.papel ? ROLE_LABELS[p.papel] : '';
+    $('vpDesc').textContent = p.descricao || 'Este usuário ainda não escreveu uma descrição.';
+    paintAvatarEl($('vpAvatar'), p.nome || fallbackName, p.foto || '');
+}
 
 /* ===== LIGHTBOX ===== */
 function openLightbox(src) {
