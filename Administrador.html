@@ -317,6 +317,80 @@
             grid-template-columns: 2fr 2.5fr 1.2fr 1.5fr;
         }
 
+        .admins-header {
+            grid-template-columns: 2fr 2.5fr 1.5fr 1.6fr;
+        }
+        .admins-row {
+            grid-template-columns: 2fr 2.5fr 1.5fr 1.6fr;
+        }
+
+        /* ===== ROLES INFO ===== */
+        .roles-info { margin-bottom: 4px; }
+        .roles-info h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 14px;
+            letter-spacing: -0.2px;
+        }
+        .role-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+        }
+        .role-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-light);
+            border-left: 3px solid var(--c1);
+            border-radius: 14px;
+            padding: 14px 16px;
+            box-shadow: var(--shadow);
+        }
+        .role-card.role-super { border-left-color: #6B00FF; }
+        .role-card.role-admin { border-left-color: #0067FF; }
+        .role-card.role-mod   { border-left-color: #FFB800; }
+        .role-card.role-edit  { border-left-color: #00C16E; }
+        .role-head {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 8px; flex-wrap: wrap;
+        }
+        .role-pill {
+            font-size: 0.74rem; font-weight: 700;
+            padding: 3px 10px; border-radius: 50px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .role-pill.super { background: #f1d9ff; color: #6B00FF; }
+        .role-pill.admin { background: #e0eeff; color: #0067FF; }
+        .role-pill.mod   { background: #fff1cc; color: #9a6900; }
+        .role-pill.edit  { background: #d6f5e5; color: #00C16E; }
+        .role-pill.none  { background: #f2f2f2; color: #8b91a8; }
+        .role-locked {
+            font-size: 0.7rem; font-weight: 700;
+            color: var(--text-light);
+            background: var(--bg-secondary);
+            padding: 2px 9px; border-radius: 50px;
+            margin-left: auto;
+        }
+        .role-card p {
+            font-size: 0.84rem; color: #4a5169; line-height: 1.45;
+        }
+        .role-meta {
+            margin-top: 8px; font-size: 0.78rem;
+            color: var(--text-light); font-weight: 500;
+        }
+        .role-meta b { color: var(--text-main); font-weight: 700; }
+
+        .role-select {
+            padding: 7px 14px; border-radius: 50px;
+            border: 1px solid var(--border-light);
+            background: #fff; font-family: inherit;
+            font-size: 0.82rem; font-weight: 600; color: var(--text-main);
+            cursor: pointer; outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .role-select:focus { border-color: var(--c1); box-shadow: 0 0 0 3px rgba(0,103,255,.15); }
+        .role-select:disabled { opacity: 0.55; cursor: not-allowed; }
+
         .table-body {
             list-style: none;
         }
@@ -1093,6 +1167,7 @@
             <button class="tab-btn" onclick="switchTab('logins')">Histórico de Logins</button>
             <button class="tab-btn" onclick="switchTab('ativos')">Usuários Ativos</button>
             <button class="tab-btn" onclick="switchTab('ferramentas')">Ferramentas Usadas</button>
+            <button class="tab-btn" id="tabBtnAdmins" onclick="switchTab('admins')" style="display:none">Administradores</button>
         </div>
 
         <!-- TAB: USERS -->
@@ -1209,6 +1284,56 @@
                 </ul>
             </div>
         </div>
+
+        <!-- TAB: ADMINISTRADORES -->
+        <div class="tab-panel" id="tab-admins">
+            <div class="roles-info">
+                <h3>Tipos de administrador</h3>
+                <div class="role-cards">
+                    <div class="role-card role-super">
+                        <div class="role-head">
+                            <span class="role-pill super">Super Admin</span>
+                            <span class="role-locked">Fixo</span>
+                        </div>
+                        <p>Poder total: gerencia todos os usuários (inclusive outros admins), define permissões, acessa tudo e configurações críticas (pagamentos, sistema, segurança).</p>
+                        <div class="role-meta"><b>Apenas 1:</b> gilbertofernandessc@gmail.com</div>
+                    </div>
+                    <div class="role-card role-admin">
+                        <div class="role-head"><span class="role-pill admin">Admin geral</span></div>
+                        <p>Gerencia conteúdo da plataforma, vê relatórios, modera usuários. Não pode excluir o Super Admin nem mexer em pagamentos/segurança.</p>
+                    </div>
+                    <div class="role-card role-mod">
+                        <div class="role-head"><span class="role-pill mod">Moderador</span></div>
+                        <p>Cuida da comunidade: remove conteúdo impróprio, banir/suspender usuários. Não acessa configurações do sistema.</p>
+                    </div>
+                    <div class="role-card role-edit">
+                        <div class="role-head"><span class="role-pill edit">Editor</span></div>
+                        <p>Cria e edita conteúdo, publica ou agenda posts/produtos. Não gerencia usuários.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-search" style="margin-top:24px">
+                <div class="table-search-wrapper">
+                    <span class="table-search-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </span>
+                    <input type="text" class="table-search-input" id="searchAdmins" placeholder="Buscar usuário por nome ou email..." />
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-header-row admins-header">
+                    <div>Usuário</div>
+                    <div>Email</div>
+                    <div>Papel atribuído</div>
+                    <div>Ação</div>
+                </div>
+                <ul class="table-body" id="adminsList">
+                    <li class="empty-row">Carregando...</li>
+                </ul>
+            </div>
+        </div>
     </div>
 
     <footer class="main-footer">E Agora Prof? © 2026 Plataforma Educacional de Matemática · Desenvolvida por Gilberto
@@ -1271,12 +1396,7 @@
 
         // ===== ADMIN CREDENTIALS =====
         const ADM_EMAIL = 'gilbertofernandessc@gmail.com';
-
-        // ===== AUTH GUARD (admin session check via localStorage) =====
-        const admSession = localStorage.getItem('alquilab_adm');
-        if (admSession !== 'true') {
-            window.location.href = 'Plataforma.html';
-        }
+        const ADM_ROLES = ['super_admin', 'admin_geral', 'moderador', 'editor'];
 
         // ===== DATA =====
         let allUsers = [];
@@ -1284,18 +1404,43 @@
         let allTools = [];
         let allAtivos = [];
         let dataStarted = false;
+        let currentAdminPapel = null;
 
-        // Wait for Firebase to restore the existing auth session
-        onAuthStateChanged(auth, (user) => {
-            if (user && !dataStarted) {
-                console.log('Usuário autenticado:', user.email);
-                showAuthBanner(user.email);
-                startData();
-            } else if (!user) {
-                console.warn('Nenhum usuário autenticado. Redirecionando...');
-                localStorage.removeItem('alquilab_adm');
-                window.location.href = 'index.html';
+        // Wait for Firebase to restore the existing auth session and validate role
+        onAuthStateChanged(auth, async (user) => {
+            if (dataStarted) return;
+            if (!user || user.isAnonymous) {
+                console.warn('Nenhum usuário autenticado. Redirecionando para login...');
+                window.location.href = 'login.html?next=' + encodeURIComponent('/Administrador.html');
+                return;
             }
+            let allowed = (user.email === ADM_EMAIL);
+            currentAdminPapel = allowed ? 'super_admin' : null;
+            if (!allowed) {
+                try {
+                    const snap = await get(ref(db, 'usuarios/' + user.uid + '/papel'));
+                    const papel = snap.exists() ? snap.val() : null;
+                    if (papel && ADM_ROLES.includes(papel)) {
+                        allowed = true;
+                        currentAdminPapel = papel;
+                    }
+                } catch(e){}
+            }
+            if (!allowed) {
+                alert('Você não tem permissão para acessar o painel administrativo.');
+                window.location.href = 'index.html';
+                return;
+            }
+            // mantém o flag legado por compat com qualquer código que ainda olhe
+            try { localStorage.setItem('alquilab_adm', 'true'); } catch(e){}
+            console.log('Admin autenticado:', user.email, '· papel:', currentAdminPapel);
+            // só Super Admin vê a aba "Administradores" (atribuir papéis)
+            if (currentAdminPapel === 'super_admin') {
+                const t = document.getElementById('tabBtnAdmins');
+                if (t) t.style.display = '';
+            }
+            showAuthBanner(user.email);
+            startData();
         });
 
         // Diagnostic banner — shows which Firebase Auth account is active in this tab
@@ -1345,13 +1490,15 @@
                             whatsapp: u.whatsapp || '',
                             dataCriacao: u.dataCriacao || '',
                             ultimoLogin: u.ultimoLogin || '',
-                            bloqueado: u.bloqueado === true
+                            bloqueado: u.bloqueado === true,
+                            papel: u.papel || ''
                         });
                     });
                 }
                 console.log('Total de usuários carregados:', allUsers.length);
                 updateStats();
                 window.renderUsers();
+                window.renderAdmins();
             }, (error) => {
                 console.error('ERRO ao ler usuarios:', error.code, error.message);
                 alert('Erro ao carregar usuários: ' + error.message + '\n\nVerifique as regras do Firebase Realtime Database.');
@@ -1510,6 +1657,86 @@
                 </li>
             `).join('');
         };
+
+        // ===== RENDER ADMINS =====
+        const PAPEL_LABELS = {
+            super_admin: 'Super Admin',
+            admin_geral: 'Admin geral',
+            moderador:   'Moderador',
+            editor:      'Editor',
+            '':          'Usuário comum'
+        };
+        const PAPEL_PILL_CLASS = {
+            super_admin: 'super',
+            admin_geral: 'admin',
+            moderador:   'mod',
+            editor:      'edit',
+            '':          'none'
+        };
+
+        window.renderAdmins = function () {
+            const q = norm(document.getElementById('searchAdmins')?.value || '');
+            const list = document.getElementById('adminsList');
+            if (!list) return;
+
+            // ordena: super admin primeiro, depois quem tem papel, depois resto
+            const sorted = allUsers.slice().sort((a, b) => {
+                const ar = (a.email === ADM_EMAIL) ? 0 : (a.papel ? 1 : 2);
+                const br = (b.email === ADM_EMAIL) ? 0 : (b.papel ? 1 : 2);
+                if (ar !== br) return ar - br;
+                return (a.nome || '').localeCompare(b.nome || '');
+            });
+
+            const filtered = q
+                ? sorted.filter(u => norm(u.nome).includes(q) || norm(u.email).includes(q))
+                : sorted;
+
+            if (filtered.length === 0) {
+                list.innerHTML = '<li class="empty-row">Nenhum usuário encontrado</li>';
+                return;
+            }
+
+            list.innerHTML = filtered.map(u => {
+                const isSuper = (u.email === ADM_EMAIL);
+                const papel = isSuper ? 'super_admin' : (u.papel || '');
+                const pillCls = PAPEL_PILL_CLASS[papel] || 'none';
+                const label = PAPEL_LABELS[papel] || 'Usuário comum';
+                const selectHtml = isSuper
+                    ? `<span class="role-locked">Não pode ser alterado</span>`
+                    : `<select class="role-select" onchange="setUserPapel('${u.uid}', this.value)">
+                            <option value=""           ${papel===''           ?'selected':''}>Usuário comum (sem acesso)</option>
+                            <option value="admin_geral"${papel==='admin_geral'?'selected':''}>Admin geral</option>
+                            <option value="moderador"  ${papel==='moderador'  ?'selected':''}>Moderador</option>
+                            <option value="editor"     ${papel==='editor'     ?'selected':''}>Editor</option>
+                       </select>`;
+                return `
+                    <li class="table-row admins-row">
+                        <div class="cell"><span class="cell-name-link" onclick="event.stopPropagation(); showUserProfile('${u.uid}')">${esc(u.nome)}</span></div>
+                        <div class="cell cell-email">${esc(u.email)}</div>
+                        <div class="cell"><span class="role-pill ${pillCls}">${label}</span></div>
+                        <div class="cell">${selectHtml}</div>
+                    </li>
+                `;
+            }).join('');
+        };
+
+        window.setUserPapel = async function (uid, papel) {
+            try {
+                if (papel) {
+                    await update(ref(db, 'usuarios/' + uid), { papel });
+                } else {
+                    await update(ref(db, 'usuarios/' + uid), { papel: null });
+                }
+                console.log('Papel atualizado:', uid, '->', papel || '(removido)');
+            } catch (e) {
+                console.error(e);
+                alert('Erro ao salvar o papel: ' + e.message);
+            }
+        };
+
+        document.addEventListener('input', (e) => {
+            if (e.target && e.target.id === 'searchAdmins') window.renderAdmins();
+        });
 
         // ===== RENDER LOGINS =====
         window.renderLogins = function () {
