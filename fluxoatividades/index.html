@@ -483,6 +483,17 @@ window.realizarLogin=async function(){
   if(!nome){$('loginAviso').textContent='Digite seu nome ou um código de retomada.';return}
   if(nome.includes(' ')){$('loginAviso').textContent='Apenas o primeiro nome.';return}
   if(nome.length>15){$('loginAviso').textContent='Máximo 15 letras.';return}
+  // Limite de 5 alunos para links criados em modo de teste (visitante)
+  if(turmaInfo && turmaInfo.guest){
+    try{
+      const snap = await db.ref(basePath+'alunos').once('value');
+      const data = snap.val() || {};
+      if(Object.keys(data).length >= 5){
+        $('loginAviso').innerHTML='Este link foi criado em <b>modo de teste</b> e atingiu o limite de 5 alunos. Peça ao professor um novo link.';
+        return;
+      }
+    }catch(e){ console.warn('Falha ao checar limite guest:', e); }
+  }
   alunoNome=nome.charAt(0).toUpperCase()+nome.slice(1).toLowerCase();
   if(!alunoSerie) alunoSerie='—';
   alunoCodigo = gerarCodigoAluno(alunoNome);
