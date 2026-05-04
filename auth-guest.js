@@ -118,18 +118,57 @@ function buildLoginUrl(loginPath) {
     return loginPath + '?next=' + next;
 }
 
+// Carrega o overlay de login uma única vez (lazy)
+let _modalLoadedPromise = null;
+function ensureLoginModalLoaded(modalPath) {
+    if (window.openLoginModal) return Promise.resolve();
+    if (_modalLoadedPromise) return _modalLoadedPromise;
+    _modalLoadedPromise = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.type = 'module';
+        s.src = modalPath;
+        s.onload = () => resolve();
+        s.onerror = () => reject(new Error('Falha ao carregar login-modal.js'));
+        document.head.appendChild(s);
+    });
+    return _modalLoadedPromise;
+}
+
+function openLoginOverlay(modalPath) {
+    ensureLoginModalLoaded(modalPath)
+        .then(() => {
+            // Pequena espera para o módulo registrar window.openLoginModal
+            const tryOpen = (tries = 0) => {
+                if (window.openLoginModal) window.openLoginModal();
+                else if (tries < 20) setTimeout(() => tryOpen(tries + 1), 50);
+            };
+            tryOpen();
+        })
+        .catch(err => {
+            console.error(err);
+            // Fallback: vai para login.html
+            window.location.href = buildLoginUrl(modalPath.replace(/login-modal\.js$/, 'login.html'));
+        });
+}
+
 const AlquiLabAuth = {
     _auth: null,
     _loginPath: '../login.html',
+    _modalPath: '../login-modal.js',
 
     /**
      * Initialize the helper. Call once after creating Firebase auth.
      * @param {Auth} authInstance - Firebase Auth instance
-     * @param {Object} opts - { loginPath: '../login.html' }
+     * @param {Object} opts - { loginPath: '../login.html', modalPath: '../login-modal.js' }
      */
     init(authInstance, opts = {}) {
         this._auth = authInstance;
         if (opts.loginPath) this._loginPath = opts.loginPath;
+        if (opts.modalPath) this._modalPath = opts.modalPath;
+        else if (opts.loginPath) {
+            // Deriva modalPath do loginPath se não informado
+            this._modalPath = opts.loginPath.replace(/login\.html$/, 'login-modal.js');
+        }
     },
 
     /**
@@ -164,6 +203,7 @@ const AlquiLabAuth = {
         const existing = document.getElementById('alLockedOverlay');
         if (existing) existing.remove();
 
+        const modalPath = this._modalPath;
         const overlay = document.createElement('div');
         overlay.id = 'alLockedOverlay';
         overlay.className = 'al-locked-overlay';
@@ -173,7 +213,7 @@ const AlquiLabAuth = {
                 <h3>Recurso para usuários cadastrados</h3>
                 <p>${motivo || 'Crie sua conta gratuita ou faça login para ter acesso completo e ilimitado a todas as ferramentas da plataforma.'}</p>
                 <div class="al-locked-actions">
-                    <a class="al-btn" href="${buildLoginUrl(this._loginPath)}">Criar conta / Entrar</a>
+                    <button type="button" class="al-btn" id="alLockedLogin">Criar conta / Entrar</button>
                     <button type="button" class="al-btn al-secondary" id="alLockedClose">Fechar</button>
                 </div>
             </div>
@@ -181,6 +221,10 @@ const AlquiLabAuth = {
         document.body.appendChild(overlay);
         const close = () => overlay.remove();
         overlay.querySelector('#alLockedClose').addEventListener('click', close);
+        overlay.querySelector('#alLockedLogin').addEventListener('click', () => {
+            close();
+            openLoginOverlay(modalPath);
+        });
         overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
         document.addEventListener('keydown', function onEsc(e) {
             if (e.key === 'Escape') {
@@ -197,14 +241,16 @@ const AlquiLabAuth = {
     showTestModeBanner(opts = {}) {
         if (document.getElementById('alTestBanner')) return;
         const msg = opts.msg || 'Você está em <u>modo de teste</u>. Crie uma conta para acesso completo.';
+        const modalPath = this._modalPath;
         const banner = document.createElement('div');
         banner.id = 'alTestBanner';
         banner.className = 'al-test-banner';
         banner.innerHTML = `
             <span>${msg}</span>
-            <a class="al-banner-btn" href="${buildLoginUrl(this._loginPath)}">Criar conta gratuita</a>
+            <button type="button" class="al-banner-btn" id="alBannerLogin">Criar conta gratuita</button>
         `;
         document.body.insertBefore(banner, document.body.firstChild);
+        banner.querySelector('#alBannerLogin').addEventListener('click', () => openLoginOverlay(modalPath));
     },
 
     /**
@@ -217,6 +263,7 @@ const AlquiLabAuth = {
             sessionStorage.setItem('al_intro_' + key, '1');
         } catch (_) { }
 
+        const modalPath = this._modalPath;
         const overlay = document.createElement('div');
         overlay.className = 'al-locked-overlay';
         overlay.innerHTML = `
@@ -225,7 +272,7 @@ const AlquiLabAuth = {
                 <h3>${title || 'Modo de teste'}</h3>
                 <p>${body || 'Você está usando esta ferramenta no modo de teste. Algumas funções estão limitadas. Crie uma conta gratuita para ter acesso total.'}</p>
                 <div class="al-locked-actions">
-                    <a class="al-btn" href="${buildLoginUrl(this._loginPath)}">Criar conta / Entrar</a>
+                    <button type="button" class="al-btn" id="alIntroLogin">Criar conta / Entrar</button>
                     <button type="button" class="al-btn al-secondary" id="alIntroClose">Continuar como visitante</button>
                 </div>
             </div>
@@ -233,6 +280,10 @@ const AlquiLabAuth = {
         document.body.appendChild(overlay);
         const close = () => overlay.remove();
         overlay.querySelector('#alIntroClose').addEventListener('click', close);
+        overlay.querySelector('#alIntroLogin').addEventListener('click', () => {
+            close();
+            openLoginOverlay(modalPath);
+        });
         overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
     }
 };
