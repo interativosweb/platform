@@ -1278,9 +1278,13 @@
 
         // ===== LOGIN BUTTON =====
         document.getElementById('btnLogin').addEventListener('click', () => {
-            window.location.href = 'login.html';
+            if (window.openLoginModal) window.openLoginModal();
+            else window.location.href = 'login.html';
         });
     </script>
+
+    <!-- LOGIN MODAL (overlay) -->
+    <script type="module" src="login-modal.js"></script>
 
     <!-- FIREBASE AUTH (mostra perfil se já logado, sem exigir login) -->
     <script type="module">
