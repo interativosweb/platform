@@ -337,7 +337,7 @@ body{
         </div>
         <h3 style="font-size:1.18rem;font-weight:800;margin-bottom:8px">Acesso restrito</h3>
         <p style="color:var(--text-muted);font-size:.92rem;margin-bottom:18px">Apenas o administrador pode acessar a moderação.</p>
-        <a class="btn btn-primary" href="../login.html?next=%2Fpibid%2Fadmin.html">Entrar como admin</a>
+        <button class="btn btn-primary" type="button" onclick="window.openLoginModal ? window.openLoginModal() : (window.location.href='../login.html?next=%2Fpibid%2Fadmin.html')">Entrar como admin</button>
     </div>
 </div>
 
@@ -361,6 +361,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 const ADM_EMAIL = 'gilbertofernandessc@gmail.com';
+const MOD_ROLES = ['super_admin', 'admin_geral', 'moderador'];
 
 const $ = (id) => document.getElementById(id);
 const escapeHtml = (s) => String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -383,8 +384,20 @@ let eixos = [];
 let editingEixoId = null;
 let selColor = COLORS[0];
 
-onAuthStateChanged(auth, (user) => {
-    if (!user || user.email !== ADM_EMAIL) {
+onAuthStateChanged(auth, async (user) => {
+    if (!user || user.isAnonymous) {
+        $('adminGate').classList.add('show');
+        return;
+    }
+    let allowed = (user.email === ADM_EMAIL);
+    if (!allowed) {
+        try {
+            const snap = await get(ref(db, 'usuarios/' + user.uid + '/papel'));
+            const papel = snap.exists() ? snap.val() : null;
+            if (papel && MOD_ROLES.includes(papel)) allowed = true;
+        } catch(e){}
+    }
+    if (!allowed) {
         $('adminGate').classList.add('show');
         return;
     }
@@ -431,10 +444,13 @@ function renderPending(list) {
     list.forEach(p => {
         const card = document.createElement('div');
         card.className = 'mod-card';
-        const tipoLabel = p.tipo === 'feed' ? 'Feed 24h' : (p.tipo === 'comentario' ? 'Comentário' : 'Publicação');
+        const tipoLabel = p.tipo === 'feed' ? 'Story 24h'
+            : (p.tipo === 'comentario' ? 'Comentário'
+            : (p.tipo === 'comentario_story' ? 'Comentário em story'
+            : 'Publicação'));
         const eixo = eixos.find(e => e.id === p.eixo);
         let body = '';
-        if (p.tipo === 'comentario') {
+        if (p.tipo === 'comentario' || p.tipo === 'comentario_story') {
             body = `<div class="preview">${escapeHtml(p.texto || '')}</div>`;
         } else {
             body = `<div class="preview">${p.html || escapeHtml(p.texto || '')}${renderAttachmentsPreview(p)}</div>`;
@@ -509,6 +525,12 @@ async function approvePending(p) {
             await set(r, payload);
         } else if (p.tipo === 'comentario') {
             const r = push(ref(db, `pibid_publicacoes/${p.eixo}/${p.pubId}/comentarios`));
+            await set(r, {
+                texto: p.texto, autorUid: p.autorUid, autorNome: p.autorNome,
+                autorRole: p.autorRole || 'aluno', ts: p.ts
+            });
+        } else if (p.tipo === 'comentario_story') {
+            const r = push(ref(db, `pibid_feed/${p.storyId}/comentarios`));
             await set(r, {
                 texto: p.texto, autorUid: p.autorUid, autorNome: p.autorNome,
                 autorRole: p.autorRole || 'aluno', ts: p.ts
@@ -742,6 +764,9 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') $('eixoModal').classList.remove('show');
 });
 </script>
+
+<!-- LOGIN MODAL (overlay) -->
+<script type="module" src="../login-modal.js"></script>
 
 </body>
 </html>
