@@ -1066,7 +1066,7 @@ body{
         <h3>Faça login para participar</h3>
         <p id="gateMsg">Para publicar, comentar ou curtir é preciso ter uma conta.</p>
         <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-            <a class="btn-primary" href="../login.html?next=%2Fpibid%2Findex.html">Criar conta / Entrar</a>
+            <button class="btn-primary" id="gateLoginBtn" type="button">Criar conta / Entrar</button>
             <button class="btn-secondary" id="gateClose">Continuar olhando</button>
         </div>
     </div>
@@ -1082,7 +1082,7 @@ body{
         <p style="color:var(--text-muted);font-size:.92rem;margin-bottom:18px;line-height:1.5">As <b>Experiências PIBID</b> estão em fase fechada — apenas administradores podem acessar por enquanto. Em breve abriremos para todos.</p>
         <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
             <a class="btn-primary" href="../index.html">Voltar à plataforma</a>
-            <a class="btn-secondary" id="accessGateLogin" href="../login.html?next=%2Fpibid%2Findex.html">Entrar com outra conta</a>
+            <button class="btn-secondary" id="accessGateLogin" type="button">Entrar com outra conta</button>
         </div>
     </div>
 </div>
@@ -1374,9 +1374,15 @@ onAuthStateChanged(auth, async (user) => {
     initEixos();
 });
 
-$('btnLogin').addEventListener('click', () => {
-    window.location.href = '../login.html?next=' + encodeURIComponent('/pibid/index.html');
-});
+function abrirLoginPibid() {
+    if (window.openLoginModal) window.openLoginModal();
+    else window.location.href = '../login.html?next=' + encodeURIComponent('/pibid/index.html');
+}
+$('btnLogin').addEventListener('click', abrirLoginPibid);
+const _gateLoginBtn = document.getElementById('gateLoginBtn');
+if (_gateLoginBtn) _gateLoginBtn.addEventListener('click', abrirLoginPibid);
+const _accessGateLogin = document.getElementById('accessGateLogin');
+if (_accessGateLogin) _accessGateLogin.addEventListener('click', abrirLoginPibid);
 
 /* ===== AVATAR HELPERS ===== */
 function paintAvatarEl(el, nome, foto) {
@@ -1510,11 +1516,10 @@ const GUEST_VIEW_LIMIT = 5;
 function buildGuestBanner(totalOculto, contexto) {
     const div = document.createElement('div');
     div.className = 'guest-limit-banner';
-    const loginUrl = '../login.html?next=' + encodeURIComponent('/pibid/index.html');
     div.innerHTML = `
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         <span>Você está vendo <b>${GUEST_VIEW_LIMIT}</b> ${contexto}. Há <b>+${totalOculto}</b> aguardando você. Crie uma conta gratuita para ver tudo e participar.</span>
-        <a href="${loginUrl}">Criar conta</a>
+        <a href="javascript:void(0)" onclick="window.openLoginModal ? window.openLoginModal() : (window.location.href='../login.html?next=' + encodeURIComponent('/pibid/index.html'))">Criar conta</a>
     `;
     return div;
 }
@@ -2384,6 +2389,9 @@ setInterval(() => {
 }, 60000);
 
 </script>
+
+<!-- LOGIN MODAL (overlay) -->
+<script type="module" src="../login-modal.js"></script>
 
 </body>
 </html>
