@@ -5065,7 +5065,7 @@
         'box-shadow:0 4px 14px rgba(107,0,255,.25)'
       ].join(';');
       banner.innerHTML = 'Você está no modo de teste. Crie uma conta para ter acesso ILIMITADO. ' +
-        '<a href="../login.html?next=' + encodeURIComponent('Geolab/gerador_link.html') + '" style="background:#fff;color:#6B00FF;border:1px solid #fff;padding:5px 14px;border-radius:50px;font-weight:800;font-size:.76rem;text-decoration:none;">Criar conta gratuita</a>';
+        '<button type="button" onclick="window.openLoginModal ? window.openLoginModal() : (window.location.href=\'../login.html?next=' + encodeURIComponent('Geolab/gerador_link.html') + '\')" style="background:#fff;color:#6B00FF;border:1px solid #fff;padding:5px 14px;border-radius:50px;font-weight:800;font-size:.76rem;text-decoration:none;cursor:pointer;font-family:inherit;">Criar conta gratuita</button>';
       document.body.appendChild(banner);
       // Empurra o conteúdo para baixo da banner
       requestAnimationFrame(()=>{
@@ -6621,6 +6621,9 @@
       });
     })();
   </script>
+
+  <!-- LOGIN MODAL (overlay) -->
+  <script type="module" src="../login-modal.js"></script>
 </body>
 
 </html>
